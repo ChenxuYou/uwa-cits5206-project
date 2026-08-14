@@ -19,10 +19,17 @@ credited twice under two names.
 
 ## Former members
 
-**DongSheng Li (24351499)** withdrew from CITS5206 and is **no longer a member of this
-team**. He appears in early project records — he chaired the team meeting of 24 July 2026
-and organised the client walkthrough of 29 July 2026 — because he was a member at the time.
-Those records are left unedited as an accurate account of what happened.
+**DongSheng Li (24351499)** withdrew from CITS5206 on **27 July 2026** and is **no longer a
+member of this team**. He appears in records from before that date — he chaired the team
+meeting of 24 July 2026, and it was at that meeting that he arranged the client walkthrough
+for the following week. That walkthrough took place on 29 July, after he had left, and he
+did not attend it. Those records are left unaltered as an accurate account of what happened;
+the 24 July record is a raw transcript, so it is held in the team's Teams area rather than
+committed ([`.gitignore`](../.gitignore) §3).
 
 Anything he was carrying has been redistributed among the five members listed above, and
 he is not counted for any deliverable, presentation section, or peer review.
+
+**The team has had five members since 27 July 2026.** The client walkthrough of 29 July was
+attended by three of them; the other two were briefed from the
+[minutes](meetings/2026-07-29-client-kickoff.md).

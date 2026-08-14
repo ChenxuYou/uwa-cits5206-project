@@ -15,6 +15,25 @@ the existing Excel tool, and establish what they want built.
 > the recording carries no speaker labels; confirm it at the next stand-up if it is needed for
 > the assignment.
 
+> ### ⚠ Annotation added 14 August 2026 — do not cite the figures in §2
+>
+> These minutes are left **unedited**, as a record of what was said. But when the client's own
+> documents arrived, the numbers in §2 Step 2 and §2 Step 5 could not be found in any of them,
+> and one of them is internally inconsistent: a calculated rate cannot be both **$3,291** and
+> "five cents on top of **$42**". They were most likely mis-heard, or fused from two separate
+> moments in a 34-minute walkthrough.
+>
+> **The figures in §2 Step 2 and §2 Step 5 are withdrawn for all downstream use.** The
+> authoritative worked example is the client's costing guide, restated in
+> [`requirements.md` §4](../requirements.md#4-the-calculation): $150,000 operating costs,
+> $20,000 UWA in-kind, $30,000 WA Gov, 1,000 hours → **$100.00 / $162.00 / $202.50** per hour.
+>
+> Everything else in these minutes — the method, the three formulas, `k = 1.35`, the seven
+> capabilities, the design requirements, the IP position, ways of working — was confirmed
+> against the client's documents and stands. See
+> [`requirements.md`, *Source precedence*](../requirements.md), which now ranks spoken minutes
+> below written client material for exactly this reason.
+
 ---
 
 ## 1. Background — what the client does and why this matters
@@ -56,13 +75,13 @@ through. Costs are captured at two levels:
 Some platforms — not all — receive income from the university or from government to support
 operations. It never covers the full cost, but it is taken into account.
 
-On the dummy platform demonstrated:
+On the dummy platform demonstrated — **figures withdrawn, see the annotation above**:
 
 | | Amount |
 |---|---|
-| Total to recover with no subsidy | $380,000 |
-| Less non-variable income | ($230,000) |
-| **To recover in user fees** | **$150,000** |
+| ~~Total to recover with no subsidy~~ | ~~$380,000~~ |
+| ~~Less non-variable income~~ | ~~($230,000)~~ |
+| ~~**To recover in user fees**~~ | ~~**$150,000**~~ |
 
 ### Step 3 — Capacity, then utilisation
 
@@ -99,14 +118,18 @@ infrastructure — but not the equipment or the capability itself.
 
 ### Step 5 — Proposed rates and the resulting balance
 
-The raw calculated rates are reference figures, not prices. The client's example produced
-$3,291, and made the point that nobody is going to charge five cents on top of $42. The
-platform leader is expected to step back, benchmark, think about the user experience, and
-**propose their own rates**.
+The raw calculated rates are reference figures, not prices. ~~The client's example produced
+$3,291, and made the point that nobody is going to charge five cents on top of $42.~~
+*(Figures withdrawn — see the annotation above. The point stands: a calculated rate is rounded
+to something a user can understand. The client's own workbook proposes $50 / $100 / $100
+against calculated rates such as $36.64.)* The platform leader is expected to step back,
+benchmark, think about the user experience, and **propose their own rates**.
 
-The tool must then show what those proposed rates do to the platform's forecast balance. In
-the demonstration, the proposed rates still left a **$15,000 deficit** at year end — which is
-exactly the kind of thing the client wants surfaced before a decision is made.
+The tool must then show what those proposed rates do to the platform's forecast balance. ~~In
+the demonstration, the proposed rates still left a **$15,000 deficit** at year end~~ — a
+deficit at the proposed rates is exactly the kind of thing the client wants surfaced before a
+decision is made. *(The specific figure is withdrawn; the client's workbook does carry deficits
+at its proposed rates, of −$21,372 and −$16,370 on two capabilities.)*
 
 ## 3. The current tool and what is wrong with it
 
