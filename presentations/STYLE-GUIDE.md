@@ -2,7 +2,7 @@
 
 **Project:** Research Infrastructure Costing & Pricing Tool (CITS5206 Capstone)
 **Status:** Binding for all presentations produced in this repository
-**Version:** 2.1 — 14 August 2026
+**Version:** 2.3 — 14 August 2026 (change log: §11)
 
 Every HTML presentation in `presentations/` **must** conform to this document. The goal is that every deck in this repository — whoever builds it, whenever over the semester — looks like it came from one studio.
 
@@ -198,6 +198,12 @@ A deck is therefore `cover → n × (divider + 2–3 pages) → closing`, where 
 
 Rationale: a one-section-per-member spine makes speaking time visibly equal, matches the assessment's per-member accountability, and lets any deck be rehearsed as self-contained blocks, one per speaker.
 
+**When a member cannot attend.** The spine is fixed; who speaks to it on the day is not. If a member cannot attend, **that section's owner is reassigned to another member.** The team agrees the reassignment — on the spot before the deck is presented, or in the Teams chat ahead of time — and the divider's owner line **MUST** then name **the person actually presenting, and only that person**. A divider that announces someone who is not in the room is worse than no name at all, and a divider naming two people leaves the audience unsure who to look at.
+
+Reassignment changes who owns a section for that delivery. It does not change the deck: a section is **never** deleted, merged into a neighbour or renumbered to cover an absence. *n* always equals the number of members listed in `docs/team.md`, so one person **MAY** carry two or three sections on the day.
+
+Record the reassignment — a line in the deck's commit message, or in the minutes of the meeting where it was agreed — so the reason is on file rather than inferred from a name that changed.
+
 ### 4.3 Page types
 
 | Type | Surface | Composition |
@@ -296,7 +302,8 @@ presentations/
 
 Run this before every presentation. Every box **MUST** be ticked.
 
-- [ ] One section per team member, in `docs/team.md` order, each with a divider and 2–3 content pages
+- [ ] Exactly one section per team member — *n* = the number of members in `docs/team.md` — in that file's order, each with a divider and 2–3 content pages
+- [ ] Every divider names one person: the member actually presenting it. Any reassignment agreed by the team and recorded in the commit message or minutes (§4.2)
 - [ ] Ink surface used only for the cover, the section dividers and the closing page
 - [ ] Only the three approved font families; no hard-coded hex outside `:root`
 - [ ] No content text below 20 px; nothing below 16 px except 13 px `--t-label` furniture
@@ -313,6 +320,18 @@ Run this before every presentation. Every box **MUST** be ticked.
 
 ## 10. Amending This Guide
 
-This document is version-controlled. Changes are proposed by pull request, need one other team member's approval, and require the version number and date at the top to be bumped. Decks already delivered are not retrofitted.
+This document is version-controlled. Changes are proposed by pull request, need one other team member's approval, and require the version number and date at the top to be bumped **and a line added to §11**.
+
+**Decks already delivered are not retrofitted.** A deck states the guide version it was built against in its header comment, and that claim is a statement about the day it was presented. If a delivered deck is edited afterwards for any reason, the edit is judged against the *current* version — reopening the file reopens the obligation.
 
 **Deviating from this guide is allowed — silently deviating is not.** If a slide genuinely needs something not covered here, raise it, get agreement, and then write it down for everyone.
+
+---
+
+## 11. Change Log
+
+| Version | Date | Change |
+|---|---|---|
+| 2.3 | 14 Aug 2026 | §4.2 absence rule rewritten: when a member cannot attend, that section's **owner is reassigned to another member**, agreed on the spot or in the Teams chat, and the divider names **only** the person actually presenting. The `Presenter — for Absent Member` dual-credit form is withdrawn. §9 checklist items 1–2 reworded to match, making *n* = the member count explicit. §10 now states that editing a delivered deck reopens its obligation to the current version. This change log added — earlier versions bumped the number without recording what moved. |
+| 2.2 | 14 Aug 2026 | Version in force when the [5 August facilitator checkpoint deck](2026-08-05-facilitator-checkpoint.html) had its section owners filled in. Contents not separately recorded. |
+| ≤ 2.1 | — | Not recorded. The guide carried no change log before v2.3, so the history of v1.0 → v2.2 cannot be reconstructed from this file. |

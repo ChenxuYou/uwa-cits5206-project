@@ -4,11 +4,36 @@
   CITS5206 Capstone — Facilitator Checkpoint
   Research Infrastructure Costing & Pricing Tool
 
-  Built from template.html. Conforms to presentations/STYLE-GUIDE.md v1.0.
+  Built from template.html. Delivered 5 August 2026 against STYLE-GUIDE.md v1.0.
+  Last edited 14 August 2026, so it is now judged against the current guide
+  (STYLE-GUIDE.md v2.3 SS10).
 
-  18 pages: cover + 5 x (divider + 2-3 pages) + closing.
-  Section owners were left as "Owner TBC" when this was delivered on 5 August
-  and were filled in afterwards, on 14 August. Content is otherwise as presented.
+  18 pages: cover + 5 x (divider + 2-3 pages) + closing. Five sections for the
+  five members in docs/team.md, per STYLE-GUIDE.md SS4.2.
+
+  Section owners were left as "Owner TBC" when this was delivered and were filled
+  in on 14 August. Sections 1-3 are attributed to Chenxu You, who presented them.
+  Under SS4.2 an absent member's section is reassigned to another member and the
+  divider names only the presenter, which is what these dividers do -- but the
+  reassignment itself was never recorded at the time.
+
+  TODO (team): confirm who was absent on 5 August and add a line to the minutes,
+  so the attribution rests on a record rather than on memory.
+
+  Outstanding against v2.3. SS10 is explicit that reopening a delivered deck
+  reopens its obligation to the current guide, so these are defects to fix, not
+  deviations to record:
+    - SS4.4  divider labels "Section n of 5" are hand-typed; template.html
+             generates them from data-section-label.
+    - SS3.3  the architecture SVG uses 13/15/18px text, below the 20px content
+             floor and the 16px hard floor.
+
+  Content is otherwise as presented on 5 August, and predates requirements v2.0
+  of 14 August. Do not cite this deck for the calculation: it shows the withdrawn
+  two-line income model (I_uwa / I_gov), says the method excludes replacement
+  cost, uses "instrument" and "platform leader" where the client's own guide says
+  "capability" and "custodian", and lists cost allocation and the utilisation
+  split as unresolved when both are now closed. docs/requirements.md governs.
 
   NAVIGATION: arrows / space / PgUp / PgDn / Home / End / 1-5 / F / click / swipe
   ============================================================================
@@ -236,7 +261,7 @@ code{font-size:.95em}
 }
 @page{size:1280px 720px; margin:0}
 @media print{
-  body{display:block; background:#fff; overflow:visible}
+  body{display:block; background:var(--paper); overflow:visible}
   #stage{transform:none !important; box-shadow:none; width:1280px; height:auto}
   #hint{display:none}
   .page{
@@ -367,16 +392,16 @@ R_commercial = (C / U) &times; k</code></pre>
 <section class="page" data-section="2">
   <div class="furniture top"><span>2 &middot; Requirements</span><span>Chenxu You</span></div>
   <p class="eyebrow">What the client asked for, and what is still open</p>
-  <h1>Ten firm requirements &mdash; and eight questions we still owe them</h1>
+  <h1>The requirements we are sure of &mdash; and the questions we still owe them</h1>
   <hr class="rule">
   <table>
     <thead><tr><th>Requirement</th><th>Why they want it</th></tr></thead>
     <tbody>
       <tr><td>Guided web form, three sequential sections</td><td>Mirrors the spreadsheet; no finance jargon</td></tr>
       <tr><td>Calculation logic hidden server-side</td><td>&ldquo;Nobody can really use it because it&rsquo;s easy to break&rdquo;</td></tr>
-      <tr><td>Mandatory fields and type validation</td><td>Stops <span class="hi">$20,000</span> being entered as <span class="hi">$200,000</span></td></tr>
+      <tr><td>Mandatory fields and type validation</td><td>Stops <strong>$20,000</strong> being entered as <strong>$200,000</strong></td></tr>
       <tr><td>Free-text justifications throughout</td><td>The rate must be defensible, not just correct</td></tr>
-      <tr class="is-key"><td>Seal on submit, then export the record</td><td>Formal approval, put on file, retrievable in 3 years</td></tr>
+      <tr><td>Seal on submit, then export the record</td><td>Put on file, and still readable in three years</td></tr>
     </tbody>
   </table>
   <p class="small" style="margin-top:var(--s4)">
@@ -510,8 +535,9 @@ R_commercial = (C / U) &times; k</code></pre>
   <hr class="rule">
   <svg viewBox="0 0 1140 250" width="100%" role="img" aria-labelledby="archTitle archDesc">
     <title id="archTitle">Three-tier architecture</title>
-    <desc id="archDesc">A browser wizard calls a REST API over HTTPS. The API calls an isolated
-      calculation engine and a report generator, and persists to PostgreSQL and a sealed file store.</desc>
+    <desc id="archDesc">A browser wizard calls the application server over HTTPS. The server's API
+      layer calls an isolated calculation engine and a report generator, and persists to PostgreSQL
+      and a sealed file store. The shape holds whichever technology option we choose.</desc>
 
     <text class="dg-lbl" x="0" y="12">BROWSER</text>
     <rect class="dg-panel" x="0" y="26" width="320" height="200" rx="2"/>
@@ -526,7 +552,7 @@ R_commercial = (C / U) &times; k</code></pre>
     <text class="dg-lbl" x="400" y="12">APPLICATION SERVER</text>
     <rect class="dg-panel" x="400" y="26" width="340" height="200" rx="2"/>
     <rect class="dg-box" x="416" y="42" width="308" height="52" rx="2"/>
-    <text class="dg-t" x="436" y="64">REST API</text>
+    <text class="dg-t" x="436" y="64">API layer</text>
     <text class="dg-s" x="436" y="84">Auth &middot; validation &middot; workflow</text>
     <rect class="dg-box-key" x="416" y="102" width="308" height="52" rx="2"/>
     <text class="dg-key-t" x="436" y="124">Calculation engine</text>
@@ -558,14 +584,14 @@ R_commercial = (C / U) &times; k</code></pre>
 <section class="page" data-section="4">
   <div class="furniture top"><span>4 &middot; Architecture</span><span>Yichen Zhao</span></div>
   <p class="eyebrow">Not yet committed</p>
-  <h1>One recommendation, one fallback, one decision point</h1>
+  <h1>Two live candidates, one decision point</h1>
   <hr class="rule">
   <table>
     <thead><tr><th>Option</th><th>Shape</th><th>Status</th></tr></thead>
     <tbody>
       <tr><td>A</td><td>Client-side SPA, no backend</td><td>Throwaway prototype only &mdash; validates the flow with the client</td></tr>
-      <tr class="is-key"><td>B</td><td>SPA + API + PostgreSQL</td><td>Recommended &mdash; meets every stated requirement</td></tr>
-      <tr><td>C</td><td>Django + HTMX monolith</td><td>Documented fallback &mdash; highest probability of shipping complete</td></tr>
+      <tr><td>B</td><td>SPA + API + PostgreSQL</td><td>Live candidate &mdash; meets every stated requirement</td></tr>
+      <tr><td>C</td><td>Django + HTMX monolith</td><td>Live candidate &mdash; highest probability of shipping complete</td></tr>
       <tr><td>D / E</td><td>Power Platform / integrate into UWA systems</td><td>Rejected and deferred respectively</td></tr>
     </tbody>
   </table>
@@ -598,11 +624,11 @@ R_commercial = (C / U) &times; k</code></pre>
     <thead><tr><th class="n">Pts</th><th>Section</th><th>What we will show</th></tr></thead>
     <tbody>
       <tr><td class="n">4</td><td>Problem statement</td><td>The spreadsheet&rsquo;s failure modes, and the MVP vertical slice</td></tr>
-      <tr class="is-key"><td class="n">4</td><td>Client communication &amp; MVP</td><td>Recorded walkthrough, written summary, and the client&rsquo;s <strong>written MVP sign-off</strong></td></tr>
+      <tr class="is-key"><td class="n">4</td><td>Client communication &amp; MVP</td><td>Recorded walkthrough, written summary, and an MVP statement going to the client for <strong>written sign-off</strong></td></tr>
       <tr><td class="n">4</td><td>Project management</td><td>Milestones, named owners, deadlines, board and CI</td></tr>
       <tr><td class="n">3</td><td>Risk &amp; technology</td><td>Skills audit, five options assessed, risks including cybersecurity</td></tr>
     </tbody>
-    <caption>Submission links to the GitHub repository and the Teams area; facilitator access must be confirmed.</caption>
+    <caption>Submission links to the GitHub repository and the Teams area; facilitator access must be confirmed. The client&rsquo;s sign-off on the MVP is outstanding, not assumed.</caption>
   </table>
   <div class="spacer"></div>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
@@ -647,7 +673,7 @@ R_commercial = (C / U) &times; k</code></pre>
   <h2 class="cover-title" style="font-size:var(--t-section)">Research Infrastructure Costing &amp; Pricing Tool</h2>
   <hr class="rule">
   <p class="lead" style="color:var(--stone-400);max-width:56ch">
-    Chenxu You &middot; Evan Zhao &middot; Wenmin Luo &middot; Dai Lam La La &middot; Jaswanth Vericherla
+    Chenxu You &middot; Yichen Zhao &middot; Wenmin Luo &middot; Dai Lam La La &middot; Jaswanth Vericherla
   </p>
   <div class="spacer"></div>
   <p class="mono" style="font-size:var(--t-small);color:var(--stone-400)">github.com/ChenxuYou/uwa-cits5206-project</p>
