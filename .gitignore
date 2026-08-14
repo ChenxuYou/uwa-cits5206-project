@@ -69,9 +69,19 @@ reference/unit/*.pdf
 # -----------------------------------------------------------------------------
 # 3. Recordings and transcripts
 #
-# Meeting audio and video capture identifiable voices, and raw transcripts
-# capture unreviewed speech. Neither is committed. Write minutes from them in
-# markdown, commit the minutes, and keep the source in the Teams area.
+# Meeting audio and video capture identifiable voices, and transcripts capture
+# unreviewed speech about identifiable people. Neither is committed. Write
+# minutes from them in markdown, commit the minutes, and keep the source in the
+# Teams area.
+#
+# Extension patterns alone do not catch a transcript pasted into a .md file, so
+# the *-transcript.md rule below closes that gap. Name transcript files that way
+# and they stay local by default.
+#
+# There is no internal-meeting exception. An earlier version of this file allowed
+# a raw transcript to be committed when no client or other external party was
+# present; that has been withdrawn. It is unreviewed speech either way, and the
+# minutes are the artefact anyone actually needs.
 # -----------------------------------------------------------------------------
 *.m4a
 *.mp3
@@ -95,6 +105,22 @@ reference/unit/*.pdf
 *.sbv
 *.dfxp
 *.ttml
+
+# Transcripts written up as text, wherever they sit in the tree
+*-transcript.md
+*-transcript.txt
+
+
+# -----------------------------------------------------------------------------
+# 3a. Our own internal review notes
+#
+# Audits of our own documentation: working critique, written for us, revised as
+# we go. They are how we find our own mistakes, not a deliverable, and a
+# half-finished list of everything wrong with the project is not something to
+# hand a client or a facilitator. Findings that matter get actioned in the
+# documents themselves, which is where they belong.
+# -----------------------------------------------------------------------------
+docs/audit-*.md
 
 
 # -----------------------------------------------------------------------------

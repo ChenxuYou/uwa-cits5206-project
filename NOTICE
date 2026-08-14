@@ -1,0 +1,126 @@
+NOTICE — Ownership, rights and permissions
+Research Infrastructure Costing & Pricing Tool
+CITS5206 Professional Computing capstone, The University of Western Australia
+
+Copyright (c) 2026 Chenxu You, Yichen Zhao, Wenmin Luo, Dai Lam La La and
+Jaswanth Vericherla. All rights reserved.
+
+--------------------------------------------------------------------------------
+1. STATUS
+--------------------------------------------------------------------------------
+
+This repository carries NO open-source licence, and that is a deliberate interim
+position rather than an oversight.
+
+The intellectual property in this project is jointly held (see section 2), and a
+licence granted by one joint owner alone may not be effective. The team therefore
+does not purport to grant one. The licensing question is recorded as Q9 in
+docs/requirements.md and closes at handover, once the ownership position in
+section 2 has been confirmed in writing by the client.
+
+Until then: all rights are reserved, except for the permissions expressly granted
+in sections 3 and 4 below.
+
+--------------------------------------------------------------------------------
+2. WHO OWNS WHAT
+--------------------------------------------------------------------------------
+
+Agreed with UWA Research Infrastructure at the client kickoff of 29 July 2026;
+recorded in docs/meetings/2026-07-29-client-kickoff.md section 9, decision D5.
+
+  The costing and pricing method    UWA. The six-step process, the three rate
+                                    formulas, the cost and income categories and
+                                    the 1.35 indirect cost recovery factor are the
+                                    client's. They are not secret, but they are
+                                    not ours.
+
+  The source code                   The team members named above, who wrote it.
+
+  The overarching IP in the tool    Jointly held by UWA and the team. The client's
+                                    stated position is that building this
+                                    calculator and then selling it onward would
+                                    not be appropriate. The team accepts that.
+
+The joint-ownership position is transcribed from a spoken meeting and has not yet
+been confirmed in writing. Section 1 does not change until it is.
+
+--------------------------------------------------------------------------------
+3. PERMISSION GRANTED TO THE UNIVERSITY OF WESTERN AUSTRALIA
+--------------------------------------------------------------------------------
+
+The copyright holders named above grant The University of Western Australia a
+perpetual, irrevocable, royalty-free, non-exclusive permission to use, run, copy,
+modify, host and internally distribute this software and its documentation for the
+University's own purposes, including charging researchers and external parties for
+access to research infrastructure priced with it.
+
+This permission extends to UWA's staff, students and contractors acting on the
+University's behalf. It does not permit the University to sell or sublicense the
+software as a product to third parties; that would require the team's agreement,
+as section 2 would equally require UWA's.
+
+--------------------------------------------------------------------------------
+4. PERMISSION RETAINED BY THE AUTHORS
+--------------------------------------------------------------------------------
+
+Each author may show, describe and reproduce their own contribution to this
+project in a portfolio, CV, job application, interview or academic record. The
+client raised no objection to the team sharing what it builds (kickoff, section 9).
+
+This covers presenting the work. It does not extend to selling it, which section 2
+rules out for every party.
+
+--------------------------------------------------------------------------------
+5. EVERYONE ELSE
+--------------------------------------------------------------------------------
+
+No licence is granted to the public. If this repository is public on GitHub, GitHub's
+Terms of Service already permit any GitHub user to view and fork it — that is a
+consequence of publishing there and not a grant made by this NOTICE.
+
+Reading the code, quoting it with attribution for study or review, and anything
+else permitted by law regardless of licence, are unaffected.
+
+To request any other use, contact the team through the unit coordinator.
+
+--------------------------------------------------------------------------------
+6. CLIENT MATERIAL IS NOT COVERED BY THIS NOTICE
+--------------------------------------------------------------------------------
+
+The client's costing guide, calculator workbook and worked examples remain the
+client's material. They are not committed to this repository — see .gitignore
+section 1 and reference/client/README.md. Where this repository states something
+drawn from them, it is rewritten by us and the source is named in the text.
+
+--------------------------------------------------------------------------------
+7. OUTSTANDING — AN EARLIER MIT GRANT IS STILL IN THE HISTORY
+--------------------------------------------------------------------------------
+
+The initial commit of this repository (2d6f498, 13 August 2026) contained a
+LICENSE file reading:
+
+    MIT License
+    Copyright (c) 2026 RTMart
+
+That file is no longer present in the working tree, but deleting a file does not
+retract a grant already published under an earlier commit. MIT permits sale, which
+is the one thing section 2 rules out. If the repository has been pushed, anyone who
+cloned it before the deletion holds that grant.
+
+Action required, in this order:
+
+  1. Rewrite LICENSE out of the history. The history is short, so this is cheap
+     now and expensive later. Take the 24 July transcript out in the same pass —
+     it was committed before the transcript exception was withdrawn:
+         git filter-repo --invert-paths \
+             --path LICENSE \
+             --path docs/meetings/2026-07-24-team-meeting-transcript.md
+  2. Force-push, and have every team member re-clone.
+  3. Confirm no fork or clone predates the rewrite.
+
+Until step 3 is done, this section stays here. It is not resolved by the existence
+of this NOTICE.
+
+--------------------------------------------------------------------------------
+
+Last reviewed: 14 August 2026.
