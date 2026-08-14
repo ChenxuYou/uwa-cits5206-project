@@ -234,7 +234,8 @@ PostgreSQL is the relational store either way.
 ## Next deliverable
 
 **Assignment 1 — project specification and plan.** A single PDF, submitted by one member,
-due **Tuesday 18 August 2026, 11:59 pm**. Four sections: problem statement, client
+due **Tuesday 25 August 2026, 11:59 pm** — extended by one week from 18 August, requested by
+us and granted by the unit coordinator by email on 14 August 2026. Four sections: problem statement, client
 communication and MVP agreement, project management and plans, risk and technology
 assessment. The submission links to this repository and the team's Teams area, and the
 facilitator must have access to both.

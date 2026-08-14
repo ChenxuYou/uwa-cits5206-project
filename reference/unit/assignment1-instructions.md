@@ -1,3 +1,17 @@
+> ### ⚠ Annotation added 14 August 2026 — the due date below is superseded
+>
+> This file is a transcription of the unit's brief and is left **unedited**, as the record of
+> what we were originally set. One thing in it no longer holds:
+>
+> **The due date has moved to Tuesday, 25 August 2026, 11:59 pm** — one week later than the
+> "18 August" stated below. We requested the extension by email and the unit coordinator
+> granted it by email on 14 August 2026. File that exchange in the team's Teams area; it is
+> the only evidence of the new date.
+>
+> Everything else — the four sections, the single-PDF format, the one-submitter rule, the
+> requirement that the facilitator can open every linked resource, and the peer-review
+> weighting — is unchanged.
+
 The goal of this group deliverable is for each member of the group to document the agreed functionality to be delivered for this project and the group's plans for delivering the project.
 
 Use the Upload Files link to upload a single pdf file that summaries your project specification and plans.
