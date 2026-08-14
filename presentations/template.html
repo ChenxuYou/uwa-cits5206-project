@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  CITS5206 Capstone — Presentation Skeleton
+
+  DO NOT PRESENT FROM THIS FILE, AND DO NOT PUT CONTENT IN IT. Copy it:
+      cp template.html YYYY-MM-DD-<topic>.html
+
+  Conforms to presentations/STYLE-GUIDE.md v1.1. Read that first.
+
+  STRUCTURE (mandatory): cover -> one section per team member -> closing.
+  Each section = 1 divider page + 2-3 content pages.
+  Section owners and their order come from docs/team.md, which is the only
+  place the roster lives. Never copy names here.
+
+  Every content slot is marked TODO. The deck is finished when none remain;
+  the console prints a count on load.
+
+  Ready-made markup for statement, metric, quote, two-column, table and
+  callout pages sits at the bottom of the body, inside the inert element
+  with id="page-types". Copy a block out of it; do not present from it.
+
+  NAVIGATION: arrows / space / PgUp / PgDn / Home / End / number keys / F
+              click left or right half / swipe
+  ============================================================================
+-->
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- TODO: deck title. Shows in the browser tab and becomes the PDF filename. -->
+<title>TODO Deck Title &mdash; Research Infrastructure Costing &amp; Pricing Tool | CITS5206</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================================================
+   1. TOKENS — the only place colour, type and space are defined.
+      Never hard-code a hex value below this block.
+   =========================================================================== */
+:root{
+  /* Ink — the black family. Never pure #000. */
+  --ink-900:#0B0B0C; --ink-800:#141416; --ink-700:#1C1C1F;
+  --ink-500:#3A3A40; --ink-300:#6E6E75;
+  /* Paper — the light family. Never pure #FFF. */
+  --paper:#FAF8F5; --paper-alt:#F1EDE7; --paper-rule:#DDD6CC;
+  /* Red — the single accent. */
+  --red-700:#9B0F22; --red-600:#C8102E; --red-400:#E8384F; --red-100:#F6E2E4;
+  /* Stone — warm neutrals. */
+  --stone-600:#5C554D; --stone-400:#8A8078; --stone-200:#C9C1B8;
+  /* Semantic */
+  --surplus:#1F6F5C; --deficit:#C8102E;
+
+  --font-display:"Playfair Display","Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --font-sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+
+  --t-cover:72px; --t-section:56px; --t-metric:84px; --t-title:44px;
+  --t-sub:28px;   --t-lead:24px;    --t-body:20px;   --t-small:16px; --t-label:13px;
+
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+
+  --pad-x:64px; --pad-y:56px;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+/* ===========================================================================
+   2. STAGE — fixed 1280x720 canvas, scaled to the viewport.
+      Slides are compositions, not responsive layouts.
+   =========================================================================== */
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  background:var(--ink-800); color:var(--ink-900);
+  font-family:var(--font-sans); font-size:var(--t-body);
+  -webkit-font-smoothing:antialiased; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+}
+#stage{
+  position:relative; width:1280px; height:720px; flex:0 0 auto;
+  transform-origin:center center; background:var(--paper);
+  box-shadow:0 0 0 1px rgba(0,0,0,.35);
+}
+
+/* ===========================================================================
+   3. PAGE — every page is a full canvas; exactly one is visible.
+   =========================================================================== */
+.page{
+  position:absolute; inset:0; padding:var(--pad-y) var(--pad-x);
+  display:none; flex-direction:column; background:var(--paper);
+  opacity:0; transition:opacity 180ms var(--ease), transform 180ms var(--ease);
+}
+.page.is-active{display:flex; opacity:1}
+.page.is-enter{transform:translateY(16px); opacity:0}
+
+/* --- Ink surface: cover, the section dividers, closing. Nothing else. --- */
+.page.ink{background:var(--ink-900); color:var(--paper)}
+.page.ink .eyebrow{color:var(--stone-400)}
+
+/* --- Vertical rhythm helpers --- */
+.center{justify-content:center}
+.spacer{flex:1 1 auto}
+
+/* ===========================================================================
+   4. TYPE
+   =========================================================================== */
+.eyebrow{
+  font-size:var(--t-label); font-weight:600; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--stone-600); margin:0 0 var(--s5);
+}
+.eyebrow .accent{color:var(--red-600)}
+.page.ink .eyebrow .accent{color:var(--red-400)}
+
+h1{
+  font-family:var(--font-display); font-weight:500; font-size:var(--t-title);
+  line-height:1.15; letter-spacing:-.02em; margin:0 0 var(--s5);
+}
+h2{font-size:var(--t-sub); font-weight:600; line-height:1.25; margin:0 0 var(--s4)}
+h3{
+  font-size:var(--t-label); font-weight:600; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--stone-600); margin:0 0 var(--s3);
+}
+p{margin:0 0 var(--s4); max-width:62ch; line-height:1.45}
+.lead{font-size:var(--t-lead); line-height:1.40; color:var(--stone-600); max-width:62ch}
+.small{font-size:var(--t-small); line-height:1.40; color:var(--stone-600)}
+.page.ink .small{color:var(--stone-400)}
+strong{font-weight:600}
+em{font-style:italic}
+.hi{color:var(--red-600); font-weight:600}          /* the one red focal point */
+.page.ink .hi{color:var(--red-400)}
+.num{font-variant-numeric:tabular-nums}
+
+/* The 3px red accent rule — one per page, no more. */
+.rule{width:56px; height:3px; background:var(--red-600); border:0; margin:0 0 var(--s5)}
+
+/* ===========================================================================
+   5. PAGE TYPES
+   =========================================================================== */
+
+/* --- 5a. Cover --- */
+.cover-title{
+  font-family:var(--font-display); font-weight:700; font-size:var(--t-cover);
+  line-height:1.05; letter-spacing:-.02em; margin:0 0 var(--s5); max-width:20ch;
+}
+.cover-meta{
+  display:flex; gap:var(--s8); font-size:var(--t-label); font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--stone-400);
+}
+
+/* --- 5b. Section divider --- */
+.divider-num{
+  font-family:var(--font-display); font-weight:700; font-size:180px;
+  line-height:.85; color:var(--red-600); letter-spacing:-.04em; margin:0 0 var(--s5);
+}
+.divider-title{
+  font-family:var(--font-display); font-weight:500; font-size:var(--t-section);
+  line-height:1.08; letter-spacing:-.02em; margin:0 0 var(--s4); max-width:22ch;
+}
+.divider-owner{font-size:var(--t-lead); color:var(--stone-400)}
+
+/* --- 5c. Statement page --- */
+.statement{
+  font-family:var(--font-display); font-weight:500; font-size:var(--t-title);
+  line-height:1.25; letter-spacing:-.02em; max-width:26ch; margin:0;
+}
+
+/* --- 5d. Metric page --- */
+.metric{
+  font-family:var(--font-display); font-weight:700; font-size:var(--t-metric);
+  line-height:1; letter-spacing:-.03em; font-variant-numeric:tabular-nums;
+  margin:0 0 var(--s3);
+}
+.metric.is-deficit{color:var(--deficit)}
+.metric.is-surplus{color:var(--surplus)}
+
+/* --- 5e. Quote page --- */
+blockquote{
+  margin:0; padding-left:var(--s5); border-left:3px solid var(--red-600);
+  font-family:var(--font-display); font-style:italic; font-weight:400;
+  font-size:var(--t-lead); line-height:1.45; max-width:56ch;
+}
+blockquote cite{
+  display:block; margin-top:var(--s5); font:600 var(--t-label)/1.2 var(--font-sans);
+  letter-spacing:.14em; text-transform:uppercase; font-style:normal; color:var(--stone-600);
+}
+
+/* --- 5f. Grid / two-column --- */
+.grid{display:grid; gap:var(--s5); align-items:start}
+.g-6-6{grid-template-columns:1fr 1fr}
+.g-8-4{grid-template-columns:2fr 1fr}
+.g-4-4-4{grid-template-columns:1fr 1fr 1fr}
+
+/* ===========================================================================
+   6. COMPONENTS
+   =========================================================================== */
+ul.bullets{margin:0; padding:0; list-style:none; max-width:62ch}
+ul.bullets li{
+  position:relative; padding-left:var(--s5); margin-bottom:var(--s3); line-height:1.45;
+}
+ul.bullets li::before{
+  content:""; position:absolute; left:0; top:.62em;
+  width:7px; height:7px; background:var(--red-600);
+}
+.page.ink ul.bullets li::before{background:var(--red-400)}
+
+.callout{
+  background:var(--red-100); border-left:3px solid var(--red-600);
+  padding:var(--s5); border-radius:2px; color:var(--red-700); max-width:62ch;
+}
+.callout p:last-child{margin-bottom:0}
+
+table{border-collapse:collapse; width:100%; font-size:var(--t-body)}
+caption{caption-side:bottom; text-align:left; padding-top:var(--s3);
+  font-size:var(--t-small); color:var(--stone-600)}
+thead th{
+  font:600 var(--t-label)/1.2 var(--font-sans); letter-spacing:.14em;
+  text-transform:uppercase; text-align:left; color:var(--stone-600);
+  background:var(--paper-alt); padding:var(--s3) var(--s4);
+}
+tbody td{padding:var(--s3) var(--s4); border-bottom:1px solid var(--paper-rule); vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right; font-variant-numeric:tabular-nums}
+tr.is-key td{background:var(--red-100); color:var(--red-700); font-weight:600}
+
+code,pre,.mono{font-family:var(--font-mono); font-variant-ligatures:none}
+pre{
+  background:var(--paper-alt); padding:var(--s5); border-radius:2px;
+  font-size:18px; line-height:1.6; margin:0; overflow:hidden;
+}
+code{font-size:.95em}
+
+/* [ASK] / [DECIDE] — an unconfirmed decision is never presented as agreed. */
+.tag{
+  display:inline-block; font:600 var(--t-label)/1 var(--font-sans);
+  letter-spacing:.14em; text-transform:uppercase; color:var(--red-600);
+  border:1px solid var(--red-600); padding:5px 8px; border-radius:2px;
+}
+
+/* TODO markers — deliberately loud. No deck ships with one of these visible. */
+.todo{
+  font-family:var(--font-mono); font-size:.9em; font-style:normal; font-weight:500;
+  letter-spacing:0; text-transform:none;
+  color:var(--red-700); background:var(--red-100);
+  padding:1px 6px; border-radius:2px;
+}
+.page.ink .todo{color:var(--red-400); background:rgba(232,56,79,.14)}
+
+/* ===========================================================================
+   7. FURNITURE — quiet, consistent, never on cover or closing.
+      Page numbers and progress segments are generated; never type them.
+   =========================================================================== */
+.furniture{
+  position:absolute; left:var(--pad-x); right:var(--pad-x);
+  font:600 var(--t-label)/1.2 var(--font-sans); letter-spacing:.14em;
+  text-transform:uppercase; color:var(--stone-600); pointer-events:none;
+}
+.furniture.top{top:24px; display:flex; justify-content:space-between}
+.furniture.bottom{bottom:22px; display:flex; justify-content:flex-end}
+.page.ink .furniture{color:var(--stone-400)}
+.page.no-furniture .furniture{display:none}
+
+#progress{
+  position:absolute; left:0; right:0; bottom:0; height:3px;
+  display:grid; gap:2px; z-index:5;   /* columns are set by the engine */
+}
+#progress span{background:var(--paper-rule); transition:background 180ms var(--ease)}
+#progress span.on{background:var(--red-600)}
+#progress.on-ink span{background:var(--ink-500)}
+#progress.on-ink span.on{background:var(--red-400)}
+
+#hint{
+  position:fixed; bottom:14px; left:50%; transform:translateX(-50%);
+  font:500 12px/1 var(--font-sans); letter-spacing:.1em; text-transform:uppercase;
+  color:var(--stone-400); opacity:.55; transition:opacity 400ms var(--ease);
+}
+#hint.hide{opacity:0}
+
+/* ===========================================================================
+   8. ACCESSIBILITY & PRINT
+   =========================================================================== */
+@media (prefers-reduced-motion:reduce){
+  .page{transition:none !important}
+  #progress span{transition:none !important}
+}
+
+@page{size:1280px 720px; margin:0}
+@media print{
+  body{display:block; background:#fff; overflow:visible}
+  #stage{transform:none !important; box-shadow:none; width:1280px; height:auto}
+  #hint{display:none}
+  .page{
+    position:relative !important; display:flex !important; opacity:1 !important;
+    transform:none !important; width:1280px; height:720px; break-after:page; page-break-after:always;
+  }
+  #progress{display:none}
+}
+</style>
+</head>
+
+<body>
+<div id="stage">
+
+<!-- ==========================================================================
+     COVER  (Ink, no furniture)
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="0">
+  <p class="eyebrow">CITS5206 Professional Computing &middot; <span class="accent todo">TODO deck kind</span></p>
+  <h2 class="cover-title"><span class="todo">TODO project title</span></h2>
+  <hr class="rule">
+  <p class="lead" style="color:var(--stone-400);max-width:56ch"><span class="todo">TODO one-line descriptor</span></p>
+  <div class="spacer"></div>
+  <div class="cover-meta">
+    <span>CITS5206</span>
+    <span class="todo">TODO date</span>
+  </div>
+</section>
+
+
+<!-- ==========================================================================
+     SECTION 1
+     Duplicate this whole block once per team member. Owner and order:
+     docs/team.md. Renumber data-section and .divider-num; nothing else.
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="1">
+  <p class="divider-num">1</p>
+  <h2 class="divider-title"><span class="todo">TODO section title</span></h2>
+  <p class="divider-owner"><span class="todo">TODO owner &mdash; docs/team.md</span></p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0" data-section-label>Section 1</p>
+</section>
+
+<section class="page" data-section="1">
+  <div class="furniture top"><span class="todo">TODO section</span><span class="todo">TODO owner</span></div>
+  <p class="eyebrow"><span class="todo">TODO eyebrow</span></p>
+  <h1><span class="todo">TODO slide title &mdash; a claim, not a label</span></h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li>TODO &mdash; max 6 bullets, each at most 2 lines</li>
+    <li>TODO</li>
+  </ul>
+  <div class="spacer"></div>
+  <p class="small"><span class="todo">TODO source: document, section, date</span></p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="1">
+  <div class="furniture top"><span class="todo">TODO section</span><span class="todo">TODO owner</span></div>
+  <p class="eyebrow"><span class="todo">TODO eyebrow</span></p>
+  <h1><span class="todo">TODO slide title</span></h1>
+  <hr class="rule">
+  <p class="lead">TODO &mdash; or replace this page with one of the types in
+    <code>&lt;template id="page-types"&gt;</code> at the foot of this file.</p>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+
+<!-- ==========================================================================
+     SECTION 2
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="2">
+  <p class="divider-num">2</p>
+  <h2 class="divider-title"><span class="todo">TODO section title</span></h2>
+  <p class="divider-owner"><span class="todo">TODO owner &mdash; docs/team.md</span></p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0" data-section-label>Section 2</p>
+</section>
+
+<section class="page" data-section="2">
+  <div class="furniture top"><span class="todo">TODO section</span><span class="todo">TODO owner</span></div>
+  <p class="eyebrow"><span class="todo">TODO eyebrow</span></p>
+  <h1><span class="todo">TODO slide title</span></h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li>TODO</li>
+    <li>TODO</li>
+  </ul>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="2">
+  <div class="furniture top"><span class="todo">TODO section</span><span class="todo">TODO owner</span></div>
+  <p class="eyebrow"><span class="todo">TODO eyebrow</span></p>
+  <h1><span class="todo">TODO slide title</span></h1>
+  <hr class="rule">
+  <p class="lead">TODO</p>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+
+<!-- ==========================================================================
+     SECTION 3
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="3">
+  <p class="divider-num">3</p>
+  <h2 class="divider-title"><span class="todo">TODO section title</span></h2>
+  <p class="divider-owner"><span class="todo">TODO owner &mdash; docs/team.md</span></p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0" data-section-label>Section 3</p>
+</section>
+
+<section class="page" data-section="3">
+  <div class="furniture top"><span class="todo">TODO section</span><span class="todo">TODO owner</span></div>
+  <p class="eyebrow"><span class="todo">TODO eyebrow</span></p>
+  <h1><span class="todo">TODO slide title</span></h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li>TODO</li>
+    <li>TODO</li>
+  </ul>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="3">
+  <div class="furniture top"><span class="todo">TODO section</span><span class="todo">TODO owner</span></div>
+  <p class="eyebrow"><span class="todo">TODO eyebrow</span></p>
+  <h1><span class="todo">TODO slide title</span></h1>
+  <hr class="rule">
+  <p class="lead">TODO</p>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+
+<!-- ==========================================================================
+     SECTION 4
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="4">
+  <p class="divider-num">4</p>
+  <h2 class="divider-title"><span class="todo">TODO section title</span></h2>
+  <p class="divider-owner"><span class="todo">TODO owner &mdash; docs/team.md</span></p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0" data-section-label>Section 4</p>
+</section>
+
+<section class="page" data-section="4">
+  <div class="furniture top"><span class="todo">TODO section</span><span class="todo">TODO owner</span></div>
+  <p class="eyebrow"><span class="todo">TODO eyebrow</span></p>
+  <h1><span class="todo">TODO slide title</span></h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li>TODO</li>
+    <li>TODO</li>
+  </ul>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="4">
+  <div class="furniture top"><span class="todo">TODO section</span><span class="todo">TODO owner</span></div>
+  <p class="eyebrow"><span class="todo">TODO eyebrow</span></p>
+  <h1><span class="todo">TODO slide title</span></h1>
+  <hr class="rule">
+  <p class="lead">TODO</p>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+
+<!-- ==========================================================================
+     SECTION 5
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="5">
+  <p class="divider-num">5</p>
+  <h2 class="divider-title"><span class="todo">TODO section title</span></h2>
+  <p class="divider-owner"><span class="todo">TODO owner &mdash; docs/team.md</span></p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0" data-section-label>Section 5</p>
+</section>
+
+<section class="page" data-section="5">
+  <div class="furniture top"><span class="todo">TODO section</span><span class="todo">TODO owner</span></div>
+  <p class="eyebrow"><span class="todo">TODO eyebrow</span></p>
+  <h1><span class="todo">TODO slide title</span></h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li>TODO</li>
+    <li>TODO</li>
+  </ul>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="5">
+  <div class="furniture top"><span class="todo">TODO section</span><span class="todo">TODO owner</span></div>
+  <p class="eyebrow"><span class="todo">TODO eyebrow</span></p>
+  <h1><span class="todo">TODO slide title</span></h1>
+  <hr class="rule">
+  <p class="lead">TODO</p>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+
+<!-- ==========================================================================
+     CLOSING  (Ink, no furniture)
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="0">
+  <p class="eyebrow">Thank you &mdash; <span class="accent">questions</span></p>
+  <h2 class="cover-title" style="font-size:var(--t-section)"><span class="todo">TODO project title</span></h2>
+  <hr class="rule">
+  <p class="lead" style="color:var(--stone-400);max-width:56ch">
+    <span class="todo">TODO team names, in docs/team.md order</span>
+  </p>
+  <div class="spacer"></div>
+  <p class="mono" style="font-size:var(--t-small);color:var(--stone-400)">github.com/ChenxuYou/uwa-cits5206-project</p>
+</section>
+
+<!-- Section progress bar — segments generated by the engine -->
+<div id="progress" aria-hidden="true"></div>
+</div>
+
+<p id="hint">&larr; &rarr; to navigate &middot; number keys for sections &middot; F fullscreen</p>
+
+
+<!-- ==========================================================================
+     PAGE-TYPE LIBRARY
+     Inert: the browser never renders a <template>, and the engine never sees
+     these pages. Copy a block out, paste it in above, fill it in.
+     ========================================================================== -->
+<template id="page-types">
+
+  <!-- STATEMENT — a turning point. 12 words or fewer, one red keyword. -->
+  <section class="page center" data-section="1">
+    <div class="furniture top"><span>1 &middot; Section</span><span>Owner</span></div>
+    <p class="eyebrow">Eyebrow</p>
+    <p class="statement">Twelve words at most, with <span class="hi">one</span> of them red.</p>
+    <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+  </section>
+
+  <!-- METRIC — one hero figure. Add is-surplus or is-deficit for balances. -->
+  <section class="page" data-section="1">
+    <div class="furniture top"><span>1 &middot; Section</span><span>Owner</span></div>
+    <p class="eyebrow">What this figure measures</p>
+    <div class="spacer"></div>
+    <p class="metric">$150,000</p>
+    <p class="lead">One line saying why the number matters.</p>
+    <div class="spacer"></div>
+    <p class="small">Source: document, section, date.</p>
+    <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+  </section>
+
+  <!-- QUOTE — client's words, Playfair italic, red rule, always attributed. -->
+  <section class="page center" data-section="1">
+    <div class="furniture top"><span>1 &middot; Section</span><span>Owner</span></div>
+    <p class="eyebrow">In the client's words</p>
+    <blockquote>
+      The sentence, verbatim. Quoting the client back to them is the most
+      persuasive move available in these meetings.
+      <cite>Attribution &middot; date</cite>
+    </blockquote>
+    <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+  </section>
+
+  <!-- TWO-COLUMN — g-6-6, g-8-4 or g-4-4-4. -->
+  <section class="page" data-section="1">
+    <div class="furniture top"><span>1 &middot; Section</span><span>Owner</span></div>
+    <p class="eyebrow">Eyebrow</p>
+    <h1>Slide title</h1>
+    <hr class="rule">
+    <div class="grid g-6-6">
+      <div>
+        <h3>Left heading</h3>
+        <ul class="bullets"><li>Point</li><li>Point</li></ul>
+      </div>
+      <div>
+        <h3>Right heading</h3>
+        <ul class="bullets"><li>Point</li><li>Point</li></ul>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+  </section>
+
+  <!-- TABLE — 6 rows x 5 columns maximum. Numbers right-aligned via class="n". -->
+  <section class="page" data-section="1">
+    <div class="furniture top"><span>1 &middot; Section</span><span>Owner</span></div>
+    <p class="eyebrow">Eyebrow</p>
+    <h1>Slide title</h1>
+    <hr class="rule">
+    <table>
+      <caption>Caption, if the table needs one.</caption>
+      <thead>
+        <tr><th>Column</th><th>Column</th><th class="n">Amount</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Row</td><td>Value</td><td class="n">$12,000</td></tr>
+        <tr class="is-key"><td>The row that matters</td><td>Value</td><td class="n">$48,000</td></tr>
+      </tbody>
+    </table>
+    <div class="spacer"></div>
+    <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+  </section>
+
+  <!-- CALLOUT + ASSUMPTION TAGS -->
+  <section class="page" data-section="1">
+    <div class="furniture top"><span>1 &middot; Section</span><span>Owner</span></div>
+    <p class="eyebrow">Eyebrow</p>
+    <h1>Slide title</h1>
+    <hr class="rule">
+    <div class="callout">
+      <p>One idea worth boxing. Never more than one callout per page.</p>
+    </div>
+    <div class="spacer"></div>
+    <p><span class="tag">[ASK]</span> needs the client &nbsp; <span class="tag">[DECIDE]</span> needs the team</p>
+    <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+  </section>
+
+</template>
+
+
+<script>
+/* ===========================================================================
+   DECK ENGINE — keyboard, click, swipe, hash, fullscreen, canvas scaling.
+   Self-contained; works with no network.
+
+   Nothing here is hard-coded to a section count. Sections, number-key
+   shortcuts and progress segments are all derived from data-section in the
+   markup, so adding or removing a section needs no change to this script.
+   =========================================================================== */
+(function () {
+  var stage    = document.getElementById('stage');
+  var progress = document.getElementById('progress');
+  var hint     = document.getElementById('hint');
+  var pages    = Array.prototype.slice.call(document.querySelectorAll('.page'));
+  var deckName = document.title;
+  var current  = 0;
+
+  /* --- Scale the fixed 1280x720 canvas to fit the viewport --- */
+  function fit() {
+    var s = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    stage.style.transform = 'scale(' + s + ')';
+  }
+
+  /* --- Derive the section map, and generate page numbers --- */
+  var sectionStart = {};   /* section number -> index of its first page */
+  var sectionCount = 0;
+
+  pages.forEach(function (p, i) {
+    var s = p.dataset.section;
+    if (s !== '0') {
+      if (sectionStart[s] === undefined) sectionStart[s] = i;
+      sectionCount = Math.max(sectionCount, parseInt(s, 10));
+    }
+    /* Page numbers are generated, never typed — they stay correct when a
+       page is inserted or removed. */
+    var n = p.querySelector('[data-pagenum]');
+    if (n) n.textContent = i + 1;
+    /* So is the big divider numeral: move a section, it renumbers itself. */
+    var dnum = p.querySelector('.divider-num');
+    if (dnum) dnum.textContent = s;
+    /* Divider labels: "SECTION n OF m" without anyone typing m. */
+    var label = p.querySelector('[data-section-label]');
+    if (label) label.dataset.n = s;
+  });
+
+  /* --- Build the progress bar to match the section count --- */
+  var segments = [];
+  progress.style.gridTemplateColumns = 'repeat(' + Math.max(sectionCount, 1) + ',1fr)';
+  for (var k = 0; k < sectionCount; k++) {
+    var seg = document.createElement('span');
+    progress.appendChild(seg);
+    segments.push(seg);
+  }
+
+  /* --- Finish the "SECTION n OF m" labels now that m is known --- */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-section-label]'), function (el) {
+    el.textContent = 'Section ' + el.dataset.n + ' of ' + sectionCount;
+  });
+
+  function show(i, push) {
+    i = Math.max(0, Math.min(pages.length - 1, i));
+    pages.forEach(function (p) {
+      p.classList.remove('is-active');
+      p.setAttribute('aria-hidden', 'true');
+    });
+
+    var page = pages[i];
+    page.classList.add('is-active', 'is-enter');
+    page.setAttribute('aria-hidden', 'false');
+    /* force reflow so the enter transition actually runs */
+    void page.offsetWidth;
+    page.classList.remove('is-enter');
+
+    current = i;
+
+    var sec = parseInt(page.dataset.section, 10);
+    segments.forEach(function (s, n) { s.classList.toggle('on', n < sec); });
+    progress.classList.toggle('on-ink', page.classList.contains('ink'));
+
+    /* A deck is usually opened over file://, where some browsers refuse
+       history writes. Losing the linkable hash must never stop the deck. */
+    if (push !== false) {
+      try { history.replaceState(null, '', '#' + (i + 1)); } catch (err) {}
+    }
+    document.title = 'Slide ' + (i + 1) + ' / ' + pages.length + ' — ' + deckName;
+  }
+
+  var next = function () { show(current + 1); };
+  var prev = function () { show(current - 1); };
+
+  /* --- Keyboard --- */
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { e.preventDefault(); next(); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp')             { e.preventDefault(); prev(); }
+    else if (k === 'Home')  { e.preventDefault(); show(0); }
+    else if (k === 'End')   { e.preventDefault(); show(pages.length - 1); }
+    else if (k === 'f' || k === 'F') {
+      e.preventDefault();
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen();
+    }
+    else if (/^[0-9]$/.test(k) && sectionStart[k] !== undefined) { e.preventDefault(); show(sectionStart[k]); }
+    hideHint();
+  });
+
+  /* --- Click: right half forward, left half back.
+         Ignores text selection and anything genuinely clickable. --- */
+  document.addEventListener('click', function (e) {
+    if (window.getSelection && String(window.getSelection())) return;
+    if (e.target.closest && e.target.closest('a,button,input,select,textarea')) return;
+    (e.clientX > window.innerWidth / 2 ? next : prev)();
+    hideHint();
+  });
+
+  /* --- Swipe --- */
+  var x0 = null;
+  document.addEventListener('touchstart', function (e) { x0 = e.changedTouches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 45) { (dx < 0 ? next : prev)(); hideHint(); }
+    x0 = null;
+  }, { passive: true });
+
+  var hintTimer = setTimeout(hideHint, 6000);
+  function hideHint() { clearTimeout(hintTimer); hint.classList.add('hide'); }
+
+  window.addEventListener('resize', fit);
+  document.addEventListener('fullscreenchange', fit);
+  window.addEventListener('hashchange', function () {
+    var n = parseInt(location.hash.slice(1), 10);
+    if (n && n - 1 !== current) show(n - 1, false);
+  });
+
+  fit();
+  var start = parseInt(location.hash.slice(1), 10);
+  show(start ? start - 1 : 0);
+
+  /* --- Unfinished-deck warning. A deck is done when this prints nothing.
+         textContent, not innerText: hidden pages must be counted too. --- */
+  var todos = (stage.textContent.match(/TODO/g) || []).length;
+  if (todos) {
+    console.warn('[deck] ' + todos + ' TODO placeholder(s) remain across ' +
+                 pages.length + ' pages. Do not present until this warning stops.');
+  }
+})();
+</script>
+</body>
+</html>

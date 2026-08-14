@@ -1,0 +1,115 @@
+# =============================================================================
+# CITS5206 Capstone — line endings and file handling
+#
+# WHY THIS FILE EXISTS
+# Windows writes CRLF line endings, macOS and Linux write LF. Git stores bytes,
+# so the same line saved on two platforms is two different lines to Git. Left
+# alone, that produces pull requests where every line of a file is marked as
+# changed and the one real edit is invisible — and it resets `git blame` for
+# every affected line, which is how we evidence who wrote what.
+#
+# core.autocrlf cannot fix this: it lives on each person's machine and is not
+# shared. This file is committed, so it applies to everyone automatically, on
+# every clone, without anyone having to configure anything.
+#
+# POLICY: everything is LF, in the repository and in the working tree.
+# Our content is Markdown, HTML and (soon) web code. VS Code, PowerShell,
+# browsers and every toolchain we are likely to pick handle LF correctly.
+#
+# Check what applies to a path:   git check-attr -a <path>
+# After changing this file:       git add --renormalize .
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+# Default — detect text automatically, store and check out as LF
+# -----------------------------------------------------------------------------
+* text=auto eol=lf
+
+
+# -----------------------------------------------------------------------------
+# Explicit text types
+#
+# Redundant with `text=auto` in the normal case, but it removes the guesswork
+# for files with unusual content — a Markdown file that happens to start with a
+# long base64 block, for instance, can be misdetected as binary.
+# -----------------------------------------------------------------------------
+*.md        text eol=lf
+*.txt       text eol=lf
+*.html      text eol=lf
+*.css       text eol=lf
+*.js        text eol=lf
+*.jsx       text eol=lf
+*.ts        text eol=lf
+*.tsx       text eol=lf
+*.json      text eol=lf
+*.jsonc     text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.toml      text eol=lf
+*.py        text eol=lf
+*.sql       text eol=lf
+*.svg       text eol=lf
+*.csv       text eol=lf
+.gitignore  text eol=lf
+.gitattributes text eol=lf
+
+
+# -----------------------------------------------------------------------------
+# Files that MUST keep a specific ending regardless of the policy above
+#
+# A shell script with CRLF fails on Linux — the shebang line becomes
+# `#!/bin/sh\r`, and the interpreter is reported as not found. This matters the
+# moment we add CI.
+#
+# Windows batch files are the mirror image: cmd.exe needs CRLF.
+# -----------------------------------------------------------------------------
+*.sh        text eol=lf
+*.bash      text eol=lf
+Dockerfile  text eol=lf
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+
+
+# -----------------------------------------------------------------------------
+# Binary — never convert, never try to diff
+#
+# Most of these are excluded by .gitignore, but the declaration still matters:
+# anything force-added with `git add -f` would otherwise be run through line
+# ending conversion, which silently corrupts it.
+# -----------------------------------------------------------------------------
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.webp      binary
+*.ico       binary
+*.pdf       binary
+*.woff      binary
+*.woff2     binary
+*.ttf       binary
+*.otf       binary
+*.eot       binary
+*.zip       binary
+*.docx      binary
+*.xlsx      binary
+*.pptx      binary
+*.m4a       binary
+*.mp3       binary
+*.wav       binary
+*.mp4       binary
+*.mov       binary
+
+
+# -----------------------------------------------------------------------------
+# GitHub language statistics
+#
+# Without this, GitHub reports the repository as almost entirely HTML, because
+# the presentation decks are large self-contained HTML files. That would be a
+# misleading first impression of a project whose application code lives in
+# src/. Marking decks and reference material as documentation keeps the
+# language bar meaningful once src/ has content in it.
+# -----------------------------------------------------------------------------
+presentations/*.html    linguist-documentation
+reference/**            linguist-documentation
+docs/**                 linguist-documentation

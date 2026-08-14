@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  CITS5206 Capstone — Facilitator Checkpoint
+  Research Infrastructure Costing & Pricing Tool
+
+  Built from template.html. Conforms to presentations/STYLE-GUIDE.md v1.0.
+
+  18 pages: cover + 5 x (divider + 2-3 pages) + closing.
+  Section owners were left as "Owner TBC" when this was delivered on 5 August
+  and were filled in afterwards, on 14 August. Content is otherwise as presented.
+
+  NAVIGATION: arrows / space / PgUp / PgDn / Home / End / 1-5 / F / click / swipe
+  ============================================================================
+-->
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Facilitator Checkpoint — Research Infrastructure Costing &amp; Pricing Tool | CITS5206</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================================================
+   1. TOKENS — the only place colour, type and space are defined.
+   =========================================================================== */
+:root{
+  --ink-900:#0B0B0C; --ink-800:#141416; --ink-700:#1C1C1F;
+  --ink-500:#3A3A40; --ink-300:#6E6E75;
+  --paper:#FAF8F5; --paper-alt:#F1EDE7; --paper-rule:#DDD6CC;
+  --red-700:#9B0F22; --red-600:#C8102E; --red-400:#E8384F; --red-100:#F6E2E4;
+  --stone-600:#5C554D; --stone-400:#8A8078; --stone-200:#C9C1B8;
+  --surplus:#1F6F5C; --deficit:#C8102E;
+
+  --font-display:"Playfair Display","Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --font-sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+
+  --t-cover:72px; --t-section:56px; --t-metric:84px; --t-title:44px;
+  --t-sub:28px;   --t-lead:24px;    --t-body:20px;   --t-small:16px; --t-label:13px;
+
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+
+  --pad-x:64px; --pad-y:56px;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+/* ===========================================================================
+   2. STAGE
+   =========================================================================== */
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  background:var(--ink-800); color:var(--ink-900);
+  font-family:var(--font-sans); font-size:var(--t-body);
+  -webkit-font-smoothing:antialiased; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+}
+#stage{
+  position:relative; width:1280px; height:720px; flex:0 0 auto;
+  transform-origin:center center; background:var(--paper);
+  box-shadow:0 0 0 1px rgba(0,0,0,.35);
+}
+
+/* ===========================================================================
+   3. PAGE
+   =========================================================================== */
+.page{
+  position:absolute; inset:0; padding:var(--pad-y) var(--pad-x);
+  display:none; flex-direction:column; background:var(--paper);
+  opacity:0; transition:opacity 180ms var(--ease), transform 180ms var(--ease);
+}
+.page.is-active{display:flex; opacity:1}
+.page.is-enter{transform:translateY(16px); opacity:0}
+.page.ink{background:var(--ink-900); color:var(--paper)}
+.page.ink .eyebrow{color:var(--stone-400)}
+.center{justify-content:center}
+.spacer{flex:1 1 auto}
+
+/* ===========================================================================
+   4. TYPE
+   =========================================================================== */
+.eyebrow{
+  font-size:var(--t-label); font-weight:600; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--stone-600); margin:0 0 var(--s5);
+}
+.eyebrow .accent{color:var(--red-600)}
+.page.ink .eyebrow .accent{color:var(--red-400)}
+h1{
+  font-family:var(--font-display); font-weight:500; font-size:var(--t-title);
+  line-height:1.15; letter-spacing:-.02em; margin:0 0 var(--s5);
+}
+h2{font-size:var(--t-sub); font-weight:600; line-height:1.25; margin:0 0 var(--s4)}
+h3{
+  font-size:var(--t-label); font-weight:600; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--stone-600); margin:0 0 var(--s3);
+}
+p{margin:0 0 var(--s4); max-width:62ch; line-height:1.45}
+.lead{font-size:var(--t-lead); line-height:1.40; color:var(--stone-600); max-width:62ch}
+.small{font-size:var(--t-small); line-height:1.40; color:var(--stone-600)}
+.page.ink .small{color:var(--stone-400)}
+strong{font-weight:600}
+.hi{color:var(--red-600); font-weight:600}
+.page.ink .hi{color:var(--red-400)}
+.num{font-variant-numeric:tabular-nums}
+.rule{width:56px; height:3px; background:var(--red-600); border:0; margin:0 0 var(--s5)}
+
+/* ===========================================================================
+   5. PAGE TYPES
+   =========================================================================== */
+.cover-title{
+  font-family:var(--font-display); font-weight:700; font-size:var(--t-cover);
+  line-height:1.05; letter-spacing:-.02em; margin:0 0 var(--s5); max-width:20ch;
+}
+.cover-meta{
+  display:flex; gap:var(--s8); font-size:var(--t-label); font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--stone-400);
+}
+.divider-num{
+  font-family:var(--font-display); font-weight:700; font-size:180px;
+  line-height:.85; color:var(--red-600); letter-spacing:-.04em; margin:0 0 var(--s5);
+}
+.divider-title{
+  font-family:var(--font-display); font-weight:500; font-size:var(--t-section);
+  line-height:1.08; letter-spacing:-.02em; margin:0 0 var(--s4); max-width:22ch;
+}
+.divider-owner{font-size:var(--t-lead); color:var(--stone-400)}
+.metric{
+  font-family:var(--font-display); font-weight:700; font-size:var(--t-metric);
+  line-height:1; letter-spacing:-.03em; font-variant-numeric:tabular-nums;
+  margin:0 0 var(--s3);
+}
+.metric.is-deficit{color:var(--deficit)}
+blockquote{
+  margin:0; padding-left:var(--s5); border-left:3px solid var(--red-600);
+  font-family:var(--font-display); font-style:italic; font-weight:400;
+  font-size:var(--t-lead); line-height:1.45; max-width:56ch;
+}
+blockquote cite{
+  display:block; margin-top:var(--s5); font:600 var(--t-label)/1.2 var(--font-sans);
+  letter-spacing:.14em; text-transform:uppercase; font-style:normal; color:var(--stone-600);
+}
+.grid{display:grid; gap:var(--s5); align-items:start}
+.g-6-6{grid-template-columns:1fr 1fr}
+.g-8-4{grid-template-columns:2fr 1fr}
+.g-4-4-4{grid-template-columns:1fr 1fr 1fr}
+
+/* ===========================================================================
+   6. COMPONENTS
+   =========================================================================== */
+ul.bullets{margin:0; padding:0; list-style:none; max-width:62ch}
+ul.bullets li{position:relative; padding-left:var(--s5); margin-bottom:var(--s3); line-height:1.45}
+ul.bullets li::before{
+  content:""; position:absolute; left:0; top:.62em;
+  width:7px; height:7px; background:var(--red-600);
+}
+.page.ink ul.bullets li::before{background:var(--red-400)}
+.callout{
+  background:var(--red-100); border-left:3px solid var(--red-600);
+  padding:var(--s5); border-radius:2px; color:var(--red-700); max-width:62ch;
+}
+.callout p:last-child{margin-bottom:0}
+.panel{background:var(--paper-alt); padding:var(--s5); border-radius:2px}
+.panel h3{margin-bottom:var(--s3)}
+.panel p:last-child{margin-bottom:0}
+table{border-collapse:collapse; width:100%; font-size:var(--t-body)}
+caption{caption-side:bottom; text-align:left; padding-top:var(--s3);
+  font-size:var(--t-small); color:var(--stone-600)}
+thead th{
+  font:600 var(--t-label)/1.2 var(--font-sans); letter-spacing:.14em;
+  text-transform:uppercase; text-align:left; color:var(--stone-600);
+  background:var(--paper-alt); padding:var(--s3) var(--s4);
+}
+tbody td{padding:var(--s3) var(--s4); border-bottom:1px solid var(--paper-rule); vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right; font-variant-numeric:tabular-nums}
+tr.is-key td{background:var(--red-100); color:var(--red-700); font-weight:600}
+code,pre,.mono{font-family:var(--font-mono); font-variant-ligatures:none}
+pre{background:var(--paper-alt); padding:var(--s5); border-radius:2px;
+  font-size:18px; line-height:1.6; margin:0; overflow:hidden}
+code{font-size:.95em}
+.tag{
+  display:inline-block; font:600 var(--t-label)/1 var(--font-sans);
+  letter-spacing:.14em; text-transform:uppercase; color:var(--red-600);
+  border:1px solid var(--red-600); padding:5px 8px; border-radius:2px;
+}
+
+/* --- Architecture diagram --- */
+.dg-panel{fill:none; stroke:var(--paper-rule); stroke-width:1}
+.dg-box{fill:var(--paper-alt); stroke:none}
+.dg-box-key{fill:var(--red-100); stroke:var(--red-600); stroke-width:1.5}
+.dg-t{font-family:var(--font-sans); font-size:18px; font-weight:600; fill:var(--ink-900)}
+.dg-s{font-family:var(--font-sans); font-size:15px; fill:var(--stone-600)}
+.dg-key-t{font-family:var(--font-sans); font-size:18px; font-weight:600; fill:var(--red-700)}
+.dg-key-s{font-family:var(--font-sans); font-size:15px; fill:var(--red-700)}
+.dg-lbl{font-family:var(--font-sans); font-size:13px; font-weight:600;
+  letter-spacing:.14em; fill:var(--stone-600)}
+.dg-arrow{stroke:var(--red-600); stroke-width:2; fill:none}
+
+/* ===========================================================================
+   7. FURNITURE
+   =========================================================================== */
+.furniture{
+  position:absolute; left:var(--pad-x); right:var(--pad-x);
+  font:600 var(--t-label)/1.2 var(--font-sans); letter-spacing:.14em;
+  text-transform:uppercase; color:var(--stone-600); pointer-events:none;
+}
+.furniture.top{top:24px; display:flex; justify-content:space-between}
+.furniture.bottom{bottom:22px; display:flex; justify-content:flex-end}
+.page.ink .furniture{color:var(--stone-400)}
+.page.no-furniture .furniture{display:none}
+#progress{
+  position:absolute; left:0; right:0; bottom:0; height:3px;
+  display:grid; grid-template-columns:repeat(5,1fr); gap:2px; z-index:5;
+}
+#progress span{background:var(--paper-rule); transition:background 180ms var(--ease)}
+#progress span.on{background:var(--red-600)}
+#progress.on-ink span{background:var(--ink-500)}
+#progress.on-ink span.on{background:var(--red-400)}
+#hint{
+  position:fixed; bottom:14px; left:50%; transform:translateX(-50%);
+  font:500 12px/1 var(--font-sans); letter-spacing:.1em; text-transform:uppercase;
+  color:var(--stone-400); opacity:.55; transition:opacity 400ms var(--ease);
+}
+#hint.hide{opacity:0}
+
+/* ===========================================================================
+   8. ACCESSIBILITY & PRINT
+   =========================================================================== */
+@media (prefers-reduced-motion:reduce){
+  .page{transition:none !important}
+  #progress span{transition:none !important}
+}
+@page{size:1280px 720px; margin:0}
+@media print{
+  body{display:block; background:#fff; overflow:visible}
+  #stage{transform:none !important; box-shadow:none; width:1280px; height:auto}
+  #hint{display:none}
+  .page{
+    position:relative !important; display:flex !important; opacity:1 !important;
+    transform:none !important; width:1280px; height:720px; break-after:page; page-break-after:always;
+  }
+  #progress{display:none}
+}
+</style>
+</head>
+
+<body>
+<div id="stage">
+
+<!-- ==========================================================================
+     PAGE 1 — COVER
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="0">
+  <p class="eyebrow">CITS5206 Professional Computing &middot; <span class="accent">Facilitator Checkpoint</span></p>
+  <h2 class="cover-title">Research Infrastructure Costing &amp; Pricing Tool</h2>
+  <hr class="rule">
+  <p class="lead" style="color:var(--stone-400);max-width:56ch">
+    What we have learned from the client, what we believe they need,
+    and how we intend to build it.
+  </p>
+  <div class="spacer"></div>
+  <div class="cover-meta">
+    <span>Client &middot; UWA Research Infrastructure</span>
+    <span>5 August 2026</span>
+  </div>
+</section>
+
+<!-- ==========================================================================
+     SECTION 1 — WHAT WE LEARNED FROM THE CLIENT
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="1">
+  <p class="divider-num">1</p>
+  <h2 class="divider-title">What We Learned From the Client</h2>
+  <p class="divider-owner">Chenxu You</p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0">Section 1 of 5</p>
+</section>
+
+<section class="page" data-section="1">
+  <div class="furniture top"><span>1 &middot; Learned from the client</span><span>Chenxu You</span></div>
+  <p class="eyebrow">One recorded walkthrough, 29 July</p>
+  <h1>UWA must price its research platforms consistently &mdash; and prove why</h1>
+  <hr class="rule">
+  <div class="grid g-6-6">
+    <div>
+      <h3>The setting</h3>
+      <ul class="bullets">
+        <li>Electron microscopes, a human MRI, radio telescopes, phenotyping drones &mdash; expensive to buy and to run</li>
+        <li>Publicly funded, so costing must be <strong>transparent and identical in method</strong> across every platform</li>
+        <li>The goal is <strong>break-even</strong>, not profit and not replacement cost</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Who actually uses the tool</h3>
+      <ul class="bullets">
+        <li><strong>Platform leaders</strong> &mdash; UWA academic or professional staff who run a facility, not the researchers who buy time</li>
+        <li>Busy technical people; this is admin work they tolerate rather than enjoy</li>
+        <li>Run <strong>once every 3&ndash;5 years</strong> &mdash; low frequency, high stakes</li>
+      </ul>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <p class="small">Source: client meeting transcript, 29 July 2026.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page center" data-section="1">
+  <div class="furniture top"><span>1 &middot; Learned from the client</span><span>Chenxu You</span></div>
+  <p class="eyebrow">The sentence that defines the product</p>
+  <blockquote>
+    If someone comes to us and says &lsquo;why does it cost $50 an hour for me to use?&rsquo;, we want to
+    be able to say: well, it costs $100,000 a year to run, this is how many hours a year it&rsquo;s going
+    to be used, we divide one by the other &mdash; $50 an hour. That&rsquo;s the reason we charge that price.
+    <cite>UWA Research Infrastructure &middot; 29 July 2026</cite>
+  </blockquote>
+  <div class="spacer"></div>
+  <p class="small">
+    Everything else &mdash; the wizard, the validation, the sealed record &mdash; exists to make that
+    answer available three years after the decision was made.
+  </p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<!-- ==========================================================================
+     SECTION 2 — OUR UNDERSTANDING OF THE REQUIREMENTS
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="2">
+  <p class="divider-num">2</p>
+  <h2 class="divider-title">Our Understanding of the Requirements</h2>
+  <p class="divider-owner">Chenxu You</p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0">Section 2 of 5</p>
+</section>
+
+<section class="page" data-section="2">
+  <div class="furniture top"><span>2 &middot; Requirements</span><span>Chenxu You</span></div>
+  <p class="eyebrow">The calculation, as we understand it</p>
+  <h1>Costs, minus subsidies, divided by forecast use</h1>
+  <hr class="rule">
+  <div class="grid g-6-6">
+    <div>
+<pre><code>R_internal   = (C &minus; I_uwa &minus; I_gov) / U
+R_national   = ((C &minus; I_gov) / U) &times; k
+R_commercial = (C / U) &times; k</code></pre>
+      <p class="small" style="margin-top:var(--s4)">
+        <code>C</code> total operating cost &middot; <code>I</code> non-variable income &middot;
+        <code>U</code> forecast utilisation &middot; <code>k</code> = 1.35
+      </p>
+    </div>
+    <div>
+      <ul class="bullets">
+        <li>Costs are captured <strong>per instrument</strong> and <strong>per platform</strong> &mdash; the demo facility held seven instruments</li>
+        <li><span class="hi">Forecast utilisation</span>, not capacity, is the divisor. 1,000 h capacity may be 500 h of real use</li>
+        <li><code>k = 1.35</code> is UWA&rsquo;s standard indirect cost recovery for any external party &mdash; insurance, legal, finance, library, buildings, IT</li>
+      </ul>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <p class="small">We will verify this against the client&rsquo;s own spreadsheet as a golden-file test before writing any UI.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="2">
+  <div class="furniture top"><span>2 &middot; Requirements</span><span>Chenxu You</span></div>
+  <p class="eyebrow">What the client asked for, and what is still open</p>
+  <h1>Ten firm requirements &mdash; and eight questions we still owe them</h1>
+  <hr class="rule">
+  <table>
+    <thead><tr><th>Requirement</th><th>Why they want it</th></tr></thead>
+    <tbody>
+      <tr><td>Guided web form, three sequential sections</td><td>Mirrors the spreadsheet; no finance jargon</td></tr>
+      <tr><td>Calculation logic hidden server-side</td><td>&ldquo;Nobody can really use it because it&rsquo;s easy to break&rdquo;</td></tr>
+      <tr><td>Mandatory fields and type validation</td><td>Stops <span class="hi">$20,000</span> being entered as <span class="hi">$200,000</span></td></tr>
+      <tr><td>Free-text justifications throughout</td><td>The rate must be defensible, not just correct</td></tr>
+      <tr class="is-key"><td>Seal on submit, then export the record</td><td>Formal approval, put on file, retrievable in 3 years</td></tr>
+    </tbody>
+  </table>
+  <p class="small" style="margin-top:var(--s4)">
+    <span class="tag">Assumption</span>&nbsp;&nbsp;Cost-allocation method, user-type utilisation split and multi-year
+    handling are unresolved. A consolidated question list is being prepared for the client.
+  </p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<!-- ==========================================================================
+     SECTION 3 — HOW WE WILL TAKE THIS FORWARD
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="3">
+  <p class="divider-num">3</p>
+  <h2 class="divider-title">How We Will Take This Forward</h2>
+  <p class="divider-owner">Chenxu You</p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0">Section 3 of 5</p>
+</section>
+
+<section class="page" data-section="3">
+  <div class="furniture top"><span>3 &middot; Ways of working</span><span>Chenxu You</span></div>
+  <p class="eyebrow">Cadence and collaboration</p>
+  <h1>Weekly online, fortnightly in person, everything in the repository</h1>
+  <hr class="rule">
+  <div class="grid g-6-6">
+    <div>
+      <h3>Meeting rhythm</h3>
+      <ul class="bullets">
+        <li><strong>Weekly</strong> team stand-up online &mdash; progress, blockers, next week&rsquo;s allocation</li>
+        <li><strong>Fortnightly</strong> face-to-face on campus, including this facilitator checkpoint</li>
+        <li>Client on <strong>Wednesdays</strong> as needed, plus a shared Teams chat for async questions</li>
+      </ul>
+    </div>
+    <div>
+      <h3>How we work together</h3>
+      <ul class="bullets">
+        <li>GitHub Projects board; every task an issue with one named owner and a deadline</li>
+        <li>Markdown and plain text only, so every change diffs and review is visible</li>
+        <li>Minutes recorded and committed within 24 hours &mdash; two members missed the client walkthrough and were briefed from them</li>
+      </ul>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <p class="small">Cadence agreed with the client on 29 July: heavier support up front, easing off later.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="3">
+  <div class="furniture top"><span>3 &middot; Ways of working</span><span>Chenxu You</span></div>
+  <p class="eyebrow">Professional obligations</p>
+  <h1>Two codes govern how we behave on this project</h1>
+  <hr class="rule">
+  <div class="grid g-6-6">
+    <div class="panel">
+      <h3>ACS Code of Professional Ethics (2023)</h3>
+      <p style="font-size:var(--t-lead);font-family:var(--font-display);margin-bottom:var(--s3)">
+        Honesty &middot; Trustworthiness &middot; Respect
+      </p>
+      <p class="small" style="margin:0">
+        In practice: we do not overstate what we have built, we declare what is still an assumption,
+        and we take responsibility for failures as well as successes.
+      </p>
+    </div>
+    <div class="panel">
+      <h3>UWA Code of Conduct</h3>
+      <p class="small" style="margin:0 0 var(--s3)">
+        Behave honestly and with integrity &middot; act with care and diligence &middot; treat everyone with
+        respect and courtesy &middot; comply with applicable laws &middot; uphold the University&rsquo;s reputation.
+      </p>
+      <p class="small" style="margin:0">
+        The Code&rsquo;s own test: <em>would I be happy for this to appear on the front page of the newspaper?</em>
+      </p>
+    </div>
+  </div>
+  <p class="small" style="margin-top:var(--s5)">
+    We are building a tool whose entire purpose is public accountability for public money.
+    Holding ourselves to the same standard is not decoration.
+  </p>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="3">
+  <div class="furniture top"><span>3 &middot; Ways of working</span><span>Chenxu You</span></div>
+  <p class="eyebrow">Generative AI</p>
+  <h1>Used deliberately, declared openly, never as a substitute for our thinking</h1>
+  <hr class="rule">
+  <div class="grid g-6-6">
+    <div>
+      <h3>What we do</h3>
+      <ul class="bullets">
+        <li>Follow the <strong>AI use tier</strong> and AI use statement set for each assessment &mdash; the assessment brief is definitive, not the general guide</li>
+        <li>Keep a log of tools, prompts and outputs, and submit an acknowledgement statement</li>
+        <li>Check every AI output ourselves &mdash; we remain responsible for accuracy</li>
+      </ul>
+    </div>
+    <div>
+      <h3>What we never do</h3>
+      <ul class="bullets">
+        <li>Put <strong>client data, personal data or third-party IP</strong> into a public AI tool &mdash; the client&rsquo;s spreadsheet has not yet been cleared for this</li>
+        <li>Use AI to replace critical thinking or analysis</li>
+        <li>Use <strong>DeepSeek</strong> &mdash; prohibited on all UWA networks and devices</li>
+      </ul>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <p class="small">
+    Source: <em>Using Artificial Intelligence Tools at UWA: A Guide for Students</em>, updated March 2026 &middot;
+    UWA Academic Integrity Policy. <span class="tag">Open</span>&nbsp;&nbsp;We have asked the client whether
+    AI tools may be used on their material; not yet answered.
+  </p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<!-- ==========================================================================
+     SECTION 4 — SYSTEM ARCHITECTURE
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="4">
+  <p class="divider-num">4</p>
+  <h2 class="divider-title">What the Architecture Will Look Like</h2>
+  <p class="divider-owner">Yichen Zhao</p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0">Section 4 of 5</p>
+</section>
+
+<section class="page" data-section="4">
+  <div class="furniture top"><span>4 &middot; Architecture</span><span>Yichen Zhao</span></div>
+  <p class="eyebrow">Three tiers, one protected engine</p>
+  <h1>The calculation logic lives where the user cannot reach it</h1>
+  <hr class="rule">
+  <svg viewBox="0 0 1140 250" width="100%" role="img" aria-labelledby="archTitle archDesc">
+    <title id="archTitle">Three-tier architecture</title>
+    <desc id="archDesc">A browser wizard calls a REST API over HTTPS. The API calls an isolated
+      calculation engine and a report generator, and persists to PostgreSQL and a sealed file store.</desc>
+
+    <text class="dg-lbl" x="0" y="12">BROWSER</text>
+    <rect class="dg-panel" x="0" y="26" width="320" height="200" rx="2"/>
+    <rect class="dg-box" x="16" y="92" width="288" height="68" rx="2"/>
+    <text class="dg-t" x="36" y="120">Guided wizard</text>
+    <text class="dg-s" x="36" y="144">Validated form &middot; scenario modeller</text>
+
+    <path class="dg-arrow" d="M320 126 H392"/>
+    <path class="dg-arrow" d="M386 120 l8 6 -8 6"/>
+    <text class="dg-s" x="322" y="112">HTTPS</text>
+
+    <text class="dg-lbl" x="400" y="12">APPLICATION SERVER</text>
+    <rect class="dg-panel" x="400" y="26" width="340" height="200" rx="2"/>
+    <rect class="dg-box" x="416" y="42" width="308" height="52" rx="2"/>
+    <text class="dg-t" x="436" y="64">REST API</text>
+    <text class="dg-s" x="436" y="84">Auth &middot; validation &middot; workflow</text>
+    <rect class="dg-box-key" x="416" y="102" width="308" height="52" rx="2"/>
+    <text class="dg-key-t" x="436" y="124">Calculation engine</text>
+    <text class="dg-key-s" x="436" y="144">Pure &middot; versioned &middot; unit-tested</text>
+    <rect class="dg-box" x="416" y="162" width="308" height="52" rx="2"/>
+    <text class="dg-t" x="436" y="184">Report generator</text>
+    <text class="dg-s" x="436" y="204">Sealed record &rarr; PDF</text>
+
+    <path class="dg-arrow" d="M740 126 H812"/>
+    <path class="dg-arrow" d="M806 120 l8 6 -8 6"/>
+
+    <text class="dg-lbl" x="820" y="12">PERSISTENCE</text>
+    <rect class="dg-panel" x="820" y="26" width="320" height="200" rx="2"/>
+    <rect class="dg-box" x="836" y="58" width="288" height="52" rx="2"/>
+    <text class="dg-t" x="856" y="80">PostgreSQL</text>
+    <text class="dg-s" x="856" y="100">Cycles &middot; records &middot; audit log</text>
+    <rect class="dg-box" x="836" y="142" width="288" height="52" rx="2"/>
+    <text class="dg-t" x="856" y="164">File store</text>
+    <text class="dg-s" x="856" y="184">Sealed PDF records</text>
+  </svg>
+  <div class="spacer"></div>
+  <p class="small">
+    The engine is a pure module with no database or UI dependency: decimal arithmetic, a divide-by-zero
+    guard, and a versioned config so a 2026 record still reproduces its figures in 2030.
+  </p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="4">
+  <div class="furniture top"><span>4 &middot; Architecture</span><span>Yichen Zhao</span></div>
+  <p class="eyebrow">Not yet committed</p>
+  <h1>One recommendation, one fallback, one decision point</h1>
+  <hr class="rule">
+  <table>
+    <thead><tr><th>Option</th><th>Shape</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>A</td><td>Client-side SPA, no backend</td><td>Throwaway prototype only &mdash; validates the flow with the client</td></tr>
+      <tr class="is-key"><td>B</td><td>SPA + API + PostgreSQL</td><td>Recommended &mdash; meets every stated requirement</td></tr>
+      <tr><td>C</td><td>Django + HTMX monolith</td><td>Documented fallback &mdash; highest probability of shipping complete</td></tr>
+      <tr><td>D / E</td><td>Power Platform / integrate into UWA systems</td><td>Rejected and deferred respectively</td></tr>
+    </tbody>
+  </table>
+  <p class="small" style="margin-top:var(--s4)">
+    <span class="tag">Open</span>&nbsp;&nbsp;A <strong>team skills audit</strong> runs before we commit, with a
+    <strong>go/no-go at the mid-semester checkpoint</strong>. If our JavaScript depth is thin, we take Option C
+    rather than discover the problem in week 10.
+  </p>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<!-- ==========================================================================
+     SECTION 5 — WHAT WE EXPECT TO DELIVER
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="5">
+  <p class="divider-num">5</p>
+  <h2 class="divider-title">What We Expect to Deliver</h2>
+  <p class="divider-owner">Jaswanth Vericherla</p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0">Section 5 of 5</p>
+</section>
+
+<section class="page" data-section="5">
+  <div class="furniture top"><span>5 &middot; Deliverables</span><span>Jaswanth Vericherla</span></div>
+  <p class="eyebrow">Next deliverable &middot; due Tuesday 18 August 2026</p>
+  <h1>Assignment 1 &mdash; specification and plan, as a single PDF</h1>
+  <hr class="rule">
+  <table>
+    <thead><tr><th class="n">Pts</th><th>Section</th><th>What we will show</th></tr></thead>
+    <tbody>
+      <tr><td class="n">4</td><td>Problem statement</td><td>The spreadsheet&rsquo;s failure modes, and the MVP vertical slice</td></tr>
+      <tr class="is-key"><td class="n">4</td><td>Client communication &amp; MVP</td><td>Recorded walkthrough, written summary, and the client&rsquo;s <strong>written MVP sign-off</strong></td></tr>
+      <tr><td class="n">4</td><td>Project management</td><td>Milestones, named owners, deadlines, board and CI</td></tr>
+      <tr><td class="n">3</td><td>Risk &amp; technology</td><td>Skills audit, five options assessed, risks including cybersecurity</td></tr>
+    </tbody>
+    <caption>Submission links to the GitHub repository and the Teams area; facilitator access must be confirmed.</caption>
+  </table>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="5">
+  <div class="furniture top"><span>5 &middot; Deliverables</span><span>Jaswanth Vericherla</span></div>
+  <p class="eyebrow">End of semester</p>
+  <h1>What the client should have in their hands</h1>
+  <hr class="rule">
+  <div class="grid g-6-6">
+    <div>
+      <h3>The product</h3>
+      <ul class="bullets">
+        <li>A deployed web application covering the full path: create a cycle &rarr; enter inputs &rarr; see rates &rarr; propose rates &rarr; seal &rarr; export</li>
+        <li>A calculation engine proven against the client&rsquo;s own spreadsheet</li>
+        <li>A sealed PDF pricing record &mdash; the artefact the client actually asked for</li>
+      </ul>
+    </div>
+    <div>
+      <h3>The report and handover</h3>
+      <ul class="bullets">
+        <li>Final report: what we built, how it was tested, what we would do next</li>
+        <li>Repository with documentation, tests and setup instructions</li>
+        <li>Live demonstration to the client, and a roadmap of what we deliberately left out</li>
+      </ul>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <p class="small">
+    The client owns the costing logic; we own the code and may use it in our portfolios.
+    Agreed on 29 July.
+  </p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<!-- ==========================================================================
+     CLOSING
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="0">
+  <p class="eyebrow">Thank you &mdash; <span class="accent">questions</span></p>
+  <h2 class="cover-title" style="font-size:var(--t-section)">Research Infrastructure Costing &amp; Pricing Tool</h2>
+  <hr class="rule">
+  <p class="lead" style="color:var(--stone-400);max-width:56ch">
+    Chenxu You &middot; Evan Zhao &middot; Wenmin Luo &middot; Dai Lam La La &middot; Jaswanth Vericherla
+  </p>
+  <div class="spacer"></div>
+  <p class="mono" style="font-size:var(--t-small);color:var(--stone-400)">github.com/ChenxuYou/uwa-cits5206-project</p>
+</section>
+
+<div id="progress" aria-hidden="true">
+  <span></span><span></span><span></span><span></span><span></span>
+</div>
+</div>
+
+<p id="hint">&larr; &rarr; to navigate &middot; 1&ndash;5 sections &middot; F fullscreen</p>
+
+<script>
+/* ===========================================================================
+   DECK ENGINE — keyboard, click, swipe, hash, fullscreen, canvas scaling.
+   =========================================================================== */
+(function () {
+  var stage    = document.getElementById('stage');
+  var pages    = Array.prototype.slice.call(document.querySelectorAll('.page'));
+  var segments = Array.prototype.slice.call(document.querySelectorAll('#progress span'));
+  var progress = document.getElementById('progress');
+  var hint     = document.getElementById('hint');
+  var current  = 0;
+
+  function fit() {
+    var s = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    stage.style.transform = 'scale(' + s + ')';
+  }
+
+  var sectionStart = {};
+  pages.forEach(function (p, i) {
+    var s = p.dataset.section;
+    if (s !== '0' && sectionStart[s] === undefined) sectionStart[s] = i;
+    var n = p.querySelector('[data-pagenum]');
+    if (n) n.textContent = i + 1;
+  });
+
+  function show(i, push) {
+    i = Math.max(0, Math.min(pages.length - 1, i));
+    pages.forEach(function (p) { p.classList.remove('is-active'); });
+
+    var page = pages[i];
+    page.classList.add('is-active', 'is-enter');
+    void page.offsetWidth;
+    page.classList.remove('is-enter');
+
+    current = i;
+
+    var sec = parseInt(page.dataset.section, 10);
+    segments.forEach(function (seg, n) { seg.classList.toggle('on', n < sec); });
+    progress.classList.toggle('on-ink', page.classList.contains('ink'));
+
+    if (push !== false) history.replaceState(null, '', '#' + (i + 1));
+    document.title = 'Slide ' + (i + 1) + ' / ' + pages.length +
+                     ' — Facilitator Checkpoint';
+  }
+
+  var next = function () { show(current + 1); };
+  var prev = function () { show(current - 1); };
+
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { e.preventDefault(); next(); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp')             { e.preventDefault(); prev(); }
+    else if (k === 'Home')  { e.preventDefault(); show(0); }
+    else if (k === 'End')   { e.preventDefault(); show(pages.length - 1); }
+    else if (k === 'f' || k === 'F') {
+      e.preventDefault();
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen();
+    }
+    else if (/^[1-5]$/.test(k) && sectionStart[k] !== undefined) { e.preventDefault(); show(sectionStart[k]); }
+    hideHint();
+  });
+
+  document.addEventListener('click', function (e) {
+    if (window.getSelection && String(window.getSelection())) return;
+    (e.clientX > window.innerWidth / 2 ? next : prev)();
+    hideHint();
+  });
+
+  var x0 = null;
+  document.addEventListener('touchstart', function (e) { x0 = e.changedTouches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 45) { (dx < 0 ? next : prev)(); hideHint(); }
+    x0 = null;
+  }, { passive: true });
+
+  var hintTimer = setTimeout(hideHint, 6000);
+  function hideHint() { clearTimeout(hintTimer); hint.classList.add('hide'); }
+
+  window.addEventListener('resize', fit);
+  window.addEventListener('hashchange', function () {
+    var n = parseInt(location.hash.slice(1), 10);
+    if (n && n - 1 !== current) show(n - 1, false);
+  });
+
+  fit();
+  var start = parseInt(location.hash.slice(1), 10);
+  show(start ? start - 1 : 0);
+})();
+</script>
+</body>
+</html>
