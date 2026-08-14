@@ -93,34 +93,5 @@ section 1 and reference/client/README.md. Where this repository states something
 drawn from them, it is rewritten by us and the source is named in the text.
 
 --------------------------------------------------------------------------------
-7. OUTSTANDING — AN EARLIER MIT GRANT IS STILL IN THE HISTORY
---------------------------------------------------------------------------------
-
-The initial commit of this repository (2d6f498, 13 August 2026) contained a
-LICENSE file reading:
-
-    MIT License
-    Copyright (c) 2026 RTMart
-
-That file is no longer present in the working tree, but deleting a file does not
-retract a grant already published under an earlier commit. MIT permits sale, which
-is the one thing section 2 rules out. If the repository has been pushed, anyone who
-cloned it before the deletion holds that grant.
-
-Action required, in this order:
-
-  1. Rewrite LICENSE out of the history. The history is short, so this is cheap
-     now and expensive later. Take the 24 July transcript out in the same pass —
-     it was committed before the transcript exception was withdrawn:
-         git filter-repo --invert-paths \
-             --path LICENSE \
-             --path docs/meetings/2026-07-24-team-meeting-transcript.md
-  2. Force-push, and have every team member re-clone.
-  3. Confirm no fork or clone predates the rewrite.
-
-Until step 3 is done, this section stays here. It is not resolved by the existence
-of this NOTICE.
-
---------------------------------------------------------------------------------
 
 Last reviewed: 14 August 2026.

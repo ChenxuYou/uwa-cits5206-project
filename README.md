@@ -191,13 +191,15 @@ The rules and the reasoning are in [`.gitignore`](.gitignore). Check any single 
 `git check-ignore -v <path>`. Committing something excluded needs team agreement and
 `git add -f`.
 
-**Ignoring a file does not remove it from history.** Two things are already in earlier commits
-and still need rewriting out, and both should go in the same pass:
+**Ignoring a file does not remove it from history.** Two files were committed before these
+rules settled — the 24 July team transcript, and an earlier `LICENSE` — and adding them to
+`.gitignore` did nothing to the commits that already held them. Both have since been rewritten
+out and the result force-pushed. The current history begins at `84ab707` and neither file
+appears anywhere in it.
 
-- the 24 July team transcript, committed before the exception above was withdrawn;
-- an earlier `LICENSE` file — see the closing section of [`NOTICE`](NOTICE).
-
-The history is two commits long, so this is cheap now and expensive later.
+That pass cost one rewrite and a re-clone for everyone, which is what it costs while the
+history is short. The lesson is the rule at the top of this section: the check happens before
+the commit, not after it.
 
 ## How the team works
 
@@ -265,6 +267,8 @@ so it is not what stops the tool being sold. The joint-IP position is.
 Reserving all rights costs us nothing here: `NOTICE` already gives UWA everything it needs,
 and GitHub's terms already let any user view and fork a public repository.
 
-> **Outstanding:** an earlier MIT licence, copyright "RTMart", is still retrievable from the
-> initial commit. Deleting a file does not retract a grant already published under an earlier
-> commit, so the history needs rewriting — see the closing section of [`NOTICE`](NOTICE).
+An early commit carried a `LICENSE` file — MIT, copyright "RTMart" — which would have granted
+the public exactly the right to sell that the joint-IP position rules out. Deleting the file
+would not have retracted a grant already published, so the history was rewritten to remove it,
+force-pushed, and checked for forks and clones predating the rewrite. Nothing in the current
+history grants a licence to anyone.
