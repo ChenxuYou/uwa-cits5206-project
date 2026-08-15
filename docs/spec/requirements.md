@@ -3,9 +3,9 @@
 **Project:** Research Infrastructure Costing & Pricing Tool
 **Client:** UWA Research Infrastructure
 **Unit:** CITS5206 Professional Computing, The University of Western Australia
-**Status:** Draft v2.0 — 14 August 2026, not yet reviewed by the client
+**Status:** Draft v2.2 — 15 August 2026, not yet reviewed by the client
 **Primary sources:** the client's own documents (see *Source precedence* below), supported by the
-[client kickoff minutes, 29 July 2026](meetings/2026-07-29-client-kickoff.md)
+[client kickoff minutes, 29 July 2026](../meetings/2026-07-29-client-kickoff.md)
 
 > **How to read this document.** It records *our* understanding, not the client's words.
 > Companion documents: [user stories](user-stories.md) and [architecture](architecture.md).
@@ -20,10 +20,10 @@ than silently resolved.
 | --- | --- | --- | --- |
 | 1 | **`01-context-costing-pricing-research-infrastructure.docx`** — the client's costing & pricing guide | **[G]** with the step number | The client's normative policy document. It states its own scope: "a consistent methodology for developing, reviewing and approving sustainable charge-out rates **across the University**" |
 | 2 | **`02-template-ric-cost-calculator.xlsx`** — the working calculator | **[W]** with the sheet and cell | A reference *implementation* of the guide. Authoritative for structure and data shape; **not** authoritative where its arithmetic departs from the guide, because it contains demonstrable formula defects (§2) |
-| 3 | [Kickoff minutes, 29 July 2026](meetings/2026-07-29-client-kickoff.md) | **[K]** with the section | Our own record of a spoken walkthrough. Useful for intent and priority, unreliable for figures |
+| 3 | [Kickoff minutes, 29 July 2026](../meetings/2026-07-29-client-kickoff.md) | **[K]** with the section | Our own record of a spoken walkthrough. Useful for intent and priority, unreliable for figures |
 
 Client files live in `reference/client/` and are **not committed** — see
-[`reference/client/README.md`](../reference/client/README.md). Everything quoted from them here
+[`reference/client/README.md`](../../reference/client/README.md). Everything quoted from them here
 is transcribed by us, with the source named.
 
 **Anything not carrying a [G], [W] or [K] marker is an inference of ours** and is listed in §8
@@ -211,7 +211,7 @@ and is wrong. What is excluded is *historical capital expenditure*, not a forwar
 Samples**. The same unit should be used consistently throughout capacity, utilisation and
 pricing calculations." **[G, Step 2]** Earlier drafts said "hours, days or weeks" — weeks is
 not one of the client's units, and samples was missing. This answers what was previously
-open question Q7.
+open question Q6.
 
 **Capacity baselines.** The guide gives the standard UWA working year as **230 working days ×
 7.5 hours = approximately 1,725 hours per annum** before operational constraints **[G, Step
@@ -497,7 +497,7 @@ spreadsheets; multi-institution or multi-tenant operation.
 
 A vertical slice is preferred to a broader but incomplete build: a narrow end-to-end path that
 works beats three-quarters of every feature. See
-[`reference/unit/wipro-mvp-summary.md`](../reference/unit/wipro-mvp-summary.md).
+[`reference/unit/wipro-mvp-summary.md`](../../reference/unit/wipro-mvp-summary.md).
 
 ## 8. Assumptions
 
@@ -518,37 +518,36 @@ Recorded so that they can be confirmed or corrected. Each is ours, not the clien
 
 ## 9. Open questions
 
-**Q1, Q2 and Q7 have been closed by the client's own documents** and their answers are now in
-§4. **Q3–Q6 remain from the kickoff** and are the client's own. **Q8–Q11 are ours.** A
+**Q1, Q2 and Q6 have been closed by the client's own documents** and their answers are now in
+§4. **Q3–Q5 remain from the kickoff** and are the client's own. **Q7–Q10 are ours.** A
 consolidated list is being prepared for the client; a *proposed default* is given for each so
 that a non-answer does not block us.
 
 Any count of open questions quoted elsewhere in the repository refers to this table. If a
 question is added, it is added here first.
 
-**Seven questions are open**: four carried from the kickoff (Q3–Q6) and three of ours
-(Q9–Q11). Q8 is answered but recorded because the answer is ours, not the client's.
+**Six questions are open**: three carried from the kickoff (Q3–Q5) and three of ours
+(Q8–Q10). Q7 is answered but recorded because the answer is ours, not the client's.
 
 | # | Question | Status / proposed default |
 | --- | --- | --- |
 | ~~Q1~~ | How are costs allocated between the per-capability and per-platform levels? | **Closed.** Even split across capability columns **[W]** — see §4 Step 1 |
 | ~~Q2~~ | How is utilisation split across the three user types? | **Closed.** A single `U` per capability drives the rates; the per-type split drives the balance projection **[W]** — see §4 Step 2 |
 | **Q3** | How are multi-year cycles handled, and how is a sealed record superseded rather than overwritten? | A cycle carries a validity period; a new cycle supersedes the previous one by reference; nothing is ever overwritten (A5) |
-| **Q4** | What access control is needed beyond authentication — who may see, and who is the delegated authority in the system? | Three roles: custodian (own platform, create and submit), delegated authority (approve what is submitted to them), administrator (all platforms). Authentication local to the app for the MVP |
+| **Q4** | What access control is needed beyond authentication — who may see, and who is the delegated authority in the system? | Three roles: custodian (own platform, create and submit), delegated authority (**sees** what is submitted to them — the approval *action* is F16, Should, not MVP), administrator (all platforms). Authentication local to the app for the MVP. The guide names the approver as "typically the head of the BU responsible for the operating costs" **[G, Step 5]**; what we lack is whether *typically* holds here and who it is |
 | **Q5** | What format does the sealed record take — printout, generated email, or something else? | PDF export, generated server-side, plus a stable in-app URL for the record |
-| **Q6** | May AI tools be used on client material? **Asked 29 July, not answered as of 14 August** | No. Client material stays out of public AI tools until answered in writing — see [`reference/client/README.md`](../reference/client/README.md) |
-| ~~Q7~~ | What is the billable unit set? | **Closed.** Hours, days or samples **[G, Step 2]** |
-| ~~Q8~~ | Is the calculated-vs-proposed variance ever required to be zero? | **Answered by us, not the client.** Always permissible, always surfaced, justification mandatory when non-zero. The workbook itself carries large deficits at proposed rates, so a non-zero variance is clearly normal **[W]** |
-| **Q9** | What licence does this repository carry, given jointly owned IP? | **None, deliberately.** All rights reserved, with UWA's permissions granted directly in [`NOTICE`](../NOTICE). A licence from one joint owner alone may not be effective, so we do not purport to grant one; this closes at handover once the ownership position is confirmed in writing — see [README §Ownership](../README.md#ownership) |
-| **Q10** | The guide's commercial formula deducts no income; the workbook's commercial row deducts federal and other income **[W, sheet 1 row 59]**. Which is correct? | **The guide.** `(C / U) × k`, no deduction. Recorded as a defect in the workbook, to be confirmed |
-| **Q11** | Should the tool reproduce the workbook's three formula defects for backward comparability, or correct them? | Correct them, and show the corrected figure beside the workbook's where a historical comparison is made. A tool that faithfully reproduces a known error is not an improvement |
+| ~~Q6~~ | What is the billable unit set? | **Closed.** Hours, days or samples **[G, Step 2]** |
+| ~~Q7~~ | Is the calculated-vs-proposed variance ever required to be zero? | **Answered by us, not the client.** Always permissible, always surfaced, justification mandatory when non-zero. The workbook itself carries large deficits at proposed rates, so a non-zero variance is clearly normal **[W]** |
+| **Q8** | What licence does this repository carry, given jointly owned IP? | **None, deliberately.** All rights reserved, with UWA's permissions granted directly in [`NOTICE`](../../NOTICE). A licence from one joint owner alone may not be effective, so we do not purport to grant one; this closes at handover once the ownership position is confirmed in writing — see [README §Ownership](../../README.md#ownership) |
+| **Q9** | The guide's commercial formula deducts no income; the workbook's commercial row deducts federal and other income **[W, sheet 1 row 59]**. Which is correct? | **The guide.** `(C / U) × k`, no deduction. Recorded as a defect in the workbook, to be confirmed |
+| **Q10** | Should the tool reproduce the workbook's three formula defects for backward comparability, or correct them? | Correct them, and show the corrected figure beside the workbook's where a historical comparison is made. A tool that faithfully reproduces a known error is not an improvement |
 
 ## 10. Constraints
 
 - **Academic calendar.** The project ends with the semester; the technology decision has a go/no-go at the mid-semester checkpoint. Delivery risk, not client risk, drives the schedule.
 - **Client availability.** The client asked us to digest, then meet when we have questions — no fixed weekly slot. Wednesdays preferred, Teams chat for async, support tapering over the project. **[K §10]** Question batching matters; a two-week wait on a blocking answer is a real risk.
-- **Client material handling.** Client documents stay local and uncommitted; anything the repository needs is rewritten by us and attributed. **[K §7]**
-- **IP.** The team owns the code and may use it in portfolios. The costing logic is UWA's, and overarching IP is joint — selling the tool onward would not be appropriate. **[K §9]**
+- **Client material handling.** Client documents stay local and uncommitted, and **nothing the client gave us enters the repository without their agreement**; anything the repository needs is rewritten by us and attributed. Enforced by [`.gitignore`](../../.gitignore) §1 and set out in [`reference/client/README.md`](../../reference/client/README.md). **[K §7]**
+- **IP.** The team owns the code and may use it in portfolios. The costing logic is UWA's, and overarching IP is **joint** — selling the tool onward would not be appropriate. **[K §9]** The kickoff's decision D5 phrases this as "the costing logic and overarching IP remain UWA's, jointly", which reads two ways; *jointly* governs the overarching IP, not the costing logic. That is the reading [`NOTICE`](../../NOTICE) §2 records and the only one consistent with the client's own words in [kickoff §9](../meetings/2026-07-29-client-kickoff.md#9-intellectual-property-and-portfolio-use). Anything we put in front of the client states it in full rather than quoting D5.
 - **Data.** Relatively sensitive, subject to FOI, not commercially confidential, not for wide promotion while in progress. **[K §7]**
 
 ---
@@ -559,4 +558,6 @@ question is added, it is added here first.
 | --- | --- | --- |
 | 1.0 | 14 Aug 2026 | First draft, written from the 29 July kickoff minutes. Not yet reviewed by the client. |
 | 1.1 | 14 Aug 2026 | §7 named as the scope baseline that the user stories must follow, and tied to the MoSCoW priorities in §6. §9 now says which questions came from the client and which are ours. |
-| 2.0 | 14 Aug 2026 | **Rewritten against the client's own documents.** Source precedence established: the costing guide governs, the workbook is a reference implementation, the minutes rank last. The demonstration figures transcribed from the walkthrough ($380,000 / $230,000 / $3,291 / $15,000) are **withdrawn** — none appears in any client document — and replaced by the guide's worked example ($150,000 / $20,000 / $30,000 / 1,000 h → $100 / $162 / $202.50), which is now the golden-file fixture. Rates are **per capability**, not per platform (A1). Income is **four lines**, split UWA vs non-UWA, not two. Billable units are **hours, days, samples**, not weeks. Capacity baselines, the staff-FTE cap and the even-split allocation rule are stated from the workbook. Replacement reserve added (F19) — the earlier "not replacement cost" line was wrong. Benchmarking (F20) and price-change communication (F21) added from guide steps 4 and 6. GST-exclusive promoted from assumption to fact. Terminology settled from the guide: custodian, capability, billable unit, APFR. **F15 raised to Must and moved into the MVP.** N14 added against the workbook's column-range defect. Q1, Q2 and Q7 closed by the client's documents; Q10 and Q11 opened by them. §2 now documents three specific formula defects in the live workbook as evidence for the problem statement. |
+| 2.0 | 14 Aug 2026 | **Rewritten against the client's own documents.** Source precedence established: the costing guide governs, the workbook is a reference implementation, the minutes rank last. The demonstration figures transcribed from the walkthrough ($380,000 / $230,000 / $3,291 / $15,000) are **withdrawn** — none appears in any client document — and replaced by the guide's worked example ($150,000 / $20,000 / $30,000 / 1,000 h → $100 / $162 / $202.50), which is now the golden-file fixture. Rates are **per capability**, not per platform (A1). Income is **four lines**, split UWA vs non-UWA, not two. Billable units are **hours, days, samples**, not weeks. Capacity baselines, the staff-FTE cap and the even-split allocation rule are stated from the workbook. Replacement reserve added (F19) — the earlier "not replacement cost" line was wrong. Benchmarking (F20) and price-change communication (F21) added from guide steps 4 and 6. GST-exclusive promoted from assumption to fact. Terminology settled from the guide: custodian, capability, billable unit, APFR. **F15 raised to Must and moved into the MVP.** N14 added against the workbook's column-range defect. Q1, Q2 and Q6 closed by the client's documents; Q9 and Q10 opened by them. §2 now documents three specific formula defects in the live workbook as evidence for the problem statement. |
+| 2.1 | 15 Aug 2026 | **Q4's proposed default corrected.** It committed the delegated authority to *approving* submissions, which contradicted F16 (Should, not MVP) and the scope baseline in §7 — the core role is a **viewing** role, per A6, and the approval action remains stretch. The guide's own answer to "who holds the delegated authority" — "typically the head of the BU responsible for the operating costs" **[G, Step 5]** — is now quoted in the default, so what we are actually asking the client is the narrower question of whether *typically* holds for these platforms. Both corrections found while reviewing [`2026-08-15-scope-and-questions.md`](../client/2026-08-15-scope-and-questions.md), whose Question 2 carried the same conflict; that document is corrected to match. §10's IP constraint now flags that kickoff decision D5 is ambiguously worded and states which reading governs, after a draft of the client sign-off document took the wrong one — [`NOTICE`](../../NOTICE) §2 carries the full note. No requirement, story or MoSCoW priority changes. |
+| 2.2 | 15 Aug 2026 | **§9 reduced to the questions that decide what we build.** The question about the team's own working method was withdrawn — it settled nothing in the product and does not belong in a list whose purpose is to unblock the build — and the remaining questions are renumbered without a gap: old **Q7–Q11 become Q6–Q10**. Any Q-number quoted elsewhere in the repository follows this table and has been updated with it. §10's client-material constraint now states the rule it always meant: **nothing the client gave us enters the repository without their agreement**, enforced by [`.gitignore`](../../.gitignore) §1 and set out in [`reference/client/README.md`](../../reference/client/README.md). No requirement, story or MoSCoW priority changes. |

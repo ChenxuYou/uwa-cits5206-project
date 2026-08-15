@@ -9,7 +9,7 @@
 | Jaswanth Vericherla | — | 24681985 | jaswanth-kumar24 |
 
 This table is the roster's only home. Presentations derive one section per member,
-in this order, from it — see [`presentations/STYLE-GUIDE.md`](../presentations/STYLE-GUIDE.md) §4.2.
+in this order, from it — see [`presentations/STYLE-GUIDE.md`](../../presentations/STYLE-GUIDE.md) §4.2.
 
 **Two members go by an English name as well as the name on their enrolment.** Chenxu You is
 **Oliver**; Yichen Zhao is **Evan**. Either name refers to the same person, and both turn up
@@ -25,11 +25,11 @@ meeting of 24 July 2026, and it was at that meeting that he arranged the client 
 for the following week. That walkthrough took place on 29 July, after he had left, and he
 did not attend it. Those records are left unaltered as an accurate account of what happened;
 the 24 July record is a raw transcript, so it is held in the team's Teams area rather than
-committed ([`.gitignore`](../.gitignore) §3).
+committed ([`.gitignore`](../../.gitignore) §3).
 
 Anything he was carrying has been redistributed among the five members listed above, and
 he is not counted for any deliverable, presentation section, or peer review.
 
 **The team has had five members since 27 July 2026.** The client walkthrough of 29 July was
 attended by three of them; the other two were briefed from the
-[minutes](meetings/2026-07-29-client-kickoff.md).
+[minutes](../meetings/2026-07-29-client-kickoff.md).

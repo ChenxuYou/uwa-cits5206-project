@@ -14,7 +14,7 @@ position rather than an oversight.
 
 The intellectual property in this project is jointly held (see section 2), and a
 licence granted by one joint owner alone may not be effective. The team therefore
-does not purport to grant one. The licensing question is recorded as Q9 in
+does not purport to grant one. The licensing question is recorded as Q8 in
 docs/requirements.md and closes at handover, once the ownership position in
 section 2 has been confirmed in writing by the client.
 
@@ -43,6 +43,23 @@ recorded in docs/meetings/2026-07-29-client-kickoff.md section 9, decision D5.
 
 The joint-ownership position is transcribed from a spoken meeting and has not yet
 been confirmed in writing. Section 1 does not change until it is.
+
+HOW DECISION D5 SHOULD BE READ. D5 records this as "The costing logic and
+overarching IP remain UWA's, jointly." That sentence carries two readings and
+only one of them is correct: "jointly" governs the overarching IP, not the
+costing logic. The costing logic is UWA's outright; the overarching IP in the
+tool is held jointly, exactly as the table above states. The client's own words
+in section 9 of the same minutes settle it — selling the tool onward "would not
+be appropriate, because the overarching IP would be jointly owned" — a sentence
+that only makes sense if the joint holding is the thing being described.
+
+The minutes are a record of a meeting and are not edited after the fact, so the
+ambiguity stays where it is and this note is the correction. It is not a
+hypothetical one: a draft of the client sign-off document read D5 the other way
+and would have asked the client to confirm that the overarching IP was UWA's
+alone — which, under section 1, is the very confirmation that closes Q8. It was
+caught before the document was sent. See docs/client/mvp-agreement.md, change
+log entry 1.1.
 
 --------------------------------------------------------------------------------
 3. PERMISSION GRANTED TO THE UNIVERSITY OF WESTERN AUSTRALIA
@@ -94,4 +111,4 @@ drawn from them, it is rewritten by us and the source is named in the text.
 
 --------------------------------------------------------------------------------
 
-Last reviewed: 14 August 2026.
+Last reviewed: 15 August 2026.

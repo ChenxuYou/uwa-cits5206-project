@@ -1,7 +1,7 @@
 # Architecture Vision
 
 **Project:** Research Infrastructure Costing & Pricing Tool
-**Status:** Draft v2.0 — 14 August 2026. **Technology not yet committed.**
+**Status:** Draft v2.1 — 15 August 2026. **Technology not yet committed.**
 **Companion documents:** [requirements](requirements.md) · [user stories](user-stories.md)
 
 > This document sets out the architecture we intend to build, the options we assessed for
@@ -9,7 +9,7 @@
 > §2 to §7 — holds regardless of which option is chosen. The **stack** — §8 — is deliberately
 > still open, pending the skills audit in §9.
 >
-> Options A–E were presented at the [facilitator checkpoint on 5 August 2026](../presentations/2026-08-05-facilitator-checkpoint.html).
+> Options A–E were presented at the [facilitator checkpoint on 5 August 2026](../../presentations/2026-08-05-facilitator-checkpoint.html).
 >
 > Source markers follow [requirements, *Source precedence*](requirements.md): **[G]** the
 > client's costing & pricing guide, **[W]** the client's calculator workbook, **[K]** the
@@ -143,7 +143,7 @@ roll-up, the even-split allocation and the staff-FTE capacity cap against a real
 > a capability reading another's costs, and platform totals summed over the wrong column range.
 > Fixture 2 asserts the **corrected** figures, and the test file records what was corrected and
 > why, so that a future reader does not mistake a deliberate divergence for a bug of ours
-> ([Q11](requirements.md#9-open-questions)).
+> ([Q10](requirements.md#9-open-questions)).
 
 > **Withdrawn fixtures.** Versions up to 1.1 of this document named "$380,000 total, $230,000
 > income, $150,000 to recover, the $3,291 calculated rate, the $15,000 deficit" as the first
@@ -228,10 +228,10 @@ high-security posture.
 | XSS | Framework auto-escaping; justification free text escaped on render and on PDF generation |
 | CSRF | Tokens on all state-changing requests |
 | Mass assignment | Explicit input schemas; the API never binds a request body straight onto a model |
-| Secrets | Environment variables, never committed. Enforced by [`.gitignore`](../.gitignore) |
+| Secrets | Environment variables, never committed. Enforced by [`.gitignore`](../../.gitignore) |
 | Dependencies | Lockfiles committed; automated vulnerability scanning in CI |
 | Audit | Append-only log of every state change **[N10]** |
-| Client material | Stays out of the repository and out of public AI tools until the client answers ([Q6](requirements.md#9-open-questions)) |
+| Client material | Nothing the client gave us is committed without their agreement; the repository carries our own rewrites, attributed. Enforced by [`.gitignore`](../../.gitignore) §1 |
 
 **The threat that actually matters here** is not an external attacker — it is an incorrect or
 undetectably altered rate. The controls that count are server-side validation **[N2, N3]**,
@@ -245,7 +245,7 @@ the audit log.
 - **No calculation in the browser.** Not even a "preview" — it would leak the logic and reintroduce the spreadsheet's defect **[N1]**.
 - **No premature multi-tenancy.** One institution ([A9](requirements.md#8-assumptions)).
 - **No integration with UWA systems.** Explicitly deferred by the client **[requirements §7]**.
-- **No faithful reproduction of the workbook's arithmetic errors.** We match the client's *method*, not its bugs ([Q11](requirements.md#9-open-questions)).
+- **No faithful reproduction of the workbook's arithmetic errors.** We match the client's *method*, not its bugs ([Q10](requirements.md#9-open-questions)).
 
 ## 8. Options assessed
 
@@ -331,7 +331,7 @@ The decision closes at the mid-semester checkpoint, on this evidence:
 
 1. **Skills audit.** Every member self-rates on JavaScript/React, Python, SQL, HTML/CSS, Git and testing. If our JavaScript depth is thin, we take Option C — deciding that in week 5 is cheap; discovering it in week 10 is not.
 2. **Spike.** A one-week timebox: the engine plus one screen, built both ways, by the members who would own each. Whichever produced working, tested code in the timebox wins.
-3. **Go / no-go.** Recorded as an ADR in [`docs/decisions/`](decisions/), naming the choice, the evidence and the fallback trigger.
+3. **Go / no-go.** Recorded as an ADR in [`docs/decisions/`](../decisions/), naming the choice, the evidence and the fallback trigger.
 
 **Fallback trigger, stated in advance:** if B is chosen and has not produced a working
 end-to-end slice by the end of week 8 — sign in → create cycle → enter inputs → see rates →
@@ -354,7 +354,7 @@ fallback credible rather than a comforting sentence in a document.
 ## 10. Delivery approach
 
 **Build order** — the vertical slice, thinnest possible, then widen
-(see [`reference/unit/wipro-mvp-summary.md`](../reference/unit/wipro-mvp-summary.md)):
+(see [`reference/unit/wipro-mvp-summary.md`](../../reference/unit/wipro-mvp-summary.md)):
 
 1. **Engine + golden-file test** — no UI, no database. Proves the arithmetic against the guide's worked example.
 2. **Data model + persistence + identity.** Proves a cycle survives a restart and knows who made it. Authentication lands here, not at the end: `sealed_by` and "last edited by" are MVP acceptance criteria (US-02, US-15, US-16), and retrofitting identity through a data model is more expensive than starting with it.
@@ -393,3 +393,4 @@ unit tests for logic · reviewed by a second member · merged to main · deploye
 | 1.0 | 14 Aug 2026 | First draft. Options A–E as assessed at the 5 August facilitator checkpoint; recommended B, with C as fallback; decision deferred to the skills audit. |
 | 1.1 | 14 Aug 2026 | Recommendation withdrawn. v1.0 recommended B, but its own weighted table scored C higher without the text acknowledging it; §8 and §9 now report the scores plainly and carry B and C forward as equal candidates until the team has met on it. §9 fallback trigger reworded to cover either choice. |
 | 2.0 | 14 Aug 2026 | **Realigned to requirements v2.0.** §3 golden-file fixtures replaced: the withdrawn walkthrough figures ($380,000 / $230,000 / $3,291 / $15,000, none of which appears in any client document) give way to the guide's worked example, $150,000 / $20,000 / $30,000 / 1,000 h → $100.00 / $162.00 / $202.50, plus a second fixture transcribed from a workbook capability. §4 data model reshaped: `RateSet` moves to `Capability`, income becomes a four-value enum with UWA/non-UWA derived, capacity references a configured baseline, and `ReplacementReserve`, `BenchmarkEntry` and `User` are added. New driver and engine rule **R8** against **N14**, the workbook's mismatched-column-range defect. §6 authentication contradiction resolved — F15 is a Must and the MVP authenticates. §10 build order moves identity into step 2 rather than step 6. **AQ1 closed** (per capability); AQ6 opened. §8 now says why Option E is unscored, and the v1.1 change-log entry is rewritten to say what it meant. |
+| 2.1 | 15 Aug 2026 | **Synchronised with requirements v2.2.** §6's client-material control now states the rule directly — nothing the client gave us is committed without their agreement, enforced by [`.gitignore`](../../.gitignore) §1 — rather than deferring to an open question. Q-number references follow the renumbering in [requirements §9](requirements.md#9-open-questions), where old Q7–Q11 became Q6–Q10: the workbook-defect question is now **Q10**. No architectural decision changes. |

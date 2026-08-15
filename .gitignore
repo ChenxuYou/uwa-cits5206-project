@@ -119,7 +119,14 @@ reference/unit/*.pdf
 # half-finished list of everything wrong with the project is not something to
 # hand a client or a facilitator. Findings that matter get actioned in the
 # documents themselves, which is where they belong.
+#
+# These live in docs/internal/, whose README is committed so the folder and its
+# rule are visible. The docs/audit-*.md line below is belt and braces: a review
+# note written in the wrong place is still ignored.
 # -----------------------------------------------------------------------------
+docs/internal/*
+!docs/internal/README.md
+
 docs/audit-*.md
 
 

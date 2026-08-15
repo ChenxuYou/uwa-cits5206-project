@@ -7,7 +7,7 @@
 > Stories trace to the requirement IDs in [requirements §6](requirements.md#6-requirements).
 > Sources follow the precedence set out in [requirements, *Source precedence*](requirements.md):
 > **[G]** the client's costing & pricing guide, **[W]** the client's calculator workbook,
-> **[K]** the [kickoff minutes of 29 July 2026](meetings/2026-07-29-client-kickoff.md).
+> **[K]** the [kickoff minutes of 29 July 2026](../meetings/2026-07-29-client-kickoff.md).
 > Anything not traceable to one of those is marked **(inferred)** and is a candidate for the
 > next client conversation.
 
@@ -378,7 +378,7 @@ the other in the same commit. Estimates are relative points, for sprint planning
 - A deficit is shown clearly as a deficit — the client's own workbook forecasts −$21,372 on one capability and −$16,370 on another at its proposed rates, and that is exactly the kind of thing the client wants surfaced **[W]**.
 - The platform roll-up is summed over every capability, with no column silently excluded **[N14]**.
 - The position updates when a proposed rate changes.
-- A deficit does not block submission; it requires a justification. *(Assumes [Q8](requirements.md#9-open-questions).)*
+- A deficit does not block submission; it requires a justification. *(Assumes [Q7](requirements.md#9-open-questions).)*
 
 ---
 
@@ -587,7 +587,7 @@ where they are enforced, so that "no story" is never mistaken for "no coverage".
 | N8 divide-by-zero | US-08, US-18 | Engine rule R4 |
 | N9 transport and secrets | — | [architecture §6](architecture.md#6-security); `.gitignore` |
 | N10 audit | US-15, US-19 | [architecture §4, §5](architecture.md#4-data-model) |
-| N11 data handling | — | [architecture §6](architecture.md#6-security); [`reference/client/README.md`](../reference/client/README.md) |
+| N11 data handling | — | [architecture §6](architecture.md#6-security); [`reference/client/README.md`](../../reference/client/README.md) |
 | N12 WCAG 2.1 AA | — | Applied across every screen; no single story owns it |
 | N13 golden-file verification | US-09 | [architecture §3, Verification](architecture.md#3-the-calculation-engine); CI gate in [architecture §10](architecture.md#10-delivery-approach) |
 | N14 consistent column contracts | US-03, US-12, US-18 | [architecture §3](architecture.md#3-the-calculation-engine) |

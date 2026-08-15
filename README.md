@@ -24,7 +24,7 @@ formula defects: one capability priced against another capability's capacity, th
 capability costed against another's cost base, and platform totals that sum revenue over six
 columns while summing cost over eight. Together they produce a $2,079 "surplus" that is purely
 an artefact and a revenue total understated by $4,875. Nothing in the spreadsheet flags any of
-it. See [`docs/requirements.md` §2](docs/requirements.md#2-the-problem).
+it. See [`docs/spec/requirements.md` §2](docs/spec/requirements.md#2-the-problem).
 
 The sentence the client used to describe what success looks like:
 
@@ -105,31 +105,42 @@ discussed and deferred; a working website comes first.
 
 ## Open questions
 
-**Seven are open**: four are the client's own, carried from the kickoff (multi-year cycles,
-access control, the record format, and whether AI tools may be used on client material), and
-three we raised ourselves. Three earlier questions — cost allocation, the utilisation split,
-and the billable unit set — were **closed by reading the client's own documents** rather than
-by asking.
+**Six are open**: three are the client's own, carried from the kickoff (multi-year cycles,
+access control and the record format), and three we raised ourselves. Three earlier questions —
+cost allocation, the utilisation split, and the billable unit set — were **closed by reading the
+client's own documents** rather than by asking.
 
 The full list, each with a proposed default so that a non-answer does not block us, is in
-[`docs/requirements.md`](docs/requirements.md#9-open-questions); the originals are in the
+[`docs/spec/requirements.md`](docs/spec/requirements.md#9-open-questions); the originals are in the
 [kickoff minutes](docs/meetings/2026-07-29-client-kickoff.md#open-questions).
 
 One of the three that are ours cannot be closed by us alone — **what licence this repository
-carries** (Q9), because the IP is jointly held. Until it is settled, the repository is
+carries** (Q8), because the IP is jointly held. Until it is settled, the repository is
 all rights reserved and [`NOTICE`](NOTICE) carries the permissions. See
 [Ownership](#ownership).
 
 ## Repository layout
 
+`docs/` is grouped by who a document is for — the specification, how the team runs, and what
+crosses to the client — because those three readerships want different things and were becoming
+hard to tell apart in a single flat folder.
+
 ```
 ├── docs/
+│   ├── spec/               What we are building
+│   │   ├── requirements.md     What the client needs, and what is still open
+│   │   ├── user-stories.md     Personas, epics, stories and acceptance criteria
+│   │   └── architecture.md     System shape, options assessed, and the decision gate
+│   ├── project/            How the team runs
+│   │   ├── team.md             The roster — the only place it lives
+│   │   └── assignment-1-readiness.md   Where we stand against the marking rubric
+│   ├── client/             Everything that crosses to the client
+│   │   ├── 2026-08-15-scope-and-questions.md   The document they receive
+│   │   ├── mvp-agreement.md    Why that scope, traced to requirement IDs
+│   │   └── questions-round-1.md   Why those questions, and our defaults
+│   ├── meetings/           Minutes, one file per meeting
 │   ├── decisions/          Architecture and process decision records
-│   ├── meetings/           Minutes and notes, one file per meeting
-│   ├── requirements.md     What we understand the client needs, and what is still open
-│   ├── user-stories.md     Personas, epics, stories and acceptance criteria
-│   ├── architecture.md     System shape, options assessed, and the decision gate
-│   └── team.md             The roster — the only place it lives
+│   └── internal/           Our own review notes — not committed
 ├── presentations/          Self-contained HTML decks, one file per deck
 │   ├── README.md           How to build, present and export a deck
 │   ├── STYLE-GUIDE.md      Binding style policy — read before building a deck
@@ -156,7 +167,7 @@ single self-contained HTML files for the same reason — see
 ## Where our facts come from
 
 The client gave us a costing & pricing guide, a working calculator, and a recorded walkthrough.
-They do not always agree, so [`docs/requirements.md`](docs/requirements.md) sets a precedence
+They do not always agree, so [`docs/spec/requirements.md`](docs/spec/requirements.md) sets a precedence
 order and every statement is marked with its source:
 
 | Rank | Source | Marker |
@@ -178,7 +189,7 @@ Some files referenced in this repository are **deliberately absent** from it:
 | Client spreadsheets and documents (`reference/client/`) | The client's material, sensitive while in progress, and not ours to publish |
 | Meeting audio and video (`.m4a`, `.mp4`, …) | Identifiable voices |
 | Transcripts of any kind — subtitle formats (`.srt`, `.vtt`, …) and `*-transcript.md` | Verbatim, unreviewed speech, whatever the file extension. Written minutes are the record, and they go in `docs/meetings/` |
-| Internal review notes (`docs/audit-*.md`) | Our own working critique of our own documents. Useful to us; not a deliverable, and not something to hand anyone half-finished |
+| Internal review notes (`docs/internal/`) | Our own working critique of our own documents. Useful to us; not a deliverable, and not something to hand anyone half-finished |
 | Credentials, `.env` files, keys, local databases | The obvious reasons |
 
 **There is no exception for internal meetings.** An earlier version of these rules let a
@@ -209,7 +220,7 @@ the commit, not after it.
 - Every task is a GitHub issue with one named owner and a deadline.
 - Minutes are committed within 24 hours, so members who missed a meeting can be briefed from the repository.
 
-Team roster: [`docs/team.md`](docs/team.md).
+Team roster: [`docs/project/team.md`](docs/project/team.md).
 
 ## Technology
 
@@ -219,7 +230,7 @@ an SPA with a REST API and PostgreSQL; a Django + HTMX monolith; Microsoft Power
 (rejected); and building inside existing UWA systems (deferred at the client's request).
 
 The SPA and the monolith are both still live. On the weighted comparison in
-[`docs/architecture.md`](docs/architecture.md#8-options-assessed) the monolith leads — 143 to
+[`docs/spec/architecture.md`](docs/spec/architecture.md#8-options-assessed) the monolith leads — 143 to
 134 — on criteria that deliberately weight delivery risk; the SPA leads on interaction quality
 and on what the team learns. Nine points apart is too close to settle on paper, so nothing has
 been chosen.
@@ -256,7 +267,7 @@ its own purposes, and reserves portfolio use for the authors.
 This is an interim position, held deliberately. The IP is **jointly** held, and a licence
 granted by one joint owner alone may not be effective — so the team does not purport to grant
 one until the ownership position is confirmed in writing. That is
-[Q9](docs/requirements.md#9-open-questions), and it closes at handover, not before.
+[Q8](docs/spec/requirements.md#9-open-questions), and it closes at handover, not before.
 
 Why an open-source licence would not do the job in the meantime: MIT and Apache-2.0 permit
 sale; **GPL and AGPL also permit sale** — copyleft requires source disclosure, it does not

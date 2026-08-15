@@ -90,7 +90,7 @@ These slides hold themselves to **WCAG 2.1 AA**. A deck projected badly in a bri
 - Red **MUST NOT** exceed roughly **10% of a slide's visual area**.
 - Each slide **SHOULD** have exactly **one red focal point** — a key figure, one highlighted row, one underlined phrase. Not three.
 - A slide **MUST** be either a Paper slide or an Ink slide. Gradients between the two families are prohibited.
-- Ink slides are **reserved** for: the cover, the section dividers — one per member (see [`docs/team.md`](../docs/team.md)) — and the closing slide. This gives the deck a rhythm — the audience learns that a black page means "new speaker".
+- Ink slides are **reserved** for: the cover, the section dividers — one per member (see [`docs/project/team.md`](../docs/project/team.md)) — and the closing slide. This gives the deck a rhythm — the audience learns that a black page means "new speaker".
 - `--surplus` / `--deficit` **MUST** be used for balance figures, never a generic red/green.
 - Colour **MUST NOT** be the sole carrier of meaning. A deficit is red *and* parenthesised *and* labelled.
 
@@ -185,22 +185,22 @@ The slide canvas is a fixed **1280 × 720** box scaled to the viewport (§4.1), 
 
 ### 4.2 Deck structure — mandatory
 
-Every deck **MUST** have exactly **one section per team member**, in the order listed in [`docs/team.md`](../docs/team.md).
+Every deck **MUST** have exactly **one section per team member**, in the order listed in [`docs/project/team.md`](../docs/project/team.md).
 
-**`docs/team.md` is the only place the roster lives.** Names and their order **MUST NOT** be copied into this guide, into `template.html`, or into any tooling. When the roster changes, one file changes.
+**`docs/project/team.md` is the only place the roster lives.** Names and their order **MUST NOT** be copied into this guide, into `template.html`, or into any tooling. When the roster changes, one file changes.
 
 Each section consists of:
 
 - exactly **one section divider** page (Ink, full-bleed, numeral + title + owner), plus
 - **2–3 content pages**.
 
-A deck is therefore `cover → n × (divider + 2–3 pages) → closing`, where *n* is the number of members listed in `docs/team.md` — **3n + 2 to 4n + 2 pages**. Sections **MUST NOT** be added, removed or merged to suit one speaker; if a member has less to say, they take two pages, not zero.
+A deck is therefore `cover → n × (divider + 2–3 pages) → closing`, where *n* is the number of members listed in `docs/project/team.md` — **3n + 2 to 4n + 2 pages**. Sections **MUST NOT** be added, removed or merged to suit one speaker; if a member has less to say, they take two pages, not zero.
 
 Rationale: a one-section-per-member spine makes speaking time visibly equal, matches the assessment's per-member accountability, and lets any deck be rehearsed as self-contained blocks, one per speaker.
 
 **When a member cannot attend.** The spine is fixed; who speaks to it on the day is not. If a member cannot attend, **that section's owner is reassigned to another member.** The team agrees the reassignment — on the spot before the deck is presented, or in the Teams chat ahead of time — and the divider's owner line **MUST** then name **the person actually presenting, and only that person**. A divider that announces someone who is not in the room is worse than no name at all, and a divider naming two people leaves the audience unsure who to look at.
 
-Reassignment changes who owns a section for that delivery. It does not change the deck: a section is **never** deleted, merged into a neighbour or renumbered to cover an absence. *n* always equals the number of members listed in `docs/team.md`, so one person **MAY** carry two or three sections on the day.
+Reassignment changes who owns a section for that delivery. It does not change the deck: a section is **never** deleted, merged into a neighbour or renumbered to cover an absence. *n* always equals the number of members listed in `docs/project/team.md`, so one person **MAY** carry two or three sections on the day.
 
 Record the reassignment — a line in the deck's commit message, or in the minutes of the meeting where it was agreed — so the reason is on file rather than inferred from a name that changed.
 
@@ -302,7 +302,7 @@ presentations/
 
 Run this before every presentation. Every box **MUST** be ticked.
 
-- [ ] Exactly one section per team member — *n* = the number of members in `docs/team.md` — in that file's order, each with a divider and 2–3 content pages
+- [ ] Exactly one section per team member — *n* = the number of members in `docs/project/team.md` — in that file's order, each with a divider and 2–3 content pages
 - [ ] Every divider names one person: the member actually presenting it. Any reassignment agreed by the team and recorded in the commit message or minutes (§4.2)
 - [ ] Ink surface used only for the cover, the section dividers and the closing page
 - [ ] Only the three approved font families; no hard-coded hex outside `:root`

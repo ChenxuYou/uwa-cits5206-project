@@ -25,13 +25,13 @@ the existing Excel tool, and establish what they want built.
 >
 > **The figures in §2 Step 2 and §2 Step 5 are withdrawn for all downstream use.** The
 > authoritative worked example is the client's costing guide, restated in
-> [`requirements.md` §4](../requirements.md#4-the-calculation): $150,000 operating costs,
+> [`requirements.md` §4](../spec/requirements.md#4-the-calculation): $150,000 operating costs,
 > $20,000 UWA in-kind, $30,000 WA Gov, 1,000 hours → **$100.00 / $162.00 / $202.50** per hour.
 >
 > Everything else in these minutes — the method, the three formulas, `k = 1.35`, the seven
 > capabilities, the design requirements, the IP position, ways of working — was confirmed
 > against the client's documents and stands. See
-> [`requirements.md`, *Source precedence*](../requirements.md), which now ranks spoken minutes
+> [`requirements.md`, *Source precedence*](../spec/requirements.md), which now ranks spoken minutes
 > below written client material for exactly this reason.
 
 ---

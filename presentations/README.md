@@ -23,9 +23,9 @@ Three things to set first, all marked in the file:
 
 1. The `<title>` — the tab name and the PDF filename come from it.
 2. The cover title, descriptor and date.
-3. Each section's title and owner. **Owners and their order come from [`docs/team.md`](../docs/team.md)** — that file is the roster's only home, so read it rather than remembering.
+3. Each section's title and owner. **Owners and their order come from [`docs/project/team.md`](../docs/project/team.md)** — that file is the roster's only home, so read it rather than remembering.
 
-The deck has exactly as many sections as there are members in `docs/team.md`, one each. **If someone cannot present on the day, that section's owner is reassigned to another member** — agree it on the spot or in the Teams chat, change the divider to name only the person actually presenting, and note the swap in the commit message. Never delete or merge a section to cover an absence; one person can carry two. Full rule: [`STYLE-GUIDE.md`](STYLE-GUIDE.md) §4.2.
+The deck has exactly as many sections as there are members in `docs/project/team.md`, one each. **If someone cannot present on the day, that section's owner is reassigned to another member** — agree it on the spot or in the Teams chat, change the divider to name only the person actually presenting, and note the swap in the commit message. Never delete or merge a section to cover an absence; one person can carry two. Full rule: [`STYLE-GUIDE.md`](STYLE-GUIDE.md) §4.2.
 
 Page numbers, section indicators and the progress bar are generated at runtime. Add or delete a page and they stay correct on their own; never type a page number by hand.
 
