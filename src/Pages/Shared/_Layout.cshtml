@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] · UWA Research Infrastructure</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="sidebar">
+            <a class="brand" href="/" aria-label="UWA Research Infrastructure home">
+                <span class="brand-mark">UWA</span>
+                <span><strong>Research Infrastructure</strong><small>Costing &amp; Pricing</small></span>
+            </a>
+
+            <nav class="main-nav" aria-label="Main navigation">
+                <a class="nav-item active" href="/">
+                    <span class="nav-icon">⌂</span><span>Overview</span>
+                </a>
+                <a class="nav-item" href="#cycles"><span class="nav-icon">◫</span><span>Costing cycles</span></a>
+                <a class="nav-item" href="#capabilities"><span class="nav-icon">◇</span><span>Capabilities</span></a>
+                <a class="nav-item" href="#reports"><span class="nav-icon">▤</span><span>Reports</span></a>
+            </nav>
+
+            <div class="sidebar-section">
+                <p>Workspace</p>
+                <a class="nav-item" href="#help"><span class="nav-icon">?</span><span>Help &amp; guidance</span></a>
+                <a class="nav-item" href="#settings"><span class="nav-icon">⚙</span><span>Settings</span></a>
+            </div>
+
+            <div class="sidebar-help">
+                <span class="help-icon">?</span>
+                <strong>Need help?</strong>
+                <p>Read the costing guide or contact Research Infrastructure.</p>
+                <a href="#guide">View guide →</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <button class="menu-button" id="menuButton" aria-label="Open navigation">☰</button>
+                <div class="topbar-spacer"></div>
+                <button class="icon-button" aria-label="Notifications">♢<span class="notification-dot"></span></button>
+                <div class="user-chip">
+                    <span class="avatar">PL</span>
+                    <span><strong>Priya Lal</strong><small>Platform custodian</small></span>
+                    <span class="chevron">⌄</span>
+                </div>
+            </header>
+
+            @RenderBody()
+        </main>
+    </div>
+
+    <script>
+        document.getElementById('menuButton')?.addEventListener('click', () => {
+            document.getElementById('sidebar')?.classList.toggle('open');
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

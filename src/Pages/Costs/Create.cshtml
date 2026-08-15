@@ -1,0 +1,213 @@
+@page
+@model CostingTool.Pages.Costs.CreateModel
+@{
+    ViewData["Title"] = "New costing cycle";
+}
+
+<div class="page-wrap cost-entry-page">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Overview</a><span>›</span><span>New costing cycle</span>
+    </nav>
+
+    <section class="cost-page-heading">
+        <div>
+            <span class="eyebrow">NEW COSTING CYCLE</span>
+            <h1>Add project costs</h1>
+            <p>Enter the costs required to deliver this research project. You can add more than one item in each category.</p>
+        </div>
+        <span class="autosave"><i></i> Draft saved</span>
+    </section>
+
+    <div class="cost-layout">
+        <aside class="cost-steps" aria-label="Costing cycle steps">
+            <div class="cost-step active"><span>1</span><div><strong>Project details</strong><small>Project and costing period</small></div></div>
+            <div class="cost-step"><span>2</span><div><strong>Add costs</strong><small>Personnel and other costs</small></div></div>
+            <div class="cost-step"><span>3</span><div><strong>Review</strong><small>Check totals and submit</small></div></div>
+            <div class="entry-total-card">
+                <small>Current project total</small>
+                <strong id="projectTotal">@((Model.CurrentCycle?.CostItems.SelectMany(x => x.YearAmounts).Sum(x => x.Amount) ?? 0).ToString("C"))</strong>
+                <span>@(Model.CurrentCycle?.CostItems.Count ?? 0) cost items added</span>
+            </div>
+        </aside>
+
+        <form method="post" class="cost-form-card">
+            <input type="hidden" asp-for="CycleId">
+            @if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
+            {
+                <div class="form-success">✓ @Model.SuccessMessage</div>
+            }
+            <div asp-validation-summary="All" class="form-errors"></div>
+            <section class="form-section">
+                <div class="section-title"><span>1</span><div><h2>Project details</h2><p>Tell us which project this costing belongs to.</p></div></div>
+                <div class="form-grid two-columns">
+                    <label class="field"><span>Project name <b>*</b></span><input asp-for="ProjectName" placeholder="e.g. Advanced Microscopy Research Project" required></label>
+                    <label class="field"><span>Project reference</span><input asp-for="ProjectReference" placeholder="e.g. PRJ-2026-001"></label>
+                    <label class="field"><span>Start year <b>*</b></span><select asp-for="StartYear" required><option>2026</option><option>2027</option><option>2028</option></select></label>
+                    <label class="field"><span>Project duration <b>*</b></span><select asp-for="ProjectDuration" id="projectDuration" required><option value="1">1 year</option><option value="2">2 years</option><option value="3">3 years</option><option value="4">4 years</option><option value="5">5 years</option></select></label>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <div class="section-title"><span>2</span><div><h2>Add a cost item</h2><p>Select a category. The required fields will update automatically.</p></div></div>
+
+                <label class="field full-width"><span>Cost category <b>*</b></span>
+                    <select asp-for="CostCategory" id="costCategory">
+                        <option value="">Select a cost category</option>
+                        <option value="personnel">Personnel (e.g. Stipends, Consultants)</option>
+                        <option value="equipment">Equipment</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="travel">Travel</option>
+                        <option value="animal">Animal Cost</option>
+                        <option value="other">Other</option>
+                    </select>
+                </label>
+
+                <div id="emptyCategory" class="category-placeholder">
+                    <span>＋</span><strong>Select a cost category to continue</strong><p>We’ll only ask for information relevant to that type of cost.</p>
+                </div>
+
+                <div id="personnelFields" class="conditional-form" hidden>
+                    <div class="conditional-heading"><div class="category-badge">PE</div><div><h3>Personnel details</h3><p>Salary and employment information for this person.</p></div></div>
+
+                    <div class="form-grid two-columns">
+                        <label class="field full-span"><span>Name <b>*</b></span><input asp-for="PersonnelName" placeholder="Enter the person's name"></label>
+
+                        <label class="field"><span>Funding Type <b>*</b></span>
+                            <select asp-for="FundingType" id="fundingType">
+                                <option value="">Select funding type</option>
+                                <option value="arc-fellow">ARC Fellow</option>
+                                <option value="arc-funded">ARC Funded Position</option>
+                                <option value="uwa-funded">Chief Investigator – UWA funded</option>
+                            </select>
+                        </label>
+
+                        <label class="field" id="fellowshipField" hidden><span>Fellowship Type <b>*</b></span>
+                            <select asp-for="FellowshipType" id="fellowshipType">
+                                <option value="">Select fellowship type</option>
+                                <option value="DECRA">DECRA</option>
+                                <option value="DIA">DIA</option>
+                                <option value="FT">FT</option>
+                            </select>
+                            <small>Required for ARC Fellows.</small>
+                        </label>
+
+                        <label class="field"><span>Step/Option <b>*</b></span><select asp-for="StepOption"><option>100% option</option><option>75% option</option><option>50% option</option></select></label>
+                        <label class="field"><span>Work Years <b>*</b></span><select asp-for="WorkYears"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+                        <label class="field"><span>Employment Type <b>*</b></span><select asp-for="EmploymentType"><option>Ongoing</option><option>Fixed Term</option><option>Casual</option></select></label>
+                        <label class="field"><span>Percent Worked <b>*</b></span><select asp-for="PercentWorked"><option value="100">100%</option><option value="80">80%</option><option value="75">75%</option><option value="60">60%</option><option value="50">50%</option><option value="40">40%</option><option value="20">20%</option></select></label>
+                        <label class="field"><span>Superannuation <b>*</b></span><select asp-for="SuperannuationPercent"><option value="17">17%</option><option value="12">12%</option><option value="11.5">11.5%</option><option value="0">0%</option></select></label>
+                        <label class="field"><span>Staff Type <b>*</b></span><select asp-for="StaffType"><option>Academic</option><option>Professional</option></select></label>
+                        <label class="field"><span>Salary Scale <b>*</b></span><select asp-for="SalaryScale"><option>LVLA</option><option>LVLB</option><option>LVLC</option><option>LVLD</option><option>LVLE</option></select></label>
+                        <label class="field"><span>Salary Step <b>*</b></span><select asp-for="SalaryStep"><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option></select></label>
+                        <label class="field"><span>School Type <b>*</b></span><select asp-for="SchoolType"><option>Low cost school</option><option>High cost school</option></select></label>
+                        <label class="field readonly-field"><span>Base Salary</span><input asp-for="BaseSalary" id="baseSalary" readonly><small>Calculated from salary scale and step.</small></label>
+                    </div>
+
+                    <div class="yearly-costs">
+                        <div><h3>Cost by project year</h3><p>Enter the personnel cost allocated to each year.</p></div>
+                        <div id="yearFields" class="year-grid"></div>
+                    </div>
+
+                    <label class="field full-width"><span>Notes</span><textarea asp-for="Notes" rows="3" placeholder="Optional assumptions or supporting information"></textarea></label>
+                </div>
+
+                <div id="genericFields" class="conditional-form" hidden>
+                    <div class="conditional-heading"><div class="category-badge neutral">$</div><div><h3 id="genericHeading">Cost details</h3><p>Add a description and the expected amount for each project year.</p></div></div>
+                    <div class="form-grid two-columns">
+                        <label class="field full-span"><span>Description <b>*</b></span><input asp-for="Description" placeholder="Describe this cost item"></label>
+                        <label class="field full-span"><span>Supplier or source</span><input asp-for="Supplier" placeholder="Optional"></label>
+                    </div>
+                    <div class="yearly-costs"><div><h3>Cost by project year</h3><p>Enter the expected amount for each year.</p></div><div id="genericYearFields" class="year-grid"></div></div>
+                    <label class="field full-width"><span>Notes</span><textarea asp-for="Notes" rows="3" placeholder="Optional assumptions or supporting information"></textarea></label>
+                </div>
+            </section>
+
+            <div class="form-actions">
+                <a class="secondary-action" href="/">Cancel</a>
+                <div><button class="secondary-action" type="submit" asp-page-handler="SaveDraft">Save draft</button><button class="primary-button" id="addCostButton" type="submit" asp-page-handler="AddCost" disabled>Add cost item <span>→</span></button></div>
+            </div>
+            @if (Model.CurrentCycle?.CostItems.Count > 0)
+            {
+                <section class="saved-items">
+                    <div class="section-title"><span>✓</span><div><h2>Added cost items</h2><p>Saved in this draft costing cycle.</p></div></div>
+                    @foreach (var item in Model.CurrentCycle.CostItems.OrderByDescending(x => x.Id))
+                    {
+                        <div class="saved-item-row">
+                            <div><strong>@(item.PersonnelName ?? item.Description)</strong><small>@item.Category · @item.YearAmounts.Sum(x => x.Amount).ToString("C")</small></div>
+                            <span class="status-pill draft">Saved</span>
+                        </div>
+                    }
+                    <div class="review-cta">
+                        <div><strong>Finished adding costs?</strong><small>Review the complete project breakdown before submitting.</small></div>
+                        <a class="primary-button" asp-page="/Costs/Review" asp-route-cycleId="@Model.CurrentCycle.Id">Review &amp; submit <span>→</span></a>
+                    </div>
+                </section>
+            }
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const category = document.getElementById('costCategory');
+    const emptyCategory = document.getElementById('emptyCategory');
+    const personnelFields = document.getElementById('personnelFields');
+    const genericFields = document.getElementById('genericFields');
+    const genericHeading = document.getElementById('genericHeading');
+    const fundingType = document.getElementById('fundingType');
+    const fellowshipField = document.getElementById('fellowshipField');
+    const fellowshipType = document.getElementById('fellowshipType');
+    const duration = document.getElementById('projectDuration');
+    const addButton = document.getElementById('addCostButton');
+    const savedPersonnelAmounts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.PersonnelYearAmounts));
+    const savedGenericAmounts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.GenericYearAmounts));
+
+    const categoryNames = { equipment: 'Equipment details', maintenance: 'Maintenance details', travel: 'Travel details', animal: 'Animal cost details', other: 'Other cost details' };
+
+    function setSectionEnabled(section, enabled) {
+        section.querySelectorAll('input, select, textarea').forEach(control => control.disabled = !enabled);
+    }
+
+    function renderYearFields(containerId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        for (let year = 1; year <= Number(duration.value); year++) {
+            const label = document.createElement('label');
+            label.className = 'field money-field';
+            const propertyName = containerId === 'yearFields' ? 'PersonnelYearAmounts' : 'GenericYearAmounts';
+            const savedAmounts = containerId === 'yearFields' ? savedPersonnelAmounts : savedGenericAmounts;
+            const amount = savedAmounts[year - 1] ?? 0;
+            label.innerHTML = `<span>Year ${year}</span><div><b>$</b><input name="${propertyName}[${year - 1}]" type="number" min="0" step="0.01" value="${amount}" aria-label="Year ${year} amount"></div>`;
+            container.appendChild(label);
+        }
+    }
+
+    function updateCategory() {
+        const value = category.value;
+        emptyCategory.hidden = Boolean(value);
+        personnelFields.hidden = value !== 'personnel';
+        genericFields.hidden = !value || value === 'personnel';
+        setSectionEnabled(personnelFields, value === 'personnel');
+        setSectionEnabled(genericFields, Boolean(value) && value !== 'personnel');
+        addButton.disabled = !value;
+        if (value === 'personnel') renderYearFields('yearFields');
+        if (value && value !== 'personnel') {
+            genericHeading.textContent = categoryNames[value];
+            renderYearFields('genericYearFields');
+        }
+    }
+
+    function updateFellowship() {
+        const isArcFellow = fundingType.value === 'arc-fellow';
+        fellowshipField.hidden = !isArcFellow;
+        fellowshipType.required = isArcFellow;
+        if (!isArcFellow) fellowshipType.value = '';
+    }
+
+    category.addEventListener('change', updateCategory);
+    fundingType.addEventListener('change', updateFellowship);
+    duration.addEventListener('change', updateCategory);
+    updateCategory();
+    updateFellowship();
+</script>
+}

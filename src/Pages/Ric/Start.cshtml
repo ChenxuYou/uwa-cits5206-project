@@ -1,0 +1,19 @@
+@page
+@model CostingTool.Pages.Ric.StartModel
+@{ ViewData["Title"] = "Start RIC cycle"; }
+<div class="page-wrap ric-page">
+    <nav class="breadcrumb"><a href="/">Overview</a><span>›</span><span>New RIC costing cycle</span></nav>
+    <partial name="_RicSteps" model='new CostingTool.Pages.Ric.RicStepViewModel(1, null)' />
+    <form method="post" class="ric-card narrow-card">
+        <div class="ric-heading"><span>01</span><div><h1>Platform and capabilities</h1><p>Define the infrastructure being costed and the unit users are charged in.</p></div></div>
+        <div asp-validation-summary="All" class="form-errors"></div>
+        <div class="form-grid two-columns">
+            <label class="field full-span"><span>Platform name <b>*</b></span><input asp-for="PlatformName" placeholder="e.g. Cytometry"></label>
+            <label class="field"><span>Pricing period starts <b>*</b></span><input asp-for="StartYear" type="number" min="2020" max="2200"></label>
+            <label class="field"><span>Pricing period ends <b>*</b></span><input asp-for="EndYear" type="number" min="2020" max="2200"></label>
+            <label class="field full-span"><span>Billable unit <b>*</b></span><select asp-for="BillableUnit"><option>Hours</option><option>Days</option><option>Samples</option></select><small>This unit must stay consistent across capacity, utilisation and rates.</small></label>
+            <label class="field full-span"><span>Capabilities <b>*</b></span><textarea asp-for="CapabilityNames" rows="5" placeholder="Enter one capability per line, e.g.&#10;Flow Cytometry&#10;Cell Sorting&#10;Analysis / Consulting"></textarea><small>You can also separate names with commas.</small></label>
+        </div>
+        <div class="wizard-actions"><a href="/" class="secondary-action">Cancel</a><button class="primary-button" type="submit">Continue to costs →</button></div>
+    </form>
+</div>
