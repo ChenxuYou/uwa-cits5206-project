@@ -1,14 +1,14 @@
 # Assignment 1 — Readiness
 
 **Deliverable:** project specification and plan, a single PDF, submitted by one member
-**Due:** Tuesday 25 August 2026, 11:59 pm — **eleven days from today (Friday 14 August)**
+**Due:** Tuesday 25 August 2026, 11:59 pm — **ten days from today (Saturday 15 August)**
 **Worth:** 15 points across four criteria
-**Brief and rubric:** [`reference/unit/`](../reference/unit/)
+**Brief and rubric:** [`reference/unit/`](../../reference/unit/)
 
 > **The deadline moved.** We asked the unit coordinator for an extension and he granted it by
 > email on **14 August 2026**: the due date is now **Tuesday 25 August**, one week later than
 > the 18 August in the brief. The email is the only record of that, so it belongs in the team's
-> Teams area. The brief itself is [annotated](../reference/unit/assignment1-instructions.md)
+> Teams area. The brief itself is [annotated](../../reference/unit/assignment1-instructions.md)
 > rather than edited, because it is a transcription of the unit's document and not ours to
 > rewrite.
 >
@@ -66,14 +66,14 @@ taste.
 
 ### What we already have
 
-- The client's problem statement in their own words, with the failure modes elaborated ([`requirements.md` §2](requirements.md#2-the-problem)).
+- The client's problem statement in their own words, with the failure modes elaborated ([`requirements.md` §2](../spec/requirements.md#2-the-problem)).
 - Documented defects in the live workbook, with cell references and dollar effects: a **$2,079.08** platform "surplus" that is purely an artefact, and platform revenue understated by **$4,874.74**.
-- The MVP defined twice over and reconciled: [`requirements.md` §7](requirements.md#7-scope) as the scope baseline, [`user-stories.md` §5](user-stories.md#5-mvp-definition) as eighteen Must stories at 110 points, and a stated demonstration that proves it works.
+- The MVP defined twice over and reconciled: [`requirements.md` §7](../spec/requirements.md#7-scope) as the scope baseline, [`user-stories.md` §5](../spec/user-stories.md#5-mvp-definition) as eighteen Must stories at 110 points, and a stated demonstration that proves it works.
 - The client's success sentence — *"why does it cost $50 an hour?"* — which gives the reader the product's purpose in twenty seconds.
 
 ### What is missing
 
-- **The defect evidence needs correcting before it is published.** [`audit-2026-08-14.md`](audit-2026-08-14.md) §B found that several cell citations in §2 are wrong or incomplete: `I29` is misclassified, `I41`/`I42` carry the same defect and are undocumented, `C24` is not `SUM(D:K)`, "one column too far" describes three different faults as one, and there are at least six defects rather than three. **A wrong cell reference in a document whose entire premise is source fidelity is the single most damaging thing we could submit.** Fix §2 before it goes in the PDF.
+- **The defect evidence needs correcting before it is published.** [`audit-2026-08-14.md`](../internal/audit-2026-08-14.md) §B found that several cell citations in §2 are wrong or incomplete: `I29` is misclassified, `I41`/`I42` carry the same defect and are undocumented, `C24` is not `SUM(D:K)`, "one column too far" describes three different faults as one, and there are at least six defects rather than three. **A wrong cell reference in a document whose entire premise is source fidelity is the single most damaging thing we could submit.** Fix §2 before it goes in the PDF.
 - **Defect 4 should be promoted into the submission.** The indirect-cost total omits the Office floor-area row entirely — a cost the user is asked to enter and the spreadsheet then never counts. That is a better story than a mis-typed reference, and it is the cleanest possible illustration of why N14 exists.
 - The workbook has **eight** sheets, not three. "Three process sheets over a background data layer" is both accurate and more useful, because that data layer is an input source the MVP has no story for.
 
@@ -86,24 +86,26 @@ stakeholders, **and** that the client *has approved* the MVP and other deliverab
 
 ### What we already have
 
-- A recorded 34-minute client walkthrough, written up as [minutes](meetings/2026-07-29-client-kickoff.md) with decisions D1–D6 and actions A1–A4.
+- A recorded 34-minute client walkthrough, written up as [minutes](../meetings/2026-07-29-client-kickoff.md) with decisions D1–D6 and actions A1–A4.
 - A working relationship with agreed terms: Wednesdays, a shared Teams chat, batched questions, support tapering (kickoff §10).
 - Requirements rewritten **against the client's own documents**, with a stated source-precedence order and every claim marked **[G]**, **[W]** or **[K]**.
-- Seven open questions, each with a proposed default so a non-answer does not block us ([`requirements.md` §9](requirements.md#9-open-questions)).
+- Six open questions, each with a proposed default so a non-answer does not block us ([`requirements.md` §9](../spec/requirements.md#9-open-questions)). **Five go to the client** in [round 1](../client/questions-round-1.md); Q8, the repository licence, is ours and closes at handover.
+- Two client-facing documents drafted and reconciled against the spec: the [scope statement and question list](../client/2026-08-15-scope-and-questions.md) the client receives, and the [reasoning behind it](../client/mvp-agreement.md) traced promise by promise to a numbered requirement.
 
 ### The one thing that separates 2 from 4
 
 **The client has not approved the MVP.** The rubric's Exceptional band says so in as many words.
-Requirements v2.0 is marked *"not yet reviewed by the client"* on its own front page.
+Requirements v2.1 is marked *"not yet reviewed by the client"* on its own front page, and both
+client-facing documents are marked *"drafted, not yet sent"*.
 
 **The extension changes this from a lost cause to a winnable one.** Under the old deadline a
 request sent on Friday would almost certainly not have come back by Tuesday, and the honest
-plan was to submit with sign-off outstanding. With eleven days, a written answer is realistic —
-which is why the client step is the **one item below that does not move**.
+plan was to submit with sign-off outstanding. With ten days, a written answer is realistic —
+which is why the client step is the **one item below that still does not move**.
 
-1. **Send the consolidated question list and a one-page MVP statement to the client today, Friday 14 August**, asking for a written yes/no on the MVP scope. Sending it a week later would spend the extension on nothing.
-2. **Follow up on Wednesday 19 August** if there is no reply. Wednesdays are the client's stated preference, and it leaves six days to absorb whatever comes back.
-3. **If it arrives, say so and quote it.** If it does not, **say plainly in the PDF that sign-off was requested on 14 August, chased on 19 August, and is outstanding.** A team that knows exactly what it is waiting for reads better than one that blurs it. The 5 August deck already takes this line — *"The client's sign-off on the MVP is outstanding, not assumed"* — and we should not retreat from it.
+1. **Send [`2026-08-15-scope-and-questions.md`](../client/2026-08-15-scope-and-questions.md) to the client today, Saturday 15 August.** One document: the scope statement, the two confirmations, then the five questions. It asks for a written yes or no **by Tuesday 18 August**. It was planned for Friday 14 August and slipped a day — that is one day of the extension spent on nothing, and it is the last one we can afford to spend that way.
+2. **Chase on Wednesday 19 August** if there is no reply: the day *after* the date we asked for rather than on it, and Wednesdays are the client's stated preference. It still leaves six days to absorb whatever comes back.
+3. **If it arrives, say so and quote it.** If it does not, **say plainly in the PDF that sign-off was requested on 15 August with a reply asked for by 18 August, chased on 19 August, and is outstanding.** A team that knows exactly what it is waiting for reads better than one that blurs it. The 5 August deck already takes this line — *"The client's sign-off on the MVP is outstanding, not assumed"* — and we should not retreat from it.
 
 ### The evidence gap that will be noticed
 
@@ -114,16 +116,8 @@ two stand-ups plus the 5 August facilitator checkpoint, and none of them has min
 This is the cheapest high-value work available to us. Writing up 24 July and 5 August costs an
 hour each and repairs criterion 2 *and* criterion 3 at once. The 5 August record is doubly
 load-bearing: the checkpoint deck's own header carries a `TODO` that depends on it, and
-[`STYLE-GUIDE.md`](../presentations/STYLE-GUIDE.md) §9 has a checklist item that cannot be
+[`STYLE-GUIDE.md`](../../presentations/STYLE-GUIDE.md) §9 has a checklist item that cannot be
 ticked without it.
-
-### One more, quietly important
-
-**Q6 — may AI tools be used on client material? — was asked on 29 July and is still
-unanswered.** Our own default is *no*, recorded in
-[`reference/client/README.md`](../reference/client/README.md). Requirements v2.0 was rewritten
-against the client's documents in the meantime. Whatever the answer, this question should be at
-the front of the batched list, and we should be able to say cleanly how that work was done.
 
 ---
 
@@ -139,9 +133,9 @@ what is missing is artefacts rather than thinking.
 ### What we already have
 
 - A [team roster](team.md) with a single home, and a documented member departure with the work redistributed.
-- A [build order](architecture.md#10-delivery-approach) — engine first, then identity, then forms, then rates, then seal and export — with a stated rationale for the order.
-- A [definition of done](architecture.md#10-delivery-approach) per story.
-- A [decision gate](architecture.md#9-decision-gate) with a named fallback trigger at end of week 8.
+- A [build order](../spec/architecture.md#10-delivery-approach) — engine first, then identity, then forms, then rates, then seal and export — with a stated rationale for the order.
+- A [definition of done](../spec/architecture.md#10-delivery-approach) per story.
+- A [decision gate](../spec/architecture.md#9-decision-gate) with a named fallback trigger at end of week 8.
 - Eighteen estimated stories, 110 points, ready to be sequenced.
 
 ### What does not exist
@@ -162,7 +156,7 @@ has learned something about the whole submission.
 
 ### Minimum credible fix, in priority order
 
-1. `docs/plan.md` — a milestone table from now to end of semester, with dates, and each of the 110 points assigned to a named member for the next two sprints.
+1. `docs/project/plan.md` — a milestone table from now to end of semester, with dates, and each of the 110 points assigned to a named member for the next two sprints.
 2. GitHub Projects board, populated from the eighteen Must stories, one issue each, owner and due date on every one. Link it from `README.md`.
 3. `.github/workflows/ci.yml` — even a lint-and-test stub against an empty `src/`. It makes "CI from the first commit of code" a fact rather than an intention, and it is fifteen minutes' work.
 4. Minutes for 24 July and 5 August.
@@ -177,7 +171,7 @@ including cybersecurity, identified and planned for.**
 
 ### Technology — strong, with one thing to say better
 
-[`architecture.md` §8](architecture.md#8-options-assessed) assesses five options against six
+[`architecture.md` §8](../spec/architecture.md#8-options-assessed) assesses five options against six
 weighted drivers and reports the scores plainly. It is the best-evidenced part of the project,
 and the v1.1 change-log entry — recommendation withdrawn because the document's own table
 contradicted its text — is itself creditable.
@@ -217,7 +211,7 @@ explicitly. What we have is scattered: `architecture.md` §6 is a competent cont
 `requirements.md` §10 lists constraints, and the fallback trigger in §9 is risk management
 without the label. None of it is a register, and a marker looking for one will not find one.
 
-`docs/risks.md`, one table, likelihood × impact × mitigation × owner × trigger. The material
+`docs/project/risks.md`, one table, likelihood × impact × mitigation × owner × trigger. The material
 already exists — it needs collecting, not inventing:
 
 | Risk | Where it already lives |
@@ -231,11 +225,17 @@ already exists — it needs collecting, not inventing:
 | **Cybersecurity:** UWA-internal, FOI-subject data; injection, XSS, CSRF, mass assignment | `architecture.md` §6 — controls exist, risk unstated |
 | **Cybersecurity:** an incorrect or undetectably altered rate — the threat that actually matters here | `architecture.md` §6, already identified as the real threat |
 | IP: an MIT grant published in an early commit | Resolved; worth stating *as a risk we found and closed*, because that is exactly the evidence the criterion wants |
-| Client material handling and the unanswered AI question | `reference/client/README.md`, Q6 |
+| IP: a sign-off document that asked the client to confirm the **wrong** ownership position | Resolved before sending — [`NOTICE`](../../NOTICE) §2, [`mvp-agreement.md`](../client/mvp-agreement.md) change log 1.1 |
+| Client material committed without the client's agreement | `reference/client/README.md`, `.gitignore` §1 — mitigation exists, risk unstated |
 
-That last-but-one row is worth dwelling on. A risk identified, assessed, and closed by rewriting
+**Those two IP rows are worth dwelling on.** A risk identified, assessed and closed by rewriting
 history is stronger evidence of risk management than any hypothetical, and we have the commit
-trail to prove it.
+trail to prove it. The second is better still, because it was caught *in review of our own
+outbound document*: the ownership confirmation asked the client to agree that the overarching IP
+was UWA's alone, when our own `NOTICE` holds it jointly — and `NOTICE` §1 makes the client's written
+confirmation the very thing that closes the licensing question. One sentence in a document we
+were about to send would have signed away the position it was written to protect. It never left
+the building.
 
 ---
 
@@ -244,31 +244,33 @@ trail to prove it.
 Ordered by marks-per-hour. Items 1–4 are the difference between a competent submission and an
 exceptional one.
 
-**Two items keep their original dates.** The client request (1) does not move, because the whole
+**Two items keep their original dates, or as near as they can.** The client request (1) has
+already slipped a day, from Friday 14 to Saturday 15 August, and does not slip again — the whole
 value of the extension is the time it buys for a reply. The skills audit (3) does not move,
-because tomorrow's meeting decides to run it *in the room* — deferring it to 22 August would
-leave the technology decision open for another week for no reason. Everything else shifts one
-week, landing on the same weekday.
+because today's meeting decides to run it *in the room* — deferring it to 22 August would leave
+the technology decision open for another week for no reason. Everything else shifts one week,
+landing on the same weekday.
 
 | # | Task | Fixes | Owner | By |
 | --- | --- | --- | --- | --- |
-| 1 | Send the client the consolidated question list **and a one-page MVP statement, requesting written sign-off**. Put Q6 first | Crit 2 | | **Fri 14 Aug — unmoved** |
+| 1 | Send the client [`2026-08-15-scope-and-questions.md`](../client/2026-08-15-scope-and-questions.md) — scope statement, two confirmations, five questions, **requesting written sign-off by Tue 18 Aug** | Crit 2 | | **Sat 15 Aug — slipped one day from Fri 14** |
 | 2 | Assign every owner in this table; agree the §4.2 deviation on the planning deck | All | | Sat 15 Aug |
 | 3 | Skills audit — five rows, six skills, gaps and how each is addressed. Run it in the meeting | Crit 4 | | **Sat 15 Aug — unmoved** |
-| 4 | Chase the client if there is no reply — Wednesday is their stated preference | Crit 2 | | Wed 19 Aug |
-| 5 | `docs/risks.md` — risk register, cybersecurity rows included | Crit 4 | | Sat 22 Aug |
-| 6 | `docs/plan.md` — milestones with dates; 110 points assigned to named members | Crit 3 | | Sat 22 Aug |
-| 7 | Correct `requirements.md` §2 cell evidence per [audit §B](audit-2026-08-14.md); promote defect 4 | Crit 1 | | Sun 23 Aug |
+| — | *(Date we asked the client to reply by)* | Crit 2 | — | *Tue 18 Aug* |
+| 4 | Chase the client if there is no reply — the day after the date we asked for, and Wednesday is their stated preference | Crit 2 | | Wed 19 Aug |
+| 5 | `docs/project/risks.md` — risk register, cybersecurity rows included | Crit 4 | | Sat 22 Aug |
+| 6 | `docs/project/plan.md` — milestones with dates; 110 points assigned to named members | Crit 3 | | Sat 22 Aug |
+| 7 | Correct `requirements.md` §2 cell evidence per [audit §B](../internal/audit-2026-08-14.md); promote defect 4 | Crit 1 | | Sun 23 Aug |
 | 8 | Minutes for 24 July and 5 August | Crit 2, 3 | | Sun 23 Aug |
 | 9 | GitHub Projects board from the eighteen Must stories; link from `README.md` | Crit 3 | | Sun 23 Aug |
 | 10 | `.github/workflows/ci.yml` stub | Crit 3 | | Sun 23 Aug |
 | 11 | Add the sensitivity decomposition to `architecture.md` §8 | Crit 4 | | Sun 23 Aug |
-| 12 | Annotate or update the [5 August deck](../presentations/2026-08-05-facilitator-checkpoint.html) — it still teaches the superseded two-income-line model and cites a transcript we do not commit | Crit 1, 2 | | Mon 24 Aug |
-| 13 | Narrow the kickoff annotation to what it can support ([audit §A2](audit-2026-08-14.md)) | Crit 1 | | Mon 24 Aug |
+| 12 | Annotate or update the [5 August deck](../../presentations/2026-08-05-facilitator-checkpoint.html) — it still teaches the superseded two-income-line model and cites a transcript we do not commit | Crit 1, 2 | | Mon 24 Aug |
+| 13 | Narrow the kickoff annotation to what it can support ([audit §A2](../internal/audit-2026-08-14.md)) | Crit 1 | | Mon 24 Aug |
 | 14 | Write the PDF | All | | Mon 24 Aug |
 | 15 | **Confirm the facilitator has access to the repository and the Teams area.** Then submit | Mechanics | | Tue 25 Aug |
 
-Owners are deliberately blank. Fill them in at tomorrow's meeting — an unassigned task list is
+Owners are deliberately blank. Fill them in at today's meeting — an unassigned task list is
 the exact failure criterion 3 marks down, and this table is going in the submission.
 
 **One trap worth naming.** An extension usually gets spent, not saved. Items 5–11 were sized for
@@ -286,6 +288,8 @@ that can be wrong. Requirements v2.0 withdrew a set of figures that had been tra
 recording and were heading for a test fixture, because a source-precedence rule caught them. The
 architecture document withdrew its own recommendation when its table contradicted its text. Two
 internal audits are on file. An MIT licence published by accident was found and rewritten out.
+The client sign-off document was reviewed before sending and four faults came out of it, one of
+them a sentence that would have had the client confirm the wrong owner of the project's IP.
 None of that is decoration on a capstone about *defensible numbers* — it is the same discipline
 the product exists to enforce, applied to ourselves, and it is the most persuasive thing we can
 put in front of a facilitator.
@@ -294,15 +298,16 @@ put in front of a facilitator.
 board, no CI and one committed meeting record. The thinking is well ahead of the artefacts.
 Criterion 3 marks artefacts.
 
-**The eleven days are more than enough** — every gap above is hours of work, not days, and most
-of the content already exists somewhere in this repository and needs collecting rather than
-inventing. What it needs is the owners filled in tomorrow.
+**The ten days are still more than enough** — every gap above is hours of work, not days, and
+most of the content already exists somewhere in this repository and needs collecting rather than
+inventing. What it needs is the owners filled in today.
 
 **And the extension buys one thing four days could not.** Criterion 2's top band is worth two
 marks and turns on a single sentence: *the client has approved the MVP*. That was out of reach
-on Friday and is in reach now — but only if the request goes out today and gets chased on
-Wednesday. If we let the extra week drift, we will arrive at 25 August in exactly the position
-we were in on 18 August, having gained nothing but a later date.
+on Friday and is in reach now — but only if the document goes out **today, 15 August**, with the
+18th named in it and the chase on the 19th. It has already slipped once. If we let the rest of
+the extra week drift the same way, we will arrive at 25 August in exactly the position we were
+in on 18 August, having gained nothing but a later date.
 
 ---
 
@@ -310,5 +315,7 @@ we were in on 18 August, having gained nothing but a later date.
 
 | Version | Date | Change |
 | --- | --- | --- |
-| 1.0 | 14 Aug 2026 | First version, written against the rubric in [`reference/unit/assignment1-rubric.md`](../reference/unit/assignment1-rubric.md) and the repository as it stands on 14 August. |
+| 1.0 | 14 Aug 2026 | First version, written against the rubric in [`reference/unit/assignment1-rubric.md`](../../reference/unit/assignment1-rubric.md) and the repository as it stands on 14 August. |
 | 1.1 | 14 Aug 2026 | **Deadline extended to Tuesday 25 August 2026**, requested by us and granted by the unit coordinator by email on 14 August. §6 rescheduled: the client request (item 1) and the skills audit (item 3) keep their original dates, a client chase on 19 August is added, and everything else shifts one week onto the same weekday. §3 rewritten — written client sign-off moves from unrealistic to achievable, which is where the extension earns its keep. The unit brief is annotated rather than edited. |
+| 1.3 | 15 Aug 2026 | **Aligned with the reduced question set.** The batch put to the client is **five questions**, not six, and our own open list is **six**, not seven, after the question about our working method was withdrawn — it settled nothing in the product. Q-numbers follow [`requirements.md` §9](../spec/requirements.md#9-open-questions) v2.2, in which old Q7–Q11 became Q6–Q10, so the repository licence question is now **Q8**. The risk table's client-material row now states the risk it always meant: client material committed without the client's agreement, mitigated by [`.gitignore`](../../.gitignore) §1 and [`reference/client/README.md`](../../reference/client/README.md). |
+| 1.2 | 15 Aug 2026 | **Re-dated to 15 August and aligned with the client documents.** Item 1 did not go out on the 14th: the slip is recorded in §3 and §6 rather than absorbed, because this table is going in the submission. The client timeline is now three dates, not two — sent **15 Aug**, reply asked for **Tue 18 Aug**, chase **Wed 19 Aug** — matching [`2026-08-15-scope-and-questions.md`](../client/2026-08-15-scope-and-questions.md) and [`mvp-agreement.md`](../client/mvp-agreement.md) §C; the chase previously fell on the deadline itself. §3 now names the outbound document and says six of the seven open questions travel to the client. Requirements reference updated to v2.1. §5 gains a second IP risk — the sign-off document's ownership sentence, found in review and corrected before sending — and §7 leads with it, because a fault caught in our own outbound document is exactly the evidence criterion 4 asks for. No change to any deadline, owner or deliverable. |
