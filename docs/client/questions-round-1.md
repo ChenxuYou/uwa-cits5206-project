@@ -3,7 +3,7 @@
 **Project:** Research Infrastructure Costing & Pricing Tool
 **Client:** UWA Research Infrastructure
 **Prepared by:** Wenmin Luo and Chenxu You (Oliver)
-**Version:** 1.4 — 15 August 2026
+**Version:** 1.5 — 15 August 2026
 **Status:** **Drafted, not yet sent.**
 **Goes out as:** Part 2 of [`2026-08-15-scope-and-questions.md`](2026-08-15-scope-and-questions.md)
 
@@ -74,6 +74,35 @@ invite a legal conversation we do not want in the way of a scope confirmation.
 Source table: [`requirements.md` §9](../spec/requirements.md#9-open-questions). When answers arrive,
 they go **into §9 first**, then anywhere that quotes it.
 
+## Considered for this batch and not asked
+
+**"How much does a cost have to move before a new cycle is opened?"** — raised internally on
+15 August, from the observation that a custodian's costs change during a cycle (a departure, a
+renegotiated contract, a utility rise) while the sealed record cannot. It is a fair question and
+it is **not** in the batch.
+
+The reason is the standard set in v1.3, applied to a question of our own this time rather than
+to one we had already drafted: **the answer changes nothing we build.** Whatever threshold the
+client named, the software would do the same thing — the sealed record stays frozen and a new
+cycle supersedes it (**F22**). Deciding when to open that cycle is an operating judgement made
+outside the tool, and the tool neither enforces a threshold nor prompts for one. Asking would
+have turned a five-question batch into six and spent the client's attention on a policy we do not
+implement.
+
+**What we did instead.** It is recorded as [A11](../spec/requirements.md#8-assumptions), together
+with the point the question actually exposed and which no document had settled: cost and income
+figures are the **budgeted** annual amounts for the period, not expenditure incurred to date.
+That distinction, not the threshold, was the thing worth writing down — if the client expects
+actuals to drive rates mid-cycle, the record stops being a frozen artefact and F11 changes shape.
+A11 says which reading we have taken, so a wrong assumption surfaces as a contradiction rather
+than as silence. If the client raises the timing question themselves when they reply, it folds
+into Q3.
+
+**The question this one is not.** Whether a sealed record can be *amended inside* its own cycle
+**is** in the batch — it is the second half of client question 2 — because that one does change
+the data model. The two are easy to confuse and worth keeping apart: one asks *when a new record
+is started*, the other asks *whether an old record can move*. Only the second costs us anything.
+
 ## What actually changes on each answer
 
 | # | If the answer differs from our default | Cost to us |
@@ -127,6 +156,7 @@ if one exists.
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.5 | 15 Aug 2026 | **A sixth question was considered and rejected, and the rejection is now on the record.** "How much does a cost have to move before a new cycle is opened?" came out of a review of what happens when a custodian's costs change mid-cycle. It fails the v1.3 test — the software behaves identically whatever the answer — so it is not asked, and the new section above says so with its reasoning, which is more useful to a reader than its silent absence. The review did surface something worth keeping: nothing in the specification said whether cost figures are budgeted or actual, and that distinction, not the threshold, is what decides the behaviour. It is now [A11](../spec/requirements.md#8-assumptions). **Nothing in this version changes the outbound document**: the batch is still five questions, the mapping to Q3–Q5, Q9 and Q10 is unchanged, and the two pre-send items are still open. The related half — whether a sealed record can be amended inside its own cycle — stays in the batch as part of question 2, and the new section states the difference so the two are not conflated later. |
 | 1.4 | 15 Aug 2026 | **Question 2 gained the "what changes in Part 1" line**, closing the third item on the pre-send list; the reasoning is above, and question 3's continued absence of one is now recorded as a decision rather than an oversight. The pre-send list is down to two, both concerning the defect list offered in question 5: who writes it and by when, and the fact that the 14 August audit it depends on **is still not in the repository**. Elsewhere in the outbound document, question 1 was corrected in two places — the client's data-sensitivity answer is no longer paraphrased as "while a pricing cycle is in progress" (kickoff §7 says *while the work is still in progress*), and the roles paragraph now states that the build is proved on one platform, matching [`requirements.md` §7](../spec/requirements.md#7-scope). The batch is still five questions and the mapping to Q3–Q5, Q9 and Q10 is unchanged. |
 | 1.0 | 15 Aug 2026 | First version. Questions drawn from [`requirements.md` §9](../spec/requirements.md#9-open-questions) — Q4, Q3, Q5, Q9, Q10 — reordered for the client, each carrying its proposed default. Not yet sent. |
 | 1.1 | 15 Aug 2026 | Client question 1 (our Q4) corrected: its default made the delegated authority an **approver**, contradicting Part 1, which keeps approval as a stretch item (F16). The core role is now a viewing role and the outbound wording quotes the guide's own answer on who holds the authority **[G, Step 5]**, so we ask only the part their material leaves open. Questions 1, 4 and 5 now each state what changes in Part 1 if the answer differs from our default — the earlier claim that the two parts were wholly independent did not survive this table. Reply date **Tue 18 August**, chase **Wed 19 August**. |

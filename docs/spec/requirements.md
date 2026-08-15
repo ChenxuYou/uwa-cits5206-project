@@ -3,7 +3,7 @@
 **Project:** Research Infrastructure Costing & Pricing Tool
 **Client:** UWA Research Infrastructure
 **Unit:** CITS5206 Professional Computing, The University of Western Australia
-**Status:** Draft v2.2 — 15 August 2026, not yet reviewed by the client
+**Status:** Draft v2.3 — 15 August 2026, not yet reviewed by the client
 **Primary sources:** the client's own documents (see *Source precedence* below), supported by the
 [client kickoff minutes, 29 July 2026](../meetings/2026-07-29-client-kickoff.md)
 
@@ -415,11 +415,35 @@ a **frozen artefact**. Rates, inputs, benchmarking, justifications and the versi
 method used are captured at seal time and never recomputed. A 2026 record must still reproduce
 its own figures in 2030 even if `k` has changed or the calculation has been revised.
 
+**The lifecycle that follows from it.** A record is editable in exactly one state and in no
+other, and the three stages are worth stating plainly because the rest of this document only
+implies them:
+
+1. **Draft.** Every input can be changed and the figures recompute as it changes **[F8, F10]**.
+2. **Sealed.** Nothing can be changed, by anyone, through the application **[F11]**.
+3. **Superseded.** A later cycle replaces this one by reference; this record stays readable
+   exactly as it was sealed **[F22]**.
+
+Costs move during a cycle — a staff departure, a renegotiated service contract, a utility rise —
+and none of that reaches back into a sealed record. The sealed figures are the evidence for a
+rate that was actually charged, and revising them to match today's costs would destroy the
+chain the client asked for: the record would no longer explain the price anyone was billed.
+A material change is answered by a **new cycle that supersedes the old one** **[F22, A5]**, not
+by editing.
+
+Two boundaries around that, both deliberate. **What counts as material** — and therefore when a
+new cycle is opened — is the client's operating judgement; the tool sets no threshold and issues
+no prompt **[A11]**. And **whether a sealed record ever needs amending inside its own cycle**, as
+opposed to being replaced by the next one, is open and asked of the client at
+[Q3](#9-open-questions); the answer changes how records are stored, which is why it is asked
+before the engine is written.
+
 ## 6. Requirements
 
 Requirement IDs are referenced by the [user stories](user-stories.md) and the
 [architecture](architecture.md). **IDs are stable, not sequential** — F19–F21 were added in
-v2.0 and appear after F18 rather than renumbering everything that cites them.
+v2.0, and F22 in v2.3, taking the next free number rather than renumbering everything that
+cites them. The table is ordered by priority, so a late Must sits with the other Musts.
 
 ### 6.1 Functional
 
@@ -439,6 +463,7 @@ v2.0 and appear after F18 rather than renumbering everything that cites them.
 | **F12** | Export the sealed record to a portable file that can be filed and read years later | K §6, G Step 5 | Must |
 | **F13** | List and retrieve past sealed records for a platform, so a new cycle can be set against the last one | K §6 | Must |
 | **F15** | Authenticate users; every record carries the identity of who created, submitted and sealed it, and access is restricted to identified UWA staff | K §7 | **Must** |
+| **F22** | Create a new cycle that **supersedes** a previous sealed cycle by reference, leaving the superseded record readable and unchanged — the only route by which a change in costs reaches the rates | K §6, [A5](#8-assumptions) | Must |
 | **F14** | Pre-fill what can be pre-filled — select "academic, level X" or "professional staff, level 8" and the salary is filled in, so it cannot be forgotten | K §5 | Should |
 | **F16** | Formal approval by a delegated authority, distinct from the custodian's submission | G Step 5 | Should |
 | **F19** | Capture an optional replacement reserve — replacement value, recovery percentage, recovery period — and carry the annual contribution into the cost total | G Step 1 | Should |
@@ -482,7 +507,7 @@ v2.0 and appear after F18 rather than renumbering everything that cites them.
 [architecture](architecture.md) disagree with this section about whether something is in the
 MVP, this section wins and the other document is corrected.
 
-**In scope (MVP).** F1–F13 and F15, and N1–N9, N11, N13, N14 — one platform with its
+**In scope (MVP).** F1–F13, F15 and F22, and N1–N9, N11, N13, N14 — one platform with its
 capabilities, one costing cycle, the full vertical slice from creating a cycle to exporting a
 sealed record, with authenticated users throughout. Every **Must** in §6.1 and §6.2, and
 nothing else.
@@ -509,12 +534,13 @@ Recorded so that they can be confirmed or corrected. Each is ours, not the clien
 | A2 | A single forecast `U` per capability is the divisor for all three of that capability's rates; the per-user-type split is used only for the revenue and balance projection, as the workbook does **[W, sheet 3 rows 19–22 vs 29]** | If each user type needs its own divisor, the formulas take three — a change to the engine contract |
 | A3 | Cost figures are annual and in AUD. *(GST-exclusive is no longer an assumption — see §4.)* | Period handling changes the arithmetic and the labels |
 | A4 | `k = 1.35` applies to APFR and commercial users only, and is uniform UWA-wide per the University Indirect Cost Recovery Policy | Per-platform or per-category `k` values require the config to be keyed differently |
-| A5 | A sealed record is superseded by a new one, never edited or deleted; corrections create a new version that references the old | Amendment-in-place would break the audit trail — needs a client decision |
+| A5 | A sealed record is superseded by a new one, never edited or deleted; corrections create a new version that references the old. **F22 carries this**, and [architecture §4](architecture.md#4-data-model) builds it | Amendment-in-place would break the audit trail — needs a client decision, and it is the second half of [Q3](#9-open-questions) |
 | A6 | A custodian may see their own platform's records; an administrator sees all; the delegated authority sees what is submitted to them | Access control design depends on the answer — see Q4 |
 | A7 | The MVP's export format is PDF, being the most durable and the closest to the "printout" the client suggested | Client may prefer generated email, CSV or a system of record — see Q5 |
 | A8 | Salary pre-fill uses a published UWA pay scale table, versioned by year, maintained as configuration | If rates are not published in a usable form, F14 becomes manual entry |
 | A9 | Fewer than 100 platforms and a handful of concurrent users — this is a low-traffic internal tool | Nothing in the design assumes scale; if wrong, little changes |
 | A10 | The Analysis/Consulting line is a chargeable column that is not a capability: it takes costs and produces rates, but has no machine capacity and is always staff-capped **[W]** | If it is a capability like any other, the capacity model simplifies |
+| A11 | Cost and income figures are the **budgeted** annual amounts for the period the rates will cover — not expenditure actually incurred to date (refining A3, which fixes only the period and the currency). It follows that mid-cycle variance does not alter a sealed record, and that **the tool sets no threshold for when a new cycle should be opened**: what counts as a material change is the client's operating judgement, made outside the tool | If the client expects actual expenditure to drive rates within a cycle, the record stops being a frozen artefact, F11 changes shape and rates become a monitoring problem rather than a periodic one. This is the assumption most likely to be tested the first time a real cost moves, which is why it is written down rather than left to be inferred from §5 |
 
 ## 9. Open questions
 
@@ -533,7 +559,7 @@ question is added, it is added here first.
 | --- | --- | --- |
 | ~~Q1~~ | How are costs allocated between the per-capability and per-platform levels? | **Closed.** Even split across capability columns **[W]** — see §4 Step 1 |
 | ~~Q2~~ | How is utilisation split across the three user types? | **Closed.** A single `U` per capability drives the rates; the per-type split drives the balance projection **[W]** — see §4 Step 2 |
-| **Q3** | How are multi-year cycles handled, and how is a sealed record superseded rather than overwritten? | A cycle carries a validity period; a new cycle supersedes the previous one by reference; nothing is ever overwritten (A5) |
+| **Q3** | How are multi-year cycles handled, and how is a sealed record superseded rather than overwritten? **And does a sealed record ever need amending *within* its own cycle** — a correction, or a mid-cycle rate change — rather than waiting to be replaced by the next one? | A cycle carries a validity period; a new cycle supersedes the previous one by reference (A5, **F22**); nothing is ever overwritten. **Supersession only — no in-cycle amendment.** If amendment is required, a sealed record keeps a visible amendment history instead of a single frozen version: F11 and US-15 grow and the data model changes, which is why this half is asked before the engine is written. Not to be confused with *when a new cycle is opened*, which is the client's operating judgement and not a question we ask (A11) |
 | **Q4** | What access control is needed beyond authentication — who may see, and who is the delegated authority in the system? | Three roles: custodian (own platform, create and submit), delegated authority (**sees** what is submitted to them — the approval *action* is F16, Should, not MVP), administrator (all platforms). Authentication local to the app for the MVP. The guide names the approver as "typically the head of the BU responsible for the operating costs" **[G, Step 5]**; what we lack is whether *typically* holds here and who it is |
 | **Q5** | What format does the sealed record take — printout, generated email, or something else? | PDF export, generated server-side, plus a stable in-app URL for the record |
 | ~~Q6~~ | What is the billable unit set? | **Closed.** Hours, days or samples **[G, Step 2]** |
@@ -560,4 +586,5 @@ question is added, it is added here first.
 | 1.1 | 14 Aug 2026 | §7 named as the scope baseline that the user stories must follow, and tied to the MoSCoW priorities in §6. §9 now says which questions came from the client and which are ours. |
 | 2.0 | 14 Aug 2026 | **Rewritten against the client's own documents.** Source precedence established: the costing guide governs, the workbook is a reference implementation, the minutes rank last. The demonstration figures transcribed from the walkthrough ($380,000 / $230,000 / $3,291 / $15,000) are **withdrawn** — none appears in any client document — and replaced by the guide's worked example ($150,000 / $20,000 / $30,000 / 1,000 h → $100 / $162 / $202.50), which is now the golden-file fixture. Rates are **per capability**, not per platform (A1). Income is **four lines**, split UWA vs non-UWA, not two. Billable units are **hours, days, samples**, not weeks. Capacity baselines, the staff-FTE cap and the even-split allocation rule are stated from the workbook. Replacement reserve added (F19) — the earlier "not replacement cost" line was wrong. Benchmarking (F20) and price-change communication (F21) added from guide steps 4 and 6. GST-exclusive promoted from assumption to fact. Terminology settled from the guide: custodian, capability, billable unit, APFR. **F15 raised to Must and moved into the MVP.** N14 added against the workbook's column-range defect. Q1, Q2 and Q6 closed by the client's documents; Q9 and Q10 opened by them. §2 now documents three specific formula defects in the live workbook as evidence for the problem statement. |
 | 2.1 | 15 Aug 2026 | **Q4's proposed default corrected.** It committed the delegated authority to *approving* submissions, which contradicted F16 (Should, not MVP) and the scope baseline in §7 — the core role is a **viewing** role, per A6, and the approval action remains stretch. The guide's own answer to "who holds the delegated authority" — "typically the head of the BU responsible for the operating costs" **[G, Step 5]** — is now quoted in the default, so what we are actually asking the client is the narrower question of whether *typically* holds for these platforms. Both corrections found while reviewing [`2026-08-15-scope-and-questions.md`](../client/2026-08-15-scope-and-questions.md), whose Question 2 carried the same conflict; that document is corrected to match. §10's IP constraint now flags that kickoff decision D5 is ambiguously worded and states which reading governs, after a draft of the client sign-off document took the wrong one — [`NOTICE`](../../NOTICE) §2 carries the full note. No requirement, story or MoSCoW priority changes. |
+| 2.3 | 15 Aug 2026 | **The record's lifecycle is stated rather than left to be assembled.** A reader asking the obvious question — *costs change during a cycle, so can a cost be edited?* — could previously find F8 (drafts are editable), F11 (sealed records are not) and A5 (supersession) in three places and no sentence joining them. §5 now carries the three states, says why a sealed record is not revised to match today's costs, and names both boundaries around that. Four changes follow from it. **(1) F22 is new**: creating a cycle that supersedes a previous sealed one by reference. This was asserted in [A5](#8-assumptions) and already built in [architecture §4](architecture.md#4-data-model), but carried no requirement ID and therefore no story — the architecture implemented something no requirement asked for. It is a **Must**, so §7's MVP list gains it, and it is owned by US-01 rather than a new story, which leaves the MVP at eighteen stories and 110 points. **(2) A11 is new**: cost and income figures are **budgeted** annual amounts, not expenditure to date — undefined until now, and the distinction that decides the whole question, since actuals would make the record a monitoring problem rather than a periodic one. A11 also records that the tool sets no threshold for when a new cycle is opened. **(3) Q3 gains the half it was missing**: whether a sealed record needs amending *within* its own cycle. That half already travels to the client as question 2 of [`2026-08-15-scope-and-questions.md`](../client/2026-08-15-scope-and-questions.md) and was added there in v1.4 of [`mvp-agreement.md`](../client/mvp-agreement.md), but was never folded back into this table, which the same document names as the authoritative source — so the rule that questions are added here first had been broken in one place. **(4) A5** now points at F22 and at Q3. No MoSCoW priority changes, no story is added or re-estimated, and nothing in the outbound client document is touched. |
 | 2.2 | 15 Aug 2026 | **§9 reduced to the questions that decide what we build.** The question about the team's own working method was withdrawn — it settled nothing in the product and does not belong in a list whose purpose is to unblock the build — and the remaining questions are renumbered without a gap: old **Q7–Q11 become Q6–Q10**. Any Q-number quoted elsewhere in the repository follows this table and has been updated with it. §10's client-material constraint now states the rule it always meant: **nothing the client gave us enters the repository without their agreement**, enforced by [`.gitignore`](../../.gitignore) §1 and set out in [`reference/client/README.md`](../../reference/client/README.md). No requirement, story or MoSCoW priority changes. |

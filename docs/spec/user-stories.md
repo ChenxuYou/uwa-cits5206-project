@@ -1,7 +1,7 @@
 # User Stories
 
 **Project:** Research Infrastructure Costing & Pricing Tool
-**Status:** Draft v2.0 — 14 August 2026, not yet reviewed by the client
+**Status:** Draft v2.1 — 15 August 2026, not yet reviewed by the client
 **Companion documents:** [requirements](requirements.md) · [architecture](architecture.md)
 
 > Stories trace to the requirement IDs in [requirements §6](requirements.md#6-requirements).
@@ -144,7 +144,7 @@ the other in the same commit. Estimates are relative points, for sprint planning
 
 ---
 
-**US-01 · Start a new costing cycle** — Must · 3 pts · F10
+**US-01 · Start a new costing cycle** — Must · 3 pts · F10, F13, F22
 
 > **As** a platform custodian
 > **I want** to start a new costing exercise for my platform
@@ -154,7 +154,8 @@ the other in the same commit. Estimates are relative points, for sprint planning
 
 - Given I am signed in, when I start a new cycle, then I am asked for the platform name, the period the rates will cover, the billable unit (hours, days or samples **[G, Step 2]**), and the capabilities the platform holds.
 - The cycle is created in **Draft** state and appears in my list of cycles.
-- If a sealed cycle already exists for this platform, its key figures are shown alongside so I can set the new one against the last **[K §6]**.
+- If a sealed cycle already exists for this platform, its key figures are shown alongside so I can set the new one against the last **[K §6, F13]**.
+- If the new cycle replaces a sealed one, it records a **reference to the cycle it supersedes**, and the superseded record stays readable and unchanged **[F22, [A5](requirements.md#8-assumptions)]**. This is the only route by which changed costs reach the rates: a sealed record is never edited to match them **[requirements §5](requirements.md#5-the-record--the-artefact-the-client-actually-wants)**.
 
 ---
 
@@ -542,8 +543,12 @@ All seven are Should or Could and none of them blocks the vertical slice.
 **Out of scope entirely:** everything marked so in
 [requirements §7](requirements.md#7-scope).
 
-The split matches [requirements §7](requirements.md#7-scope) exactly: MVP = F1–F13, F15 and
+The split matches [requirements §7](requirements.md#7-scope) exactly: MVP = F1–F13, F15, F22 and
 N1–N9, N11, N13, N14; stretch = F14, F16, F17, F19, F20, F21, N10, N12.
+
+**F22 adds no nineteenth story.** Supersession is a reference recorded when a cycle is created,
+so it is owned by US-01 rather than by a story of its own, and US-01 keeps its 3 points — the
+count above stands at eighteen and 110.
 
 **The demonstration that proves it works.** Priya signs in, starts a cycle for a
 seven-capability microscopy platform, enters costs and income, builds capacity and forecasts
@@ -580,6 +585,7 @@ where they are enforced, so that "no story" is never mistaken for "no coverage".
 | F19 replacement reserve | US-23 | |
 | F20 benchmarking record | US-24 | |
 | F21 price-change communication | US-25 | |
+| F22 cycle supersession | US-01 | [architecture §4](architecture.md#4-data-model) — a cycle is superseded, never edited; the lifecycle it belongs to is [requirements §5](requirements.md#5-the-record--the-artefact-the-client-actually-wants) |
 | N1 logic out of reach | US-09, US-18 | [architecture §2, §3](architecture.md#3-the-calculation-engine) |
 | N2, N3 validation and mandatory fields | US-18, US-08 | |
 | N4 usable without training | — | [architecture §1](architecture.md#1-what-the-architecture-has-to-achieve); verified by acceptance criterion 3 in [requirements §6.3](requirements.md#63-acceptance--how-we-will-know-the-mvp-is-right) |
@@ -600,4 +606,5 @@ where they are enforced, so that "no story" is never mistaken for "no coverage".
 | --- | --- | --- |
 | 1.0 | 14 Aug 2026 | First draft, derived from the 29 July kickoff minutes. Not yet reviewed by the client. |
 | 1.1 | 14 Aug 2026 | MVP realigned to [requirements §7](requirements.md#7-scope): US-05 and US-19 left the MVP, which became seventeen Must stories at 95 points. US-20 raised to Should. Story priority formally inherits from the requirement. |
+| 2.1 | 15 Aug 2026 | **Follows requirements v2.3, which gave cycle supersession a requirement ID.** Supersession was asserted in A5 and built in [architecture §4](architecture.md#4-data-model) but owned by no requirement and therefore by no story, so §6 below could not have shown the gap — nothing was missing from the table because nothing had an ID to be missing. **US-01 now carries F22** alongside F10 and F13 and gains one acceptance criterion: a cycle that replaces a sealed one records a reference to it, and the superseded record stays readable and unchanged. The criterion names what the whole arrangement is for — it is the only route by which changed costs reach the rates, because a sealed record is never edited to match them. §6 gains the F22 row; §5 gains a line explaining why F22 adds no nineteenth story. **US-01 keeps its 3 points and the MVP stays at eighteen stories and 110 points**, since a reference recorded at creation is not new work of any size. US-01's existing "key figures shown alongside" criterion is now attributed to F13, which §6 already claimed it for. |
 | 2.0 | 14 Aug 2026 | **Realigned to requirements v2.0, which was rewritten against the client's own documents.** US-19 (sign-in) returns to the MVP as a **Must**, resolving the contradiction where US-02, US-15 and US-16 required an identity the MVP did not provide; E7 renamed and US-19 moved to the front of the story list, because nothing else works without it. Rates are now **per capability** — US-09 and US-12 re-estimated 8 → 13 points to reflect it. Terminology follows the client's guide: capability, billable unit, APFR, custodian. US-06 rewritten for **four** income lines. US-07 carries the client's two capacity baselines and the staff-FTE cap. Three new stories from guide steps 1, 4 and 6: **US-23** replacement reserve, **US-24** benchmarking record, **US-25** price-change communication. Dr Chen is no longer *(inferred)* — the guide names the delegated authority. US-18 and US-12 gained criteria for **N14**. §6 traceability rebuilt so every requirement appears exactly once, with structural enforcement named where no story owns it. **MVP: eighteen stories, 110 points.** |

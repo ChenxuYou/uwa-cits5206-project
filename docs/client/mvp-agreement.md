@@ -3,7 +3,7 @@
 **Project:** Research Infrastructure Costing & Pricing Tool
 **Client:** UWA Research Infrastructure
 **Prepared by:** Chenxu You (Oliver) and Wenmin Luo
-**Version:** 1.4 — 15 August 2026
+**Version:** 1.5 — 15 August 2026
 **Status:** **Drafted, not yet sent.** Update the table below the moment that changes.
 
 ---
@@ -129,7 +129,16 @@ which is authoritative; this table is a view of it, not a second source. Scope b
 **If Part A and §7 ever disagree, §7 wins and Part A is corrected**, because §7 is what the
 build follows.
 
-Four MVP items carry no line in Part A, deliberately: **N4** (usable without training), **N5**
+**F22** (a new cycle supersedes a sealed one by reference, added in
+[`requirements.md` v2.3](../spec/requirements.md#61-functional)) carries no line in Part A either,
+and for a different reason from the ones below: **how supersession works is the subject of Part 2
+question 2**, so stating it as a Part 1 promise would present as settled the very thing we are
+asking about. Part A's "past sealed records can be listed and reopened" is F13 and stands
+unchanged; it promises retrieval, not the mechanism. If the client answers that a sealed record
+must also be amendable within its cycle, F22 gains a sibling and *that* is when Part 1's
+immutability sentence changes — not before.
+
+Four further MVP items carry no line in Part A, deliberately: **N4** (usable without training), **N5**
 and **N6** (exact and reproducible arithmetic), **N9** (transport and secrets) and **N14**
 (same-range aggregates, so a total is never summed over a different range from the figures it is
 compared against) are properties the client will experience rather than features they can
@@ -213,6 +222,7 @@ retreat from it now.
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.5 | 15 Aug 2026 | **Part B follows requirements v2.3, which added F22** — a new cycle supersedes a sealed one by reference. Part B's rule cuts both ways, so a new MVP requirement has to be either placed against a Part A promise or recorded as deliberately absent from one; F22 is the second, and the reason is specific to it rather than shared with N4, N5, N6, N9 and N14. **How supersession works is what Part 2 question 2 asks**, so promising it in Part 1 would present as settled the thing we are asking about. Part A's "past sealed records can be listed and reopened" is F13 and is untouched — it promises retrieval, not the mechanism. **No line of the outbound document changes**, no promise is added or withdrawn, and the traceability table itself is unchanged; only the paragraph recording deliberate omissions grows. The related change in [`questions-round-1.md` v1.5](questions-round-1.md) — a sixth question considered and rejected — likewise leaves the batch at five. |
 | 1.4 | 15 Aug 2026 | **Confirmation 2 — the minutes — is deleted from the outbound document, and with it the last pre-send blocker in Part A.** We were asking the client to confirm a file they were not being sent. There are now **two** confirmations, scope and ownership; ownership renumbers from 3 to 2 with its wording untouched, and the sign-off block gains a line for each rather than one cell covering all three. Five further edits went into the outbound file at the same time: **(1)** question 2 gained the line the preamble promises — if a sealed record must be amendable within its cycle, Part 1's immutability statement gains an exception and the storage model changes (F11, US-15); it was the most expensive question in the batch and read as the cheapest. **(2)** Part 1 no longer attributes the cost and income categories to the guide — the line-level breakdown is the **calculator's** **[W, sheet 1]**; the guide gives a prompting list, not a chart of accounts. **(3)** Question 1 no longer paraphrases the client's data-sensitivity answer as "while a pricing cycle is in progress"; kickoff §7 says *while the work is still in progress*, and we do not put words in their mouth in a document that asks them to confirm the rest. **(4)** "Deferred at your suggestion" becomes "following your own view that integration would be ideal but challenging" **[K §8]** — the client raised a difficulty, they did not propose the deferral. **(5)** Question 1 now states that the build is proved end to end on one platform, matching the scope baseline in [`requirements.md` §7](../spec/requirements.md#7-scope), so that "an administrator who can see all platforms" cannot be read as multi-platform delivery. No requirement, story or scope line changes. |
 | 1.0 | 15 Aug 2026 | First version. Part A drawn from [`requirements.md` §7](../spec/requirements.md#7-scope) and [`user-stories.md` §5](../spec/user-stories.md#5-mvp-definition); figures restricted to the client's guide worked example. Not yet sent. |
 | 1.2 | 15 Aug 2026 | **Synchronised with the outbound document after a full review of it.** (1) The omissions table said "the seven open questions" travel in the batched list — not all of them do; the repository licence question is ours and is not asked. It also implied a separate question document; there is one file, and the questions are Part 2 of it. (2) The defects row read as though the workbook defects were withheld entirely; the last of the Part 2 questions offers the list as a separate document, and the row now says so, with the precondition attached. (3) **N14** removed from the Part B traceability table — no promise in Part A carries it, and the rule at the head of that table cuts both ways. It moves to the list of MVP items deliberately unnamed, with the reason. (4) Part A now records the one thing still to settle before sending: **confirmation 2 asks the client to confirm minutes they are not being sent.** (5) The outbound Q2 no longer asserts that Part 1 excludes single sign-on — Part 1's exclusions name finance, HR and booking systems, not identity — and says instead that we would treat SSO as a system integration and come back with a trade. |
