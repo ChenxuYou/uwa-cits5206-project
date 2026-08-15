@@ -1,0 +1,7 @@
+@model CostingTool.Pages.Ric.RicStepViewModel
+<div class="ric-steps">
+@foreach (var item in new[] { (1,"Platform"), (2,"Costs"), (3,"Capacity"), (4,"Rates"), (5,"Review") })
+{
+    <div class="ric-step @(item.Item1 == Model.Current ? "active" : item.Item1 < Model.Current ? "complete" : "")"><span>@(item.Item1 < Model.Current ? "✓" : item.Item1)</span><b>@item.Item2</b></div>
+}
+</div>
