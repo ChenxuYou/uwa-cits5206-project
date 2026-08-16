@@ -2,6 +2,7 @@ using CostingTool.Data;
 using CostingTool.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Security.Claims;
 
 namespace CostingTool.Pages.Ric;
 
@@ -25,7 +26,7 @@ public class StartModel(CostingDbContext db) : PageModel
         var cycle = new RicCycle
         {
             PlatformName = PlatformName.Trim(), StartYear = StartYear, EndYear = EndYear,
-            BillableUnit = BillableUnit,
+            BillableUnit = BillableUnit, CreatedBy = User.FindFirstValue(ClaimTypes.Name) ?? User.Identity?.Name ?? "Unknown",
             Capabilities = names.Select(x => new RicCapability { Name = x }).ToList()
         };
         db.RicCycles.Add(cycle);

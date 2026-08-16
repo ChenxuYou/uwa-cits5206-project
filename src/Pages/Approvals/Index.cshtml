@@ -1,0 +1,39 @@
+@page
+@model CostingTool.Pages.Approvals.IndexModel
+@{
+    ViewData["Title"] = "Approvals";
+}
+<div class="page-wrap approval-page">
+    <div class="page-heading">
+        <div><p class="eyebrow">DELEGATED AUTHORITY</p><h1>Costing approvals</h1><p>Review submitted RIC costing cycles before the rates are sealed and communicated.</p></div>
+    </div>
+
+    <section class="approval-summary">
+        <div><span>Awaiting decision</span><strong>@Model.Pending.Count</strong></div>
+        <div><span>Recently completed</span><strong>@Model.Completed.Count</strong></div>
+    </section>
+
+    <article class="panel approval-list">
+        <div class="panel-heading compact"><div><h2>Pending approval</h2><p>Oldest submissions are shown first.</p></div></div>
+        @if (Model.Pending.Count == 0)
+        {
+            <div class="empty-state">There are no costing cycles awaiting approval.</div>
+        }
+        @foreach (var cycle in Model.Pending)
+        {
+            <a class="approval-row" asp-page="/Approvals/Details" asp-route-id="@cycle.Id">
+                <span class="record-icon">✓</span><div><strong>@cycle.PlatformName</strong><small>@cycle.StartYear–@cycle.EndYear · submitted by @cycle.SubmittedBy</small></div><time>@cycle.SubmittedAtUtc?.ToLocalTime().ToString("dd MMM yyyy")</time><b>Review →</b>
+            </a>
+        }
+    </article>
+
+    <article class="panel approval-list">
+        <div class="panel-heading compact"><div><h2>Recent decisions</h2><p>Returned and sealed cycles.</p></div></div>
+        @foreach (var cycle in Model.Completed)
+        {
+            <a class="approval-row" asp-page="/Approvals/Details" asp-route-id="@cycle.Id">
+                <span class="status-pill @cycle.Status.ToLowerInvariant()">@cycle.Status</span><div><strong>@cycle.PlatformName</strong><small>@cycle.StartYear–@cycle.EndYear</small></div><time>@cycle.UpdatedAtUtc.ToLocalTime().ToString("dd MMM yyyy")</time><b>Open →</b>
+            </a>
+        }
+    </article>
+</div>
