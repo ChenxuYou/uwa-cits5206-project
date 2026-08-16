@@ -6,6 +6,8 @@ UWA Research Infrastructure currently calculates platform charge-out rates in a 
 
 The client wants software because this is a high-stakes process that repeats only every three to five years, so custodians cannot rely on memory or manual spreadsheet skill. They need a guided tool that makes the method easier to follow, prevents accidental formula damage, keeps the calculation logic hidden from users, and leaves behind a defensible record for audit, approval, and future reference. The software must also make it possible for a future custodian or administrator to reopen a sealed record and explain how the rate was set.
 
+From these pain points and the client requirements, we are deciding to build **a web application** that replaces the fragile workbook with a guided, server-side costing tool. It will let custodians enter the required inputs, calculate the rates behind the scenes, validate mistakes before they cause silent errors, and save a sealed record that can be reviewed or retrieved later.
+
 
 ## Client Communication and MVP
 
