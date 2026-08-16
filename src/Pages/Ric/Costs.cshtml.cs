@@ -13,7 +13,7 @@ public class CostsModel(CostingDbContext db) : PageModel
     [BindProperty] public int? CapabilityId { get; set; }
     [BindProperty] public string Scope { get; set; } = "Capability";
     [BindProperty] public string EntryKind { get; set; } = "Cost";
-    [BindProperty] public string Category { get; set; } = string.Empty;
+    [BindProperty] public string Category { get; set; } = "Personnel";
     [BindProperty] public string? PersonnelName { get; set; }
     [BindProperty] public string? FundingType { get; set; }
     [BindProperty] public string? FellowshipType { get; set; }
@@ -38,7 +38,7 @@ public class CostsModel(CostingDbContext db) : PageModel
     public async Task<IActionResult> OnPostAddAsync()
     {
         if (!await Load(CycleId)) return NotFound();
-        if (Cycle.Status != "Draft") return RedirectToPage("/Ric/Review", new { cycleId = CycleId });
+        if (Cycle.Status is not ("Draft" or "Returned")) return RedirectToPage("/Ric/Review", new { cycleId = CycleId });
         var allowedCosts = new[] { "Personnel", "Equipment", "Maintenance", "Travel", "Animal Cost", "Other" };
         var allowedIncome = new[] { "UWA GP / in-kind", "State", "Federal (incl. NCRIS)", "Other recurrent support" };
         if (EntryKind == "Cost" && !allowedCosts.Contains(Category)) ModelState.AddModelError(nameof(Category), "Select a valid cost category.");
@@ -76,14 +76,14 @@ public class CostsModel(CostingDbContext db) : PageModel
 
     public async Task<IActionResult> OnPostDeleteAsync(int id)
     {
-        var item = await db.RicCostEntries.Include(x => x.RicCycle).FirstOrDefaultAsync(x => x.Id == id && x.RicCycleId == CycleId);
-        if (item is null) return NotFound(); if (item.RicCycle.Status == "Draft") { db.Remove(item); await db.SaveChangesAsync(); }
+        var item = await db.RicCostEntries.Include(x => x.RicCycle).FirstOrDefaultAsync(x => x.Id == id && x.RicCycleId == CycleId && x.RicCycle.CreatedBy == User.Identity!.Name);
+        if (item is null) return NotFound(); if (item.RicCycle.Status is "Draft" or "Returned") { db.Remove(item); await db.SaveChangesAsync(); }
         return RedirectToPage(new { cycleId = CycleId });
     }
 
     private async Task<bool> Load(int id)
     {
-        Cycle = (await db.RicCycles.Include(x => x.Capabilities).Include(x => x.Costs).ThenInclude(x => x.Capability).Include(x => x.Costs).ThenInclude(x => x.YearAmounts).FirstOrDefaultAsync(x => x.Id == id))!;
+        Cycle = (await db.RicCycles.Include(x => x.Capabilities).Include(x => x.Costs).ThenInclude(x => x.Capability).Include(x => x.Costs).ThenInclude(x => x.YearAmounts).FirstOrDefaultAsync(x => x.Id == id && x.CreatedBy == User.Identity!.Name))!;
         CycleId = id; return Cycle is not null;
     }
 }

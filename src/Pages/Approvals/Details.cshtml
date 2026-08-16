@@ -1,0 +1,52 @@
+@page "{id:int}"
+@model CostingTool.Pages.Approvals.DetailsModel
+@{
+    ViewData["Title"] = "Approval review";
+    var totalCost = Model.Results.Values.Sum(x => x.TotalOperatingCost);
+    var revenue = Model.Results.Values.Sum(x => x.ForecastPlatformRevenue);
+}
+<div class="page-wrap approval-page">
+    <div class="breadcrumb"><a asp-page="/Approvals/Index">Approvals</a><span>›</span><span>@Model.Cycle.PlatformName</span></div>
+    <div class="review-heading"><div><span class="status-pill @Model.Cycle.Status.ToLowerInvariant()">@Model.Cycle.Status</span><h1>Delegated authority review</h1><p>@Model.Cycle.PlatformName · @Model.Cycle.StartYear–@Model.Cycle.EndYear · prepared by @Model.Cycle.CreatedBy</p></div><a class="outline-action" asp-page="/Approvals/Index">← Approval queue</a></div>
+
+    <div asp-validation-summary="All" class="form-errors approval-errors"></div>
+    <div class="review-layout">
+        <main>
+            <section class="review-kpis"><div><span>Total operating cost</span><strong>@totalCost.ToString("C")</strong></div><div><span>Forecast revenue</span><strong>@revenue.ToString("C")</strong></div><div class="@(revenue-totalCost>=0?"positive-kpi":"negative-kpi")"><span>Forecast balance</span><strong>@((revenue-totalCost).ToString("C"))</strong></div></section>
+            <article class="review-card"><div class="review-card-heading"><h2>Rates requiring approval</h2><span>GST exclusive</span></div><div class="review-table-wrap"><table class="review-table"><thead><tr><th>Capability</th><th>Operating cost</th><th>UWA rate</th><th>APFR rate</th><th>Commercial rate</th><th>Balance</th></tr></thead><tbody>
+            @foreach (var c in Model.Cycle.Capabilities) { var r=Model.Results[c.Id]; <tr><td><strong>@c.Name</strong></td><td>@r.TotalOperatingCost.ToString("C")</td><td>@c.ProposedUwaRate.ToString("C")</td><td>@c.ProposedApfrRate.ToString("C")</td><td>@c.ProposedCommercialRate.ToString("C")</td><td class="@(r.ForecastBalance>=0?"positive-text":"negative-text")">@r.ForecastBalance.ToString("C")</td></tr> }
+            </tbody></table></div></article>
+            <article class="review-card"><div class="review-card-heading"><div><h2>Capacity and utilisation evidence</h2><p>Forecast demand used by the rate calculation.</p></div><span>@Model.Cycle.BillableUnit</span></div><div class="review-table-wrap"><table class="review-table capacity-evidence-table"><thead><tr><th>Capability</th><th>Maximum capacity</th><th>UWA use</th><th>APFR use</th><th>Commercial use</th><th>Total forecast</th><th>Utilisation</th></tr></thead><tbody>
+            @foreach(var c in Model.Cycle.Capabilities){var forecast=c.ForecastUwaUse+c.ForecastApfrUse+c.ForecastCommercialUse;var utilisation=c.MaximumCapacity>0?forecast/c.MaximumCapacity*100:0;<tr><td><strong>@c.Name</strong></td><td>@c.MaximumCapacity.ToString("N1")</td><td>@c.ForecastUwaUse.ToString("N1")</td><td>@c.ForecastApfrUse.ToString("N1")</td><td>@c.ForecastCommercialUse.ToString("N1")</td><td><strong>@forecast.ToString("N1")</strong></td><td>@utilisation.ToString("N1")%</td></tr>}
+            </tbody></table></div></article>
+            <article class="review-card"><div class="review-card-heading"><div><h2>Detailed cost and funding sources</h2><p>Every submitted line item and annual amount retained for audit.</p></div><span>@Model.Cycle.Costs.Count records</span></div><div class="review-table-wrap"><table class="review-table approval-cost-table"><thead><tr><th>Item</th><th>Classification</th><th>Source / personnel basis</th><th>Annual amounts</th><th>Average</th><th>Notes</th></tr></thead><tbody>
+            @foreach(var item in Model.Cycle.Costs.OrderBy(x=>x.Scope).ThenBy(x=>x.RicCapabilityId).ThenBy(x=>x.Category))
+            {
+                var capability = Model.Cycle.Capabilities.FirstOrDefault(x=>x.Id==item.RicCapabilityId)?.Name ?? "Whole platform";
+                var source = item.Category=="Personnel"
+                    ? string.Join(" · ", new[]{item.PersonnelName,item.FundingType,item.FellowshipType,item.EmploymentType,item.StaffType,item.SalaryScale is null?null:$"{item.SalaryScale}-{item.SalaryStep}",item.StepOption,item.SchoolType,item.PercentWorked is null?null:$"{item.PercentWorked:N0}% FTE",item.SuperannuationPercent is null?null:$"{item.SuperannuationPercent:N0}% super"}.Where(x=>!string.IsNullOrWhiteSpace(x)))
+                    : string.Join(" · ", new[]{item.Supplier,item.Description}.Where(x=>!string.IsNullOrWhiteSpace(x)));
+                <tr><td><strong>@(item.Description??item.PersonnelName??item.Category)</strong><small>@capability</small></td><td><span class="category-chip">@item.Category</span><small>@item.Scope · @(item.CostType=="Non-variable income"?"Funding / income":"Operating cost")</small></td><td class="source-cell">@(string.IsNullOrWhiteSpace(source)?"Not recorded":source)@if(item.BaseSalary is not null){<small>Base salary @item.BaseSalary.Value.ToString("C") · @item.WorkYears year(s)</small>}</td><td><div class="year-amounts">@foreach(var amount in item.YearAmounts.OrderBy(x=>x.ProjectYear)){<span><b>@(Model.Cycle.StartYear+amount.ProjectYear-1)</b> @amount.Amount.ToString("C")</span>}</div></td><td><strong>@item.Amount.ToString("C")</strong><small>annual average</small></td><td class="notes-cell">@(item.Notes??"—")</td></tr>
+            }
+            </tbody><tfoot><tr><td colspan="4">Average annual total entered</td><td colspan="2">@Model.Cycle.Costs.Sum(x=>x.Amount).ToString("C")</td></tr></tfoot></table></div></article>
+            <article class="review-card"><div class="review-card-heading"><h2>Evidence</h2></div><div class="review-notes"><div><span>Benchmarking</span><p>@(Model.Cycle.BenchmarkNotes ?? "Not recorded")</p></div><div><span>Pricing justification</span><p>@(Model.Cycle.PricingJustification ?? "Not recorded")</p></div></div></article>
+            @if (Model.Cycle.Status == "Returned") { <div class="return-banner"><strong>Returned by @Model.Cycle.ReturnedBy</strong><p>@Model.Cycle.ReturnReason</p></div> }
+            @if (Model.Cycle.Status == "Sealed") { <article class="integrity-card"><span>◆</span><div><strong>Approved and sealed by @Model.Cycle.ApprovedBy</strong><p>Effective @Model.Cycle.EffectiveDateUtc?.ToString("dd MMM yyyy") · @Model.Cycle.ApprovalComment</p><code>@Model.Cycle.SnapshotHash</code></div></article> }
+        </main>
+
+        <aside class="submit-panel approval-actions">
+        @if (Model.Cycle.Status == "Submitted")
+        {
+            <span class="submit-icon">✓</span><h2>Record a decision</h2><p>Approval creates an immutable snapshot. Return the cycle if any figure or evidence needs correction.</p>
+            <form method="post" asp-page-handler="Approve" asp-route-id="@Model.Cycle.Id">
+                <label class="field"><span>Effective date</span><input asp-for="EffectiveDate" type="date"></label>
+                <label class="field"><span>Approval comment</span><textarea asp-for="ApprovalComment" rows="3" placeholder="Optional decision note"></textarea></label>
+                <label class="confirmation"><input type="checkbox" name="confirmApproval" value="true"><span>I have reviewed the costing basis, capacity assumptions, proposed rates and supporting evidence.</span></label>
+                <button type="submit" class="submit-button">Approve &amp; seal <span>✓</span></button>
+            </form>
+            <details class="return-form"><summary>Return for changes</summary><form method="post" asp-page-handler="Return" asp-route-id="@Model.Cycle.Id"><label class="field"><span>Required changes <b>*</b></span><textarea asp-for="ReturnReason" rows="4" placeholder="Tell the submitter exactly what to update"></textarea></label><button type="submit" class="return-button">Return to submitter</button></form></details>
+        }
+        else { <span class="submit-icon">✓</span><h2>Decision complete</h2><p>This cycle is @Model.Cycle.Status.ToLowerInvariant(). No further approval action is available.</p><a class="secondary-action full-button" asp-page="/Approvals/Index">Back to approvals</a> }
+        </aside>
+    </div>
+</div>
