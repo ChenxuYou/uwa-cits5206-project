@@ -22,7 +22,7 @@ public class CapacityModel(CostingDbContext db) : PageModel
     public async Task<IActionResult> OnPostAsync()
     {
         if (!await Load(CycleId)) return NotFound();
-        if (Cycle.Status != "Draft") return RedirectToPage("/Ric/Review", new { cycleId = CycleId });
+        if (Cycle.Status is not ("Draft" or "Returned")) return RedirectToPage("/Ric/Review", new { cycleId = CycleId });
         foreach (var input in Inputs)
         {
             var capability = Cycle.Capabilities.FirstOrDefault(x => x.Id == input.Id);
@@ -42,7 +42,7 @@ public class CapacityModel(CostingDbContext db) : PageModel
         return RedirectToPage("/Ric/Rates", new { cycleId = CycleId });
     }
 
-    private async Task<bool> Load(int id){Cycle=(await db.RicCycles.Include(x=>x.Capabilities).FirstOrDefaultAsync(x=>x.Id==id))!;CycleId=id;return Cycle is not null;}
+    private async Task<bool> Load(int id){Cycle=(await db.RicCycles.Include(x=>x.Capabilities).FirstOrDefaultAsync(x=>x.Id==id && x.CreatedBy==User.Identity!.Name))!;CycleId=id;return Cycle is not null;}
     public class CapacityInput
     {
         public CapacityInput() { }

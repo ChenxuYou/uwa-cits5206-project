@@ -1,3 +1,9 @@
+@inject CostingTool.Data.CostingDbContext LayoutDb
+@{
+    var unreadNotifications = User.Identity?.IsAuthenticated == true && User.IsInRole("DataEntry")
+        ? LayoutDb.AppNotifications.Count(x => x.RecipientName == User.Identity.Name && !x.IsRead)
+        : 0;
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,9 +27,18 @@
                 <a class="nav-item active" href="/">
                     <span class="nav-icon">⌂</span><span>Overview</span>
                 </a>
-                <a class="nav-item" href="#cycles"><span class="nav-icon">◫</span><span>Costing cycles</span></a>
-                <a class="nav-item" href="#capabilities"><span class="nav-icon">◇</span><span>Capabilities</span></a>
-                <a class="nav-item" href="#reports"><span class="nav-icon">▤</span><span>Reports</span></a>
+                @if (User.IsInRole("DataEntry"))
+                {
+                    <a class="nav-item" href="/Ric/Start"><span class="nav-icon">◫</span><span>New costing cycle</span></a>
+                    <a class="nav-item" href="/"><span class="nav-icon">▤</span><span>My costing cycles</span></a>
+                    <a class="nav-item" href="/Notifications"><span class="nav-icon">♢</span><span>Notifications</span></a>
+                    <a class="nav-item" href="#capabilities"><span class="nav-icon">◇</span><span>Capabilities</span></a>
+                    <a class="nav-item" href="#reports"><span class="nav-icon">▤</span><span>Reports</span></a>
+                }
+                @if (User.IsInRole("Approver"))
+                {
+                    <a class="nav-item" href="/Approvals"><span class="nav-icon">✓</span><span>Approval queue</span></a>
+                }
             </nav>
 
             <div class="sidebar-section">
@@ -44,12 +59,13 @@
             <header class="topbar">
                 <button class="menu-button" id="menuButton" aria-label="Open navigation">☰</button>
                 <div class="topbar-spacer"></div>
-                <button class="icon-button" aria-label="Notifications">♢<span class="notification-dot"></span></button>
-                <div class="user-chip">
-                    <span class="avatar">PL</span>
-                    <span><strong>Priya Lal</strong><small>Platform custodian</small></span>
-                    <span class="chevron">⌄</span>
-                </div>
+                @if (User.IsInRole("DataEntry")) { <a class="icon-button" href="/Notifications" aria-label="Notifications">♢@if(unreadNotifications>0){<span class="notification-dot"></span>}</a> }
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    var displayName = User.Identity.Name ?? "User";
+                    var initials = string.Concat(displayName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(x => x[0])).ToUpperInvariant();
+                    <div class="user-chip"><span class="avatar">@initials</span><span><strong>@displayName</strong><small>@(User.IsInRole("Approver") ? "Delegated approver" : "Platform custodian")</small></span><form method="post" asp-page="/Account/Logout"><button class="logout-button" type="submit">Sign out</button></form></div>
+                }
             </header>
 
             @RenderBody()
