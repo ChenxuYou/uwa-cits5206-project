@@ -3,8 +3,8 @@
 **Project:** Research Infrastructure Costing & Pricing Tool
 **Client:** UWA Research Infrastructure
 **Prepared by:** Chenxu You (Oliver) and Wenmin Luo
-**Version:** 1.5 — 15 August 2026
-**Status:** **Drafted, not yet sent.** Update the table below the moment that changes.
+**Version:** 1.6 — 19 August 2026
+**Status:** **Sent. Awaiting the client's reply.** Update the table below the moment that changes.
 
 ---
 
@@ -15,11 +15,16 @@ date something actually happened — not a date we planned for.
 
 | Event | Date | Recorded where |
 | --- | --- | --- |
-| Statement sent to the client | *(not yet)* | Teams thread / email — file the sent copy |
+| Statement sent to the client | **Mon 17 August 2026**, by Yichen Zhao | [`Communication history/Email-17-Aug/`](Communication%20history/Email-17-Aug/) — email, scope summary and the five questions, all filed |
 | Reply requested by | **Tue 18 August** — stated in the outbound document | |
-| Client chased | *(not yet — planned Wed 19 August, the day after the date we asked for)* | |
+| Client chased | *(due today, Wed 19 August — the day after the date we asked for)* | |
 | Client response received | *(not yet)* | |
 | **Outcome** | **Outstanding** | |
+
+**One person sends, one person is named.** Yichen Zhao owns client contact
+([minutes of 15 August](../meetings/2026-08-15-team-weekly-meeting.md) §8), so the client is never
+chased twice about the same thing by two of us. The sent copy is the evidence Assignment 1 §2 is
+marked on — **a date nobody wrote down is a date we cannot cite.**
 
 **Why 18 then 19.** We ask for the reply by Tuesday and chase on Wednesday, so the chase falls
 *after* the date we named rather than on it. Wednesday is the client's stated preference for
@@ -222,6 +227,7 @@ retreat from it now.
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.6 | 19 Aug 2026 | **The statement was sent on Mon 17 August 2026** by Yichen Zhao, as an email to the client with the scope summary and the five questions attached; all three are filed in [`Communication history/Email-17-Aug/`](Communication%20history/Email-17-Aug/). Status moves from *Drafted, not yet sent* to *Sent, awaiting reply*. **Nothing in Part A, Part B or Part C changes** — no promise, requirement or story moves; only the record of what has happened does. The outbound email also proposed **Wednesday 4:00–4:30pm** for a short meeting, which is not a date this table tracks: it tracks the reply. Part C is now live: the reply date of **Tue 18 August** has passed, the single chase falls **today, Wed 19 August**, and **Fri 21 August** remains the point at which we stop waiting and write the scope as our proposal. |
 | 1.5 | 15 Aug 2026 | **Part B follows requirements v2.3, which added F22** — a new cycle supersedes a sealed one by reference. Part B's rule cuts both ways, so a new MVP requirement has to be either placed against a Part A promise or recorded as deliberately absent from one; F22 is the second, and the reason is specific to it rather than shared with N4, N5, N6, N9 and N14. **How supersession works is what Part 2 question 2 asks**, so promising it in Part 1 would present as settled the thing we are asking about. Part A's "past sealed records can be listed and reopened" is F13 and is untouched — it promises retrieval, not the mechanism. **No line of the outbound document changes**, no promise is added or withdrawn, and the traceability table itself is unchanged; only the paragraph recording deliberate omissions grows. The related change in [`questions-round-1.md` v1.5](questions-round-1.md) — a sixth question considered and rejected — likewise leaves the batch at five. |
 | 1.4 | 15 Aug 2026 | **Confirmation 2 — the minutes — is deleted from the outbound document, and with it the last pre-send blocker in Part A.** We were asking the client to confirm a file they were not being sent. There are now **two** confirmations, scope and ownership; ownership renumbers from 3 to 2 with its wording untouched, and the sign-off block gains a line for each rather than one cell covering all three. Five further edits went into the outbound file at the same time: **(1)** question 2 gained the line the preamble promises — if a sealed record must be amendable within its cycle, Part 1's immutability statement gains an exception and the storage model changes (F11, US-15); it was the most expensive question in the batch and read as the cheapest. **(2)** Part 1 no longer attributes the cost and income categories to the guide — the line-level breakdown is the **calculator's** **[W, sheet 1]**; the guide gives a prompting list, not a chart of accounts. **(3)** Question 1 no longer paraphrases the client's data-sensitivity answer as "while a pricing cycle is in progress"; kickoff §7 says *while the work is still in progress*, and we do not put words in their mouth in a document that asks them to confirm the rest. **(4)** "Deferred at your suggestion" becomes "following your own view that integration would be ideal but challenging" **[K §8]** — the client raised a difficulty, they did not propose the deferral. **(5)** Question 1 now states that the build is proved end to end on one platform, matching the scope baseline in [`requirements.md` §7](../spec/requirements.md#7-scope), so that "an administrator who can see all platforms" cannot be read as multi-platform delivery. No requirement, story or scope line changes. |
 | 1.0 | 15 Aug 2026 | First version. Part A drawn from [`requirements.md` §7](../spec/requirements.md#7-scope) and [`user-stories.md` §5](../spec/user-stories.md#5-mvp-definition); figures restricted to the client's guide worked example. Not yet sent. |
