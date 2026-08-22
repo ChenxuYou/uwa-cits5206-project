@@ -14,7 +14,7 @@ All project presentations live here. They are plain HTML — one self-contained 
 ## Starting a new deck
 
 ```bash
-cp presentations/template.html presentations/2026-08-18-assignment1-mvp.html
+cp presentations/template.html presentations/2026-08-18-assignment-1-mvp.html
 ```
 
 Then edit the copy. The skeleton already contains the mandatory spine — cover → one section per team member → closing — with every content slot marked `TODO`. Work through them in order; the deck is finished when no `TODO` remains.

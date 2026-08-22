@@ -290,7 +290,7 @@ presentations/
 └── assets/                                 ← images, diagrams, exported charts
 ```
 
-- Naming: `YYYY-MM-DD-<short-topic>.html`, lower-case and hyphenated — e.g. `2026-08-11-assignment1-mvp.html`. The date sorts the folder chronologically for free.
+- Naming: `YYYY-MM-DD-<short-topic>.html`, lower-case and hyphenated — e.g. `2026-08-11-assignment-1-mvp.html`. The date sorts the folder chronologically for free.
 - One deck per file. **`template.html` contains no content and MUST stay that way** — copy it, never present from it, never let a finished deck's material settle back into it.
 - Assets: `assets/YYYY-MM-DD-<topic>/<name>.png`. Prefer SVG for diagrams; Mermaid diagrams from `docs/` **SHOULD** be exported to SVG rather than screenshotted.
 - Decks **MUST** print to a clean PDF via `Ctrl/Cmd + P` (one slide per page, landscape, background graphics on) so a handout can be attached to a submission.
