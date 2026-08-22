@@ -15,7 +15,63 @@ TBD
 
 ## Project Management and Plans
 
-TBD
+### Agile Plan: Next Week to 13 October 2026
+
+#### Team Split
+
+| Role | Person | Responsibility |
+| --- | --- | --- |
+| Client liaison and sprint coordination | Yichen Zhao | Own client communication, book meetings, send weekly demo summaries, track feedback, and update decisions |
+| Development | Chenxu You | Implement core code changes, merge feedback-driven fixes, and prepare deployment |
+| Development | Wenmin Luo | Implement core code changes, add regression fixes, and prepare deployment |
+| Research, testing, documentation | Dai Lam La La | Trace spreadsheet logic, prepare test scenarios, document assumptions, and support validation |
+| Research, testing, documentation | Jaswanth Vericherla | Trace spreadsheet logic, prepare test scenarios, document assumptions, and support validation |
+| Deployment support | You | Help with server access, deployment setup, DNS or Nginx, and deployment testing |
+
+#### Weekly Cadence
+
+| Cadence | What happens |
+| --- | --- |
+| Every week | Reprioritise the backlog, assign owners, and confirm deadlines |
+| Every week | Develop and test in parallel so changes are verified before the client demo |
+| Every week | Demo the current increment to the client and capture feedback for the next sprint |
+| Every week | Turn research findings into test cases, notes, and implementation guidance |
+| Starting 28 September | Begin drafting the final report while keeping it aligned with the latest project state |
+
+#### Project Tools and Evidence
+
+| Tool / artefact | Purpose | Evidence we will keep |
+| --- | --- | --- |
+| GitHub Issues | Track every task with one owner and a due date | Issue list linked to sprint goals |
+| GitHub Projects board | Show sprint planning and work in progress | Board columns for Backlog, In Progress, Review, Done |
+| Meeting notes in the repo | Record decisions and client feedback | Weekly minutes linked from the plan |
+| Pull requests | Show code review and ownership | PRs with review comments and merged changes |
+| Test notes and scenarios | Prove validation of changes | Short test log for each sprint |
+| Deployment notes | Show readiness for staging and handover | Checklist for server access, CI/CD, DNS, and deployment |
+
+#### Deployment Plan
+
+| Stage | What we do | Owner |
+| --- | --- | --- |
+| Access and planning | Discuss access to the new server, confirm who can administer it, and decide the deployment approach | Yichen Zhao, You |
+| Server setup | Log into the server, create the repository, and set up CI/CD for automated deployment | Chenxu You, Wenmin Luo |
+| DNS and reverse proxy | Configure DNS, and if needed use Nginx as the reverse proxy / entry point | You, Yichen Zhao |
+| Deployment testing | Test deployment end to end, check build, release, and rollback behaviour, and verify the site is reachable | You, Dai Lam La La |
+| Staging sign-off | Confirm the deployed instance is stable enough for client review and final report evidence | All |
+| Final release | Lock the version, deploy the final release, and package handover notes | Chenxu You, Wenmin Luo, You |
+
+#### Week-by-Week Plan
+
+| Week commencing | Sprint goal | Yichen Zhao | Chenxu You | Wenmin Luo | Dai Lam La La | Jaswanth Vericherla | You | Output |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 24 Aug 2026 | Stabilise after MVP approval and turn feedback into a backlog | Own the client feedback list, summarise the MVP approval outcomes, and book the next client touchpoint | Review recent feedback and identify the first code changes | Review recent feedback and identify the first code changes | Start tracing spreadsheet logic for risky or unclear calculations | Start tracing spreadsheet logic for risky or unclear calculations | Support backlog triage and note deployment questions | Updated backlog, clear ownership, research notes |
+| 31 Aug 2026 | Deliver the first code update cycle | Prepare the weekly client summary and confirm priorities for the sprint | Implement the highest-priority code fixes and keep the core flow moving | Implement the highest-priority code fixes and keep the core flow moving | Write test cases for the updated code paths and compare outputs with spreadsheet values | Write test cases for the updated code paths and compare outputs with spreadsheet values | Help validate the updated flow and record any deployment implications | Revised code slice, test notes, client demo notes |
+| 7 Sep 2026 | Improve reliability and validate outputs | Run the client demo, capture feedback, and update the issue list | Fix bugs found in testing and tighten the main flow | Fix bugs found in testing and tighten the main flow | Expand scenario testing and document assumptions behind spreadsheet logic | Expand scenario testing and document assumptions behind spreadsheet logic | Support validation and note any hosting or deployment issues | More stable MVP, validation evidence, second feedback loop |
+| 14 Sep 2026 | Prepare deployment and integration | Confirm server and hosting questions with the client and clarify access needs | Prepare the deployment approach and identify setup tasks | Prepare the deployment approach and identify setup tasks | Document integration assumptions and risks for the hosting setup | Document integration assumptions and risks for the hosting setup | Review deployment options and prepare for server access work | Deployment notes, integration risks, staging checklist |
+| 21 Sep 2026 | Start deployment work | Coordinate the server access discussion and confirm who can administer the environment | Log into the new server, create the repository, and begin CI/CD configuration | Support server setup and test the deployment pipeline | Prepare deployment test cases and check DNS and hosting assumptions | Prepare deployment test cases and check DNS and hosting assumptions | Help with deployment setup and verify early server changes | Server access decision, repo on server, CI/CD draft |
+| 28 Sep 2026 | Finish initial deployment and harden the app | Coordinate DNS and Nginx discussion, confirm the deployment path, and prepare the next client update | Configure DNS or Nginx, then test the deployed site end to end | Support deployment testing and fix issues from server setup | Test the deployed site and document the result | Test the deployed site and document the result | Help test the deployed site and confirm access from the team side | Working staging instance, deployment test log |
+| 5 Oct 2026 | Start the final report and stabilise release | Draft report sections on client communication, deployment, and project planning | Fix only critical issues and keep the release stable | Fix only critical issues and keep the release stable | Gather evidence for the report and document testing outcomes | Gather evidence for the report and document testing outcomes | Confirm deployment evidence and support final reporting | Report draft, evidence pack, release candidate |
+| 12 Oct 2026 | Final release and submission week | Finalise the report, confirm handover details, and package submission evidence | Lock the final release and deploy it | Lock the final release and deploy it | Help verify the final build and archive test evidence | Help verify the final build and archive test evidence | Support final deployment checks and handover documentation | Final release, final report, handover notes |
 
 ## Risk Assessment and Technology Assessment
 
