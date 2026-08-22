@@ -2,7 +2,7 @@
 
 **CITS5206 Professional Computing — Capstone Project, The University of Western Australia**
 **Client:** UWA Research Infrastructure
-**Status:** Requirements rewritten against the client's own documents and going back to the client for sign-off; technology assessed but not committed. No application code yet.
+**Status:** **Scope signed off by the client on 20 August 2026** — both confirmations, scope and ownership. Requirements written against the client's own documents. A working ASP.NET Core prototype exists in [`src/`](src/); **the written technology decision has not caught up with it** — see [Technology](#technology).
 
 ---
 
@@ -103,21 +103,38 @@ Running through it:
 Deployment is a standalone web application. Integration into existing UWA systems was
 discussed and deferred; a working website comes first.
 
+## Client sign-off
+
+**The client signed the scope statement on 20 August 2026.** Mathew Hall, Strategic Development
+Coordinator, UWA Research Infrastructure — both confirmations ticked: the scope is right, and the
+ownership position is right.
+
+The paper trail, in one place: the scope statement and five questions went by email on **17
+August**; the client replied on **18 August** confirming a time; we met in person on **20
+August**; the signed document and written answers to all five questions came back the same day.
+Everything is filed in
+[`docs/client/communication-history/`](docs/client/communication-history/) and the meeting is
+[minuted](docs/meetings/2026-08-20-client-meeting.md).
+
+The client's answers also changed one thing we had promised. The exported PDF must show **the
+calculator's workings**, not only the inputs and the three rates, and records are filed into
+UWA's Content Manager (TRIM). That is real additional work and it is tracked as such rather than
+absorbed quietly — [minutes §5](docs/meetings/2026-08-20-client-meeting.md).
+
 ## Open questions
 
-**Six are open**: three are the client's own, carried from the kickoff (multi-year cycles,
-access control and the record format), and three we raised ourselves. Three earlier questions —
-cost allocation, the utilisation split, and the billable unit set — were **closed by reading the
-client's own documents** rather than by asking.
+**One is open.** Five went to the client and all five came back answered — multi-year cycles,
+access control, the record format, and both questions about whether the guide or the calculator
+governs. Three earlier questions were **closed by reading the client's own documents** rather
+than by asking. The full list is in
+[`docs/spec/requirements.md`](docs/spec/requirements.md#9-open-questions).
 
-The full list, each with a proposed default so that a non-answer does not block us, is in
-[`docs/spec/requirements.md`](docs/spec/requirements.md#9-open-questions); the originals are in the
-[kickoff minutes](docs/meetings/2026-07-29-client-kickoff.md#open-questions).
-
-One of the three that are ours cannot be closed by us alone — **what licence this repository
-carries** (Q8), because the IP is jointly held. Until it is settled, the repository is
-all rights reserved and [`NOTICE`](NOTICE) carries the permissions. See
-[Ownership](#ownership).
+The one that remains is ours and cannot be closed by us alone: **what licence this repository
+carries** (Q8), because the IP is jointly held. The 20 August signature **unblocks** it — the
+joint position is now confirmed in writing, which is what it was waiting for — but does not close
+it, because confirming the position is not the same as choosing the licence that follows from it.
+Until then the repository is all rights reserved and [`NOTICE`](NOTICE) carries the permissions.
+See [Ownership](#ownership).
 
 ## Repository layout
 
@@ -133,11 +150,18 @@ hard to tell apart in a single flat folder.
 │   │   └── architecture.md     System shape, options assessed, and the decision gate
 │   ├── project/            How the team runs
 │   │   ├── team.md             The roster — the only place it lives
-│   │   └── assignment-1-readiness.md   Where we stand against the marking rubric
+│   │   ├── assignment-1-readiness.md   Where we stand against the marking rubric
+│   │   └── assignment-1-completion-plan.md   Who does what, by when, before 25 Aug
+│   ├── assignments/        Draft material for each submission
+│   │   └── assignment-1/       submission-draft.md — the four sections in progress
 │   ├── client/             Everything that crosses to the client
 │   │   ├── 2026-08-15-scope-and-questions.md   The document they receive
-│   │   ├── mvp-agreement.md    Why that scope, traced to requirement IDs
-│   │   └── questions-round-1.md   Why those questions, and our defaults
+│   │   ├── mvp-agreement.md    Why that scope, traced to requirement IDs — and the sign-off trail
+│   │   ├── questions-round-1.md   Why those questions, and our defaults
+│   │   └── communication-history/  What actually crossed, one folder per exchange
+│   │       ├── 2026-08-17-email-scope-and-questions/       The outbound email and its two attachments
+│   │       └── 2026-08-20-client-meeting/     The signed scope statement, the client's written
+│   │                               answers, and our notes from the room
 │   ├── meetings/           Minutes, one file per meeting
 │   ├── decisions/          Architecture and process decision records
 │   └── internal/           Our own review notes — not committed
@@ -149,7 +173,7 @@ hard to tell apart in a single flat folder.
 ├── reference/
 │   ├── client/             Client material — local only, not committed
 │   └── unit/               Assignment briefs, rubric and unit resources
-├── src/                    Application code (empty pending the technology decision)
+├── src/                    Application code — ASP.NET Core Razor Pages (see the note below)
 ├── .gitattributes          Line endings — LF everywhere, so diffs stay readable
 ├── .gitignore              What never gets committed, and why
 ├── NOTICE                  Ownership, the grant to UWA, and portfolio use
@@ -159,10 +183,35 @@ hard to tell apart in a single flat folder.
 Some working files live alongside these and are deliberately local — see
 [Confidential material](#confidential-material).
 
-Everything is **markdown or HTML**, deliberately. Plain-text artefacts diff in GitHub and
-review like code; Word documents and `.pptx` files do not. Presentations are built as
-single self-contained HTML files for the same reason — see
+Everything under `docs/` and `presentations/` is **markdown or HTML**, deliberately. Plain-text
+artefacts diff in GitHub and review like code; Word documents and `.pptx` files do not.
+Presentations are built as single self-contained HTML files for the same reason — see
 [`presentations/STYLE-GUIDE.md`](presentations/STYLE-GUIDE.md) §8.
+
+### Naming
+
+One convention, so that a path can be guessed rather than looked up:
+
+| Rule | Example |
+| --- | --- |
+| Folders and files are **lowercase-kebab-case** | `docs/client/communication-history/` |
+| Anything tied to a date is prefixed **`YYYY-MM-DD-`** | `2026-08-20-client-meeting.md` |
+| No spaces, no capitals, no camelCase in a path | `submission-draft.md`, not `submissionDrafts.md` |
+| Repository meta-documents keep their conventional capitals | `README.md`, `NOTICE`, `STYLE-GUIDE.md` |
+| The same thing is spelled the same way everywhere | `assignment-1-*`, never `assignment1-*` |
+
+**`src/` is the deliberate exception.** C# and ASP.NET Core expect PascalCase files and folders
+(`Pages/Ric/Rates.cshtml`, `Services/RicCalculationService.cs`), and fighting a framework's own
+convention costs more than it buys. The rule inside `src/` is the .NET rule.
+
+Client-supplied filenames in `reference/client/` are **left exactly as the client sent them**
+— [`requirements.md`](docs/spec/requirements.md) cites them by name as sources, and a renamed
+source is a broken citation.
+
+A rename pass on 22 August 2026 brought the tree to this convention: a misspelled `assginment/`
+folder, spaces in `Communication history/` and `Email content.md`, non-ISO dates in
+`Email-17-Aug/`, and a camelCase `submissionDrafts.md` all went. Every cross-reference was
+rewritten with them and all 274 internal links were checked afterwards.
 
 ## Where our facts come from
 
@@ -224,6 +273,28 @@ Team roster: [`docs/project/team.md`](docs/project/team.md).
 
 ## Technology
 
+> ### ⚠ The code and the assessment do not match — unresolved as of 22 August 2026
+>
+> [`src/`](src/) contains a working **ASP.NET Core Razor Pages** application — Entity Framework
+> Core over SQLite, sign-in, an approvals queue, notifications, and a sealed-record snapshot with
+> a SHA-256 hash. It is real, and a good deal further along than this section describes.
+>
+> **None of the five options assessed below is ASP.NET Core.** Option C is a server-rendered
+> monolith, which is the same *shape*, but the assessed stack was Django + HTMX + PostgreSQL,
+> and what was built is .NET + SQLite. So the repository currently argues for one stack in
+> `architecture.md`, records no decision in `docs/decisions/`, and ships another in `src/`.
+>
+> **This is flagged, not fixed.** Criterion 4 of the Assignment 1 rubric marks whether
+> *"different choices of technology have been carefully considered and the decisions clearly
+> justified"* — and right now a marker who opens both files finds a contradiction rather than a
+> justification. The fix is not to rewrite history but to write the decision down: an ADR in
+> [`docs/decisions/`](docs/decisions/) saying why .NET, how it maps to Option C, what the SQLite
+> versus PostgreSQL position is, and when it was actually taken. Tracked in
+> [`assignment-1-completion-plan.md`](docs/project/assignment-1-completion-plan.md).
+>
+> Everything below this box is the 5 August position and is left unedited, because it is what
+> was presented to the facilitator on that date.
+
 **Assessed, but not committed — and the team has not yet met to choose.** Five options were
 put to the facilitator on 5 August 2026: a client-side SPA with no backend (prototype only);
 an SPA with a REST API and PostgreSQL; a Django + HTMX monolith; Microsoft Power Platform
@@ -258,7 +329,9 @@ Brief and rubric: [`reference/unit/`](reference/unit/).
 The client owns the costing logic. The team owns the code and may use the project in
 portfolios; the client raised no objection to us sharing what we build. Selling the tool
 onward would not be appropriate, as the overarching IP is joint. Agreed with the client on
-29 July 2026 — see the [kickoff minutes](docs/meetings/2026-07-29-client-kickoff.md) §9.
+29 July 2026 — see the [kickoff minutes](docs/meetings/2026-07-29-client-kickoff.md) §9 — and
+**confirmed in writing on 20 August 2026**, signed, as confirmation 2 of the
+[scope statement](docs/client/communication-history/2026-08-20-client-meeting/project-scope-summary-signed.pdf).
 
 **No licence: all rights reserved, with permissions set out in [`NOTICE`](NOTICE).** That file
 records who owns what, grants UWA a perpetual permission to use, modify and host the tool for
@@ -266,8 +339,13 @@ its own purposes, and reserves portfolio use for the authors.
 
 This is an interim position, held deliberately. The IP is **jointly** held, and a licence
 granted by one joint owner alone may not be effective — so the team does not purport to grant
-one until the ownership position is confirmed in writing. That is
-[Q8](docs/spec/requirements.md#9-open-questions), and it closes at handover, not before.
+one. That is [Q8](docs/spec/requirements.md#9-open-questions), and it closes at handover, not
+before.
+
+**The condition on it has now been met.** The position held until the ownership was confirmed in
+writing; the client signed that confirmation on 20 August 2026. What remains is choosing the
+licence, which is a decision for handover and not one to take in the week before an assignment
+is due.
 
 Why an open-source licence would not do the job in the meantime: MIT and Apache-2.0 permit
 sale; **GPL and AGPL also permit sale** — copyleft requires source disclosure, it does not
