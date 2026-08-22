@@ -3,8 +3,8 @@
 **Project:** Research Infrastructure Costing & Pricing Tool
 **Client:** UWA Research Infrastructure
 **Prepared by:** Chenxu You (Oliver) and Wenmin Luo
-**Version:** 1.6 — 19 August 2026
-**Status:** **Sent. Awaiting the client's reply.** Update the table below the moment that changes.
+**Version:** 1.7 — 20 August 2026
+**Status:** **APPROVED — signed by the client on 20 August 2026.** Both confirmations ticked.
 
 ---
 
@@ -15,23 +15,27 @@ date something actually happened — not a date we planned for.
 
 | Event | Date | Recorded where |
 | --- | --- | --- |
-| Statement sent to the client | **Mon 17 August 2026**, by Yichen Zhao | [`Communication history/Email-17-Aug/`](Communication%20history/Email-17-Aug/) — email, scope summary and the five questions, all filed |
+| Statement sent to the client | **Mon 17 August 2026**, by Yichen Zhao | [`communication-history/2026-08-17-email-scope-and-questions/`](communication-history/2026-08-17-email-scope-and-questions/) — email, scope summary and the five questions, all filed |
 | Reply requested by | **Tue 18 August** — stated in the outbound document | |
-| Client chased | *(due today, Wed 19 August — the day after the date we asked for)* | |
-| Client response received | *(not yet)* | |
-| **Outcome** | **Outstanding** | |
+| Client replied, confirming a time to meet | **Tue 18 August 2026**, by email | Teams / email thread |
+| Client chased | *(never needed — the reply arrived first)* | |
+| Meeting held | **Thu 20 August 2026**, in person | [Minutes](../meetings/2026-08-20-client-meeting.md) |
+| Client response received | **Thu 20 August 2026** — signed document and written answers to all five questions, returned by email | [`communication-history/2026-08-20-client-meeting/`](communication-history/2026-08-20-client-meeting/) |
+| **Outcome** | ✅ **APPROVED.** Signed by **Mathew Hall**, Strategic Development Coordinator, **20/8/2026**. Confirmation 1 (scope) ✓ · Confirmation 2 (ownership) ✓ | [`project-scope-summary-signed.pdf`](communication-history/2026-08-20-client-meeting/project-scope-summary-signed.pdf) |
 
 **One person sends, one person is named.** Yichen Zhao owns client contact
 ([minutes of 15 August](../meetings/2026-08-15-team-weekly-meeting.md) §8), so the client is never
 chased twice about the same thing by two of us. The sent copy is the evidence Assignment 1 §2 is
 marked on — **a date nobody wrote down is a date we cannot cite.**
 
-**Why 18 then 19.** We ask for the reply by Tuesday and chase on Wednesday, so the chase falls
-*after* the date we named rather than on it. Wednesday is the client's stated preference for
-contact **[K §10]**, which is why the chase sits there and not the deadline.
+**Why 18 then 19.** We asked for the reply by Tuesday and planned the chase for Wednesday, so it
+would fall *after* the date we named rather than on it. Wednesday is the client's stated
+preference for contact **[K §10]**. In the event the client replied on the Tuesday and the chase
+was never sent.
 
-**If the outcome is still *Outstanding* at submission**, §C below says exactly what we write in
-the report. We do not blur it.
+**Part C is now dead letter.** It set out what we would write in the report if no answer came,
+and how long we would wait before giving up on one. It is kept below as the record of a plan
+we made and did not need, not as a live instruction — see the note at the head of it.
 
 ---
 
@@ -167,6 +171,13 @@ Things we left out of the client-facing page on purpose, and why:
 
 # Part C — If no answer comes
 
+> **Superseded 20 August 2026. This never became live.** The client replied on Tuesday 18
+> August, met us on Thursday 20 August, and signed. The chase in the second paragraph was not
+> sent and the decision point in the third was not reached. Part C is left unedited as the
+> record of the fallback we prepared — a plan that is not needed still shows that we had one —
+> and **nothing in it is an instruction any more.** What actually goes in the report is in the
+> status table at the head of this document.
+
 Three dates and one sentence.
 
 **Tuesday 18 August** — the date we asked for a reply by, stated in the outbound document.
@@ -227,7 +238,8 @@ retreat from it now.
 
 | Version | Date | Change |
 | --- | --- | --- |
-| 1.6 | 19 Aug 2026 | **The statement was sent on Mon 17 August 2026** by Yichen Zhao, as an email to the client with the scope summary and the five questions attached; all three are filed in [`Communication history/Email-17-Aug/`](Communication%20history/Email-17-Aug/). Status moves from *Drafted, not yet sent* to *Sent, awaiting reply*. **Nothing in Part A, Part B or Part C changes** — no promise, requirement or story moves; only the record of what has happened does. The outbound email also proposed **Wednesday 4:00–4:30pm** for a short meeting, which is not a date this table tracks: it tracks the reply. Part C is now live: the reply date of **Tue 18 August** has passed, the single chase falls **today, Wed 19 August**, and **Fri 21 August** remains the point at which we stop waiting and write the scope as our proposal. |
+| 1.7 | 20 Aug 2026 | **The client signed.** Mathew Hall, Strategic Development Coordinator, 20/8/2026, both confirmations ticked — the signed document and the client's written answers to all five questions are filed in [`communication-history/2026-08-20-client-meeting/`](communication-history/2026-08-20-client-meeting/) and the meeting is [minuted](../meetings/2026-08-20-client-meeting.md). Status moves from *Sent, awaiting reply* to **Approved**, and the status table now carries the two events it was missing: the client's reply of **Tue 18 August** confirming a time, and the **Thu 20 August** meeting. The chase planned for Wednesday 19 August was never sent, and the table says so rather than leaving the row hanging. **Part C is marked superseded** and left unedited — a fallback we prepared and did not need is still evidence that we prepared one. **Nothing in Part A or Part B changes**: the client signed the statement exactly as it stood, flag included, so no promise, requirement or story moves. Three things the client raised that Part A does not cover — the PDF showing the calculator's workings, HR-system integration for staff roles, and filing into Content Manager (TRIM) — are recorded in the [minutes](../meetings/2026-08-20-client-meeting.md) §5 as raised, and only the first is accepted in principle. |
+| 1.6 | 19 Aug 2026 | **The statement was sent on Mon 17 August 2026** by Yichen Zhao, as an email to the client with the scope summary and the five questions attached; all three are filed in [`communication-history/2026-08-17-email-scope-and-questions/`](communication-history/2026-08-17-email-scope-and-questions/). Status moves from *Drafted, not yet sent* to *Sent, awaiting reply*. **Nothing in Part A, Part B or Part C changes** — no promise, requirement or story moves; only the record of what has happened does. The outbound email also proposed **Wednesday 4:00–4:30pm** for a short meeting, which is not a date this table tracks: it tracks the reply. Part C is now live: the reply date of **Tue 18 August** has passed, the single chase falls **today, Wed 19 August**, and **Fri 21 August** remains the point at which we stop waiting and write the scope as our proposal. |
 | 1.5 | 15 Aug 2026 | **Part B follows requirements v2.3, which added F22** — a new cycle supersedes a sealed one by reference. Part B's rule cuts both ways, so a new MVP requirement has to be either placed against a Part A promise or recorded as deliberately absent from one; F22 is the second, and the reason is specific to it rather than shared with N4, N5, N6, N9 and N14. **How supersession works is what Part 2 question 2 asks**, so promising it in Part 1 would present as settled the thing we are asking about. Part A's "past sealed records can be listed and reopened" is F13 and is untouched — it promises retrieval, not the mechanism. **No line of the outbound document changes**, no promise is added or withdrawn, and the traceability table itself is unchanged; only the paragraph recording deliberate omissions grows. The related change in [`questions-round-1.md` v1.5](questions-round-1.md) — a sixth question considered and rejected — likewise leaves the batch at five. |
 | 1.4 | 15 Aug 2026 | **Confirmation 2 — the minutes — is deleted from the outbound document, and with it the last pre-send blocker in Part A.** We were asking the client to confirm a file they were not being sent. There are now **two** confirmations, scope and ownership; ownership renumbers from 3 to 2 with its wording untouched, and the sign-off block gains a line for each rather than one cell covering all three. Five further edits went into the outbound file at the same time: **(1)** question 2 gained the line the preamble promises — if a sealed record must be amendable within its cycle, Part 1's immutability statement gains an exception and the storage model changes (F11, US-15); it was the most expensive question in the batch and read as the cheapest. **(2)** Part 1 no longer attributes the cost and income categories to the guide — the line-level breakdown is the **calculator's** **[W, sheet 1]**; the guide gives a prompting list, not a chart of accounts. **(3)** Question 1 no longer paraphrases the client's data-sensitivity answer as "while a pricing cycle is in progress"; kickoff §7 says *while the work is still in progress*, and we do not put words in their mouth in a document that asks them to confirm the rest. **(4)** "Deferred at your suggestion" becomes "following your own view that integration would be ideal but challenging" **[K §8]** — the client raised a difficulty, they did not propose the deferral. **(5)** Question 1 now states that the build is proved end to end on one platform, matching the scope baseline in [`requirements.md` §7](../spec/requirements.md#7-scope), so that "an administrator who can see all platforms" cannot be read as multi-platform delivery. No requirement, story or scope line changes. |
 | 1.0 | 15 Aug 2026 | First version. Part A drawn from [`requirements.md` §7](../spec/requirements.md#7-scope) and [`user-stories.md` §5](../spec/user-stories.md#5-mvp-definition); figures restricted to the client's guide worked example. Not yet sent. |

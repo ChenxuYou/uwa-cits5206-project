@@ -3,9 +3,9 @@
 **Project:** Research Infrastructure Costing & Pricing Tool
 **Client:** UWA Research Infrastructure
 **Prepared by:** Wenmin Luo and Chenxu You (Oliver)
-**Version:** 1.5 — 15 August 2026
-**Status:** **Drafted, not yet sent.**
-**Goes out as:** Part 2 of [`2026-08-15-scope-and-questions.md`](2026-08-15-scope-and-questions.md)
+**Version:** 1.6 — 20 August 2026
+**Status:** **CLOSED — all five answered by the client on 20 August 2026.**
+**Went out as:** Part 2 of [`2026-08-15-scope-and-questions.md`](2026-08-15-scope-and-questions.md)
 
 ---
 
@@ -13,10 +13,17 @@
 
 | Event | Date | Recorded where |
 | --- | --- | --- |
-| Sent to the client | *(not yet)* | Teams thread / email — file the sent copy |
+| Sent to the client | **Mon 17 August 2026**, by Yichen Zhao | [`communication-history/2026-08-17-email-scope-and-questions/`](communication-history/2026-08-17-email-scope-and-questions/) |
 | Reply requested by | **Tue 18 August** | Stated in the outbound document |
-| Chased | *(not yet — planned Wed 19 August, the day after)* | |
-| Answers received | *(not yet)* | Fold into [`requirements.md` §9](../spec/requirements.md#9-open-questions) |
+| Chased | *(never needed — the client replied on 18 August)* | |
+| Walked through with the client | **Thu 20 August 2026**, in person | [Minutes](../meetings/2026-08-20-client-meeting.md) §3 · [notes taken in the room](communication-history/2026-08-20-client-meeting/dai-lam-meeting-notes.md) |
+| Answers received | **Thu 20 August 2026**, in writing — **all five** | [`client-answers-to-the-five-questions.md`](communication-history/2026-08-20-client-meeting/client-answers-to-the-five-questions.md) |
+| Folded into the spec | **Sat 22 August 2026** — Q3, Q4, Q5, Q9, Q10 closed | [`requirements.md` §9](../spec/requirements.md#9-open-questions) |
+
+**All five answered, none by default.** Every question carried a default we would have used in
+the absence of a reply; none of them was needed. Four answers matched the default and one — the
+sealed record — went further than it, asking that the PDF carry the calculator's workings as
+well as its outputs ([minutes](../meetings/2026-08-20-client-meeting.md) §5).
 
 The client asked us to digest their material and come back with **batched** questions rather
 than hold a fixed weekly slot ([kickoff §10](../meetings/2026-07-29-client-kickoff.md)). This is
@@ -156,6 +163,7 @@ if one exists.
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.6 | 20 Aug 2026 | **The batch is closed. All five questions were answered by the client on 20 August 2026**, in the meeting and again in writing — [answers](communication-history/2026-08-20-client-meeting/client-answers-to-the-five-questions.md), [minutes](../meetings/2026-08-20-client-meeting.md) §3. The status table is filled in with what happened: sent 17 August, client replied 18 August, met 20 August, answers received the same day, folded into [`requirements.md` §9](../spec/requirements.md#9-open-questions) on 22 August. **No default was used.** Four answers matched our proposed default; the fifth, on the sealed record, went beyond it — the PDF must carry the calculator's **workings** as well as its outputs, and the record is filed in Content Manager (TRIM). One answer adds an obligation the batch did not anticipate: the client asks that guide-vs-calculator discrepancies be **flagged to them** as we find them (action A15). **Nothing in Part A or Part B changes** — the questions are the questions that were asked, and the record of why they were asked is worth more unedited. |
 | 1.5 | 15 Aug 2026 | **A sixth question was considered and rejected, and the rejection is now on the record.** "How much does a cost have to move before a new cycle is opened?" came out of a review of what happens when a custodian's costs change mid-cycle. It fails the v1.3 test — the software behaves identically whatever the answer — so it is not asked, and the new section above says so with its reasoning, which is more useful to a reader than its silent absence. The review did surface something worth keeping: nothing in the specification said whether cost figures are budgeted or actual, and that distinction, not the threshold, is what decides the behaviour. It is now [A11](../spec/requirements.md#8-assumptions). **Nothing in this version changes the outbound document**: the batch is still five questions, the mapping to Q3–Q5, Q9 and Q10 is unchanged, and the two pre-send items are still open. The related half — whether a sealed record can be amended inside its own cycle — stays in the batch as part of question 2, and the new section states the difference so the two are not conflated later. |
 | 1.4 | 15 Aug 2026 | **Question 2 gained the "what changes in Part 1" line**, closing the third item on the pre-send list; the reasoning is above, and question 3's continued absence of one is now recorded as a decision rather than an oversight. The pre-send list is down to two, both concerning the defect list offered in question 5: who writes it and by when, and the fact that the 14 August audit it depends on **is still not in the repository**. Elsewhere in the outbound document, question 1 was corrected in two places — the client's data-sensitivity answer is no longer paraphrased as "while a pricing cycle is in progress" (kickoff §7 says *while the work is still in progress*), and the roles paragraph now states that the build is proved on one platform, matching [`requirements.md` §7](../spec/requirements.md#7-scope). The batch is still five questions and the mapping to Q3–Q5, Q9 and Q10 is unchanged. |
 | 1.0 | 15 Aug 2026 | First version. Questions drawn from [`requirements.md` §9](../spec/requirements.md#9-open-questions) — Q4, Q3, Q5, Q9, Q10 — reordered for the client, each carrying its proposed default. Not yet sent. |

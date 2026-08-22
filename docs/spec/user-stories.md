@@ -1,7 +1,10 @@
 # User Stories
 
 **Project:** Research Infrastructure Costing & Pricing Tool
-**Status:** Draft v2.1 — 15 August 2026, not yet reviewed by the client
+**Status:** Draft v2.1 — 15 August 2026. **The scope these stories implement was signed off by
+the client on 20 August 2026** ([minutes](../meetings/2026-08-20-client-meeting.md)); the stories
+themselves have not been reviewed by them, and one addition from that meeting — the sealed PDF
+showing the calculator's workings — is not yet written as a story (action A17)
 **Companion documents:** [requirements](requirements.md) · [architecture](architecture.md)
 
 > Stories trace to the requirement IDs in [requirements §6](requirements.md#6-requirements).

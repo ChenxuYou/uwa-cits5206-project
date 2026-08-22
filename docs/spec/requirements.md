@@ -3,7 +3,8 @@
 **Project:** Research Infrastructure Costing & Pricing Tool
 **Client:** UWA Research Infrastructure
 **Unit:** CITS5206 Professional Computing, The University of Western Australia
-**Status:** Draft v2.3 — 15 August 2026, not yet reviewed by the client
+**Status:** v2.4 — 22 August 2026. **The scope this document describes was signed off by the
+client on 20 August 2026**; the document itself has not been reviewed line by line by them
 **Primary sources:** the client's own documents (see *Source precedence* below), supported by the
 [client kickoff minutes, 29 July 2026](../meetings/2026-07-29-client-kickoff.md)
 
@@ -18,16 +19,24 @@ than silently resolved.
 
 | Rank | Source | Marked | Why it ranks here |
 | --- | --- | --- | --- |
-| 1 | **`01-context-costing-pricing-research-infrastructure.docx`** — the client's costing & pricing guide | **[G]** with the step number | The client's normative policy document. It states its own scope: "a consistent methodology for developing, reviewing and approving sustainable charge-out rates **across the University**" |
-| 2 | **`02-template-ric-cost-calculator.xlsx`** — the working calculator | **[W]** with the sheet and cell | A reference *implementation* of the guide. Authoritative for structure and data shape; **not** authoritative where its arithmetic departs from the guide, because it contains demonstrable formula defects (§2) |
-| 3 | [Kickoff minutes, 29 July 2026](../meetings/2026-07-29-client-kickoff.md) | **[K]** with the section | Our own record of a spoken walkthrough. Useful for intent and priority, unreliable for figures |
+| 1 | **The client's written answers to our questions** — [20 August 2026](../client/communication-history/2026-08-20-client-meeting/client-answers-to-the-five-questions.md), and the [signed scope statement](../client/communication-history/2026-08-20-client-meeting/project-scope-summary-signed.pdf) | **[C]** with the date | The client answering *our* question, in their own words, in writing, about this project. It outranks the guide because the guide is a general policy and this is a decision about how the policy applies here |
+| 2 | **`01-context-costing-pricing-research-infrastructure.docx`** — the client's costing & pricing guide | **[G]** with the step number | The client's normative policy document. It states its own scope: "a consistent methodology for developing, reviewing and approving sustainable charge-out rates **across the University**" |
+| 3 | **`02-template-ric-cost-calculator.xlsx`** — the working calculator | **[W]** with the sheet and cell | A reference *implementation* of the guide. Authoritative for structure and data shape; **not** authoritative where its arithmetic departs from the guide, because it contains demonstrable formula defects (§2) |
+| 4 | [Kickoff minutes, 29 July 2026](../meetings/2026-07-29-client-kickoff.md) · [client meeting, 20 August 2026](../meetings/2026-08-20-client-meeting.md) | **[K]** with the section | Our own record of what was said in a room. Useful for intent and priority, unreliable for figures — and where our minutes and a **[C]** answer differ, **[C]** wins |
 
 Client files live in `reference/client/` and are **not committed** — see
 [`reference/client/README.md`](../../reference/client/README.md). Everything quoted from them here
 is transcribed by us, with the source named.
 
-**Anything not carrying a [G], [W] or [K] marker is an inference of ours** and is listed in §8
-as an assumption to be confirmed. Nothing in this document has been signed off by the client.
+**Anything not carrying a [C], [G], [W] or [K] marker is an inference of ours** and is listed in
+§8 as an assumption to be confirmed.
+
+**What the client has signed off, and what they have not.** On 20 August 2026 the client signed
+the [scope statement](../client/communication-history/2026-08-20-client-meeting/project-scope-summary-signed.pdf)
+— two confirmations, scope and ownership — and answered all five open questions in writing. That
+is a sign-off on **the scope this document describes**, not a line-by-line review of the document
+itself. Statements marked **[C]** are the client's; the rest still needs reading with the
+precedence rule above.
 
 ---
 
@@ -544,29 +553,35 @@ Recorded so that they can be confirmed or corrected. Each is ours, not the clien
 
 ## 9. Open questions
 
-**Q1, Q2 and Q6 have been closed by the client's own documents** and their answers are now in
-§4. **Q3–Q5 remain from the kickoff** and are the client's own. **Q7–Q10 are ours.** A
-consolidated list is being prepared for the client; a *proposed default* is given for each so
-that a non-answer does not block us.
+**One question is open.** **Q1, Q2 and Q6** were closed by the client's own documents and their
+answers are in §4. **Q3, Q4, Q5, Q9 and Q10** were put to the client on 17 August 2026 and
+**answered by the client on 20 August 2026** — in the meeting and again in writing. **Q7** is
+answered, but recorded because the answer is ours rather than the client's. **Q8**, the
+repository licence, is the one that remains, and it closes at handover.
 
 Any count of open questions quoted elsewhere in the repository refers to this table. If a
 question is added, it is added here first.
 
-**Six questions are open**: three carried from the kickoff (Q3–Q5) and three of ours
-(Q8–Q10). Q7 is answered but recorded because the answer is ours, not the client's.
+> **No default was used.** Every question in the batch carried a proposed default so that a
+> non-answer would not block us. All five came back answered, four of them matching the default.
+> The fifth — Q5, the sealed record — went further than our default and is the only place where
+> the client's answer adds work: see the row itself.
+>
+> **Client answers:** [`client-answers-to-the-five-questions.md`](../client/communication-history/2026-08-20-client-meeting/client-answers-to-the-five-questions.md)
+> · **Meeting:** [minutes of 20 August 2026](../meetings/2026-08-20-client-meeting.md) §3
 
 | # | Question | Status / proposed default |
 | --- | --- | --- |
 | ~~Q1~~ | How are costs allocated between the per-capability and per-platform levels? | **Closed.** Even split across capability columns **[W]** — see §4 Step 1 |
 | ~~Q2~~ | How is utilisation split across the three user types? | **Closed.** A single `U` per capability drives the rates; the per-type split drives the balance projection **[W]** — see §4 Step 2 |
-| **Q3** | How are multi-year cycles handled, and how is a sealed record superseded rather than overwritten? **And does a sealed record ever need amending *within* its own cycle** — a correction, or a mid-cycle rate change — rather than waiting to be replaced by the next one? | A cycle carries a validity period; a new cycle supersedes the previous one by reference (A5, **F22**); nothing is ever overwritten. **Supersession only — no in-cycle amendment.** If amendment is required, a sealed record keeps a visible amendment history instead of a single frozen version: F11 and US-15 grow and the data model changes, which is why this half is asked before the engine is written. Not to be confused with *when a new cycle is opened*, which is the client's operating judgement and not a question we ask (A11) |
-| **Q4** | What access control is needed beyond authentication — who may see, and who is the delegated authority in the system? | Three roles: custodian (own platform, create and submit), delegated authority (**sees** what is submitted to them — the approval *action* is F16, Should, not MVP), administrator (all platforms). Authentication local to the app for the MVP. The guide names the approver as "typically the head of the BU responsible for the operating costs" **[G, Step 5]**; what we lack is whether *typically* holds here and who it is |
-| **Q5** | What format does the sealed record take — printout, generated email, or something else? | PDF export, generated server-side, plus a stable in-app URL for the record |
+| ~~Q3~~ | How are multi-year cycles handled, and how is a sealed record superseded rather than overwritten? **And does a sealed record ever need amending *within* its own cycle**? | **Closed 20 Aug 2026 by the client** — and our proposed default confirmed in full. *"Retain all records, most recent approved record is current and supersedes prior records… aiming for a validity period of 3-5 years (capability dependent)… don't expect to review records/pricing annually."* **[C]** Supersession only (A5, **F22**); nothing overwritten; **no in-cycle amendment**, so F11 and US-15 do not grow and the data model keeps a single frozen version. Validity period is now a stated range rather than a guess |
+| ~~Q4~~ | What access control is needed beyond authentication — who may see, and who is the delegated authority in the system? | **Closed 20 Aug 2026 by the client:** *"Agreed that administrator is approver of the record."* **[C]** The three roles stand — custodian, delegated authority, administrator — with authentication local to the app for the MVP. **The approval *action* remains F16 (Should, not MVP):** the client answered who holds the authority, not whether the tool must route a submission to them, and signed the scope statement with that flag in it unchanged. Confirmation is action A14. Separately, the client raised **linking staff roles to a UWA HR system** — out of the agreed scope, recorded as raised in the [minutes](../meetings/2026-08-20-client-meeting.md) §5 |
+| ~~Q5~~ | What format does the sealed record take — printout, generated email, or something else? | **Closed 20 Aug 2026 by the client**, and this is the one answer that **adds work**: *"Confirm that .pdf is appropriate format. No such template exists currently – ideally the .pdf record would include workings for the calculator (for transparency and traceability) and outputs. Records to be stored on UWA records management system: Content Manager (TRIM)."* **[C]** PDF confirmed, server-side, plus the stable in-app URL. **New:** the export must show the *workings*, not only the inputs and the three rates — needs a requirement ID and a story estimate (action A17). TRIM is a filing destination the custodian uses, **not** an integration the tool performs |
 | ~~Q6~~ | What is the billable unit set? | **Closed.** Hours, days or samples **[G, Step 2]** |
 | ~~Q7~~ | Is the calculated-vs-proposed variance ever required to be zero? | **Answered by us, not the client.** Always permissible, always surfaced, justification mandatory when non-zero. The workbook itself carries large deficits at proposed rates, so a non-zero variance is clearly normal **[W]** |
-| **Q8** | What licence does this repository carry, given jointly owned IP? | **None, deliberately.** All rights reserved, with UWA's permissions granted directly in [`NOTICE`](../../NOTICE). A licence from one joint owner alone may not be effective, so we do not purport to grant one; this closes at handover once the ownership position is confirmed in writing — see [README §Ownership](../../README.md#ownership) |
-| **Q9** | The guide's commercial formula deducts no income; the workbook's commercial row deducts federal and other income **[W, sheet 1 row 59]**. Which is correct? | **The guide.** `(C / U) × k`, no deduction. Recorded as a defect in the workbook, to be confirmed |
-| **Q10** | Should the tool reproduce the workbook's three formula defects for backward comparability, or correct them? | Correct them, and show the corrected figure beside the workbook's where a historical comparison is made. A tool that faithfully reproduces a known error is not an improvement |
+| **Q8** | What licence does this repository carry, given jointly owned IP? | **Open — the only one.** All rights reserved, with UWA's permissions granted directly in [`NOTICE`](../../NOTICE). A licence from one joint owner alone may not be effective, so we do not purport to grant one. **Unblocked 20 Aug 2026:** the client signed confirmation 2, so the joint ownership position is now confirmed in writing — which is what this question was waiting on. It still does not close today, because the signature confirms the *position*, not the licence that follows from it. Closes at handover — see [README §Ownership](../../README.md#ownership) and action A16 |
+| ~~Q9~~ | The guide's commercial formula deducts no income; the workbook's commercial row deducts federal and other income **[W, sheet 1 row 59]**. Which is correct? | **Closed 20 Aug 2026 by the client:** *"Guide governs. Where a discrepancy occurs, we'd appreciate if these can be flagged to us for our knowledge and guidance."* **[C]** `R_commercial = (C / U) × k`, no deduction. The workbook's commercial row is confirmed as a defect. The second sentence is an obligation on us, not a preference — discrepancies go back to the client as we find them (action A15) |
+| ~~Q10~~ | Should the tool reproduce the workbook's three formula defects for backward comparability, or correct them? | **Closed 20 Aug 2026 by the client:** *"Tool should follow the guide."* **[C]** Correct them, and show the corrected figure beside the workbook's where a historical comparison is made (N14). A tool that faithfully reproduces a known error is not an improvement, and the client agrees |
 
 ## 10. Constraints
 
@@ -582,6 +597,7 @@ question is added, it is added here first.
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 2.4 | 22 Aug 2026 | **The client answered. Five of the six open questions close, and one source outranks the guide.** On **20 August 2026** the client signed the scope statement (both confirmations) and answered all five questions put to them on 17 August, in the meeting and again in writing — [answers](../client/communication-history/2026-08-20-client-meeting/client-answers-to-the-five-questions.md), [minutes](../meetings/2026-08-20-client-meeting.md). **§9 goes from six open questions to one.** Q3 closes with our default confirmed and the validity period stated as **3–5 years, capability dependent**; Q4 closes on *"administrator is approver of the record"*, which settles **who** approves and leaves F16 (routed in-tool approval) a Should, as the signed scope has it; Q5 closes on PDF, **with the calculator's workings included** and filing into Content Manager (TRIM); Q9 and Q10 close on *"guide governs"* and *"tool should follow the guide"*. **Q8 alone remains open**, and it is now unblocked rather than blocked: confirmation 2 puts the joint ownership position in writing, which is what it was waiting for. **A new source rank, [C], is added above the guide** — the client answering our question in writing about this project outranks their general policy document, and the precedence table now says so and says that **[C]** beats our own minutes. **No requirement, story or MoSCoW priority changes in this version.** Two things the client's answers create are recorded as actions rather than folded in silently: the sealed PDF must show the workings, which is new work needing a requirement ID and an estimate (A17), and the client asks that guide-vs-calculator discrepancies be flagged to them as we find them (A15). Both are in the [minutes](../meetings/2026-08-20-client-meeting.md) §5, along with a third — HR-system integration for staff roles — which is **raised, not accepted**, because it is the class of work the signed scope defers. |
 | 1.0 | 14 Aug 2026 | First draft, written from the 29 July kickoff minutes. Not yet reviewed by the client. |
 | 1.1 | 14 Aug 2026 | §7 named as the scope baseline that the user stories must follow, and tied to the MoSCoW priorities in §6. §9 now says which questions came from the client and which are ours. |
 | 2.0 | 14 Aug 2026 | **Rewritten against the client's own documents.** Source precedence established: the costing guide governs, the workbook is a reference implementation, the minutes rank last. The demonstration figures transcribed from the walkthrough ($380,000 / $230,000 / $3,291 / $15,000) are **withdrawn** — none appears in any client document — and replaced by the guide's worked example ($150,000 / $20,000 / $30,000 / 1,000 h → $100 / $162 / $202.50), which is now the golden-file fixture. Rates are **per capability**, not per platform (A1). Income is **four lines**, split UWA vs non-UWA, not two. Billable units are **hours, days, samples**, not weeks. Capacity baselines, the staff-FTE cap and the even-split allocation rule are stated from the workbook. Replacement reserve added (F19) — the earlier "not replacement cost" line was wrong. Benchmarking (F20) and price-change communication (F21) added from guide steps 4 and 6. GST-exclusive promoted from assumption to fact. Terminology settled from the guide: custodian, capability, billable unit, APFR. **F15 raised to Must and moved into the MVP.** N14 added against the workbook's column-range defect. Q1, Q2 and Q6 closed by the client's documents; Q9 and Q10 opened by them. §2 now documents three specific formula defects in the live workbook as evidence for the problem statement. |
