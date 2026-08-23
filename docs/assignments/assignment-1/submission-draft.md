@@ -11,7 +11,50 @@ From these pain points and the client requirements, we are deciding to build **a
 
 ## Client Communication and MVP
 
+### Client Communication
+
+Clients: Mathew and Erika
+
+Client Meeting 1 — 29 July 2026
+- Clients introduced the project and its requirements
+- Gave the team its initial understanding of the costing and pricing problem
+- Team set up a Teams group chat with Mathew and Erika to keep communication ongoing
+
+Supporting material received — 11 August 2026 (sent by Mathew via Email)
+- CONTEXT – Costing & Pricing Research Infrastructure: guide outlining the costing and pricing exercise
+- TEMPLATE – RIC Cost Calculator: the existing spreadsheet the tool is intended to replace
+- EXAMPLE – Project Costing Template: an existing UWA costing template with similarities to our goals
+- EXAMPLE – UniSuper Calculator: an external calculator with a comparable structure
+
+Scope drafting and sign-off — 17 August 2026 (via Email)
+- Worked through the material against the clients' own worked example
+- Identified where the guide and the calculator disagreed
+- Drafted and sent two documents by email:
+  - Scope summary for sign-off (what we're building, what we're not)
+  - Five open questions, each with a default answer, so nothing was blocked while waiting for a response
+
+Client Meeting 2 — 20 August 2026
+- Demonstrated the team's understanding of the scope
+- Walked through the five open questions with the clients
+- Clients gave positive feedback and signed off on the scope document
+- This sign-off marks the boundary of Assignment 1 and confirms the MVP definition below
+
+### MVP definition
+
 TBD
+
+- Minimum end-to-end path through the guided costing tool (the vertical slice referenced in the Risk Assessment):
+  - Custodian signs in
+  - Starts a costing cycle
+  - Enters annual running costs and income against a capability
+  - Builds capacity from standard baselines
+  - Forecasts utilisation
+  - Receives the three minimum sustainable charge-out rates, with underlying figures shown
+  - Proposes a rounded rate and sees the resulting surplus/deficit
+  - Records a justification
+  - Seals and exports the record
+- Deliberately narrow: one platform, one capability, one full cycle
+- Purpose: prove the calculation engine correct against the clients' worked example before building out the interface further
 
 ## Project Management and Plans
 
