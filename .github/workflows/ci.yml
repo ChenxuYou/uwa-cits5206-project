@@ -70,9 +70,32 @@ jobs:
 
       - name: List vulnerable packages
         # risks.md R17 — a dependency advisory should surface here, not in production.
+        #
+        # High and Critical advisories fail the build, EXCEPT those listed in
+        # .github/known-advisories.txt, each of which carries a written assessment
+        # and a review date. A gate that cannot be passed is a gate that gets
+        # switched off, so accepted advisories are excluded by name — never by
+        # relaxing the rule.
         run: |
-          dotnet list src/CostingTool.csproj package --vulnerable --include-transitive 2>&1 | tee audit.txt
-          if grep -q -E 'High|Critical' audit.txt; then
-            echo "::error::High or Critical advisory found in dependencies."
+          set -o pipefail
+          dotnet list src/CostingTool.csproj package --vulnerable --include-transitive 2>&1 \
+            | tee "${RUNNER_TEMP}/audit.txt"
+
+          grep -E 'High|Critical' "${RUNNER_TEMP}/audit.txt" > "${RUNNER_TEMP}/hits.txt" || true
+
+          grep -oE 'GHSA-[a-z0-9]+-[a-z0-9]+-[a-z0-9]+' .github/known-advisories.txt \
+            | while read -r ghsa; do
+                if grep -q "$ghsa" "${RUNNER_TEMP}/hits.txt"; then
+                  echo "::notice::Accepted advisory $ghsa — see .github/known-advisories.txt"
+                  grep -v "$ghsa" "${RUNNER_TEMP}/hits.txt" > "${RUNNER_TEMP}/hits.tmp" || true
+                  mv "${RUNNER_TEMP}/hits.tmp" "${RUNNER_TEMP}/hits.txt"
+                fi
+              done
+
+          if [ -s "${RUNNER_TEMP}/hits.txt" ]; then
+            echo "::error::Unreviewed High or Critical advisory in dependencies."
+            cat "${RUNNER_TEMP}/hits.txt"
+            echo "Assess it, then either upgrade or record it in .github/known-advisories.txt."
             exit 1
           fi
+          echo "No unreviewed High or Critical advisories."
