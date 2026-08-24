@@ -137,7 +137,7 @@ the other in the same commit. Estimates are relative points, for sprint planning
 - Amounts that are implausibly large for their category prompt a confirmation — the named case is $200,000 typed where $20,000 was meant **[K §5]**.
 - Percentages outside 0–100 and negative costs are rejected.
 - Zero or absent utilisation is caught as a validation failure, never a division error **[N8]**.
-- A platform total is always summed over exactly the same set of capabilities as the figures it is compared against — the workbook's defect 3 is structurally impossible **[N14, requirements §2]**.
+- A platform total is always summed over exactly the same set of capabilities as the figures it is compared against — a mismatched aggregate is structurally impossible to express **[N14, requirements §2]**.
 - Server-side validation is authoritative; client-side validation is convenience only.
 - The client's requirement in full: "they can't break it, they can't mess it up" **[K §5]**.
 

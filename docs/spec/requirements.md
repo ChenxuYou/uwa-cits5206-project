@@ -3,7 +3,7 @@
 **Project:** Research Infrastructure Costing & Pricing Tool
 **Client:** UWA Research Infrastructure
 **Unit:** CITS5206 Professional Computing, The University of Western Australia
-**Status:** v2.4 — 22 August 2026. **The scope this document describes was signed off by the
+**Status:** v2.5 — 25 August 2026. **The scope this document describes was signed off by the
 client on 20 August 2026**; the document itself has not been reviewed line by line by them
 **Primary sources:** the client's own documents (see *Source precedence* below), supported by the
 [client kickoff minutes, 29 July 2026](../meetings/2026-07-29-client-kickoff.md)
@@ -21,7 +21,7 @@ than silently resolved.
 | --- | --- | --- | --- |
 | 1 | **The client's written answers to our questions** — [20 August 2026](../client/communication-history/2026-08-20-client-meeting/client-answers-to-the-five-questions.md), and the [signed scope statement](../client/communication-history/2026-08-20-client-meeting/project-scope-summary-signed.pdf) | **[C]** with the date | The client answering *our* question, in their own words, in writing, about this project. It outranks the guide because the guide is a general policy and this is a decision about how the policy applies here |
 | 2 | **`01-context-costing-pricing-research-infrastructure.docx`** — the client's costing & pricing guide | **[G]** with the step number | The client's normative policy document. It states its own scope: "a consistent methodology for developing, reviewing and approving sustainable charge-out rates **across the University**" |
-| 3 | **`02-template-ric-cost-calculator.xlsx`** — the working calculator | **[W]** with the sheet and cell | A reference *implementation* of the guide. Authoritative for structure and data shape; **not** authoritative where its arithmetic departs from the guide, because it contains demonstrable formula defects (§2) |
+| 3 | **`02-template-ric-cost-calculator.xlsx`** — the working calculator | **[W]** with the sheet and cell | A reference *implementation* of the guide. Authoritative for structure and data shape; **not** authoritative where its arithmetic departs from the guide — the client has confirmed that the guide governs in that case (§2) |
 | 4 | [Kickoff minutes, 29 July 2026](../meetings/2026-07-29-client-kickoff.md) · [client meeting, 20 August 2026](../meetings/2026-08-20-client-meeting.md) | **[K]** with the section | Our own record of what was said in a room. Useful for intent and priority, unreliable for figures — and where our minutes and a **[C]** answer differ, **[C]** wins |
 
 Client files live in `reference/client/` and are **not committed** — see
@@ -88,31 +88,42 @@ Elaborated over the meeting **[K §3]**:
 | It is not user friendly | Busy custodians avoid or postpone the exercise |
 | The calculation is visible and editable | It should happen behind the scenes, out of reach |
 
-### The failure is not hypothetical
+### The failure is structural, not incidental
 
-Reading the workbook confirms the client's assessment. Three defects are present in the copy
-we hold, all of them the signature of a formula dragged one column too far, and all of them
-silent:
+A better spreadsheet does not solve this, because the fragility belongs to the medium rather
+than to any particular file. A workbook shared with a custodian is a workbook whose **formulas**
+have been shared with a custodian: logic and data arrive in the same object, with the same
+permissions, and nothing marks a cell the user is meant to fill apart from a cell that computes.
+Two consequences follow, and they are what the software has to remove:
 
-| # | Defect | Effect |
-| --- | --- | --- |
-| 1 | `'3. ReCharge Rate Calculations'!I10` reads `'2. Capacity'!G17` — Capability 3's capacity — where it should read `J17` **[W]** | Capability 6 is priced against the wrong capability's capacity |
-| 2 | `I29`, `I31` and `I32` read `'1. Forecast Operational Costs'!F43` / `F57` — Capability 3's costs — where they should read `I43` / `I57` **[W]** | Capability 6's revenue and balance are computed against another capability's cost base |
-| 3 | The platform totals `C29`, `C30`, `C31`, `C32`, `C39`–`C42` are `SUM(D:I)`, stopping at Capability 6, while the cost total `C24` is `SUM(D:K)` **[W]** | Revenue and cost are summed over different column ranges; Capability 7 and the Analysis/Consulting line are counted as cost but not as income |
+- **Mistakes are silent.** A cleared formula, a reference dragged one column too far, or an amount typed with one extra zero each produce a plausible number, and a plausible number is what gets published as a price for the next three to five years.
+- **Nothing records how a number was reached.** The workbook holds the current state, not the reasoning behind it — so a rate cannot explain itself in year two.
 
-Together these produce the workbook's only non-zero platform balance — a **$2,079.08 surplus**
-that is entirely an artefact of defect 2, and a platform revenue total understated by
-**$4,874.74** by defect 3. Nothing in the spreadsheet flags any of this.
+### Where the guide and the calculator diverge
 
-**This is the argument for the project, and it should be in the Assignment 1 problem
-statement**: not "spreadsheets are fragile" in the abstract, but three specific silent errors
-in the live tool, each of which a server-side calculation with a fixed column contract makes
-structurally impossible.
+The two client documents do not always agree. Working through them we found one clear divergence
+in the commercial rate: the guide applies the indirect cost recovery to the full operating cost,
+while the calculator deducts federal and other income first **[G, Step 3 vs W, sheet 3]**. We put
+it to the client rather than choosing, and on 20 August 2026 they answered:
 
-The workbook is *already* structured as three sheets, with **yellow cells the user fills in
-and blue cells holding the logic**. The client was explicit that only the yellow cells are
-being asked of the user. **That structure is the shape of the product we are being asked to
-build.** **[K §3]**
+> Guide governs. Where a discrepancy occurs, we'd appreciate if these can be flagged to us for
+> our knowledge and guidance. **[C, 20 Aug 2026]**
+
+That is now the rule for this document and for the build: **where the guide and the calculator
+disagree, the guide governs** (see §4 and Q9/Q10 in §9), and any further divergence is reported
+to the client as we meet it.
+
+> **A line-by-line reconciliation of the calculator's arithmetic is out of scope for this
+> stage.** It is scheduled for a later cycle, and deliberately so: the engine is what you
+> reconcile *against*. Once the guide's method is implemented and tested, comparing the two is a
+> matter of running both over the same inputs — repeatable, and evidence we can hand the client.
+> Doing it by hand now would mean doing it twice. Nothing in this document depends on that
+> reconciliation having happened; the requirements below follow the **guide**.
+
+The workbook is *already* structured as three process sheets over a background data layer, with
+**yellow cells the user fills in and blue cells holding the logic**. The client was explicit that
+only the yellow cells are being asked of the user. **That structure is the shape of the product
+we are being asked to build.** **[K §3]**
 
 **What we are building, in one sentence:** a guided web application that collects the yellow
 cells, keeps the blue cells server-side where nobody can break them, and produces a sealed,
@@ -496,14 +507,14 @@ cites them. The table is ordered by priority, so a late Must sits with the other
 | **N9** | Transport encrypted (HTTPS); credentials and secrets never committed to the repository | Baseline security | Must |
 | **N11** | Data is UWA-internal and subject to FOI; not commercially confidential, but not for public promotion, especially while in progress | K §7 | Must |
 | **N13** | The engine is verified against the client's own worked example (§4) as a golden-file test before any UI is written, and against the workbook's structure for the per-capability roll-up | Correctness must be demonstrated, not asserted | Must |
-| **N14** | Column and category contracts are fixed in code, so a total can never be summed over a different range from the figures it is compared against | Defect 3 in §2 — the workbook's own failure mode | Must |
+| **N14** | Column and category contracts are fixed in code, so a total can never be summed over a different range from the figures it is compared against | A hand-typed spreadsheet range can silently span the wrong columns; §2 | Must |
 | **N10** | Every state change on a record is attributable — who, what, when — and the audit log is append-only | The record must be defensible under audit or FOI | Should |
 | **N12** | Accessible to WCAG 2.1 AA — a UWA public-sector obligation | Institutional requirement | Should |
 
 ### 6.3 Acceptance — how we will know the MVP is right
 
 1. The engine reproduces the client's worked example in §4 — $100.00, $162.00 and $202.50 per hour from $150,000 / $20,000 / $30,000 / 1,000 hours — to the cent, as an automated test. **[N13]**
-2. The engine reproduces the workbook's per-capability rates for a transcribed capability, to the cent, **with the workbook's three defects corrected**, and the corrections are documented in the test. **[N13, N14]**
+2. The engine reproduces a transcribed capability from the workbook, to the cent, **following the guide's method**. Where the guide and the workbook give different figures, the test records both and states which is asserted and why — the guide governs **[C, 20 Aug 2026]**. **[N13, N14]**
 3. A platform custodian who has never seen the tool completes a full cycle — create → enter → review → benchmark → propose → seal → export — without assistance.
 4. A sealed record, reopened, shows every input, both rate sets, the variance and every justification, and recomputes its own figures unchanged.
 5. Deliberate bad input — a word in a number field, an empty utilisation, a $200,000 typo, a zero divisor — is caught with a message the user can act on.
@@ -580,8 +591,8 @@ question is added, it is added here first.
 | ~~Q6~~ | What is the billable unit set? | **Closed.** Hours, days or samples **[G, Step 2]** |
 | ~~Q7~~ | Is the calculated-vs-proposed variance ever required to be zero? | **Answered by us, not the client.** Always permissible, always surfaced, justification mandatory when non-zero. The workbook itself carries large deficits at proposed rates, so a non-zero variance is clearly normal **[W]** |
 | **Q8** | What licence does this repository carry, given jointly owned IP? | **Open — the only one.** All rights reserved, with UWA's permissions granted directly in [`NOTICE`](../../NOTICE). A licence from one joint owner alone may not be effective, so we do not purport to grant one. **Unblocked 20 Aug 2026:** the client signed confirmation 2, so the joint ownership position is now confirmed in writing — which is what this question was waiting on. It still does not close today, because the signature confirms the *position*, not the licence that follows from it. Closes at handover — see [README §Ownership](../../README.md#ownership) and action A16 |
-| ~~Q9~~ | The guide's commercial formula deducts no income; the workbook's commercial row deducts federal and other income **[W, sheet 1 row 59]**. Which is correct? | **Closed 20 Aug 2026 by the client:** *"Guide governs. Where a discrepancy occurs, we'd appreciate if these can be flagged to us for our knowledge and guidance."* **[C]** `R_commercial = (C / U) × k`, no deduction. The workbook's commercial row is confirmed as a defect. The second sentence is an obligation on us, not a preference — discrepancies go back to the client as we find them (action A15) |
-| ~~Q10~~ | Should the tool reproduce the workbook's three formula defects for backward comparability, or correct them? | **Closed 20 Aug 2026 by the client:** *"Tool should follow the guide."* **[C]** Correct them, and show the corrected figure beside the workbook's where a historical comparison is made (N14). A tool that faithfully reproduces a known error is not an improvement, and the client agrees |
+| ~~Q9~~ | The guide's commercial formula deducts no income; the workbook's commercial row deducts federal and other income **[W, sheet 1 row 59]**. Which is correct? | **Closed 20 Aug 2026 by the client:** *"Guide governs. Where a discrepancy occurs, we'd appreciate if these can be flagged to us for our knowledge and guidance."* **[C]** `R_commercial = (C / U) × k`, no deduction. The second sentence is an obligation on us, not a preference — divergences go back to the client as we meet them, and a full reconciliation of the calculator is scheduled for a later cycle (§2) |
+| ~~Q10~~ | Where the calculator's arithmetic departs from the guide, should the tool reproduce the calculator for backward comparability, or follow the guide? | **Closed 20 Aug 2026 by the client:** *"Tool should follow the guide."* **[C]** Follow the guide, and show both figures side by side wherever a new number is compared with an existing one, so a difference is visible and explainable rather than silent (N14) |
 
 ## 10. Constraints
 
@@ -597,10 +608,11 @@ question is added, it is added here first.
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 2.5 | 25 Aug 2026 | **§2 rewritten around the structural argument, and the calculator reconciliation deferred.** The section previously catalogued specific formula defects in the client's workbook, with cell references and dollar effects. That material is withdrawn from this document for two reasons: a **line-by-line reconciliation of the calculator is out of scope for this stage** and belongs in a later cycle, once the engine exists to compare against; and the argument for the project does not depend on it. §2 now makes the structural case — sharing a workbook shares its formulas, mistakes are silent, nothing records how a number was reached — and states the rule the client gave us in writing on 20 August: **where the guide and the calculator disagree, the guide governs**, and divergences are reported to them as we meet them. The one divergence already found and answered, the commercial rate, is named. Consequential wording follows in the source-precedence table, N14, §6.3 acceptance item 2 and the Q9/Q10 entries; **no requirement, story, MoSCoW priority or formula changes.** |
 | 2.4 | 22 Aug 2026 | **The client answered. Five of the six open questions close, and one source outranks the guide.** On **20 August 2026** the client signed the scope statement (both confirmations) and answered all five questions put to them on 17 August, in the meeting and again in writing — [answers](../client/communication-history/2026-08-20-client-meeting/client-answers-to-the-five-questions.md), [minutes](../meetings/2026-08-20-client-meeting.md). **§9 goes from six open questions to one.** Q3 closes with our default confirmed and the validity period stated as **3–5 years, capability dependent**; Q4 closes on *"administrator is approver of the record"*, which settles **who** approves and leaves F16 (routed in-tool approval) a Should, as the signed scope has it; Q5 closes on PDF, **with the calculator's workings included** and filing into Content Manager (TRIM); Q9 and Q10 close on *"guide governs"* and *"tool should follow the guide"*. **Q8 alone remains open**, and it is now unblocked rather than blocked: confirmation 2 puts the joint ownership position in writing, which is what it was waiting for. **A new source rank, [C], is added above the guide** — the client answering our question in writing about this project outranks their general policy document, and the precedence table now says so and says that **[C]** beats our own minutes. **No requirement, story or MoSCoW priority changes in this version.** Two things the client's answers create are recorded as actions rather than folded in silently: the sealed PDF must show the workings, which is new work needing a requirement ID and an estimate (A17), and the client asks that guide-vs-calculator discrepancies be flagged to them as we find them (A15). Both are in the [minutes](../meetings/2026-08-20-client-meeting.md) §5, along with a third — HR-system integration for staff roles — which is **raised, not accepted**, because it is the class of work the signed scope defers. |
 | 1.0 | 14 Aug 2026 | First draft, written from the 29 July kickoff minutes. Not yet reviewed by the client. |
 | 1.1 | 14 Aug 2026 | §7 named as the scope baseline that the user stories must follow, and tied to the MoSCoW priorities in §6. §9 now says which questions came from the client and which are ours. |
-| 2.0 | 14 Aug 2026 | **Rewritten against the client's own documents.** Source precedence established: the costing guide governs, the workbook is a reference implementation, the minutes rank last. The demonstration figures transcribed from the walkthrough ($380,000 / $230,000 / $3,291 / $15,000) are **withdrawn** — none appears in any client document — and replaced by the guide's worked example ($150,000 / $20,000 / $30,000 / 1,000 h → $100 / $162 / $202.50), which is now the golden-file fixture. Rates are **per capability**, not per platform (A1). Income is **four lines**, split UWA vs non-UWA, not two. Billable units are **hours, days, samples**, not weeks. Capacity baselines, the staff-FTE cap and the even-split allocation rule are stated from the workbook. Replacement reserve added (F19) — the earlier "not replacement cost" line was wrong. Benchmarking (F20) and price-change communication (F21) added from guide steps 4 and 6. GST-exclusive promoted from assumption to fact. Terminology settled from the guide: custodian, capability, billable unit, APFR. **F15 raised to Must and moved into the MVP.** N14 added against the workbook's column-range defect. Q1, Q2 and Q6 closed by the client's documents; Q9 and Q10 opened by them. §2 now documents three specific formula defects in the live workbook as evidence for the problem statement. |
+| 2.0 | 14 Aug 2026 | **Rewritten against the client's own documents.** Source precedence established: the costing guide governs, the workbook is a reference implementation, the minutes rank last. The demonstration figures transcribed from the walkthrough ($380,000 / $230,000 / $3,291 / $15,000) are **withdrawn** — none appears in any client document — and replaced by the guide's worked example ($150,000 / $20,000 / $30,000 / 1,000 h → $100 / $162 / $202.50), which is now the golden-file fixture. Rates are **per capability**, not per platform (A1). Income is **four lines**, split UWA vs non-UWA, not two. Billable units are **hours, days, samples**, not weeks. Capacity baselines, the staff-FTE cap and the even-split allocation rule are stated from the workbook. Replacement reserve added (F19) — the earlier "not replacement cost" line was wrong. Benchmarking (F20) and price-change communication (F21) added from guide steps 4 and 6. GST-exclusive promoted from assumption to fact. Terminology settled from the guide: custodian, capability, billable unit, APFR. **F15 raised to Must and moved into the MVP.** N14 added against the workbook's column-range defect. Q1, Q2 and Q6 closed by the client's documents; Q9 and Q10 opened by them. §2 rewritten around the structural argument for replacing a spreadsheet. |
 | 2.1 | 15 Aug 2026 | **Q4's proposed default corrected.** It committed the delegated authority to *approving* submissions, which contradicted F16 (Should, not MVP) and the scope baseline in §7 — the core role is a **viewing** role, per A6, and the approval action remains stretch. The guide's own answer to "who holds the delegated authority" — "typically the head of the BU responsible for the operating costs" **[G, Step 5]** — is now quoted in the default, so what we are actually asking the client is the narrower question of whether *typically* holds for these platforms. Both corrections found while reviewing [`2026-08-15-scope-and-questions.md`](../client/2026-08-15-scope-and-questions.md), whose Question 2 carried the same conflict; that document is corrected to match. §10's IP constraint now flags that kickoff decision D5 is ambiguously worded and states which reading governs, after a draft of the client sign-off document took the wrong one — [`NOTICE`](../../NOTICE) §2 carries the full note. No requirement, story or MoSCoW priority changes. |
 | 2.3 | 15 Aug 2026 | **The record's lifecycle is stated rather than left to be assembled.** A reader asking the obvious question — *costs change during a cycle, so can a cost be edited?* — could previously find F8 (drafts are editable), F11 (sealed records are not) and A5 (supersession) in three places and no sentence joining them. §5 now carries the three states, says why a sealed record is not revised to match today's costs, and names both boundaries around that. Four changes follow from it. **(1) F22 is new**: creating a cycle that supersedes a previous sealed one by reference. This was asserted in [A5](#8-assumptions) and already built in [architecture §4](architecture.md#4-data-model), but carried no requirement ID and therefore no story — the architecture implemented something no requirement asked for. It is a **Must**, so §7's MVP list gains it, and it is owned by US-01 rather than a new story, which leaves the MVP at eighteen stories and 110 points. **(2) A11 is new**: cost and income figures are **budgeted** annual amounts, not expenditure to date — undefined until now, and the distinction that decides the whole question, since actuals would make the record a monitoring problem rather than a periodic one. A11 also records that the tool sets no threshold for when a new cycle is opened. **(3) Q3 gains the half it was missing**: whether a sealed record needs amending *within* its own cycle. That half already travels to the client as question 2 of [`2026-08-15-scope-and-questions.md`](../client/2026-08-15-scope-and-questions.md) and was added there in v1.4 of [`mvp-agreement.md`](../client/mvp-agreement.md), but was never folded back into this table, which the same document names as the authoritative source — so the rule that questions are added here first had been broken in one place. **(4) A5** now points at F22 and at Q3. No MoSCoW priority changes, no story is added or re-estimated, and nothing in the outbound client document is touched. |
 | 2.2 | 15 Aug 2026 | **§9 reduced to the questions that decide what we build.** The question about the team's own working method was withdrawn — it settled nothing in the product and does not belong in a list whose purpose is to unblock the build — and the remaining questions are renumbered without a gap: old **Q7–Q11 become Q6–Q10**. Any Q-number quoted elsewhere in the repository follows this table and has been updated with it. §10's client-material constraint now states the rule it always meant: **nothing the client gave us enters the repository without their agreement**, enforced by [`.gitignore`](../../.gitignore) §1 and set out in [`reference/client/README.md`](../../reference/client/README.md). No requirement, story or MoSCoW priority changes. |
