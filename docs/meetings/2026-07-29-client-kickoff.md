@@ -15,6 +15,17 @@ the existing Excel tool, and establish what they want built.
 > the recording carries no speaker labels; confirm it at the next stand-up if it is needed for
 > the assignment.
 
+> ### Annotation added 25 August 2026 — the two client representatives are now named
+>
+> This record refers to the client by role because, when it was written, their names sat only in
+> the team's Teams area. They are **Erika Slavin**, Manager (Research Infrastructure &
+> Partnerships) / Business Development Coordinator, who led the walkthrough of the method and the
+> calculator; and **Mathew Hall**, Strategic Development Coordinator, who framed the record
+> requirement and later signed the scope statement on 20 August 2026.
+>
+> The body below is left as written. [`docs/client/contacts.md`](../client/contacts.md) is the
+> single home for client names and roles.
+
 > ### ⚠ Annotation added 14 August 2026 — do not cite the figures in §2
 >
 > These minutes are left **unedited**, as a record of what was said. But when the client's own
