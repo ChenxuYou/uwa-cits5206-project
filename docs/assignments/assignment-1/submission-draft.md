@@ -194,6 +194,52 @@ This scope — what is in, what is out, and what is stretch-only — was **signe
 ## 2. Client Communication and MVP Agreement
 
 *(To be completed — evidence pack in preparation.)*
+**Clients:** Mathew and Erika
+
+### Meeting 1 — 29 July 2026
+- Clients introduced the project and its requirements
+- Gave the team its initial understanding of the costing and pricing problem
+- Team set up a Teams group chat with Mathew and Erika to keep communication ongoing
+
+### Supporting material received — 11 August 2026 (via email from Mathew)
+- **CONTEXT – Costing & Pricing Research Infrastructure:** the guide itself — six-step method, the worked example used as our automated test case ($150,000 costs, $20,000 UWA in-kind, $30,000 WA Government, 1,000 hours → $100.00 / $162.00 / $202.50 per hour), and the standard UWA capacity baseline (230 days × 7.5 hrs ≈ 1,725 hrs/year)
+- **TEMPLATE – RIC Cost Calculator:** the live spreadsheet the tool replaces, populated with real Cytometry platform data across eight capabilities — used to cross-check the guide and surface where the two disagreed
+- **EXAMPLE – Project Costing Template:** a live UWA tool costing individual projects (staffing + other costs, editable/exportable output) — precedent for the guided-input pattern, though it costs a project rather than a platform and has no capacity/utilisation step
+- **EXAMPLE – UniSuper Calculator:** an external retirement calculator with a pre-filled, editable goal and a clear "meet/fall short/exceed target" output — precedent for showing a proposed rate against a calculated minimum
+
+### Scope drafting and sign-off request — 17 August 2026
+- Compared the guide against the calculator's actual formulas and found several disagreements, notably in commercial-rate treatment
+- Drafted and sent two documents by email:
+  - **Project Scope Summary and Sign-off** — what we're building, what we're not, and two confirmations (scope and IP ownership)
+  - **Five Open Questions** — each with a default answer, so nothing was blocked while waiting for a response
+
+### Meeting 2 — 20 August 2026
+- Demonstrated the team's understanding of the scope
+- Walked through the five open questions with the clients
+- Clients gave positive feedback and returned both documents with responses
+
+### Client responses to the five open questions
+| # | Question | Client answer |
+|---|----------|----------------|
+| 1 | Who is allowed to see and approve a record? | Three-role model (custodian, delegated authority, administrator) confirmed. **Approval must be in the core, not stretch** — a nominated approver, granted by the administrator, approves records. If SSO is added later, link to HR for staff roles. |
+| 2 | How do multi-year cycles work? | **No amendment needed.** Errors found after sealing are handled by raising a new record next cycle; old records stay as-is. |
+| 3 | What should the sealed record look like, and where does it get filed? | **No fixed template required.** Export should include a plain-language summary of what changed from the previous record. |
+| 4 | Guide vs. calculator on commercial rates | No comment — **default confirmed: tool follows the guide** (no income deducted before the 1.35 uplift). |
+| 5 | Guide vs. calculator generally | Client suggested generating **both a guide-based and calculator-based version** of a record for comparison, not just documenting the difference in text. |
+
+### Sign-off
+- Signed by **Mathew Hall, Strategic Development Coordinator**, 20 August 2026
+- Both confirmations checked: (1) scope as described, correct subject to the approval-workflow change above; (2) IP/ownership — UWA owns the method, team owns the code, tool IP held jointly
+
+### MVP agreement
+Minimum end-to-end path through the guided costing tool, updated per the client's answers:
+- Custodian signs in, starts a cycle, enters costs/income for a capability
+- Builds capacity from standard baselines, forecasts utilisation
+- Sees the three minimum sustainable rates with underlying figures shown
+- Proposes a rounded rate, sees surplus/deficit, records justification
+- **Submits to a nominated approver** (Q1) rather than sealing directly
+- Once approved, record is sealed and exported with a **plain-language change summary** (Q3)
+- One platform, one capability, one full cycle — engine proven against the guide's worked example and the live Cytometry data before the interface is built out
 
 ---
 
