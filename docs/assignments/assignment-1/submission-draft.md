@@ -26,7 +26,7 @@ TBD
 | Development | Wenmin Luo | Implement core code changes, add regression fixes, and prepare deployment |
 | Research, testing, documentation | Dai Lam La La | Trace spreadsheet logic, prepare test scenarios, document assumptions, and support validation |
 | Research, testing, documentation | Jaswanth Vericherla | Trace spreadsheet logic, prepare test scenarios, document assumptions, and support validation |
-| Deployment support | You | Help with server access, deployment setup, DNS or Nginx, and deployment testing |
+| Deployment support | Lam | Help with server access, deployment setup, DNS or Nginx, and deployment testing |
 
 #### Weekly Cadence
 
@@ -53,16 +53,16 @@ TBD
 
 | Stage | What we do | Owner |
 | --- | --- | --- |
-| Access and planning | Discuss access to the new server, confirm who can administer it, and decide the deployment approach | Yichen Zhao, You |
+| Access and planning | Discuss access to the new server, confirm who can administer it, and decide the deployment approach | Yichen Zhao, Lam |
 | Server setup | Log into the server, create the repository, and set up CI/CD for automated deployment | Chenxu You, Wenmin Luo |
-| DNS and reverse proxy | Configure DNS, and if needed use Nginx as the reverse proxy / entry point | You, Yichen Zhao |
-| Deployment testing | Test deployment end to end, check build, release, and rollback behaviour, and verify the site is reachable | You, Dai Lam La La |
+| DNS and reverse proxy | Configure DNS, and if needed use Nginx as the reverse proxy / entry point | Lam, Yichen Zhao |
+| Deployment testing | Test deployment end to end, check build, release, and rollback behaviour, and verify the site is reachable | Lam, Dai Lam La La |
 | Staging sign-off | Confirm the deployed instance is stable enough for client review and final report evidence | All |
-| Final release | Lock the version, deploy the final release, and package handover notes | Chenxu You, Wenmin Luo, You |
+| Final release | Lock the version, deploy the final release, and package handover notes | Chenxu You, Wenmin Luo, Lam |
 
 #### Week-by-Week Plan
 
-| Week commencing | Sprint goal | Yichen Zhao | Chenxu You | Wenmin Luo | Dai Lam La La | Jaswanth Vericherla | You | Output |
+| Week commencing | Sprint goal | Yichen Zhao | Chenxu You | Wenmin Luo | Dai Lam La La | Jaswanth Vericherla | Lam | Output |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 24 Aug 2026 | Stabilise after MVP approval and turn feedback into a backlog | Own the client feedback list, summarise the MVP approval outcomes, and book the next client touchpoint | Review recent feedback and identify the first code changes | Review recent feedback and identify the first code changes | Start tracing spreadsheet logic for risky or unclear calculations | Start tracing spreadsheet logic for risky or unclear calculations | Support backlog triage and note deployment questions | Updated backlog, clear ownership, research notes |
 | 31 Aug 2026 | Deliver the first code update cycle | Prepare the weekly client summary and confirm priorities for the sprint | Implement the highest-priority code fixes and keep the core flow moving | Implement the highest-priority code fixes and keep the core flow moving | Write test cases for the updated code paths and compare outputs with spreadsheet values | Write test cases for the updated code paths and compare outputs with spreadsheet values | Help validate the updated flow and record any deployment implications | Revised code slice, test notes, client demo notes |
