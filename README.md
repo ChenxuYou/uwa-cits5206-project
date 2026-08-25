@@ -2,7 +2,7 @@
 
 **CITS5206 Professional Computing — Capstone Project, The University of Western Australia**
 **Client:** UWA Research Infrastructure
-**Status:** **Scope signed off by the client on 20 August 2026** — both confirmations, scope and ownership. Requirements written against the client's own documents. The technology decision is settled and recorded: **ASP.NET Core Razor Pages with EF Core** — see [ADR-001](docs/decisions/adr-001-technology-stack.md) and [Technology](#technology).
+**Status:** **Assignment 1 submitted on 25 August 2026** — one PDF, [`Group13-Project Spec and Plans.pdf`](docs/assignments/assignment-1/). Scope signed off by the client on 20 August 2026 — both confirmations, scope and ownership. Requirements written against the client's own documents. The technology decision is settled and recorded: **ASP.NET Core Razor Pages with EF Core** — see [ADR-001](docs/decisions/adr-001-technology-stack.md) and [Technology](#technology). Next: **M1, the engine provably correct, 4 September 2026** — [`docs/project/plan.md`](docs/project/plan.md).
 
 ---
 
@@ -159,10 +159,11 @@ hard to tell apart in a single flat folder.
 │   │   ├── plan.md             Milestones, sprints and story assignment to 13 Oct
 │   │   ├── risks.md            The risk register — likelihood, impact, mitigation, trigger, owner
 │   │   ├── skills-audit.md     Where our gaps are, and what is done about each
-│   │   ├── assignment-1-readiness.md   Where we stand against the marking rubric
-│   │   └── assignment-1-completion-plan.md   Who does what, by when, before 25 Aug
-│   ├── assignments/        Draft material for each submission
-│   │   └── assignment-1/       submission-draft.md — the four sections in progress
+│   │   ├── assignment-1-readiness.md   The 22 Aug rubric assessment — closed, kept as the record
+│   │   └── assignment-1-completion-plan.md   Who did what, by when — closed, submitted 25 Aug
+│   ├── assignments/        What was submitted, and the material it was built from
+│   │   └── assignment-1/       Group13-Project Spec and Plans.pdf — submitted 25 Aug 2026,
+│   │                           alongside submission-draft.md, the markdown it came from
 │   ├── client/             Everything that crosses to the client
 │   │   ├── contacts.md         Client names and roles — the only place they live
 │   │   ├── 2026-08-15-scope-and-questions.md   The document they receive
@@ -219,6 +220,12 @@ convention costs more than it buys. The rule inside `src/` is the .NET rule.
 Client-supplied filenames in `reference/client/` are **left exactly as the client sent them**
 — [`requirements.md`](docs/spec/requirements.md) cites them by name as sources, and a renamed
 source is a broken citation.
+
+**Submitted files keep the name they were submitted under.** `docs/assignments/assignment-1/Group13-Project Spec and Plans.pdf`
+has capitals and spaces and stays that way: it is the file the unit received, and a submission
+renamed after the fact no longer matches what was marked. The convention applies to everything
+we author for ourselves; the moment a file crosses to the client or the unit, the name it
+crossed under is the name it keeps.
 
 A rename pass on 22 August 2026 brought the tree to this convention: a misspelled `assginment/`
 folder, spaces in `Communication history/` and `Email content.md`, non-ISO dates in
@@ -316,16 +323,22 @@ still reproduces its figures in 2030. SQLite is the development store; the produ
 decided together with hosting on 9 September 2026, and EF Core makes the provider a one-line
 change.
 
-## Next deliverable
+## Deliverables
 
-**Assignment 1 — project specification and plan.** A single PDF, submitted by one member,
-due **Tuesday 25 August 2026, 11:59 pm** — extended by one week from 18 August, requested by
-us and granted by the unit coordinator by email on 14 August 2026. Four sections: problem statement, client
-communication and MVP agreement, project management and plans, risk and technology
-assessment. The submission links to this repository and the team's Teams area, and the
-facilitator must have access to both.
+**Assignment 1 — project specification and plan: submitted.** One PDF,
+`Group13-Project Spec and Plans.pdf`, uploaded by one member on **Tuesday 25 August 2026**,
+against a deadline extended by one week from 18 August at our request and granted by the unit
+coordinator by email on 14 August 2026. Four sections: problem statement, client communication
+and MVP agreement, project management and plans, risk and technology assessment. The submitted
+PDF and the markdown it was assembled from are in
+[`docs/assignments/assignment-1/`](docs/assignments/assignment-1/); both link to this
+repository, which the facilitator can open.
 
 Brief and rubric: [`reference/unit/`](reference/unit/).
+
+**Next: M1 — the engine provably correct, 4 September 2026.** The client's worked example has to
+reproduce to the cent as a CI merge gate, written before any screen. Milestones M0–M7 and the
+sprint plan to 13 October are in [`docs/project/plan.md`](docs/project/plan.md).
 
 ## Ownership
 

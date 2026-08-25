@@ -1,10 +1,22 @@
 # Assignment 1 — Readiness
 
 **Deliverable:** project specification and plan, a single PDF, submitted by one member
-**Due:** Tuesday 25 August 2026, 11:59 pm — **three days from today (Saturday 22 August)**
+**Due:** Tuesday 25 August 2026, 11:59 pm — **submitted 25 August 2026**
 **Worth:** 15 points across four criteria
 **Brief and rubric:** [`reference/unit/`](../../reference/unit/)
-**Version:** 2.1 — 25 August 2026
+**Version:** 2.2 — 25 August 2026
+
+> ### 🔒 Closed — Assignment 1 was submitted on 25 August 2026
+>
+> One PDF, `Group13-Project Spec and Plans.pdf`, uploaded by one member and filed in
+> [`docs/assignments/assignment-1/`](../assignments/assignment-1/) beside the markdown it was
+> assembled from. **Nothing below is live work.** This document is kept because it records what
+> the assessment against the rubric actually said at the time, including where we were weak; it
+> is not edited to look better after the fact.
+>
+> The two items it left open are carried, not dropped: the **GitHub Projects board** and the
+> **24 July and 5 August minutes** are now tracked in [`plan.md`](plan.md). The work that
+> follows is M1 — the engine provably correct by **4 September 2026**.
 
 > ### ✅ Superseded in substance on 24–25 August 2026 — kept as the record of the assessment
 >

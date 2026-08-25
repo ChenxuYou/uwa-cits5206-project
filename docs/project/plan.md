@@ -1,6 +1,6 @@
 # Project Plan — 24 August to 13 October 2026
 
-**Version:** 1.0 — 24 August 2026
+**Version:** 1.1 — 25 August 2026
 **Owner:** Chenxu You
 **Reviewed:** every Saturday team meeting
 **Companions:** [`risks.md`](risks.md) · [`skills-audit.md`](skills-audit.md) ·
@@ -15,7 +15,7 @@
 
 | # | Milestone | Date | Done when |
 | --- | --- | --- | --- |
-| M0 | Assignment 1 submitted | **25 Aug 2026** | One PDF uploaded by one member, every linked resource open to the facilitator |
+| M0 | ✅ Assignment 1 submitted | **25 Aug 2026** | **Met.** `Group13-Project Spec and Plans.pdf` uploaded by one member on 25 Aug, every linked resource open to the facilitator |
 | M1 | **Engine provably correct** | **4 Sep 2026** | The client's worked example reproduces to the cent, as a CI merge gate. Written before any screen |
 | M2 | Guided flow, validated server-side | **11 Sep 2026** | Costs, income, capacity and mandatory forecast utilisation captured and validated |
 | M3 | Rates, proposed rates and balance | **18 Sep 2026** | Three rates per capability with the figures behind each; proposed rates and the resulting surplus or deficit |
@@ -104,8 +104,10 @@ intentions. Detail in Assignment 1 §3.5.
 | A14 | Confirm in writing whether in-tool approval routing is required in the core, or whether recording the approver is enough | Yichen Zhao | 26 Aug |
 | A15 | Report guide-vs-calculator divergences to the client as they surface. The commercial-rate divergence is already answered; a **line-by-line reconciliation of the calculator is deferred to the next cycle**, once the engine exists to compare against | Dai Lam La La | Rolling; first pass after **M1**, 4 Sep |
 | A17 | Give "the sealed PDF shows the calculator's workings" a requirement ID and a story estimate | Wenmin Luo | 26 Aug |
-| — | Add Option F to [`architecture.md` §8](../spec/architecture.md#8-options-assessed) and re-run the weighted comparison | Chenxu You | 26 Aug |
-| — | Stop tracking `src/bin/` and `src/obj/` | Wenmin Luo | Before the next code commit |
+| — | **Create the GitHub Projects board** — Backlog · In Progress · Review · Done, populated from the eighteen Must stories. Carried out of Assignment 1 as the one artefact that has to be made by hand | Wenmin Luo | 29 Aug |
+| — | **Write up the 24 July and 5 August meetings.** Carried out of Assignment 1; the minutes rule applies from here on, and the 24 July record is a raw transcript, so what goes in `docs/meetings/` is written minutes | Jaswanth Vericherla | 29 Aug |
+| — | ~~Add Option F to [`architecture.md` §8](../spec/architecture.md#8-options-assessed) and re-run the weighted comparison~~ | Chenxu You | ✅ Done 24 Aug |
+| — | ~~Stop tracking `src/bin/` and `src/obj/`~~ | Wenmin Luo | ✅ Done 24 Aug |
 | Q8 | Repository licence — unblocked by the client's written ownership confirmation; closes at handover | Chenxu You | 13 Oct |
 
 ---

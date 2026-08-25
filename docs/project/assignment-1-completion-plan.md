@@ -1,10 +1,20 @@
 # Assignment 1 — Completion Plan
 
 **Deliverable:** project specification and plan. **One PDF**, uploaded by **one** member.
-**Due:** Tuesday 25 August 2026, 11:59 pm
+**Due:** Tuesday 25 August 2026, 11:59 pm — **submitted 25 August 2026**
 **Written:** Saturday 22 August 2026 — **three days and a deadline evening left**
 **Companion:** [`assignment-1-readiness.md`](assignment-1-readiness.md) says where we stand
 against the rubric. This says who does what, by when, and what "done" means.
+
+> ### 🔒 Closed — submitted on 25 August 2026
+>
+> `Group13-Project Spec and Plans.pdf`, one file, uploaded by one member and filed in
+> [`docs/assignments/assignment-1/`](../assignments/assignment-1/) beside
+> [`submission-draft.md`](../assignments/assignment-1/submission-draft.md), the markdown it was
+> assembled from. **The day lists below are a record, not a task list.** Two items were still
+> outstanding when it went in — the **GitHub Projects board** and the **24 July and 5 August
+> minutes** — and both are carried into [`plan.md` §6](plan.md) with an owner and a date rather
+> than being left here where nobody would look for them.
 
 > **What changed on 20 August.** The client signed the scope statement and answered all five
 > open questions ([minutes](../meetings/2026-08-20-client-meeting.md)). Criterion 2 — worth 4 of
@@ -170,14 +180,20 @@ Stated now, while it is a decision rather than a panic. In the order we drop the
 is between fifteen minutes and two hours. If Saturday slips, Sunday absorbs it and Monday's
 assembly moves to Monday evening — the buffer is deliberate.
 
-## 6. What "finished" looks like
+## 6. What "finished" looks like — as it finished
 
-- [ ] One PDF, four sections, uploaded by one member before 8:00 pm on **Tuesday 25 August**
-- [ ] Every claim in it traceable to a document in this repository
-- [ ] Links to **GitHub** and the **MS Teams** area, both absolute URLs, both opening for the facilitator
-- [ ] The signed scope statement quoted in §2 and the evidence folder linked
-- [ ] `risks.md`, `plan.md`, `skills-audit.md`, the Projects board and `ci.yml` all existing and all linked
-- [ ] No cell reference, date or name in the report contradicting any other document
+- [x] One PDF, four sections, uploaded by one member on **Tuesday 25 August**
+- [x] Every claim in it traceable to a document in this repository
+- [x] Links to **GitHub** and the **MS Teams** area, both opening for the facilitator
+- [x] The signed scope statement quoted in §2 and the evidence folder linked
+- [x] `risks.md`, `plan.md`, `skills-audit.md` and `ci.yml` all existing and all linked
+- [ ] **The Projects board.** Not created before submission — carried to [`plan.md` §6](plan.md)
+- [x] No cell reference, date or name in the report contradicting any other document
+
+**The Teams join link has since been removed from this repository.** It was live in the
+submission and the facilitator could open it; a private chat with the client is not something to
+leave as a clickable URL in a public repository afterwards. The channel is still named in
+[`contacts.md`](../client/contacts.md) — the link is not, and Yichen Zhao adds people on request.
 
 ---
 
@@ -185,5 +201,6 @@ assembly moves to Monday evening — the buffer is deliberate.
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.2 | 25 Aug 2026 | **Closed.** The submission went in on 25 August as `Group13-Project Spec and Plans.pdf`. The day lists are left exactly as written and marked as a record; §6 is ticked against what actually happened, including the **one box that stays unticked** — the Projects board was not created before submission. That item and the 24 July / 5 August minutes are carried into [`plan.md` §6](plan.md) with an owner and a date. The Teams join link has been removed from the repository, and §6 says why. |
 | 1.1 | 22 Aug 2026 | **Two findings from the repository tidy-up added as T1 and T2**, above the Sunday list because neither belongs to a single day. **T1** — the built ASP.NET Core application in `src/` matches none of the five options assessed in [`architecture.md` §8](../spec/architecture.md#8-options-assessed), and `docs/decisions/` is empty, so the repository argues for one stack and ships another. It goes to criterion 4 and needs an ADR, not a rewrite. **T2** — `src/bin/` and `src/obj/` are tracked in git, 76 files and 38 MB, because they were committed before `src/.gitignore` existed. Both are recorded rather than fixed: T1 is a team decision, T2 is a commit someone should make deliberately. The same pass renamed folders and files to one convention and rewrote every cross-reference — see [README § Naming](../../README.md#naming). |
 | 1.0 | 22 Aug 2026 | First version, written the day after the client signed. Splits the delivery plan out of [`assignment-1-readiness.md`](assignment-1-readiness.md), which had been carrying both a rubric assessment and a task list. Carries forward the items that document listed as outstanding, adds the six actions from the [20 August client meeting](../meetings/2026-08-20-client-meeting.md), and records the skills audit as **missed on 15 August** rather than quietly re-dating it. |
