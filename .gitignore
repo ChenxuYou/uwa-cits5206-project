@@ -131,6 +131,18 @@ docs/audit-*.md
 
 
 # -----------------------------------------------------------------------------
+# 3b. Scratch exports from the GitHub API
+#
+# scripts/ reads a `gh issue list --json ...` dump to work out what already
+# exists before it changes anything. That dump is a snapshot of live state,
+# stale the moment anyone touches an issue, and committing it invites someone
+# to trust it. Re-export it; never read it out of a commit.
+# -----------------------------------------------------------------------------
+issues.json
+projects.json
+
+
+# -----------------------------------------------------------------------------
 # 4. Credentials and secrets
 #
 # Nothing here is currently needed, but the calculation service will have a

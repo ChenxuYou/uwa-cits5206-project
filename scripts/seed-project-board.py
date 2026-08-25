@@ -282,7 +282,16 @@ def stage_labels(r: Runner, stories: list[Story]) -> None:
 
 
 def stage_issues(r: Runner, stories: list[Story]) -> None:
+    """Create one issue per story.
+
+    **Check the repository first.** `gh issue create` does not deduplicate, and this
+    stage has no way to know a story already has an issue. Run it against a repository
+    that already holds story issues and you get a second set of them — which is exactly
+    what happened on 25 August 2026, and `dedupe-story-issues.py` is the clean-up.
+    """
     print("\n== issues ==")
+    print("    ! this creates issues unconditionally. If the repository already has "
+          "story issues, stop and read scripts/dedupe-story-issues.py first.")
     for s in stories:
         args = [
             "gh", "issue", "create",
