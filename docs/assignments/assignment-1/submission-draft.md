@@ -11,7 +11,7 @@
 | Resource | Link |
 | --- | --- |
 | GitHub repository | <https://github.com/ChenxuYou/uwa-cits5206-project> |
-| MS Teams — client and team group chat | [Client & Group 13 · Group Chat](https://teams.microsoft.com/l/chat/19:ceb3ab5b04eb4cd091fe4eb0242d436e@thread.v2/conversations?context=%7B%22contextType%22%3A%22chat%22%7D) |
+| MS Teams — client and team group chat | Client & Group 13 · Group Chat (private; access on request) |
 | Meeting notes | <https://github.com/ChenxuYou/uwa-cits5206-project/tree/main/docs/meetings> |
 | Requirements, user stories, architecture | <https://github.com/ChenxuYou/uwa-cits5206-project/tree/main/docs/spec> |
 | Project plan, risk register, skills audit | <https://github.com/ChenxuYou/uwa-cits5206-project/tree/main/docs/project> |

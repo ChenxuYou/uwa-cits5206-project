@@ -16,7 +16,7 @@ under two spellings or two job titles.
 
 - **One voice.** Yichen Zhao owns client contact ([15 August minutes §8](../meetings/2026-08-15-team-weekly-meeting.md)), so the client is never chased twice about the same thing by two of us.
 - **Wednesdays** are generally good for meetings; both are on campus most days, so in person or Teams both work **[K §10]**.
-- **Teams group chat** for asynchronous questions, including both representatives — [Client & Group 13](https://teams.microsoft.com/l/chat/19:ceb3ab5b04eb4cd091fe4eb0242d436e@thread.v2/conversations?context=%7B%22contextType%22%3A%22chat%22%7D). The client asked us to manage expectations on response time; replies are not always immediate **[K §10]**.
+- **Teams group chat** for asynchronous questions, including both representatives — *Client & Group 13*. The join link is deliberately not recorded here: it is a private chat with the client, and a link in a public repository is an open door. Ask Yichen Zhao to be added. The client asked us to manage expectations on response time; replies are not always immediate **[K §10]**.
 - **Batched questions, not a fixed weekly slot.** The client proposed we digest, then schedule a meeting once we have questions, with support heavier up front and easing off later **[K §10]**.
 
 ## A note on naming
