@@ -224,22 +224,29 @@ class Runner:
             print(f"  would run: {printable}")
             return None
         print(f"  $ {printable}")
-        proc = subprocess.run(args, capture_output=True, text=True)
+        # encoding is explicit on purpose. text=True decodes with the *locale* codec,
+        # which on a Chinese Windows is GBK, and gh emits UTF-8 — the em dash in the
+        # project title alone is enough to raise UnicodeDecodeError inside subprocess's
+        # reader thread, leaving proc.stdout as None after gh has already done the work.
+        proc = subprocess.run(args, capture_output=True, text=True,
+                              encoding="utf-8", errors="replace")
+        out = (proc.stdout or "").strip()
         if proc.returncode != 0:
             err = (proc.stderr or "").strip()
             # Creating something that already exists is not a failure worth stopping for.
             if "already exists" in err.lower():
-                print(f"    (exists already, skipped)")
+                print("    (exists already, skipped)")
                 return None
             print(f"    FAILED: {err}", file=sys.stderr)
             raise SystemExit(1)
-        if capture_json and proc.stdout.strip():
-            return json.loads(proc.stdout)
-        return proc.stdout.strip()
+        if capture_json and out:
+            return json.loads(out)
+        return out
 
 
 def require_gh() -> None:
-    if subprocess.run(["which", "gh"], capture_output=True).returncode != 0:
+    finder = "where" if sys.platform == "win32" else "which"
+    if subprocess.run([finder, "gh"], capture_output=True).returncode != 0:
         raise SystemExit("gh is not installed. See https://cli.github.com")
 
 
@@ -290,12 +297,33 @@ def stage_issues(r: Runner, stories: list[Story]) -> None:
         r.run(args)
 
 
+def find_project(r: Runner) -> dict | None:
+    """Return the project with our title, if it already exists.
+
+    Called before creating one, so that re-running this stage after a crash does not
+    leave two projects with the same name and half the fields on each.
+    """
+    if not r.apply:
+        return None
+    listing = r.run(["gh", "project", "list", "--owner", OWNER, "--format", "json"],
+                    capture_json=True)
+    for p in (listing or {}).get("projects", []):
+        if p["title"] == PROJECT_TITLE:
+            return p
+    return None
+
+
 def stage_project(r: Runner) -> dict | None:
     print("\n== project ==")
-    created = r.run([
-        "gh", "project", "create",
-        "--owner", OWNER, "--title", PROJECT_TITLE, "--format", "json",
-    ], capture_json=True)
+    created = find_project(r)
+    if created:
+        print(f"    project #{created['number']} already exists — not creating a second "
+              f"one, continuing with it")
+    else:
+        created = r.run([
+            "gh", "project", "create",
+            "--owner", OWNER, "--title", PROJECT_TITLE, "--format", "json",
+        ], capture_json=True)
 
     number = str(created["number"]) if created else "<number>"
 
@@ -312,7 +340,16 @@ def stage_project(r: Runner) -> dict | None:
         ("Priority", "SINGLE_SELECT", "Must,Should,Could"),
         ("Sprint (text)", "SINGLE_SELECT", ",".join(SPRINT_STARTS)),
     ]
+    existing = set()
+    if r.apply and created:
+        listing = r.run(["gh", "project", "field-list", number, "--owner", OWNER,
+                         "--format", "json"], capture_json=True)
+        existing = {f["name"] for f in (listing or {}).get("fields", [])}
+
     for name, dtype, options in fields:
+        if name in existing:
+            print(f"    field {name!r} already exists, skipped")
+            continue
         args = ["gh", "project", "field-create", number, "--owner", OWNER,
                 "--name", name, "--data-type", dtype]
         if options:
@@ -432,6 +469,13 @@ and a table grouped by Sprint with Points summed.
 
 
 def main() -> None:
+    # Our own output carries em dashes and § signs; a GBK console would refuse them.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
+
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--apply", choices=["milestones", "labels", "issues", "project",
