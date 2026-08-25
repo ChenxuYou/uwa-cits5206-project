@@ -186,6 +186,8 @@ hard to tell apart in a single flat folder.
 ├── reference/
 │   ├── client/             Client material — local only, not committed
 │   └── unit/               Assignment briefs, rubric and unit resources
+├── scripts/                One-off repository tooling, not application code
+│   └── seed-project-board.py   Builds the Projects board from docs/spec/user-stories.md
 ├── src/                    Application code — ASP.NET Core Razor Pages (see the note below)
 ├── .gitattributes          Line endings — LF everywhere, so diffs stay readable
 ├── .gitignore              What never gets committed, and why
