@@ -24,9 +24,9 @@
 ### 1.1 What the client does
 
 UWA operates **research infrastructure**: electron microscopes, a human MRI scanner, radio
-astronomy telescopes, drones that assess plant phenotypes. It is expensive to buy and expensive
-to run, so part of the running cost is recovered from the researchers who buy time on it, who in
-turn budget for that cost in their grant applications.
+astronomy telescopes, drones that assess plant phenotypes. All of it is expensive to buy and
+expensive to run, so part of the running cost is recovered from the researchers who buy time on
+it — who in turn budget for that cost in their grant applications.
 
 Two constraints shape everything that follows, and the client stated both in the first meeting:
 
@@ -103,8 +103,9 @@ occurs, we'd appreciate if these can be flagged to us for our knowledge and guid
 therefore implements the guide, and shows both figures wherever a new number is compared with an
 existing one, so any difference is visible and explainable rather than silent.
 
-**A full reconciliation of the workbook's arithmetic is deliberately not in this stage.** It is
-work for a later cycle, and for a good reason: the engine is the thing you reconcile *against*.
+**A full reconciliation of the workbook's arithmetic is deliberately out of scope at this
+stage.** It is work for a later cycle, and for a good reason: the engine is the thing you
+reconcile *against*.
 Once the guide's method is implemented and tested, comparing it with the workbook is a matter of
 running both over the same inputs — cheap, repeatable, and evidence we can hand the client. Doing
 it now would mean doing it by hand, and then doing it again. The client has asked to be told what
@@ -151,8 +152,8 @@ Every design decision below answers a specific failure above:
 ### 1.6 Key deliverables for the MVP
 
 The MVP is a **complete vertical slice** for one platform and its capabilities — a narrow path
-that works end to end, in preference to three-quarters of every feature. It is eighteen Must
-stories, 110 points, tracked as `F1`–`F13`, `F15` and `F22` in
+that works end to end, in preference to three-quarters of every feature. That slice is eighteen
+Must stories, 110 points, covering requirements `F1`–`F13`, `F15` and `F22` in
 [`requirements.md` §7](https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/spec/requirements.md#7-scope).
 
 | # | Deliverable | What it means |
@@ -193,7 +194,7 @@ This scope — what is in, what is out, and what is stretch-only — was **signe
 
 ## 2. Client Communication and MVP Agreement
 
-**Clients:** Mathew and Erika
+**Clients:** Mathew Hall and Erika Slavin
 
 ### Meeting 1 — 29 July 2026
 - Clients introduced the project and its requirements
@@ -269,9 +270,8 @@ replacement reserve → salary pre-fill → in-tool approval routing.
 ### 3.2 Who owns what
 
 Five members, five distinct areas. The split follows the structure agreed at the team meeting of
-15 August 2026
-and is deliberately drawn by *role* rather than by document, so that nobody's contribution is
-defined only by which file they happened to edit.
+15 August 2026, and is deliberately drawn by *role* rather than by document, so that nobody's
+contribution is defined only by which file they happened to edit.
 
 | Area | Owner | Responsibility |
 | --- | --- | --- |
@@ -312,14 +312,12 @@ Every link below is a live resource the facilitator can open.
 | **Skills audit** | Where our gaps are, and what is done about each | [link](https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/project/skills-audit.md) |
 | **Decision records** | Architecture and process decisions, with the evidence behind them | [link](https://github.com/ChenxuYou/uwa-cits5206-project/tree/main/docs/decisions) |
 | **Client communication history** | One folder per exchange — what was sent, what came back | [link](https://github.com/ChenxuYou/uwa-cits5206-project/tree/main/docs/client/communication-history) |
-| **MS Teams — client and team group chat** | Asynchronous questions to the client, recordings and files that do not belong in a public repository | Client & Group 13 - Group Chat |
+| **MS Teams — client and team group chat** | Asynchronous questions to the client, recordings and files that do not belong in a public repository | Client & Group 13 · Group Chat |
 
 ### 3.5 Deployment plan
 
-Deployment is the largest question still open from the
-15 August meeting,
-so it is treated as a milestone with a decision date rather than as something that happens at the
-end.
+Deployment is the largest question still open from the 15 August meeting, so it is treated as a
+milestone with a decision date rather than as something that happens at the end.
 
 | Stage | What we do | Owner | By |
 | --- | --- | --- | --- |
@@ -368,7 +366,7 @@ We ran a **skills audit** across the six competencies the project actually needs
 things came out of it. The first is that the team's depth is concentrated in C#/.NET and
 server-side web work, and is thin in JavaScript frameworks — which is the single largest input
 to the technology decision in §4.2. The second is a list of gaps that are real, and each of them
-has a countermeasure rather than an intention:
+carries a countermeasure rather than an intention:
 
 | Gap | Why it threatens this project | How it is addressed |
 | --- | --- | --- |
@@ -397,8 +395,8 @@ preference.
 
 #### Options assessed
 
-Six options were considered; five were presented to the facilitator at the checkpoint of
-5 August 2026 and are recorded in
+Six options were considered; five were presented to the facilitator at the checkpoint of 5
+August 2026, and all are recorded in
 [`architecture.md` §8](https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/spec/architecture.md#8-options-assessed).
 
 | Option | Shape | Verdict |
@@ -495,8 +493,8 @@ for three years, defended in an FOI response. Every structural decision in §4.2
 
 #### Risks we have already realised and closed
 
-The clearest evidence that this register is used rather than written is that three risks on it
-have already fired, been caught, and been closed — two of them by our own review of our own
+The clearest evidence that this register is used rather than merely written is that three risks
+on it have already fired, been caught, and been closed — two of them by our own review of our own
 documents.
 
 | What happened | How it was caught | Outcome |
