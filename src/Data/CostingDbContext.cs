@@ -14,6 +14,7 @@ public class CostingDbContext(DbContextOptions<CostingDbContext> options) : DbCo
     public DbSet<RicCostYearAmount> RicCostYearAmounts => Set<RicCostYearAmount>();
     public DbSet<AppUser> AppUsers => Set<AppUser>();
     public DbSet<AppNotification> AppNotifications => Set<AppNotification>();
+    public DbSet<MethodConfig> MethodConfigs => Set<MethodConfig>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -36,6 +37,15 @@ public class CostingDbContext(DbContextOptions<CostingDbContext> options) : DbCo
         modelBuilder.Entity<AppUser>().Property(x => x.Role).HasMaxLength(30);
         modelBuilder.Entity<AppNotification>().HasIndex(x => new { x.RecipientName, x.IsRead });
         modelBuilder.Entity<AppNotification>().Property(x => x.Type).HasMaxLength(30);
+
+        // Method configuration: versioned, never edited in place. A sealed record keeps the
+        // version it was calculated under so that it still reproduces its own figures years
+        // later — architecture.md §3 rules R5 and R6.
+        modelBuilder.Entity<MethodConfig>().HasIndex(x => x.Version).IsUnique();
+        modelBuilder.Entity<MethodConfig>().Property(x => x.Version).HasMaxLength(20);
+        modelBuilder.Entity<MethodConfig>().Property(x => x.Source).HasMaxLength(200);
+        modelBuilder.Entity<MethodConfig>().Property(x => x.IndirectCostRecovery).HasPrecision(9, 4);
+        modelBuilder.Entity<RicCycle>().Property(x => x.MethodVersion).HasMaxLength(20);
 
         modelBuilder.Entity<CostingCycle>()
             .HasMany(x => x.CostItems)

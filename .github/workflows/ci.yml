@@ -1,0 +1,101 @@
+name: CI
+
+# Build and test on every push and pull request.
+# The calculation-engine tests are the merge gate: if the golden file against the
+# client's worked example drifts, the build fails and nothing merges.
+# See docs/decisions/adr-001-technology-stack.md and docs/project/plan.md §4.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          # Pinned deliberately: .NET 10 is new, and an unpinned SDK is a build
+          # that can break without a commit. See risks.md R18.
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore src/CostingTool.csproj
+
+      - name: Build
+        run: dotnet build src/CostingTool.csproj --configuration Release --no-restore
+
+      - name: Test
+        # No test project exists yet. This step is written now so that the gate is
+        # in place before the first test lands (plan.md M1, 4 September 2026).
+        # It fails the build once tests exist and one of them fails.
+        run: |
+          if ls tests/*/*.csproj >/dev/null 2>&1; then
+            dotnet test --configuration Release --logger "trx;LogFileName=results.trx"
+          else
+            echo "::warning::No test project found. Golden-file tests are due by 4 September 2026 (plan.md M1)."
+          fi
+
+      - name: Check formatting
+        continue-on-error: true
+        run: dotnet format src/CostingTool.csproj --verify-no-changes --severity warn
+
+  vulnerable-dependencies:
+    name: Vulnerable dependency scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore src/CostingTool.csproj
+
+      - name: List vulnerable packages
+        # risks.md R17 — a dependency advisory should surface here, not in production.
+        #
+        # High and Critical advisories fail the build, EXCEPT those listed in
+        # .github/known-advisories.txt, each of which carries a written assessment
+        # and a review date. A gate that cannot be passed is a gate that gets
+        # switched off, so accepted advisories are excluded by name — never by
+        # relaxing the rule.
+        run: |
+          set -o pipefail
+          dotnet list src/CostingTool.csproj package --vulnerable --include-transitive 2>&1 \
+            | tee "${RUNNER_TEMP}/audit.txt"
+
+          grep -E 'High|Critical' "${RUNNER_TEMP}/audit.txt" > "${RUNNER_TEMP}/hits.txt" || true
+
+          grep -oE 'GHSA-[a-z0-9]+-[a-z0-9]+-[a-z0-9]+' .github/known-advisories.txt \
+            | while read -r ghsa; do
+                if grep -q "$ghsa" "${RUNNER_TEMP}/hits.txt"; then
+                  echo "::notice::Accepted advisory $ghsa — see .github/known-advisories.txt"
+                  grep -v "$ghsa" "${RUNNER_TEMP}/hits.txt" > "${RUNNER_TEMP}/hits.tmp" || true
+                  mv "${RUNNER_TEMP}/hits.tmp" "${RUNNER_TEMP}/hits.txt"
+                fi
+              done
+
+          if [ -s "${RUNNER_TEMP}/hits.txt" ]; then
+            echo "::error::Unreviewed High or Critical advisory in dependencies."
+            cat "${RUNNER_TEMP}/hits.txt"
+            echo "Assess it, then either upgrade or record it in .github/known-advisories.txt."
+            exit 1
+          fi
+          echo "No unreviewed High or Critical advisories."

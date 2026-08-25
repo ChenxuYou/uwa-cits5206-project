@@ -28,8 +28,9 @@ date something actually happened — not a date we planned for.
 chased twice about the same thing by two of us. The sent copy is the evidence Assignment 1 §2 is
 marked on — **a date nobody wrote down is a date we cannot cite.**
 
-**Why 18 then 19.** We asked for the reply by Tuesday and planned the chase for Wednesday, so it
-would fall *after* the date we named rather than on it. Wednesday is the client's stated
+**Why the reply date was Tuesday and the chase Wednesday.** We asked for the reply by Tuesday and
+planned the chase for the Wednesday, so it would fall *after* the date we named rather than on
+it. Wednesday is the client's stated
 preference for contact **[K §10]**. In the event the client replied on the Tuesday and the chase
 was never sent.
 

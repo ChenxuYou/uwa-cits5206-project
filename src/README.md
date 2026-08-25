@@ -17,7 +17,22 @@ The dashboard starts a guided server-backed workflow:
 
 Submitted cycles are read-only while awaiting a decision. Returned cycles can be edited and resubmitted. Approval stores an immutable JSON snapshot and SHA-256 integrity hash.
 
-The application uses `ric-costing-v5.db`, created automatically on first run. It is excluded from Git.
+## Method configuration
+
+The indirect cost recovery factor `k` is **versioned configuration, not a constant**. It lives in
+the `MethodConfigs` table (`Models/MethodConfig.cs`), seeded on first run as version `2026.1`
+with `k = 1.35`. `RateEngine` is a pure function that takes a `MethodConfig` and never reads a
+constant; `MethodConfigProvider` resolves the version in force, and a cycle stamps its
+`MethodVersion` when it is sealed — so a record sealed in 2026 still reproduces its own figures
+after the factor changes. See `docs/spec/architecture.md` §3, rules R5 and R6.
+
+**To change the factor, add a new row and move `IsCurrent`.** Never edit an existing version:
+sealed records point at it.
+
+The application uses `ric-costing-v5.db`, created automatically on first run. It is excluded from
+Git. The schema is created with `EnsureCreated()`, so **delete the local database file after
+pulling a model change** — for example the `MethodConfigs` table and `RicCycle.MethodVersion`
+added on 25 August 2026 — and it will be rebuilt on the next run.
 
 ## Demo sign-in
 
@@ -50,14 +65,14 @@ Choose the **Arm64** installer for Apple Silicon (M1/M2/M3/M4), or **x64** for a
 From the repository root:
 
 ```bash
-dotnet restore src/CostingTool/CostingTool.csproj
-dotnet run --project src/CostingTool/CostingTool.csproj
+dotnet restore src/CostingTool.csproj
+dotnet run --project src/CostingTool.csproj
 ```
 
 Open the localhost URL printed in the terminal. During development, changes can be watched with:
 
 ```bash
-dotnet watch --project src/CostingTool/CostingTool.csproj
+dotnet watch --project src/CostingTool.csproj
 ```
 
 The current page contains representative dashboard data for UI development. It should later be

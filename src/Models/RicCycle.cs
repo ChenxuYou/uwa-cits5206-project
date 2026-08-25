@@ -8,6 +8,13 @@ public class RicCycle
     public int EndYear { get; set; }
     public string BillableUnit { get; set; } = "Hours";
     public string Status { get; set; } = "Draft";
+
+    /// <summary>
+    /// The <see cref="MethodConfig"/> version this cycle's rates were calculated under.
+    /// Stamped when the record is sealed, so the record reproduces its own figures rather
+    /// than today's — architecture.md §3, rule R6.
+    /// </summary>
+    public string MethodVersion { get; set; } = string.Empty;
     public string CreatedBy { get; set; } = string.Empty;
     public string? BenchmarkNotes { get; set; }
     public string? PricingJustification { get; set; }

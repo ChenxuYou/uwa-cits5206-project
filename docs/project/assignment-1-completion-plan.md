@@ -11,6 +11,33 @@ against the rubric. This says who does what, by when, and what "done" means.
 > 15 points and the one we could not close by working harder — is closed. **Everything left is
 > ours alone**, which means nothing on this plan can be blocked by someone else's inbox.
 
+> ### Status at 25 August 2026 — what actually landed
+>
+> | Item | Status |
+> | --- | --- |
+> | 1 · `risks.md` | ✅ Done 24 Aug — 21 rows with triggers and owners, cybersecurity included |
+> | 2 · Skills audit | ✅ Done 24 Aug — [`skills-audit.md`](skills-audit.md). **Ratings are provisional** until each member confirms their own row |
+> | 3 · `plan.md` | ✅ Done 24 Aug — M0–M7 with dates, S1–S8 with the 110 points assigned |
+> | 4 · GitHub Projects board | ⚠️ **Outstanding.** The one artefact that has to be created by hand |
+> | 5 · `.github/workflows/ci.yml` | ✅ Done 24 Aug — build, test and dependency scan |
+> | 6 · Minutes for 24 July and 5 August | ⚠️ Outstanding. Carried to the next cycle; the repository says so rather than implying a cadence it does not have |
+> | **T1** · Technology decision | ✅ **Closed** — [ADR-001](../decisions/adr-001-technology-stack.md), 24 Aug. `architecture.md` §8 gains Option F and §9 records how the gate closed |
+> | **T2** · `src/bin/` and `src/obj/` tracked | ✅ **Closed** — untracked with `git rm -r --cached`; files stay on disk, no history rewrite |
+> | 8 · Correct the `requirements.md` §2 cell evidence | **Withdrawn, not done.** See below |
+> | 9 · A17 requirement ID for "the PDF shows the workings" | ⚠️ Outstanding — carried into [`plan.md` §6](plan.md) |
+> | 10 · Deployment plan | ✅ Done — a dated, owned stage table in the submission §3.5 and [`plan.md` §5](plan.md) |
+> | 13 · A15 discrepancy list to the client | **Rescoped.** See below |
+>
+> **Items 8 and 13 are withdrawn for the same reason, and it is a decision rather than a slip.**
+> A line-by-line reconciliation of the client's calculator is **deferred to a later cycle**. The
+> engine is what you reconcile against: after milestone M1 the comparison is a matter of running
+> both over the same inputs, repeatable and worth handing to the client; before M1 it is hand
+> work that would have to be redone. So the problem statement now makes the **structural** case
+> for replacing a spreadsheet, and the rule that governs the build is the client's own written
+> answer of 20 August — **the guide governs**, and divergences are flagged to them as we meet
+> them. Nothing is hidden: the deferral is stated in the submission, in
+> [`requirements.md` §2](../spec/requirements.md#2-the-problem) and in [`plan.md` §7](plan.md).
+
 ---
 
 ## 1. The shape of the submission

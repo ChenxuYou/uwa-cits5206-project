@@ -2,7 +2,7 @@
 
 **CITS5206 Professional Computing — Capstone Project, The University of Western Australia**
 **Client:** UWA Research Infrastructure
-**Status:** **Scope signed off by the client on 20 August 2026** — both confirmations, scope and ownership. Requirements written against the client's own documents. A working ASP.NET Core prototype exists in [`src/`](src/); **the written technology decision has not caught up with it** — see [Technology](#technology).
+**Status:** **Scope signed off by the client on 20 August 2026** — both confirmations, scope and ownership. Requirements written against the client's own documents. The technology decision is settled and recorded: **ASP.NET Core Razor Pages with EF Core** — see [ADR-001](docs/decisions/adr-001-technology-stack.md) and [Technology](#technology).
 
 ---
 
@@ -19,12 +19,14 @@ words, hard for anyone to actually use because it is easy to break. What they wa
 web application that asks a platform custodian for the inputs, keeps the calculation out of
 reach behind the form, and produces a record that can be filed and retrieved.
 
-**The fragility is demonstrable, not rhetorical.** Reading the workbook turns up three silent
-formula defects: one capability priced against another capability's capacity, the same
-capability costed against another's cost base, and platform totals that sum revenue over six
-columns while summing cost over eight. Together they produce a $2,079 "surplus" that is purely
-an artefact and a revenue total understated by $4,875. Nothing in the spreadsheet flags any of
-it. See [`docs/spec/requirements.md` §2](docs/spec/requirements.md#2-the-problem).
+**The fragility belongs to the medium, not to that particular file.** Sharing a workbook shares
+its formulas: logic and data arrive in one object, with one set of permissions, and nothing marks
+a cell the user should fill apart from a cell that computes. So mistakes are silent — a cleared
+formula, a range dragged one column too far, or an amount typed with one extra zero all return a
+plausible number — and nothing records how the number was reached. Where the client's guide and
+their calculator disagree, **the guide governs**, confirmed in writing on 20 August 2026; a full
+reconciliation of the calculator is work for a later cycle, once the engine exists to compare
+against. See [`docs/spec/requirements.md` §2](docs/spec/requirements.md#2-the-problem).
 
 The sentence the client used to describe what success looks like:
 
@@ -105,9 +107,13 @@ discussed and deferred; a working website comes first.
 
 ## Client sign-off
 
-**The client signed the scope statement on 20 August 2026.** Mathew Hall, Strategic Development
-Coordinator, UWA Research Infrastructure — both confirmations ticked: the scope is right, and the
-ownership position is right.
+Our client is **UWA Research Infrastructure**: **Erika Slavin**, Manager (Research Infrastructure
+& Partnerships) / Business Development Coordinator, and **Mathew Hall**, Strategic Development
+Coordinator. Names, roles and how we contact them live in
+[`docs/client/contacts.md`](docs/client/contacts.md).
+
+**The client signed the scope statement on 20 August 2026.** Mathew Hall — both confirmations
+ticked: the scope is right, and the ownership position is right.
 
 The paper trail, in one place: the scope statement and five questions went by email on **17
 August**; the client replied on **18 August** confirming a time; we met in person on **20
@@ -150,11 +156,15 @@ hard to tell apart in a single flat folder.
 │   │   └── architecture.md     System shape, options assessed, and the decision gate
 │   ├── project/            How the team runs
 │   │   ├── team.md             The roster — the only place it lives
+│   │   ├── plan.md             Milestones, sprints and story assignment to 13 Oct
+│   │   ├── risks.md            The risk register — likelihood, impact, mitigation, trigger, owner
+│   │   ├── skills-audit.md     Where our gaps are, and what is done about each
 │   │   ├── assignment-1-readiness.md   Where we stand against the marking rubric
 │   │   └── assignment-1-completion-plan.md   Who does what, by when, before 25 Aug
 │   ├── assignments/        Draft material for each submission
 │   │   └── assignment-1/       submission-draft.md — the four sections in progress
 │   ├── client/             Everything that crosses to the client
+│   │   ├── contacts.md         Client names and roles — the only place they live
 │   │   ├── 2026-08-15-scope-and-questions.md   The document they receive
 │   │   ├── mvp-agreement.md    Why that scope, traced to requirement IDs — and the sign-off trail
 │   │   ├── questions-round-1.md   Why those questions, and our defaults
@@ -164,7 +174,9 @@ hard to tell apart in a single flat folder.
 │   │                               answers, and our notes from the room
 │   ├── meetings/           Minutes, one file per meeting
 │   ├── decisions/          Architecture and process decision records
+│   │   └── adr-001-technology-stack.md   Why ASP.NET Core Razor Pages
 │   └── internal/           Our own review notes — not committed
+├── .github/workflows/      CI — build, test and dependency scan on every push and PR
 ├── presentations/          Self-contained HTML decks, one file per deck
 │   ├── README.md           How to build, present and export a deck
 │   ├── STYLE-GUIDE.md      Binding style policy — read before building a deck
@@ -266,52 +278,43 @@ the commit, not after it.
 - **Weekly** online stand-up — progress, blockers, next week's allocation.
 - **Fortnightly** in person on campus, including the facilitator checkpoint.
 - **Client on Wednesdays as needed**, plus a shared Teams chat for asynchronous questions. The client asked us to digest and come back with batched questions rather than hold a fixed weekly slot; support is heavier up front and eases off later (agreed 29 July 2026).
-- Every task is a GitHub issue with one named owner and a deadline.
-- Minutes are committed within 24 hours, so members who missed a meeting can be briefed from the repository.
+- Every task is a GitHub issue with one named owner and a deadline, tracked on the [Projects board](https://github.com/ChenxuYou/uwa-cits5206-project/projects) and planned in [`docs/project/plan.md`](docs/project/plan.md).
+- Minutes are committed within 24 hours, so members who missed a meeting can be briefed from the repository. Two meetings from before this rule settled — 24 July and 5 August — are still to be written up.
+- CI runs on every push and pull request: [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
 Team roster: [`docs/project/team.md`](docs/project/team.md).
 
 ## Technology
 
-> ### ⚠ The code and the assessment do not match — unresolved as of 22 August 2026
->
-> [`src/`](src/) contains a working **ASP.NET Core Razor Pages** application — Entity Framework
-> Core over SQLite, sign-in, an approvals queue, notifications, and a sealed-record snapshot with
-> a SHA-256 hash. It is real, and a good deal further along than this section describes.
->
-> **None of the five options assessed below is ASP.NET Core.** Option C is a server-rendered
-> monolith, which is the same *shape*, but the assessed stack was Django + HTMX + PostgreSQL,
-> and what was built is .NET + SQLite. So the repository currently argues for one stack in
-> `architecture.md`, records no decision in `docs/decisions/`, and ships another in `src/`.
->
-> **This is flagged, not fixed.** Criterion 4 of the Assignment 1 rubric marks whether
-> *"different choices of technology have been carefully considered and the decisions clearly
-> justified"* — and right now a marker who opens both files finds a contradiction rather than a
-> justification. The fix is not to rewrite history but to write the decision down: an ADR in
-> [`docs/decisions/`](docs/decisions/) saying why .NET, how it maps to Option C, what the SQLite
-> versus PostgreSQL position is, and when it was actually taken. Tracked in
-> [`assignment-1-completion-plan.md`](docs/project/assignment-1-completion-plan.md).
->
-> Everything below this box is the 5 August position and is left unedited, because it is what
-> was presented to the facilitator on that date.
+**Decided: ASP.NET Core Razor Pages with Entity Framework Core, targeting .NET 10.** Recorded in
+[ADR-001](docs/decisions/adr-001-technology-stack.md), 24 August 2026.
 
-**Assessed, but not committed — and the team has not yet met to choose.** Five options were
-put to the facilitator on 5 August 2026: a client-side SPA with no backend (prototype only);
-an SPA with a REST API and PostgreSQL; a Django + HTMX monolith; Microsoft Power Platform
-(rejected); and building inside existing UWA systems (deferred at the client's request).
+Six options were considered. Five went to the facilitator on 5 August 2026 — a client-side SPA
+with no backend (prototype only); an SPA with a REST API and PostgreSQL; a Django + HTMX
+monolith; Microsoft Power Platform (rejected); and building inside existing UWA systems
+(deferred at the client's request). The weighted comparison in
+[`docs/spec/architecture.md` §8](docs/spec/architecture.md#8-options-assessed) put the
+**server-rendered monolith** ahead, on criteria that deliberately weight delivery risk: one
+codebase, framework-provided auth and validation, and nowhere for calculation logic to leak to.
 
-The SPA and the monolith are both still live. On the weighted comparison in
-[`docs/spec/architecture.md`](docs/spec/architecture.md#8-options-assessed) the monolith leads — 143 to
-134 — on criteria that deliberately weight delivery risk; the SPA leads on interaction quality
-and on what the team learns. Nine points apart is too close to settle on paper, so nothing has
-been chosen.
+The sixth is what we build: **the same architecture in the language the team can actually move
+fastest in.** That was settled by evidence rather than argument — a timeboxed spike produced a
+working end-to-end application in .NET, running in time for the client meeting of 20 August, and
+the skills audit confirmed the team's depth is in C# and server-side web work rather than in
+JavaScript frameworks. `decimal` being a native base-10 type in C# also maps directly onto the
+requirement that money arithmetic be exact and defensible.
 
-A **team skills audit** and a one-week spike run before the decision, with a go/no-go at the
-mid-semester checkpoint. Whatever is chosen, some things are already settled: the calculation
-engine is a pure, versioned, unit-tested module with no database or UI dependency — decimal
-arithmetic, a divide-by-zero guard, aggregates that iterate rather than index, and
-configuration versioned so that a record created in 2026 still reproduces its figures in 2030.
-PostgreSQL is the relational store either way.
+**The decision record was written after the spike, not before it**, and
+[ADR-001](docs/decisions/adr-001-technology-stack.md) says so. We built to learn; the ADR
+documents what we learned, reconciles it with the five options already assessed, and lists the
+follow-on work the choice creates.
+
+Settled regardless of stack: the calculation engine is a pure, versioned, unit-tested module with
+no database or UI dependency — decimal arithmetic, a divide-by-zero guard, aggregates that
+iterate rather than index, and method configuration versioned so that a record created in 2026
+still reproduces its figures in 2030. SQLite is the development store; the production store is
+decided together with hosting on 9 September 2026, and EF Core makes the provider a one-line
+change.
 
 ## Next deliverable
 

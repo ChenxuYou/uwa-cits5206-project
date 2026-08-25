@@ -1,0 +1,35 @@
+# Advisories we have assessed and accepted, one GHSA id per line.
+#
+# A dependency scan that cannot be made to pass is a dependency scan that gets
+# switched off. This file is the alternative: an advisory listed here stops
+# failing the build, but only after somebody has written down why. Anything NOT
+# listed here still fails CI, so a *new* High or Critical advisory is never
+# hidden by an old accepted one.
+#
+# Every entry carries: what it is, why it is accepted, and when it is reviewed
+# again. Reviewed at the Saturday team meeting alongside docs/project/risks.md.
+
+# ---------------------------------------------------------------------------
+# GHSA-2m69-gcr7-jv3q — CVE-2025-6965 (High, CVSS 7.2)
+# SQLitePCLRaw.lib.e_sqlite3 <= 2.1.11 bundles SQLite < 3.50.2, in which the
+# number of aggregate terms can exceed the number of columns available, leading
+# to memory corruption.
+#
+# Reached transitively: Microsoft.EntityFrameworkCore.Sqlite -> SQLitePCLRaw.
+#
+# Why accepted, for now:
+#   1. There is NO patched version. The advisory lists "Patched versions: None"
+#      and 2.1.11 is the latest release, so this cannot be fixed by upgrading.
+#   2. Exploiting it requires the ability to submit crafted SQL. This
+#      application issues no raw SQL anywhere: every query goes through EF Core
+#      and is parameterised, and no user input reaches a query as text.
+#      (docs/project/risks.md R11.)
+#   3. The database is not network-reachable. It is a local file read only by
+#      the application process.
+#   4. It disappears entirely if the production store becomes PostgreSQL, which
+#      is decided with hosting on 9 September 2026 (ADR-001, AQ2).
+#
+# Review: 9 September 2026, with the hosting decision — or sooner if a patched
+# SQLitePCLRaw is released. Owner: Wenmin Luo.
+# ---------------------------------------------------------------------------
+GHSA-2m69-gcr7-jv3q

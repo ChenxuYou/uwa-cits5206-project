@@ -4,6 +4,33 @@
 **Due:** Tuesday 25 August 2026, 11:59 pm — **three days from today (Saturday 22 August)**
 **Worth:** 15 points across four criteria
 **Brief and rubric:** [`reference/unit/`](../../reference/unit/)
+**Version:** 2.1 — 25 August 2026
+
+> ### ✅ Superseded in substance on 24–25 August 2026 — kept as the record of the assessment
+>
+> This document is a **rubric assessment written on 22 August**, and its value is that it says
+> honestly where we were weak. Most of what it lists as missing now exists, and the gaps it
+> names have been closed rather than argued away:
+>
+> | What §4–§5 said was missing | Where it is now |
+> | --- | --- |
+> | No risk register anywhere in the repository | [`risks.md`](risks.md) — 21 rows with likelihood, impact, mitigation, **trigger** and owner, cybersecurity included, plus four risks already realised and closed |
+> | The skills audit has not happened | [`skills-audit.md`](skills-audit.md), run 24 August. Ratings are provisional until each member confirms their own row |
+> | No milestone schedule, no named owners against work | [`plan.md`](plan.md) — M0–M7 with dates, S1–S8 with the 110 points assigned, and standing responsibilities per member |
+> | Nothing under `.github/` — no CI | [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) — build, test and dependency scan on every push and pull request |
+> | The technology decision is not written down; the code contradicts the assessment | [ADR-001](../decisions/adr-001-technology-stack.md), and [`architecture.md` §8–§9](../spec/architecture.md#8-options-assessed) now carries Option F and records how the gate closed |
+> | *"We have no code"* (§7) | Not true when it was written, and less so now: [`src/`](../../src/) holds a working ASP.NET Core application. §7 is left unedited and this row is the correction |
+>
+> **Two items in this document are deliberately no longer live.** §2 argues for publishing a
+> catalogue of formula defects found in the client's workbook. We have decided not to: a
+> line-by-line reconciliation of the calculator is **deferred to a later cycle**, once the engine
+> exists to compare against, and the problem statement makes the structural case instead. The
+> client's written rule — **the guide governs**, and divergences are flagged to them — is what
+> stands. §6 item 7 and §5's related lines should be read with that in mind.
+>
+> **The GitHub Projects board is the one artefact still to be created by hand.** Everything else
+> above opens.
+
 **Version:** 2.0 — 22 August 2026
 
 > ### ✅ The client signed on 20 August 2026

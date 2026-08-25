@@ -64,6 +64,9 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
             : now.Date;
         Cycle.SealedBy = Cycle.ApprovedBy;
         Cycle.SealedAtUtc = now;
+        // Stamp the method version the figures were produced under, so the sealed record
+        // reproduces its own numbers rather than a later version's.
+        Cycle.MethodVersion = calculator.Method.Version;
         Cycle.Status = "Sealed";
         Cycle.UpdatedAtUtc = now;
 
@@ -87,7 +90,10 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
         var snapshot = new
         {
             SchemaVersion = "1.0",
-            CalculationMethod = "RIC sustainable rate v1; APFR and commercial multiplier 1.35",
+            MethodVersion = calculator.Method.Version,
+            CalculationMethod = $"RIC sustainable rate, method version {calculator.Method.Version}; "
+                + $"indirect cost recovery k = {calculator.Method.IndirectCostRecovery} "
+                + $"({calculator.Method.Source})",
             Cycle = new { Cycle.Id, Cycle.PlatformName, Cycle.StartYear, Cycle.EndYear, Cycle.BillableUnit, Cycle.CreatedBy, Cycle.BenchmarkNotes, Cycle.PricingJustification, Cycle.SubmittedBy, Cycle.SubmittedAtUtc, Cycle.ApprovedBy, Cycle.ApprovedAtUtc, Cycle.ApprovalComment, Cycle.EffectiveDateUtc },
             Capabilities = Cycle.Capabilities.OrderBy(x => x.Id).Select(x => new { x.Id, x.Name, x.MaximumCapacity, x.ForecastUwaUse, x.ForecastApfrUse, x.ForecastCommercialUse, x.ProposedUwaRate, x.ProposedApfrRate, x.ProposedCommercialRate, Result = Results[x.Id] }),
             Costs = Cycle.Costs.OrderBy(x => x.Id).Select(x => new { x.Id, x.RicCapabilityId, x.Scope, x.CostType, x.Category, x.Amount, x.Notes, x.PersonnelName, x.FundingType, x.FellowshipType, x.StepOption, x.WorkYears, x.EmploymentType, x.PercentWorked, x.SuperannuationPercent, x.StaffType, x.SalaryScale, x.SalaryStep, x.SchoolType, x.BaseSalary, x.Description, x.Supplier, YearAmounts = x.YearAmounts.OrderBy(y => y.ProjectYear).Select(y => new { y.ProjectYear, y.Amount }) })
