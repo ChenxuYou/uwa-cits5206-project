@@ -193,7 +193,6 @@ This scope — what is in, what is out, and what is stretch-only — was **signe
 
 ## 2. Client Communication and MVP Agreement
 
-*(To be completed — evidence pack in preparation.)*
 **Clients:** Mathew and Erika
 
 ### Meeting 1 — 29 July 2026
