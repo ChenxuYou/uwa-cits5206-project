@@ -247,8 +247,7 @@ Minimum end-to-end path through the guided costing tool, updated per the client'
 We run **one-week sprints on a Saturday-to-Saturday cycle**, each ending in a client-facing
 increment. The plan below covers every week from the day after this submission to the final
 deliverable on **13 October 2026**. Every task has one named owner and one date; the full backlog
-lives in [`plan.md`](https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/project/plan.md)
-and on the GitHub Projects board.
+lives on the GitHub Projects board.
 
 ### 3.1 Milestones
 
@@ -270,7 +269,7 @@ replacement reserve → salary pre-fill → in-tool approval routing.
 ### 3.2 Who owns what
 
 Five members, five distinct areas. The split follows the structure agreed at the team meeting of
-[15 August 2026 §8](https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/meetings/2026-08-15-team-weekly-meeting.md)
+15 August 2026
 and is deliberately drawn by *role* rather than by document, so that nobody's contribution is
 defined only by which file they happened to edit.
 
@@ -302,23 +301,23 @@ Every link below is a live resource the facilitator can open.
 
 | Tool / artefact | Purpose | Where |
 | --- | --- | --- |
-| **GitHub repository** | Single source of truth for specification, plans and code | <https://github.com/ChenxuYou/uwa-cits5206-project> |
-| **GitHub Issues** | Every task carries one owner and one due date | <https://github.com/ChenxuYou/uwa-cits5206-project/issues> |
-| **GitHub Projects board** | Sprint planning and work in progress — Backlog · In Progress · Review · Done, populated from the eighteen Must stories | <https://github.com/ChenxuYou/uwa-cits5206-project/projects> |
-| **Pull requests** | Code review and ownership; nothing merges unreviewed | <https://github.com/ChenxuYou/uwa-cits5206-project/pulls> |
-| **GitHub Actions CI** | Build, test and dependency scan on every push and pull request; the engine tests are the merge gate | [`ci.yml`](https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/.github/workflows/ci.yml) · [runs](https://github.com/ChenxuYou/uwa-cits5206-project/actions) |
-| **Meeting notes** | Decisions and client feedback, numbered and traceable across meetings | <https://github.com/ChenxuYou/uwa-cits5206-project/tree/main/docs/meetings> |
-| **Project plan** | Milestones, sprints and story assignment | [`plan.md`](https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/project/plan.md) |
-| **Risk register** | Likelihood × impact × mitigation × **trigger** × owner | [`risks.md`](https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/project/risks.md) |
-| **Skills audit** | Where our gaps are, and what is done about each | [`skills-audit.md`](https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/project/skills-audit.md) |
-| **Decision records** | Architecture and process decisions, with the evidence behind them | <https://github.com/ChenxuYou/uwa-cits5206-project/tree/main/docs/decisions> |
-| **Client communication history** | One folder per exchange — what was sent, what came back | <https://github.com/ChenxuYou/uwa-cits5206-project/tree/main/docs/client/communication-history> |
-| **MS Teams — client and team group chat** | Asynchronous questions to the client, recordings and files that do not belong in a public repository | [Client & Group 13 · Group Chat](https://teams.microsoft.com/l/chat/19:ceb3ab5b04eb4cd091fe4eb0242d436e@thread.v2/conversations?context=%7B%22contextType%22%3A%22chat%22%7D) |
+| **GitHub repository** | Single source of truth for specification, plans and code | [link](https://github.com/ChenxuYou/uwa-cits5206-project) |
+| **GitHub Issues** | Every task carries one owner and one due date | [link](https://github.com/ChenxuYou/uwa-cits5206-project/issues) |
+| **GitHub Projects board** | Sprint planning and work in progress — Backlog · In Progress · Review · Done, populated from the eighteen Must stories | [link](https://github.com/ChenxuYou/uwa-cits5206-project/projects) |
+| **Pull requests** | Code review and ownership; nothing merges unreviewed | [link](https://github.com/ChenxuYou/uwa-cits5206-project/pulls) |
+| **GitHub Actions CI** | Build, test and dependency scan on every push and pull request; the engine tests are the merge gate | [link](https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/.github/workflows/ci.yml) |
+| **Meeting notes** | Decisions and client feedback, numbered and traceable across meetings | [link](https://github.com/ChenxuYou/uwa-cits5206-project/tree/main/docs/meetings) |
+| **Project plan** | Milestones, sprints and story assignment | [link](https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/project/plan.md) |
+| **Risk register** | Likelihood × impact × mitigation × **trigger** × owner | [link](https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/project/risks.md) |
+| **Skills audit** | Where our gaps are, and what is done about each | [link](https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/project/skills-audit.md) |
+| **Decision records** | Architecture and process decisions, with the evidence behind them | [link](https://github.com/ChenxuYou/uwa-cits5206-project/tree/main/docs/decisions) |
+| **Client communication history** | One folder per exchange — what was sent, what came back | [link](https://github.com/ChenxuYou/uwa-cits5206-project/tree/main/docs/client/communication-history) |
+| **MS Teams — client and team group chat** | Asynchronous questions to the client, recordings and files that do not belong in a public repository | Client & Group 13 - Group Chat |
 
 ### 3.5 Deployment plan
 
 Deployment is the largest question still open from the
-[15 August meeting §7](https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/meetings/2026-08-15-team-weekly-meeting.md),
+15 August meeting,
 so it is treated as a milestone with a decision date rather than as something that happens at the
 end.
 
