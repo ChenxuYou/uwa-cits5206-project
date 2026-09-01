@@ -74,7 +74,3 @@ Open the localhost URL printed in the terminal. During development, changes can 
 ```bash
 dotnet watch --project src/CostingTool.csproj
 ```
-
-The current page contains representative dashboard data for UI development. It should later be
-replaced by values supplied from page models, application services, and the server-side calculation
-engine.

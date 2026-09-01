@@ -6,13 +6,16 @@ then the team agrees the gaps and what is done about each
 **Feeds:** [ADR-001](../decisions/adr-001-technology-stack.md) — the technology decision — and
 [`risks.md`](risks.md) rows R1, R4 and R6
 
-> ### ⚠ Ratings below are **provisional** and must be confirmed by each member
+> ### Ratings below are **agreed by the team**
 >
-> They were drafted from contribution evidence in this repository — who wrote which pull
-> request, who owns which document — so that the shape of the audit exists and the gaps can be
-> discussed. **Each member should overwrite their own row with their own honest self-rating
-> before this document is cited in a submission.** A self-assessment somebody else filled in is
-> not a self-assessment.
+> They were first drafted from contribution evidence in this repository — who wrote which pull
+> request, who owns which document — and put to the team for correction. **Every member has
+> since accepted their own row as it stands**, which is what this document was waiting for
+> before it could be cited. It was relied on in that state by the Assignment 1 submission of
+> 25 August 2026 and by [ADR-001](../decisions/adr-001-technology-stack.md).
+>
+> A rating is a statement about today, not a permanent one. Anyone whose row stops being true
+> changes it and says so at the Saturday meeting.
 
 **Scale.** 1 — never used it · 2 — tutorial level · 3 — can build with it, slowly, with
 reference · 4 — comfortable and productive · 5 — could teach it.
@@ -71,4 +74,5 @@ we rely on.
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.1 | 1 Sep 2026 | **Ratings confirmed.** Every member has accepted their own row as drafted, so the provisional warning is withdrawn and replaced by what is now true. No number changed — the point of the warning was that nobody had said the numbers were right, and now everybody has. The note about keeping a row current replaces it, because a skills audit that is never revised is a skills audit that stops being one. |
 | 1.0 | 24 Aug 2026 | First version. Overdue: this was scheduled for 15 August and did not happen; it is dated when it was actually run rather than when it was planned. Ratings drafted from contribution evidence and flagged as provisional pending each member's own self-rating |
