@@ -187,7 +187,11 @@ hard to tell apart in a single flat folder.
 │   ├── client/             Client material — local only, not committed
 │   └── unit/               Assignment briefs, rubric and unit resources
 ├── scripts/                One-off repository tooling, not application code
-│   └── seed-project-board.py   Builds the Projects board from docs/spec/user-stories.md
+│   ├── seed-project-board.py   Milestones, labels, issues and the Projects board, built
+│   │                           from docs/spec/user-stories.md and docs/project/plan.md
+│   ├── dedupe-story-issues.py  One issue per story — keeps the first, deletes the rest
+│   ├── backfill-issues.py      Assigns unowned Must stories; opens the deploy issue
+│   └── export-issues.py        Dumps live issue state to issues.json (not committed)
 ├── src/                    Application code — ASP.NET Core Razor Pages (see the note below)
 ├── .gitattributes          Line endings — LF everywhere, so diffs stay readable
 ├── .gitignore              What never gets committed, and why
@@ -260,6 +264,7 @@ Some files referenced in this repository are **deliberately absent** from it:
 | Meeting audio and video (`.m4a`, `.mp4`, …) | Identifiable voices |
 | Transcripts of any kind — subtitle formats (`.srt`, `.vtt`, …) and `*-transcript.md` | Verbatim, unreviewed speech, whatever the file extension. Written minutes are the record, and they go in `docs/meetings/` |
 | Internal review notes (`docs/internal/`) | Our own working critique of our own documents. Useful to us; not a deliverable, and not something to hand anyone half-finished |
+| API state dumps (`issues.json`, `projects.json`) | What `scripts/` reads to work out what already exists before it changes anything. A snapshot of live state, stale the moment anyone touches an issue, and committing it invites someone to trust it. Re-export it; never read it out of a commit |
 | Credentials, `.env` files, keys, local databases | The obvious reasons |
 
 **There is no exception for internal meetings.** An earlier version of these rules let a
@@ -287,7 +292,7 @@ the commit, not after it.
 - **Weekly** online stand-up — progress, blockers, next week's allocation.
 - **Fortnightly** in person on campus, including the facilitator checkpoint.
 - **Client on Wednesdays as needed**, plus a shared Teams chat for asynchronous questions. The client asked us to digest and come back with batched questions rather than hold a fixed weekly slot; support is heavier up front and eases off later (agreed 29 July 2026).
-- Every task is a GitHub issue with one named owner and a deadline, tracked on the [Projects board](https://github.com/ChenxuYou/uwa-cits5206-project/projects) and planned in [`docs/project/plan.md`](docs/project/plan.md).
+- Every MVP task is a GitHub issue with a named owner and a milestone date, tracked on the [Projects board](https://github.com/users/ChenxuYou/projects/2) and planned in [`docs/project/plan.md`](docs/project/plan.md). Stretch stories sit on the board unassigned, because assigning work nobody has agreed to do is how a plan starts lying.
 - Minutes are committed within 24 hours, so members who missed a meeting can be briefed from the repository. Two meetings from before this rule settled — 24 July and 5 August — are still to be written up.
 - CI runs on every push and pull request: [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
