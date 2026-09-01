@@ -43,7 +43,10 @@ from pathlib import Path
 
 OWNER = "ChenxuYou"
 REPO = "uwa-cits5206-project"
-PROJECT_TITLE = "RIC Costing Tool — MVP delivery"
+# Must match the board's title on GitHub exactly. The script finds the board by title
+# and creates a new one if no match is found, so a mismatch here silently produces a
+# second, empty board rather than an error.
+PROJECT_TITLE = "uwa-cits5206-project-board"
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 STORIES_MD = REPO_ROOT / "docs" / "spec" / "user-stories.md"
