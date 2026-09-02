@@ -79,12 +79,16 @@ public class BoundaryTests
         // rates, and the per-category split drives only the balance projection.
         var allUwa = Baseline() with
         {
-            ForecastUwaUse = 1_000m, ForecastApfrUse = 0m, ForecastCommercialUse = 0m
+            ForecastUwaUse = 1_000m,
+            ForecastApfrUse = 0m,
+            ForecastCommercialUse = 0m
         };
 
         var spread = Baseline() with
         {
-            ForecastUwaUse = 400m, ForecastApfrUse = 350m, ForecastCommercialUse = 250m
+            ForecastUwaUse = 400m,
+            ForecastApfrUse = 350m,
+            ForecastCommercialUse = 250m
         };
 
         Assert.Equal(
