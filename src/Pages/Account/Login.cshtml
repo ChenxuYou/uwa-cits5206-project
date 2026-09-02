@@ -1,8 +1,18 @@
 @page
 @model CostingTool.Pages.Account.LoginModel
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment
 @{
     Layout = null;
     ViewData["Title"] = "Sign in";
 }
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sign in · UWA Research Infrastructure</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap"><link rel="stylesheet" href="~/css/site.css" asp-append-version="true"></head>
-<body class="login-body"><main class="login-shell"><section class="login-brand"><span class="login-mark">UWA</span><p>Research Infrastructure</p><h1>Costing &amp; Pricing</h1><small>Secure costing, rate modelling and delegated approval.</small></section><section class="login-card"><p class="eyebrow">SECURE ACCESS</p><h2>Sign in to continue</h2><p class="login-intro">Your role determines whether you can prepare costing cycles or approve submitted rates.</p><form method="post"><input type="hidden" asp-for="ReturnUrl"><div asp-validation-summary="All" class="form-errors login-errors"></div><label class="field"><span>Username</span><input asp-for="UserName" autocomplete="username" autofocus></label><label class="field"><span>Password</span><input asp-for="Password" type="password" autocomplete="current-password"></label><button type="submit" class="login-button">Sign in <span>→</span></button></form><div class="demo-accounts"><strong>Demo accounts</strong><p>Data entry: <code>entry</code> / <code>Entry123!</code></p><p>Approver: <code>approver</code> / <code>Approve123!</code></p></div></section></main></body></html>
+<body class="login-body"><main class="login-shell"><section class="login-brand"><span class="login-mark">UWA</span><p>Research Infrastructure</p><h1>Costing &amp; Pricing</h1><small>Secure costing, rate modelling and delegated approval.</small></section><section class="login-card"><p class="eyebrow">SECURE ACCESS</p><h2>Sign in to continue</h2><p class="login-intro">Your role determines whether you can prepare costing cycles or approve submitted rates.</p><form method="post"><input type="hidden" asp-for="ReturnUrl"><div asp-validation-summary="All" class="form-errors login-errors"></div><label class="field"><span>Username</span><input asp-for="UserName" autocomplete="username" autofocus></label><label class="field"><span>Password</span><input asp-for="Password" type="password" autocomplete="current-password"></label><button type="submit" class="login-button">Sign in <span>→</span></button></form>@*
+    Development only. The accounts themselves are seeded only in development
+    (Program.cs), so printing them anywhere else would be both a bad habit and a
+    lie — risks.md R14.
+*@
+@if (HostEnvironment.IsDevelopment())
+{
+    <div class="demo-accounts"><strong>Demo accounts — development only</strong><p>Data entry: <code>entry</code> / <code>Entry123!</code></p><p>Approver: <code>approver</code> / <code>Approve123!</code></p></div>
+}
+</section></main></body></html>

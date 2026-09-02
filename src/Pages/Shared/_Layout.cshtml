@@ -1,11 +1,22 @@
-@inject CostingTool.Data.CostingDbContext LayoutDb
+@inject CostingDbContext LayoutDb
 @{
-    var unreadNotifications = User.Identity?.IsAuthenticated == true && User.IsInRole("DataEntry")
-        ? LayoutDb.AppNotifications.Count(x => x.RecipientName == User.Identity.Name && !x.IsRead)
+    var isCustodian = User.IsInRole(AppUser.Roles.DataEntry);
+    var isApprover = User.IsInRole(AppUser.Roles.Approver);
+
+    var unreadNotifications = User.Identity?.IsAuthenticated == true && isCustodian
+        ? LayoutDb.AppNotifications.Count(x => x.RecipientUserName == User.UserName() && !x.IsRead)
         : 0;
+
+    // The highlighted item follows the page being viewed. It used to be fixed on Overview,
+    // so the sidebar said "you are here" in the wrong place on every screen but one.
+    var path = (Context.Request.Path.Value ?? "/").ToLowerInvariant();
+    string NavClass(string prefix) =>
+        prefix == "/"
+            ? (path == "/" ? "nav-item active" : "nav-item")
+            : (path.StartsWith(prefix) ? "nav-item active" : "nav-item");
 }
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-AU">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,6 +27,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <div class="app-shell">
         <aside class="sidebar" id="sidebar">
             <a class="brand" href="/" aria-label="UWA Research Infrastructure home">
@@ -24,47 +36,73 @@
             </a>
 
             <nav class="main-nav" aria-label="Main navigation">
-                <a class="nav-item active" href="/">
-                    <span class="nav-icon">⌂</span><span>Overview</span>
+                <a class="@NavClass("/")" href="/">
+                    <span class="nav-icon" aria-hidden="true">⌂</span><span>Overview</span>
                 </a>
-                @if (User.IsInRole("DataEntry"))
+                @if (isCustodian)
                 {
-                    <a class="nav-item" href="/Ric/Start"><span class="nav-icon">◫</span><span>New costing cycle</span></a>
-                    <a class="nav-item" href="/"><span class="nav-icon">▤</span><span>My costing cycles</span></a>
-                    <a class="nav-item" href="/Notifications"><span class="nav-icon">♢</span><span>Notifications</span></a>
-                    <a class="nav-item" href="#capabilities"><span class="nav-icon">◇</span><span>Capabilities</span></a>
-                    <a class="nav-item" href="#reports"><span class="nav-icon">▤</span><span>Reports</span></a>
+                    <a class="@NavClass("/ric/start")" asp-page="/Ric/Start">
+                        <span class="nav-icon" aria-hidden="true">◫</span><span>New costing cycle</span>
+                    </a>
+                    <a class="@NavClass("/notifications")" asp-page="/Notifications/Index">
+                        <span class="nav-icon" aria-hidden="true">♢</span><span>Notifications</span>
+                        @if (unreadNotifications > 0)
+                        {
+                            <span class="nav-count">@unreadNotifications</span>
+                        }
+                    </a>
                 }
-                @if (User.IsInRole("Approver"))
+                @if (isApprover)
                 {
-                    <a class="nav-item" href="/Approvals"><span class="nav-icon">✓</span><span>Approval queue</span></a>
+                    <a class="@NavClass("/approvals")" asp-page="/Approvals/Index">
+                        <span class="nav-icon" aria-hidden="true">✓</span><span>Approval queue</span>
+                    </a>
                 }
             </nav>
 
-            <div class="sidebar-section">
-                <p>Workspace</p>
-                <a class="nav-item" href="#help"><span class="nav-icon">?</span><span>Help &amp; guidance</span></a>
-                <a class="nav-item" href="#settings"><span class="nav-icon">⚙</span><span>Settings</span></a>
-            </div>
-
+            @*
+                The sidebar previously carried Capabilities, Reports, Settings and a "View
+                guide" link, all pointing at "#". Placeholder navigation is worse than none
+                in front of a client: it invites a click and answers with nothing. What is
+                built is listed above; the rest returns when the pages exist.
+            *@
             <div class="sidebar-help">
-                <span class="help-icon">?</span>
+                <span class="help-icon" aria-hidden="true">?</span>
                 <strong>Need help?</strong>
-                <p>Read the costing guide or contact Research Infrastructure.</p>
-                <a href="#guide">View guide →</a>
+                <p>The method follows the UWA Costing &amp; Pricing Guide. Contact Research Infrastructure with anything the guide does not answer.</p>
             </div>
         </aside>
 
-        <main class="main-content">
+        <main class="main-content" id="main-content">
             <header class="topbar">
-                <button class="menu-button" id="menuButton" aria-label="Open navigation">☰</button>
+                <button class="menu-button" id="menuButton" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">☰</button>
                 <div class="topbar-spacer"></div>
-                @if (User.IsInRole("DataEntry")) { <a class="icon-button" href="/Notifications" aria-label="Notifications">♢@if(unreadNotifications>0){<span class="notification-dot"></span>}</a> }
+                @if (isCustodian)
+                {
+                    <a class="icon-button" asp-page="/Notifications/Index"
+                       aria-label="@(unreadNotifications > 0 ? $"Notifications, {unreadNotifications} unread" : "Notifications")">
+                        ♢@if (unreadNotifications > 0) { <span class="notification-dot"></span> }
+                    </a>
+                }
                 @if (User.Identity?.IsAuthenticated == true)
                 {
-                    var displayName = User.Identity.Name ?? "User";
-                    var initials = string.Concat(displayName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(x => x[0])).ToUpperInvariant();
-                    <div class="user-chip"><span class="avatar">@initials</span><span><strong>@displayName</strong><small>@(User.IsInRole("Approver") ? "Delegated approver" : "Platform custodian")</small></span><form method="post" asp-page="/Account/Logout"><button class="logout-button" type="submit">Sign out</button></form></div>
+                    var displayName = User.DisplayName();
+                    var initials = string.Concat(displayName
+                        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                        .Take(2)
+                        .Select(x => x[0]))
+                        .ToUpperInvariant();
+
+                    <div class="user-chip">
+                        <span class="avatar" aria-hidden="true">@initials</span>
+                        <span>
+                            <strong>@displayName</strong>
+                            <small>@(isApprover ? "Delegated approver" : "Platform custodian")</small>
+                        </span>
+                        <form method="post" asp-page="/Account/Logout">
+                            <button class="logout-button" type="submit">Sign out</button>
+                        </form>
+                    </div>
                 }
             </header>
 
@@ -73,8 +111,10 @@
     </div>
 
     <script>
-        document.getElementById('menuButton')?.addEventListener('click', () => {
-            document.getElementById('sidebar')?.classList.toggle('open');
+        const menuButton = document.getElementById('menuButton');
+        menuButton?.addEventListener('click', () => {
+            const open = document.getElementById('sidebar')?.classList.toggle('open');
+            menuButton.setAttribute('aria-expanded', String(!!open));
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)

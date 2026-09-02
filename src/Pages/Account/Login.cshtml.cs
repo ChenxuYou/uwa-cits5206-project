@@ -13,19 +13,23 @@ namespace CostingTool.Pages.Account;
 public class LoginModel(CostingDbContext db, IPasswordHasher<AppUser> hasher) : PageModel
 {
     [BindProperty] public string UserName { get; set; } = string.Empty;
+
     [BindProperty] public string Password { get; set; } = string.Empty;
+
     [BindProperty(SupportsGet = true)] public string? ReturnUrl { get; set; }
 
-    public IActionResult OnGet()
-    {
-        if (User.Identity?.IsAuthenticated == true) return LocalRedirect(GetHome());
-        return Page();
-    }
+    public IActionResult OnGet() =>
+        User.Identity?.IsAuthenticated == true ? LocalRedirect(Home()) : Page();
 
     public async Task<IActionResult> OnPostAsync()
     {
-        var user = await db.AppUsers.SingleOrDefaultAsync(x => x.UserName == UserName.Trim().ToLower() && x.IsActive);
-        if (user is null || hasher.VerifyHashedPassword(user, user.PasswordHash, Password) == PasswordVerificationResult.Failed)
+        var userName = UserName.Trim().ToLowerInvariant();
+        var user = await db.AppUsers.SingleOrDefaultAsync(x => x.UserName == userName && x.IsActive);
+
+        // One message for both "no such user" and "wrong password", so the form cannot be
+        // used to find out which usernames exist.
+        if (user is null ||
+            hasher.VerifyHashedPassword(user, user.PasswordHash, Password) == PasswordVerificationResult.Failed)
         {
             ModelState.AddModelError(string.Empty, "Invalid username or password.");
             return Page();
@@ -36,15 +40,21 @@ public class LoginModel(CostingDbContext db, IPasswordHasher<AppUser> hasher) : 
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Name, user.DisplayName),
             new Claim(ClaimTypes.Role, user.Role),
-            new Claim("username", user.UserName)
+            new Claim(CurrentUser.UserNameClaim, user.UserName)
         };
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
             new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)),
             new AuthenticationProperties { IsPersistent = false });
 
-        if (!string.IsNullOrWhiteSpace(ReturnUrl) && Url.IsLocalUrl(ReturnUrl)) return LocalRedirect(ReturnUrl);
-        return LocalRedirect(user.Role == "Approver" ? "/Approvals" : "/");
+        if (!string.IsNullOrWhiteSpace(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
+        {
+            return LocalRedirect(ReturnUrl);
+        }
+
+        return LocalRedirect(user.Role == AppUser.Roles.Approver ? "/Approvals" : "/");
     }
 
-    private string GetHome() => User.IsInRole("Approver") ? "/Approvals" : "/";
+    private string Home() => User.IsInRole(AppUser.Roles.Approver) ? "/Approvals" : "/";
 }

@@ -1,15 +1,20 @@
-namespace CostingTool.Models;
+namespace CostingTool.Engine;
 
 /// <summary>
 /// Versioned configuration for the University's costing method.
 ///
-/// The indirect cost recovery factor <c>k</c>, the rounding rule and the capacity
-/// baselines are <b>configuration, not constants</b>. The client told us at the kickoff
-/// of 29 July 2026 that the method and its factors are reviewed, and a costing cycle runs
-/// for three to five years — so a rate sealed in 2026 must still reproduce its own figures
-/// in 2030 from the method version that produced it.
+/// The indirect cost recovery factor <c>k</c> and the rounding rule are
+/// <b>configuration, not constants</b>. The client told us at the kickoff of 29 July 2026
+/// that the method and its factors are reviewed, and a costing cycle runs for three to
+/// five years — so a rate sealed in 2026 must still reproduce its own figures in 2030
+/// from the method version that produced it.
 ///
 /// See <c>docs/spec/architecture.md</c> §3, engine rules R5 and R6.
+///
+/// This type lives in the engine project rather than beside the other entities because
+/// the engine must be able to calculate without a database present — a unit test
+/// constructs one directly. Entity Framework maps it from the web project all the same;
+/// a POCO does not need to live next to its <c>DbContext</c>.
 /// </summary>
 public class MethodConfig
 {
@@ -28,8 +33,22 @@ public class MethodConfig
     /// </summary>
     public decimal IndirectCostRecovery { get; set; } = 1.35m;
 
-    /// <summary>Decimal places a presented rate is rounded to. Stored values stay unrounded.</summary>
+    /// <summary>
+    /// Decimal places a presented rate is rounded to. Stored values stay unrounded, and
+    /// the rounding happens once, at presentation — architecture.md §3 rule R3.
+    /// </summary>
     public int RateDecimals { get; set; } = 2;
+
+    /// <summary>
+    /// What to do with an exact half at the last decimal place.
+    ///
+    /// <b>This is an assumption, not a quotation.</b> The client's guide states no
+    /// half-cent convention, so we apply the ordinary commercial one — round half away
+    /// from zero — and record here that it is ours rather than theirs. It is a candidate
+    /// for the next batch of questions; changing it means a new method version, never an
+    /// edit to this one.
+    /// </summary>
+    public MidpointRounding MidpointRule { get; set; } = MidpointRounding.AwayFromZero;
 
     /// <summary>Where the figures in this version came from, so a reader can check them.</summary>
     public string Source { get; set; } = string.Empty;

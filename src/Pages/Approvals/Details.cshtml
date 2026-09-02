@@ -2,20 +2,99 @@
 @model CostingTool.Pages.Approvals.DetailsModel
 @{
     ViewData["Title"] = "Approval review";
-    var totalCost = Model.Results.Values.Sum(x => x.TotalOperatingCost);
-    var revenue = Model.Results.Values.Sum(x => x.ForecastPlatformRevenue);
+    var totalCost = Model.Rates.TotalOperatingCost;
+    var revenue = Model.Rates.ForecastRevenue;
 }
 <div class="page-wrap approval-page">
     <div class="breadcrumb"><a asp-page="/Approvals/Index">Approvals</a><span>›</span><span>@Model.Cycle.PlatformName</span></div>
-    <div class="review-heading"><div><span class="status-pill @Model.Cycle.Status.ToLowerInvariant()">@Model.Cycle.Status</span><h1>Delegated authority review</h1><p>@Model.Cycle.PlatformName · @Model.Cycle.StartYear–@Model.Cycle.EndYear · prepared by @Model.Cycle.CreatedBy</p></div><a class="outline-action" asp-page="/Approvals/Index">← Approval queue</a></div>
+    <div class="review-heading"><div><span class="status-pill @Model.Cycle.Status.ToLowerInvariant()">@Model.Cycle.Status</span><h1>Delegated authority review</h1><p>@Model.Cycle.PlatformName · @Model.Cycle.StartYear–@Model.Cycle.EndYear · prepared by @Model.Cycle.CreatedByDisplay</p></div><a class="outline-action" asp-page="/Approvals/Index">← Approval queue</a></div>
 
     <div asp-validation-summary="All" class="form-errors approval-errors"></div>
     <div class="review-layout">
         <main>
             <section class="review-kpis"><div><span>Total operating cost</span><strong>@totalCost.ToString("C")</strong></div><div><span>Forecast revenue</span><strong>@revenue.ToString("C")</strong></div><div class="@(revenue-totalCost>=0?"positive-kpi":"negative-kpi")"><span>Forecast balance</span><strong>@((revenue-totalCost).ToString("C"))</strong></div></section>
             <article class="review-card"><div class="review-card-heading"><h2>Rates requiring approval</h2><span>GST exclusive</span></div><div class="review-table-wrap"><table class="review-table"><thead><tr><th>Capability</th><th>Operating cost</th><th>UWA rate</th><th>APFR rate</th><th>Commercial rate</th><th>Balance</th></tr></thead><tbody>
-            @foreach (var c in Model.Cycle.Capabilities) { var r=Model.Results[c.Id]; <tr><td><strong>@c.Name</strong></td><td>@r.TotalOperatingCost.ToString("C")</td><td>@c.ProposedUwaRate.ToString("C")</td><td>@c.ProposedApfrRate.ToString("C")</td><td>@c.ProposedCommercialRate.ToString("C")</td><td class="@(r.ForecastBalance>=0?"positive-text":"negative-text")">@r.ForecastBalance.ToString("C")</td></tr> }
+            @foreach (var c in Model.Cycle.Capabilities)
+            {
+                var r = Model.Rates.For(c.Id);
+                <tr>
+                    <td><strong>@c.Name</strong></td>
+                    @if (r is null)
+                    {
+                        <td colspan="5">@Model.Rates.ProblemFor(c.Id)</td>
+                    }
+                    else
+                    {
+                        <td>@r.TotalOperatingCost.ToString("C")</td>
+                        <td>@c.ProposedUwaRate.ToString("C")</td>
+                        <td>@c.ProposedApfrRate.ToString("C")</td>
+                        <td>@c.ProposedCommercialRate.ToString("C")</td>
+                        <td class="@(r.ForecastBalance >= 0 ? "positive-text" : "negative-text")">@r.ForecastBalance.ToString("C")</td>
+                    }
+                </tr>
+            }
             </tbody></table></div></article>
+
+            @*
+                The workings, on the approver's screen and in the sealed record.
+
+                The client asked on 20 August 2026 that the record show "workings for the
+                calculator (for transparency and traceability)". An approver signing a rate
+                should be able to see how it was reached without opening a spreadsheet, and
+                the same figures are written into the snapshot at seal time.
+            *@
+            <article class="review-card">
+                <div class="review-card-heading">
+                    <div><h2>How each rate was calculated</h2><p>Method version @Model.Rates.Method.Version · k = @Model.Rates.Method.IndirectCostRecovery</p></div>
+                    <span>Unrounded</span>
+                </div>
+                <div class="review-table-wrap">
+                    <table class="review-table capacity-evidence-table">
+                        <thead>
+                            <tr>
+                                <th>Capability</th>
+                                <th>C — operating cost</th>
+                                <th>I total / non-UWA</th>
+                                <th>U — forecast use</th>
+                                <th>UWA researcher</th>
+                                <th>APFR</th>
+                                <th>Commercial</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var c in Model.Cycle.Capabilities)
+                        {
+                            var r = Model.Rates.For(c.Id);
+                            if (r is null) { continue; }
+                            <tr>
+                                <td><strong>@c.Name</strong></td>
+                                <td>
+                                    <strong>@r.TotalOperatingCost.ToString("C")</strong>
+                                    <small>@r.CapabilityOperatingCost.ToString("C") direct + @r.AllocatedPlatformCost.ToString("C") platform share</small>
+                                </td>
+                                <td>
+                                    <strong>@r.TotalIncome.ToString("C")</strong>
+                                    <small>@r.NonUwaIncome.ToString("C") excluding UWA</small>
+                                </td>
+                                <td>@r.ForecastUtilisation.ToString("N1")</td>
+                                <td>
+                                    <strong>@r.DisplayUwaRate.ToString("C")</strong>
+                                    <small>(@r.TotalOperatingCost.ToString("N0") − @r.TotalIncome.ToString("N0")) ÷ @r.ForecastUtilisation.ToString("N0")</small>
+                                </td>
+                                <td>
+                                    <strong>@r.DisplayApfrRate.ToString("C")</strong>
+                                    <small>((@r.TotalOperatingCost.ToString("N0") − @r.NonUwaIncome.ToString("N0")) ÷ @r.ForecastUtilisation.ToString("N0")) × @r.IndirectCostRecovery</small>
+                                </td>
+                                <td>
+                                    <strong>@r.DisplayCommercialRate.ToString("C")</strong>
+                                    <small>(@r.TotalOperatingCost.ToString("N0") ÷ @r.ForecastUtilisation.ToString("N0")) × @r.IndirectCostRecovery</small>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </article>
             <article class="review-card"><div class="review-card-heading"><div><h2>Capacity and utilisation evidence</h2><p>Forecast demand used by the rate calculation.</p></div><span>@Model.Cycle.BillableUnit</span></div><div class="review-table-wrap"><table class="review-table capacity-evidence-table"><thead><tr><th>Capability</th><th>Maximum capacity</th><th>UWA use</th><th>APFR use</th><th>Commercial use</th><th>Total forecast</th><th>Utilisation</th></tr></thead><tbody>
             @foreach(var c in Model.Cycle.Capabilities){var forecast=c.ForecastUwaUse+c.ForecastApfrUse+c.ForecastCommercialUse;var utilisation=c.MaximumCapacity>0?forecast/c.MaximumCapacity*100:0;<tr><td><strong>@c.Name</strong></td><td>@c.MaximumCapacity.ToString("N1")</td><td>@c.ForecastUwaUse.ToString("N1")</td><td>@c.ForecastApfrUse.ToString("N1")</td><td>@c.ForecastCommercialUse.ToString("N1")</td><td><strong>@forecast.ToString("N1")</strong></td><td>@utilisation.ToString("N1")%</td></tr>}
             </tbody></table></div></article>
@@ -26,7 +105,7 @@
                 var source = item.Category=="Personnel"
                     ? string.Join(" · ", new[]{item.PersonnelName,item.FundingType,item.FellowshipType,item.EmploymentType,item.StaffType,item.SalaryScale is null?null:$"{item.SalaryScale}-{item.SalaryStep}",item.StepOption,item.SchoolType,item.PercentWorked is null?null:$"{item.PercentWorked:N0}% FTE",item.SuperannuationPercent is null?null:$"{item.SuperannuationPercent:N0}% super"}.Where(x=>!string.IsNullOrWhiteSpace(x)))
                     : string.Join(" · ", new[]{item.Supplier,item.Description}.Where(x=>!string.IsNullOrWhiteSpace(x)));
-                <tr><td><strong>@(item.Description??item.PersonnelName??item.Category)</strong><small>@capability</small></td><td><span class="category-chip">@item.Category</span><small>@item.Scope · @(item.CostType=="Non-variable income"?"Funding / income":"Operating cost")</small></td><td class="source-cell">@(string.IsNullOrWhiteSpace(source)?"Not recorded":source)@if(item.BaseSalary is not null){<small>Base salary @item.BaseSalary.Value.ToString("C") · @item.WorkYears year(s)</small>}</td><td><div class="year-amounts">@foreach(var amount in item.YearAmounts.OrderBy(x=>x.ProjectYear)){<span><b>@(Model.Cycle.StartYear+amount.ProjectYear-1)</b> @amount.Amount.ToString("C")</span>}</div></td><td><strong>@item.Amount.ToString("C")</strong><small>annual average</small></td><td class="notes-cell">@(item.Notes??"—")</td></tr>
+                <tr><td><strong>@(item.Description??item.PersonnelName??item.Category)</strong><small>@capability</small></td><td><span class="category-chip">@item.Category</span><small>@item.Scope · @(item.IsIncome ? "Funding / income" : "Operating cost")</small></td><td class="source-cell">@(string.IsNullOrWhiteSpace(source)?"Not recorded":source)@if(item.BaseSalary is not null){<small>Base salary @item.BaseSalary.Value.ToString("C") · @item.WorkYears year(s)</small>}</td><td><div class="year-amounts">@foreach(var amount in item.YearAmounts.OrderBy(x=>x.ProjectYear)){<span><b>@(Model.Cycle.StartYear+amount.ProjectYear-1)</b> @amount.Amount.ToString("C")</span>}</div></td><td><strong>@item.Amount.ToString("C")</strong><small>annual average</small></td><td class="notes-cell">@(item.Notes??"—")</td></tr>
             }
             </tbody><tfoot><tr><td colspan="4">Average annual total entered</td><td colspan="2">@Model.Cycle.Costs.Sum(x=>x.Amount).ToString("C")</td></tr></tfoot></table></div></article>
             <article class="review-card"><div class="review-card-heading"><h2>Evidence</h2></div><div class="review-notes"><div><span>Benchmarking</span><p>@(Model.Cycle.BenchmarkNotes ?? "Not recorded")</p></div><div><span>Pricing justification</span><p>@(Model.Cycle.PricingJustification ?? "Not recorded")</p></div></div></article>

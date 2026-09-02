@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The calculation engine, on its own.
+
+    This project deliberately has NO package references: no Entity Framework, no
+    ASP.NET Core, nothing. That is not tidiness, it is the mechanism behind
+    architecture.md §3 rule R7 — "the engine never sees a user, a session or a
+    database row". A dependency added here would make that claim untrue, so an
+    empty ItemGroup is the enforcement.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>

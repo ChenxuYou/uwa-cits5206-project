@@ -2,36 +2,139 @@
 @model CostingTool.Pages.Ric.ReviewModel
 @{
     ViewData["Title"] = "Review RIC cycle";
-    var totalCost = Model.Results.Values.Sum(x => x.TotalOperatingCost);
-    var revenue = Model.Results.Values.Sum(x => x.ForecastPlatformRevenue);
+
+    // The platform figure is a roll-up over the capability collection, computed once in
+    // CycleRates rather than re-summed here — architecture.md §4 and engine rule R8.
+    var totalCost = Model.Rates.TotalOperatingCost;
+    var revenue = Model.Rates.ForecastRevenue;
+    var balance = Model.Rates.ForecastBalance;
+    var unit = Model.Cycle.BillableUnit.ToLowerInvariant();
 }
+
 <div class="page-wrap ric-page">
     <partial name="_RicSteps" model='new CostingTool.Pages.Ric.RicStepViewModel(5, Model.Cycle.Id)' />
 
     @if (Model.SuccessMessage is not null)
     {
-        <div class="submit-success"><span>✓</span><div><strong>Status updated</strong><p>@Model.SuccessMessage</p></div></div>
+        <div class="submit-success">
+            <span>✓</span>
+            <div><strong>Status updated</strong><p>@Model.SuccessMessage</p></div>
+        </div>
     }
+
     @if (Model.Cycle.Status == "Returned")
     {
-        <div class="return-banner"><strong>Returned for changes</strong><p>@Model.Cycle.ReturnReason</p><small>Returned by @Model.Cycle.ReturnedBy on @Model.Cycle.ReturnedAtUtc?.ToLocalTime().ToString("dd MMM yyyy, h:mm tt")</small></div>
+        <div class="return-banner">
+            <strong>Returned for changes</strong>
+            <p>@Model.Cycle.ReturnReason</p>
+            <small>Returned by @Model.Cycle.ReturnedBy on @Model.Cycle.ReturnedAtUtc?.ToLocalTime().ToString("dd MMM yyyy, h:mm tt")</small>
+        </div>
     }
 
     <div class="ric-title">
-        <div><span class="status-pill @Model.Cycle.Status.ToLowerInvariant()">@Model.Cycle.Status</span><h1>Review costing cycle</h1><p>@Model.Cycle.PlatformName · @Model.Cycle.StartYear–@Model.Cycle.EndYear · per @Model.Cycle.BillableUnit.TrimEnd('s').ToLower()</p></div>
-        @if (Model.IsEditable) { <a class="outline-action" asp-page="/Ric/Rates" asp-route-cycleId="@Model.Cycle.Id">← Back to rates</a> }
+        <div>
+            <span class="status-pill @Model.Cycle.Status.ToLowerInvariant()">@Model.Cycle.Status</span>
+            <h1>Review costing cycle</h1>
+            <p>@Model.Cycle.PlatformName · @Model.Cycle.StartYear–@Model.Cycle.EndYear · per @Model.Cycle.BillableUnit.TrimEnd('s').ToLower()</p>
+        </div>
+        @if (Model.IsEditable)
+        {
+            <a class="outline-action" asp-page="/Ric/Rates" asp-route-cycleId="@Model.Cycle.Id">← Back to rates</a>
+        }
     </div>
 
     <div class="review-layout">
         <main>
-            <section class="review-kpis"><div><span>Total operating cost</span><strong>@totalCost.ToString("C")</strong></div><div><span>Forecast platform revenue</span><strong>@revenue.ToString("C")</strong></div><div class="@(revenue-totalCost>=0?"positive-kpi":"negative-kpi")"><span>Forecast balance</span><strong>@((revenue-totalCost).ToString("C"))</strong></div></section>
-            <article class="review-card"><div class="review-card-heading"><h2>Capability rates</h2><span>GST exclusive</span></div><div class="review-table-wrap"><table class="review-table"><thead><tr><th>Capability</th><th>Operating cost</th><th>Forecast use</th><th>UWA proposed</th><th>APFR proposed</th><th>Commercial proposed</th><th>Balance</th></tr></thead><tbody>
-            @foreach (var c in Model.Cycle.Capabilities) { var r = Model.Results[c.Id]; <tr><td><strong>@c.Name</strong></td><td>@r.TotalOperatingCost.ToString("C")</td><td>@((c.ForecastUwaUse+c.ForecastApfrUse+c.ForecastCommercialUse).ToString("N1"))</td><td>@c.ProposedUwaRate.ToString("C")</td><td>@c.ProposedApfrRate.ToString("C")</td><td>@c.ProposedCommercialRate.ToString("C")</td><td class="@(r.ForecastBalance>=0?"positive-text":"negative-text")">@r.ForecastBalance.ToString("C")</td></tr> }
-            </tbody></table></div></article>
-            <article class="review-card"><div class="review-card-heading"><h2>Assumptions and evidence</h2></div><div class="review-notes"><div><span>Benchmarking</span><p>@(Model.Cycle.BenchmarkNotes ?? "Not recorded")</p></div><div><span>Pricing justification</span><p>@(Model.Cycle.PricingJustification ?? "Not recorded")</p></div></div></article>
+            @if (!Model.Rates.IsComplete)
+            {
+                <div class="callout">
+                    <span>!</span>
+                    <div>
+                        <strong>Some capabilities have no rates</strong>
+                        @foreach (var problem in Model.Rates.Problems)
+                        {
+                            <p>@problem</p>
+                        }
+                    </div>
+                </div>
+            }
+
+            <section class="review-kpis">
+                <div><span>Total operating cost</span><strong>@totalCost.ToString("C")</strong></div>
+                <div><span>Forecast platform revenue</span><strong>@revenue.ToString("C")</strong></div>
+                <div class="@(balance >= 0 ? "positive-kpi" : "negative-kpi")">
+                    <span>Forecast balance</span><strong>@balance.ToString("C")</strong>
+                </div>
+            </section>
+
+            <article class="review-card">
+                <div class="review-card-heading">
+                    <h2>Capability rates</h2>
+                    <span>GST exclusive · method @Model.Rates.Method.Version</span>
+                </div>
+                <div class="review-table-wrap">
+                    <table class="review-table">
+                        <thead>
+                            <tr>
+                                <th>Capability</th>
+                                <th>Operating cost</th>
+                                <th>Forecast use</th>
+                                <th>UWA proposed</th>
+                                <th>APFR proposed</th>
+                                <th>Commercial proposed</th>
+                                <th>Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var capability in Model.Cycle.Capabilities)
+                            {
+                                var rates = Model.Rates.For(capability.Id);
+                                <tr>
+                                    <td><strong>@capability.Name</strong></td>
+                                    @if (rates is null)
+                                    {
+                                        <td colspan="6">@Model.Rates.ProblemFor(capability.Id)</td>
+                                    }
+                                    else
+                                    {
+                                        <td>@rates.TotalOperatingCost.ToString("C")</td>
+                                        <td>@rates.ForecastUtilisation.ToString("N1") @unit</td>
+                                        <td>@capability.ProposedUwaRate.ToString("C")</td>
+                                        <td>@capability.ProposedApfrRate.ToString("C")</td>
+                                        <td>@capability.ProposedCommercialRate.ToString("C")</td>
+                                        <td class="@(rates.ForecastBalance >= 0 ? "positive-text" : "negative-text")">
+                                            @rates.ForecastBalance.ToString("C")
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+            <article class="review-card">
+                <div class="review-card-heading"><h2>Assumptions and evidence</h2></div>
+                <div class="review-notes">
+                    <div><span>Benchmarking</span><p>@(Model.Cycle.BenchmarkNotes ?? "Not recorded")</p></div>
+                    <div><span>Pricing justification</span><p>@(Model.Cycle.PricingJustification ?? "Not recorded")</p></div>
+                </div>
+            </article>
+
             @if (Model.IsSealed)
             {
-                <article class="integrity-card"><span>◆</span><div><strong>Sealed record</strong><p>This immutable snapshot was approved by @Model.Cycle.ApprovedBy and sealed on @Model.Cycle.SealedAtUtc?.ToLocalTime().ToString("dd MMM yyyy, h:mm tt").</p><code>@Model.Cycle.SnapshotHash</code></div></article>
+                <article class="integrity-card">
+                    <span>◆</span>
+                    <div>
+                        <strong>Sealed record</strong>
+                        <p>
+                            This immutable snapshot was approved by @Model.Cycle.ApprovedBy and sealed on
+                            @Model.Cycle.SealedAtUtc?.ToLocalTime().ToString("dd MMM yyyy, h:mm tt"),
+                            under method version @Model.Cycle.MethodVersion.
+                        </p>
+                        <code>@Model.Cycle.SnapshotHash</code>
+                    </div>
+                </article>
             }
         </main>
 
@@ -39,16 +142,31 @@
             <span class="submit-icon">✓</span>
             @if (Model.IsEditable)
             {
-                <h2>Ready to submit?</h2><p>Submission locks the figures and sends the cycle to the delegated authority.</p>
-                <form method="post" asp-page-handler="Submit" asp-route-cycleId="@Model.Cycle.Id"><div asp-validation-summary="All" class="form-errors submit-errors"></div><label class="confirmation"><input type="checkbox" name="confirmAccuracy" value="true"><span>I confirm the costs, utilisation assumptions, proposed rates and evidence are complete and accurate.</span></label><button class="submit-button" type="submit">Submit for approval <span>→</span></button></form>
+                <h2>Ready to submit?</h2>
+                <p>Submission locks the figures and sends the cycle to the delegated authority.</p>
+                <form method="post" asp-page-handler="Submit" asp-route-cycleId="@Model.Cycle.Id">
+                    <div asp-validation-summary="All" class="form-errors submit-errors"></div>
+                    <label class="confirmation">
+                        <input type="checkbox" name="confirmAccuracy" value="true" />
+                        <span>I confirm the costs, utilisation assumptions, proposed rates and evidence are complete and accurate.</span>
+                    </label>
+                    <button class="submit-button" type="submit">Submit for approval <span>→</span></button>
+                </form>
             }
             else if (Model.IsPending)
             {
-                <h2>Awaiting approval</h2><p>Submitted by @Model.Cycle.SubmittedBy on @Model.Cycle.SubmittedAtUtc?.ToLocalTime().ToString("dd MMM yyyy, h:mm tt"). The delegated approver has been given access to this record.</p>
+                <h2>Awaiting approval</h2>
+                <p>
+                    Submitted by @Model.Cycle.SubmittedBy on
+                    @Model.Cycle.SubmittedAtUtc?.ToLocalTime().ToString("dd MMM yyyy, h:mm tt").
+                    The delegated approver has been given access to this record.
+                </p>
             }
             else
             {
-                <h2>Approved and sealed</h2><p>This record is immutable. Create a new costing cycle if rates need to change.</p><a href="/" class="secondary-action full-button">Return to dashboard</a>
+                <h2>Approved and sealed</h2>
+                <p>This record is immutable. Create a new costing cycle if rates need to change.</p>
+                <a href="/" class="secondary-action full-button">Return to dashboard</a>
             }
         </aside>
     </div>

@@ -1,0 +1,82 @@
+@page
+@model CostingTool.Pages.ErrorModel
+@{
+    ViewData["Title"] = "Something went wrong";
+
+    // Deliberately standalone: no shared layout, no database.
+    //
+    // The application was configured with UseExceptionHandler("/Error") while no such page
+    // existed, so in production an unhandled error produced a blank response. An error page
+    // that depends on the same layout — which queries notifications — could fail for the
+    // same reason the request did, so this one depends on nothing.
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] · UWA Research Infrastructure</title>
+    <style>
+        :root { color-scheme: light; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 30px;
+            background: #f5f7fb;
+            color: #17223b;
+            font: 500 15px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+        }
+        .error-card {
+            width: min(520px, 100%);
+            background: #fff;
+            border: 1px solid #e4e9f1;
+            border-radius: 12px;
+            box-shadow: 0 3px 14px rgba(18, 35, 63, .055);
+            padding: 40px;
+        }
+        .error-mark {
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #fff0f1;
+            color: #a63f48;
+            font-weight: 700;
+        }
+        h1 { font-size: 22px; margin: 22px 0 10px; letter-spacing: -.4px; }
+        p { color: #68758b; font-size: 13px; margin: 0 0 10px; }
+        .reference { font-size: 11px; color: #8a96a7; word-break: break-all; }
+        a.button {
+            display: inline-block;
+            margin-top: 22px;
+            background: #1769e0;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 7px;
+            padding: 11px 16px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <main class="error-card">
+        <span class="error-mark" aria-hidden="true">!</span>
+        <h1>@Model.Heading</h1>
+        <p>@Model.Detail</p>
+        <p>
+            <strong>No costing data was changed.</strong> A cycle is only ever saved by a
+            completed step, so anything you had already entered is still there.
+        </p>
+        @if (Model.RequestId is not null)
+        {
+            <p class="reference">Reference: @Model.RequestId</p>
+        }
+        <a class="button" href="/">Return to the dashboard</a>
+    </main>
+</body>
+</html>

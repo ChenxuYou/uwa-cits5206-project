@@ -1,4 +1,6 @@
+using System.Globalization;
 using CostingTool.Data;
+using CostingTool.Engine;
 using CostingTool.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
@@ -14,32 +16,55 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
     });
+
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("DataEntry", policy => policy.RequireRole("DataEntry"));
-    options.AddPolicy("Approver", policy => policy.RequireRole("Approver"));
+    options.AddPolicy(AppUser.Roles.DataEntry, policy => policy.RequireRole(AppUser.Roles.DataEntry));
+    options.AddPolicy(AppUser.Roles.Approver, policy => policy.RequireRole(AppUser.Roles.Approver));
 });
+
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizePage("/Index");
-    options.Conventions.AuthorizeFolder("/Ric", "DataEntry");
-    options.Conventions.AuthorizeFolder("/Costs", "DataEntry");
-    options.Conventions.AuthorizeFolder("/Notifications", "DataEntry");
-    options.Conventions.AuthorizeFolder("/Approvals", "Approver");
+    options.Conventions.AuthorizeFolder("/Ric", AppUser.Roles.DataEntry);
+    options.Conventions.AuthorizeFolder("/Notifications", AppUser.Roles.DataEntry);
+    options.Conventions.AuthorizeFolder("/Approvals", AppUser.Roles.Approver);
     options.Conventions.AllowAnonymousToPage("/Account/Login");
     options.Conventions.AllowAnonymousToPage("/Account/AccessDenied");
+    options.Conventions.AllowAnonymousToPage("/Error");
 });
+
 builder.Services.AddDbContext<CostingDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("CostingDb") ?? "Data Source=ric-costing-v5.db"));
+    options.UseSqlite(builder.Configuration.GetConnectionString("CostingDb")
+                      ?? "Data Source=ric-costing-v5.db"));
+
 builder.Services.AddScoped<MethodConfigProvider>();
 builder.Services.AddScoped<RicCalculationService>();
 builder.Services.AddScoped<IPasswordHasher<AppUser>, PasswordHasher<AppUser>>();
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment())
+// Every figure on screen is Australian currency, and every date is read by someone in
+// Perth. Without this the application formats money in whatever culture the host happens
+// to have — which on a stock Linux server is the invariant culture, where $1,250.00 comes
+// out as "¤1,250.00". Pinning it here means the development machine and the deployed
+// server render the same record identically, which is the whole point of a sealed record.
+var australia = new CultureInfo("en-AU");
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(australia),
+    SupportedCultures = [australia],
+    SupportedUICultures = [australia]
+});
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
 {
     app.UseExceptionHandler("/Error");
+    app.UseStatusCodePagesWithReExecute("/Error", "?code={0}");
     app.UseHsts();
 }
 
@@ -50,16 +75,26 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapRazorPages();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<CostingDbContext>();
-    db.Database.EnsureCreated();
+await SeedAsync(app);
 
-    // Seed the method configuration in force. k is configuration, not a constant:
-    // the client expects the method and its factors to be reviewed within a 3-5 year
-    // cycle, and a sealed record must still reproduce its own figures afterwards.
-    // architecture.md §3, rules R5 and R6.
-    if (!db.MethodConfigs.Any())
+app.Run();
+
+static async Task SeedAsync(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<CostingDbContext>();
+
+    // EnsureCreated builds the schema from the model on first run. It cannot evolve an
+    // existing database, which is why the README says to delete the local file after a
+    // model change — and why moving to EF Core migrations is a gate on the staging
+    // deployment (plan.md M5), not an optional tidy-up.
+    await db.Database.EnsureCreatedAsync();
+
+    // The method configuration in force. k is configuration, not a constant: the client
+    // expects the method and its factors to be reviewed within a 3–5 year cycle, and a
+    // sealed record must still reproduce its own figures afterwards — architecture.md §3,
+    // rules R5 and R6.
+    if (!await db.MethodConfigs.AnyAsync())
     {
         db.MethodConfigs.Add(new MethodConfig
         {
@@ -67,23 +102,46 @@ using (var scope = app.Services.CreateScope())
             EffectiveFromUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
             IndirectCostRecovery = 1.35m,
             RateDecimals = 2,
+            MidpointRule = MidpointRounding.AwayFromZero,
             Source = "UWA Costing & Pricing Guide, Step 3; University Indirect Cost Recovery Policy",
             Notes = "Initial version. Supersede rather than edit: add a new row and move IsCurrent.",
             IsCurrent = true
         });
-        db.SaveChanges();
+        await db.SaveChangesAsync();
     }
 
-    if (!db.AppUsers.Any())
+    // Demo accounts exist for local development and are seeded ONLY there.
+    //
+    // This used to run in every environment, which meant that deploying to a fresh staging
+    // database created `entry` / `Entry123!` on it — the deployment itself re-creating the
+    // credentials that risks.md R14 makes a gate on deploying. A staging or production
+    // instance now starts with no users, and accounts are provisioned deliberately.
+    if (!app.Environment.IsDevelopment())
+    {
+        return;
+    }
+
+    if (!await db.AppUsers.AnyAsync())
     {
         var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<AppUser>>();
-        var entry = new AppUser { UserName = "entry", DisplayName = "Priya Lal", Role = "DataEntry" };
+
+        var entry = new AppUser
+        {
+            UserName = "entry",
+            DisplayName = "Priya Lal",
+            Role = AppUser.Roles.DataEntry
+        };
         entry.PasswordHash = hasher.HashPassword(entry, "Entry123!");
-        var approver = new AppUser { UserName = "approver", DisplayName = "Dr Chen", Role = "Approver" };
+
+        var approver = new AppUser
+        {
+            UserName = "approver",
+            DisplayName = "Dr Chen",
+            Role = AppUser.Roles.Approver
+        };
         approver.PasswordHash = hasher.HashPassword(approver, "Approve123!");
+
         db.AppUsers.AddRange(entry, approver);
-        db.SaveChanges();
+        await db.SaveChangesAsync();
     }
 }
-
-app.Run();

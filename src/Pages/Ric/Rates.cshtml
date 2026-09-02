@@ -1,6 +1,126 @@
 @page
 @model CostingTool.Pages.Ric.RatesModel
-@{ViewData["Title"]="Sustainable rates";}
-<div class="page-wrap ric-page"><partial name="_RicSteps" model='new CostingTool.Pages.Ric.RicStepViewModel(4, Model.Cycle.Id)' /><div class="ric-title"><div><span class="eyebrow">@Model.Cycle.PlatformName.ToUpper()</span><h1>Sustainable and proposed rates</h1><p>Calculated rates are GST exclusive. Proposed rates can vary, but the financial effect must be visible.</p></div></div>
-<form method="post"><input type="hidden" asp-for="CycleId"><div asp-validation-summary="All" class="form-errors"></div><div class="rate-list">@for(var i=0;i<Model.Inputs.Count;i++){var c=Model.Cycle.Capabilities.First(x=>x.Id==Model.Inputs[i].Id);var r=Model.Results[c.Id];<article class="ric-card rate-card"><input type="hidden" asp-for="Inputs[i].Id"><div class="rate-card-head"><div><h2>@c.Name</h2><p>Operating cost @r.TotalOperatingCost.ToString("C") · Forecast use @((c.ForecastUwaUse+c.ForecastApfrUse+c.ForecastCommercialUse).ToString("N1")) @Model.Cycle.BillableUnit.ToLower()</p></div></div><div class="rate-grid"><div class="rate-column"><span>UWA Researcher</span><small>Minimum sustainable</small><strong>@r.UwaRate.ToString("C")</strong><label>Proposed rate<input asp-for="Inputs[i].Uwa" type="number" min="0" step="0.01"></label></div><div class="rate-column"><span>APFR</span><small>Includes 35% indirect cost</small><strong>@r.ApfrRate.ToString("C")</strong><label>Proposed rate<input asp-for="Inputs[i].Apfr" type="number" min="0" step="0.01"></label></div><div class="rate-column"><span>Commercial</span><small>Includes 35% indirect cost</small><strong>@r.CommercialRate.ToString("C")</strong><label>Proposed rate<input asp-for="Inputs[i].Commercial" type="number" min="0" step="0.01"></label></div></div></article>}</div>
-<section class="ric-card rate-notes"><div class="form-grid two-columns"><label class="field"><span>Benchmarking notes</span><textarea asp-for="BenchmarkNotes" rows="5" placeholder="Comparable facilities, published rates and differences in value..."></textarea></label><label class="field"><span>Pricing justification</span><textarea asp-for="PricingJustification" rows="5" placeholder="Explain why the proposed rates differ from the calculated minimums..."></textarea></label></div></section><div class="wizard-actions"><a class="secondary-action" asp-page="/Ric/Capacity" asp-route-cycleId="@Model.Cycle.Id">← Back to capacity</a><button class="primary-button" type="submit">Review costing cycle →</button></div></form></div>
+@{
+    ViewData["Title"] = "Sustainable rates";
+
+    // The uplift is versioned configuration, so the label reads it rather than stating a
+    // number. The page used to say "Includes 35% indirect cost" in fixed text, which would
+    // have gone quietly wrong the first time k changed.
+    var k = Model.Rates.Method.IndirectCostRecovery;
+    var upliftLabel = $"Includes {(k - 1m) * 100m:0.#}% indirect cost recovery";
+    var unit = Model.Cycle.BillableUnit.ToLowerInvariant();
+}
+
+<div class="page-wrap ric-page">
+    <partial name="_RicSteps" model='new CostingTool.Pages.Ric.RicStepViewModel(4, Model.Cycle.Id)' />
+
+    <div class="ric-title">
+        <div>
+            <span class="eyebrow">@Model.Cycle.PlatformName.ToUpper()</span>
+            <h1>Sustainable and proposed rates</h1>
+            <p>Calculated rates are GST exclusive. Proposed rates can vary, but the financial effect must be visible.</p>
+        </div>
+        <div class="ric-total">
+            <small>Method version</small>
+            <strong>@Model.Rates.Method.Version</strong>
+        </div>
+    </div>
+
+    <form method="post">
+        <input type="hidden" asp-for="CycleId" />
+        <div asp-validation-summary="All" class="form-errors"></div>
+
+        <div class="rate-list">
+            @for (var i = 0; i < Model.Inputs.Count; i++)
+            {
+                var capability = Model.Cycle.Capabilities.First(x => x.Id == Model.Inputs[i].Id);
+                var rates = Model.Rates.For(capability.Id);
+
+                <article class="ric-card rate-card">
+                    <input type="hidden" asp-for="Inputs[i].Id" />
+
+                    <div class="rate-card-head">
+                        <div>
+                            <h2>@capability.Name</h2>
+                            @if (rates is null)
+                            {
+                                <p>Not yet priced.</p>
+                            }
+                            else
+                            {
+                                <p>
+                                    Operating cost @rates.TotalOperatingCost.ToString("C")
+                                    · less income @rates.TotalIncome.ToString("C")
+                                    · forecast use @rates.ForecastUtilisation.ToString("N1") @unit
+                                </p>
+                            }
+                        </div>
+                    </div>
+
+                    @if (rates is null)
+                    {
+                        @* Rule R4: the engine refuses rather than returning a plausible zero,
+                           and the refusal is shown where the number would have been. *@
+                        <div class="callout">
+                            <span>!</span>
+                            <div>
+                                <strong>No rate can be calculated yet</strong>
+                                <p>@Model.Rates.ProblemFor(capability.Id)</p>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="rate-grid">
+                            <div class="rate-column">
+                                <span>UWA Researcher</span>
+                                <small>Minimum sustainable</small>
+                                <strong>@rates.DisplayUwaRate.ToString("C")</strong>
+                                <label>
+                                    Proposed rate
+                                    <input asp-for="Inputs[i].Uwa" type="number" min="0" step="0.01" />
+                                </label>
+                            </div>
+                            <div class="rate-column">
+                                <span>APFR</span>
+                                <small>@upliftLabel</small>
+                                <strong>@rates.DisplayApfrRate.ToString("C")</strong>
+                                <label>
+                                    Proposed rate
+                                    <input asp-for="Inputs[i].Apfr" type="number" min="0" step="0.01" />
+                                </label>
+                            </div>
+                            <div class="rate-column">
+                                <span>Commercial</span>
+                                <small>@upliftLabel</small>
+                                <strong>@rates.DisplayCommercialRate.ToString("C")</strong>
+                                <label>
+                                    Proposed rate
+                                    <input asp-for="Inputs[i].Commercial" type="number" min="0" step="0.01" />
+                                </label>
+                            </div>
+                        </div>
+                    }
+                </article>
+            }
+        </div>
+
+        <section class="ric-card rate-notes">
+            <div class="form-grid two-columns">
+                <label class="field">
+                    <span>Benchmarking notes</span>
+                    <textarea asp-for="BenchmarkNotes" rows="5" placeholder="Comparable facilities, published rates and differences in value..."></textarea>
+                </label>
+                <label class="field">
+                    <span>Pricing justification</span>
+                    <textarea asp-for="PricingJustification" rows="5" placeholder="Explain why the proposed rates differ from the calculated minimums..."></textarea>
+                </label>
+            </div>
+        </section>
+
+        <div class="wizard-actions">
+            <a class="secondary-action" asp-page="/Ric/Capacity" asp-route-cycleId="@Model.Cycle.Id">← Back to capacity</a>
+            <button class="primary-button" type="submit">Review costing cycle →</button>
+        </div>
+    </form>
+</div>
