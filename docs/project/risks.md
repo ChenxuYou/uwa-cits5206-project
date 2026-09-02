@@ -2,7 +2,7 @@
 
 **Owner of this document:** Dai Lam La La
 **Reviewed:** every Saturday team meeting, alongside the sprint review
-**Version:** 1.0 — 24 August 2026
+**Version:** 1.1 — 2 September 2026
 **Feeds:** Assignment 1 §4.3 · [`skills-audit.md`](skills-audit.md) · [`plan.md`](plan.md)
 
 > **Every row carries a trigger.** A mitigation without a trigger is a hope: it says what we
@@ -46,7 +46,7 @@ the immutable snapshot, the integrity hash, and the golden-file test as a merge 
 | # | Risk | L | I | Mitigation | Trigger | Owner |
 | --- | --- | --- | --- | --- | --- | --- |
 | R5 | Scope grows past the semester | Medium | High | The vertical slice is the commitment; the stretch list is written to the client as "intentions, not commitments"; the cut order is stated in advance — dashboard, price-change communication, benchmarking, replacement reserve, salary pre-fill, in-tool approval | Any stretch item started before the slice is complete end to end | Whole team |
-| R6 | Deployment is left to the end and does not happen | Medium | High | Deployment is a milestone with owners and dates, not an end-of-semester task: hosting decided 9 Sep, staging live 28 Sep, client uses it unaccompanied for two weeks | The 9 Sep hosting decision slipping by more than three days | Chenxu You |
+| R6 | Deployment is left to the end and does not happen | Medium | High | Deployment is a milestone with owners and dates, not an end-of-semester task: hosting decided 9 Sep, the deploy sprint runs the week of 28 Sep, staging live 2 Oct (**M5**), client uses it unaccompanied for the eleven days to handover | The 9 Sep hosting decision slipping by more than three days | Chenxu You |
 | R7 | Schedule slips because a task has no owner | Medium | Medium | Every issue carries one owner and one date; the board is reviewed at the Saturday meeting; unassigned issues are not allowed into a sprint | Any issue in a sprint column with no assignee | Whole team |
 | R8 | A key member becomes unavailable — five people, one already withdrawn | Medium | High | Two owners for every critical area; engine kept framework-independent so any member can read it; PR review by a second member; the redistribution after DongSheng Li's withdrawal is documented in [`team.md`](team.md) | Any area with a single owner for more than one sprint | Whole team |
 | R9 | Client latency blocks a decision | Low | Medium | One named liaison so the client is never chased twice; questions batched; **every open question carries a default we will use if no answer comes**. All five sent 17 Aug came back answered — none defaulted | Any question open for more than seven days | Yichen Zhao |
@@ -98,4 +98,5 @@ stronger evidence of risk management than any hypothetical.
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.1 | 2 Sep 2026 | **First review since the register was written, and it is late.** The header says this document is reviewed every Saturday; the 29 August meeting passed without it being opened, which is exactly the failure mode a register is supposed to catch in other people's work. Recorded here rather than backdated. Three corrections follow. **R6** said staging was live on 28 September and the client had it for two weeks; [`plan.md`](plan.md) has said **2 October** since it was written — 28 September is the week the deploy sprint *starts* (S6), not the date the milestone lands. R6 now names M5 and the eleven days that actually remain to handover, and the same correction was made in [`skills-audit.md`](skills-audit.md) G2 and [ADR-001](../decisions/adr-001-technology-stack.md) action 6, which had drifted the same way. **R7's trigger has fired and been cleared**: the Projects board was created on 1 September and the twenty-five story issues carry owners, so "any issue in a sprint column with no assignee" is now a check somebody can actually run. **R1 is the live risk this week** — M1 falls on 4 September and no test project exists yet, so the merge gate named in the mitigation is written into [`ci.yml`](../../.github/workflows/ci.yml) but not yet armed; ADR-001 action 4 carries it. No row is added, removed or re-scored. |
 | 1.0 | 24 Aug 2026 | First version. Collects material previously scattered across `architecture.md` §6, `requirements.md` §10, `assignment-1-readiness.md` §5 and the Assignment 1 draft into a single register with owners and triggers. Adds the cybersecurity rows the rubric names explicitly, and §3, the risks already realised and closed |
