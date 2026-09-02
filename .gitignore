@@ -226,6 +226,20 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# .NET
+#
+# These live here, at the root, and not only in src/.gitignore. That file covers
+# what sits beneath it, so the first project added outside src/ — tests/ — brought
+# its own bin/ and obj/ back with it, which is the same mistake ADR-001 action 5
+# cleaned up for src/ in August. A rule that only guards one directory guards one
+# directory.
+[Bb]in/
+[Oo]bj/
+TestResults/
+*.user
+*.suo
+.vs/
+
 # Python
 __pycache__/
 *.py[cod]
