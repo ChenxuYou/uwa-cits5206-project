@@ -2,7 +2,7 @@
 
 **CITS5206 Professional Computing — Capstone Project, The University of Western Australia**
 **Client:** UWA Research Infrastructure
-**Status:** **Assignment 1 submitted on 25 August 2026** — one PDF, [`Group13-Project Spec and Plans.pdf`](docs/assignments/assignment-1/). Scope signed off by the client on 20 August 2026 — both confirmations, scope and ownership. Requirements written against the client's own documents. The technology decision is settled and recorded: **ASP.NET Core Razor Pages with EF Core** — see [ADR-001](docs/decisions/adr-001-technology-stack.md) and [Technology](#technology). Next: **M1, the engine provably correct, 4 September 2026** — [`docs/project/plan.md`](docs/project/plan.md).
+**Status:** **Assignment 1 submitted on 25 August 2026** — one PDF, [`Group13-Project Spec and Plans.pdf`](docs/assignments/assignment-1/). Scope signed off by the client on 20 August 2026 — both confirmations, scope and ownership. Requirements written against the client's own documents. The technology decision is settled and recorded: **ASP.NET Core Razor Pages with EF Core** — see [ADR-001](docs/decisions/adr-001-technology-stack.md) and [Technology](#technology). **M1 met on 2 September 2026:** the client's worked example reproduces to the cent as a CI merge gate. Next: **M2, the guided flow validated server-side, 11 September 2026** — [`docs/project/plan.md`](docs/project/plan.md).
 
 ---
 
@@ -82,8 +82,9 @@ with 1,882.5 hours of machine availability may see far less real use, and weeken
 maintenance windows, staff FTE and even weather all cut into it. And costs are captured both
 per capability and per platform, with platform costs split evenly across capabilities.
 
-The engine is validated against the client's worked example as a golden-file test before any
-UI is written.
+The engine is validated against the client's worked example as a golden-file test — and it is,
+in [`tests/CostingTool.Engine.Tests`](tests/CostingTool.Engine.Tests/), where those three
+figures are asserted to the cent and the build fails if they drift.
 
 ## What the MVP delivers
 
@@ -193,6 +194,16 @@ hard to tell apart in a single flat folder.
 │   ├── backfill-issues.py      Assigns unowned Must stories; opens the deploy issue
 │   └── export-issues.py        Dumps live issue state to issues.json (not committed)
 ├── src/                    Application code — ASP.NET Core Razor Pages (see the note below)
+│   ├── CostingTool.Engine/     The calculation, on its own — no EF, no ASP.NET, no
+│   │                           package references at all, which is what makes
+│   │                           "the engine never sees a database row" checkable
+│   ├── CostingTool.csproj      The web application
+│   └── README.md               How to run it in VS Code, and what is not built yet
+├── tests/                  Automated tests
+│   └── CostingTool.Engine.Tests/   The golden file — the client's worked example,
+│                                   asserted to the cent. The CI merge gate
+├── .vscode/                Shared editor setup — F5 runs the app, tasks run the tests
+├── CostingTool.sln         The three projects, so one command builds and tests them all
 ├── .gitattributes          Line endings — LF everywhere, so diffs stay readable
 ├── .gitignore              What never gets committed, and why
 ├── NOTICE                  Ownership, the grant to UWA, and portfolio use
@@ -343,9 +354,11 @@ repository, which the facilitator can open.
 
 Brief and rubric: [`reference/unit/`](reference/unit/).
 
-**Next: M1 — the engine provably correct, 4 September 2026.** The client's worked example has to
-reproduce to the cent as a CI merge gate, written before any screen. Milestones M0–M7 and the
-sprint plan to 13 October are in [`docs/project/plan.md`](docs/project/plan.md).
+**M1 — the engine provably correct: met on 2 September 2026**, two days early. The client's
+worked example reproduces to the cent in `tests/CostingTool.Engine.Tests`, and `dotnet test` is
+a merge gate rather than a warning. **Next: M2, the guided flow validated server-side,
+11 September.** Milestones M0–M7 and the sprint plan to 13 October are in
+[`docs/project/plan.md`](docs/project/plan.md).
 
 ## Ownership
 

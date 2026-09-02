@@ -3,7 +3,7 @@
 **Status:** Accepted
 **Date:** 24 August 2026
 **Deciders:** Chenxu You, Yichen Zhao, Wenmin Luo, Dai Lam La La, Jaswanth Vericherla
-**Supersedes:** the open decision gate in [`architecture.md` §9](../spec/architecture.md#9-decision-gate)
+**Supersedes:** the open decision gate in [`architecture.md` §9](../spec/architecture.md#9-how-the-decision-was-taken)
 **Related:** [`architecture.md` §8](../spec/architecture.md#8-options-assessed) (options A–E),
 [`skills-audit.md`](../project/skills-audit.md), [`risks.md`](../project/risks.md)
 
@@ -129,10 +129,12 @@ false one. Two things follow, and we do both rather than either:
 | 1 | Extract the calculation into a pure engine with no EF or ASP.NET dependency | Wenmin Luo | 30 Aug 2026 | ✅ **Done 25 Aug** — `RateEngine` is a static, pure function; `MethodConfigProvider` does the database work; `RicCalculationService` is the thin wrapper page models depend on |
 | 2 | Replace the hard-coded `1.35` with versioned method configuration (`R5`) | Wenmin Luo | 30 Aug 2026 | ✅ **Done 25 Aug** — `MethodConfigs` table seeded as version `2026.1`; `k` arrives as configuration and a cycle stamps its `MethodVersion` when sealed (`R6`) |
 | 3 | Add `architecture.md` §8 Option F and re-run the weighted comparison including it | Chenxu You | 26 Aug 2026 | ✅ **Done 25 Aug** — F leads at 151; §9 rewritten from a gate into a record of how it closed |
-| 4 | Golden-file test against the client's worked example, wired as a CI merge gate | Jaswanth Vericherla | 4 Sep 2026 (**M1**) | ⚠️ Outstanding. `ci.yml` already carries the gate; the test does not exist yet and the workflow says so |
+| 4 | Golden-file test against the client's worked example, wired as a CI merge gate | Jaswanth Vericherla | 4 Sep 2026 (**M1**) | ✅ **Done 2 Sep** — `tests/CostingTool.Engine.Tests` asserts $100.00 / $162.00 / $202.50 to the cent, plus the boundaries. The engine moved into `src/CostingTool.Engine`, a project with no package references at all, so the test suite reaches the arithmetic without touching EF or ASP.NET — R7 enforced by the compiler. `ci.yml` no longer warns that the gate is empty; `dotnet test` runs the solution and the formatting check is no longer `continue-on-error` |
 | 5 | Stop tracking `src/bin/` and `src/obj/` (`git rm -r --cached`) | Wenmin Luo | Before the next code commit | ✅ **Done 25 Aug** — 76 files untracked, files kept on disk, no history rewrite |
-| 6 | Replace the seeded demo credentials before anything is deployed to staging | Chenxu You | 28 Sep 2026 | ⚠️ Outstanding — a gate on the staging deployment (`risks.md` R14) |
-| 7 | Move pay scales, capacity baselines and the cost/income categories into `MethodConfig` alongside `k` | Wenmin Luo | 4 Sep 2026 | ⚠️ Outstanding — `k` and the rounding rule are done; the rest of `R5` is not |
+| 6 | Replace the seeded demo credentials before anything is deployed to staging | Chenxu You | 2 Oct 2026 (**M5**) | ⚠️ Outstanding — a gate on the staging deployment (`risks.md` R14) |
+| 7 | Move pay scales, capacity baselines and the cost/income categories into `MethodConfig` alongside `k` | Wenmin Luo | 11 Sep 2026 (**M2**) | ⚠️ Outstanding, part-done and re-dated. `k`, the decimal places and the half-cent rule are configuration, and the categories are now named constants in one place (`Models/RicCostEntry`) rather than string literals repeated across the engine, the page models, the validation and the dropdown's JavaScript — which closes the drift risk even though it is not yet a database row. Pay scales and capacity baselines remain hard-coded |
+| 8 | **New.** Replace `EnsureCreated()` with EF Core migrations | Wenmin Luo | 2 Oct 2026 (**M5**) | ⚠️ Outstanding. `EnsureCreated` cannot evolve a schema, so every model change costs the local database. Locally that is a nuisance; once the client has entered data on staging it is data loss, which makes this a gate on the deployment rather than a tidy-up |
+| 9 | **New.** Confirm two modelling decisions with the client that carry no source marker: whether a multi-year cost profile should be averaged into one annual figure, and whether the indirect-cost uplift is retained by the platform in the revenue projection | Dai Lam La La | With the next question batch | ⚠️ Outstanding. Both surfaced while extracting the engine; both are commented in the code as ours rather than theirs |
 
 ## Fallback trigger
 
