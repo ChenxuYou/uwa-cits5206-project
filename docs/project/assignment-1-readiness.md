@@ -213,7 +213,7 @@ what is missing is artefacts rather than thinking.
 - A [team roster](team.md) with a single home, and a documented member departure with the work redistributed.
 - A [build order](../spec/architecture.md#10-delivery-approach) — engine first, then identity, then forms, then rates, then seal and export — with a stated rationale for the order.
 - A [definition of done](../spec/architecture.md#10-delivery-approach) per story.
-- A [decision gate](../spec/architecture.md#9-decision-gate) with a named fallback trigger at end of week 8.
+- A [decision gate](../spec/architecture.md#9-how-the-decision-was-taken) with a named fallback trigger at end of week 8.
 - Eighteen estimated stories, 110 points, ready to be sequenced.
 
 ### What does not exist
