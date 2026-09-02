@@ -32,25 +32,34 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore
-        run: dotnet restore src/CostingTool.csproj
+        run: dotnet restore CostingTool.sln
 
       - name: Build
-        run: dotnet build src/CostingTool.csproj --configuration Release --no-restore
+        run: dotnet build CostingTool.sln --configuration Release --no-restore
 
-      - name: Test
-        # No test project exists yet. This step is written now so that the gate is
-        # in place before the first test lands (plan.md M1, 4 September 2026).
-        # It fails the build once tests exist and one of them fails.
-        run: |
-          if ls tests/*/*.csproj >/dev/null 2>&1; then
-            dotnet test --configuration Release --logger "trx;LogFileName=results.trx"
-          else
-            echo "::warning::No test project found. Golden-file tests are due by 4 September 2026 (plan.md M1)."
-          fi
+      - name: Test — the golden file is the merge gate
+        # The engine reproduces the client's worked example to the cent
+        # ($100.00 / $162.00 / $202.50) or this step fails and nothing merges.
+        # plan.md M1; ADR-001 follow-on action 4.
+        run: >
+          dotnet test CostingTool.sln
+          --configuration Release
+          --no-build
+          --logger "trx;LogFileName=results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: '**/TestResults/*.trx'
+          if-no-files-found: ignore
 
       - name: Check formatting
-        continue-on-error: true
-        run: dotnet format src/CostingTool.csproj --verify-no-changes --severity warn
+        # No longer advisory. It was set to continue-on-error, which meant the gate
+        # never fired — and two page models had drifted to single 700-character
+        # lines that nobody could review, in the files holding the rate logic.
+        run: dotnet format CostingTool.sln --verify-no-changes --severity warn
 
   vulnerable-dependencies:
     name: Vulnerable dependency scan
@@ -66,7 +75,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore
-        run: dotnet restore src/CostingTool.csproj
+        run: dotnet restore CostingTool.sln
 
       - name: List vulnerable packages
         # risks.md R17 — a dependency advisory should surface here, not in production.
@@ -78,7 +87,7 @@ jobs:
         # relaxing the rule.
         run: |
           set -o pipefail
-          dotnet list src/CostingTool.csproj package --vulnerable --include-transitive 2>&1 \
+          dotnet list CostingTool.sln package --vulnerable --include-transitive 2>&1 \
             | tee "${RUNNER_TEMP}/audit.txt"
 
           grep -E 'High|Critical' "${RUNNER_TEMP}/audit.txt" > "${RUNNER_TEMP}/hits.txt" || true
