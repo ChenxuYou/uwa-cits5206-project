@@ -1,14 +1,5 @@
-costing.db
-costing.db-shm
-costing.db-wal
-ric-costing.db
-ric-costing.db-shm
-ric-costing.db-wal
-ric-costing-v2.db
-ric-costing-v2.db-shm
-ric-costing-v2.db-wal
-ric-costing-v3.db
-ric-costing-v3.db-shm
-ric-costing-v3.db-wal
+# Build output. The root .gitignore covers local databases with *.db — this file
+# deliberately does not enumerate database filenames, because the enumeration went
+# stale the moment the development store moved past ric-costing-v3.db.
 bin/
 obj/

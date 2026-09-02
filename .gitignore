@@ -187,6 +187,12 @@ service-account*.json
 *.sqlite
 *.sqlite3
 *.db
+# SQLite's write-ahead log and shared-memory files sit beside the database and
+# carry the same data. They were previously caught only by an enumeration of
+# database filenames in src/.gitignore, which went stale as the development
+# store was versioned forward; matched by pattern here instead.
+*.db-shm
+*.db-wal
 *.dump
 *.bak
 /data/
@@ -267,9 +273,19 @@ $RECYCLE.BIN/
 *.lnk
 
 .idea/
+
+# VS Code: personal preferences stay out, shared project setup goes in.
+#
+# launch.json, tasks.json and settings.json are checked in deliberately: they are
+# how a new team member gets the application running with F5 instead of by being
+# told a sequence of commands, and they are what keeps everyone's formatting on
+# the right side of the CI gate. Anything genuinely personal — window layout,
+# private snippets — lands in the ignored remainder.
 .vscode/*
 !.vscode/extensions.json
-!.vscode/settings.shared.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/settings.json
 *.swp
 *.swo
 *~
