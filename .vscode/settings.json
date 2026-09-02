@@ -1,0 +1,30 @@
+{
+  // The repository's own conventions, applied on save, so that the CI formatting
+  // gate is something the editor keeps you on the right side of rather than
+  // something that fails your pull request.
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "editor.formatOnSave": true,
+  "editor.rulers": [100],
+
+  "[csharp]": {
+    "editor.defaultFormatter": "ms-dotnettools.csharp",
+    "editor.tabSize": 4
+  },
+  "[markdown]": {
+    "files.trimTrailingWhitespace": false
+  },
+
+  "dotnet.defaultSolution": "CostingTool.sln",
+
+  // The local SQLite file and build output are noise in the explorer, and both
+  // are already excluded from Git.
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true,
+    "**/*.db": true,
+    "**/*.db-shm": true,
+    "**/*.db-wal": true
+  }
+}

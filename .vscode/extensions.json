@@ -1,0 +1,7 @@
+{
+  // VS Code offers to install these the first time someone opens the repository.
+  "recommendations": [
+    "ms-dotnettools.csdevkit",
+    "ms-dotnettools.csharp"
+  ]
+}

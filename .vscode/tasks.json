@@ -1,0 +1,53 @@
+{
+  // Ctrl/Cmd+Shift+B runs the default build task. The rest are on the
+  // command palette under "Tasks: Run Task".
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "detail": "Build every project in the solution",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["build", "${workspaceFolder}/CostingTool.sln"],
+      "problemMatcher": "$msCompile",
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "watch",
+      "detail": "Run the app and reload it as files are saved",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["watch", "--project", "${workspaceFolder}/src/CostingTool.csproj"],
+      "problemMatcher": "$msCompile",
+      "isBackground": true
+    },
+    {
+      "label": "test",
+      "detail": "Run the engine tests — the client's worked example, to the cent",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["test", "${workspaceFolder}/CostingTool.sln"],
+      "problemMatcher": "$msCompile",
+      "group": { "kind": "test", "isDefault": true }
+    },
+    {
+      "label": "format",
+      "detail": "Apply the formatting the CI gate checks",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["format", "${workspaceFolder}/CostingTool.sln"],
+      "problemMatcher": []
+    },
+    {
+      "label": "reset local database",
+      "detail": "Delete the SQLite file so the schema is rebuilt on the next run",
+      "type": "shell",
+      "command": "rm -f ric-costing-v*.db*",
+      "windows": {
+        "command": "Remove-Item -Path ric-costing-v*.db* -Force -ErrorAction SilentlyContinue"
+      },
+      "options": { "cwd": "${workspaceFolder}/src" },
+      "problemMatcher": []
+    }
+  ]
+}
