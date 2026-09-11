@@ -101,3 +101,82 @@ summary:focus-visible {
         transition: none !important;
     }
 }
+
+/* ---------------------------------------------------------------------------
+   Non-variable income (US-06)
+   ---------------------------------------------------------------------------
+   The explanation shown while "Non-variable income" is selected on the costs
+   step, and the income split in the arithmetic panel beside it.
+   --------------------------------------------------------------------------- */
+
+.income-guide > p {
+    font-size: 10px;
+    line-height: 1.55;
+    color: #536176;
+    margin: 0 0 12px;
+}
+
+.income-guide .callout {
+    margin-bottom: 12px;
+}
+
+.income-lines {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+}
+
+.income-lines th {
+    text-align: left;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.income-lines td {
+    padding: 7px 0;
+    border-bottom: 1px solid #edf0f5;
+    font-size: 10px;
+}
+
+/* The global `td:first-child` rule lays a cell out as an icon grid for the
+   capability tables. This table has no icons, so it is reset here, as
+   .review-table does. */
+.income-lines td:first-child {
+    display: table-cell;
+    width: 42%;
+    font-weight: 600;
+}
+
+.income-lines td small {
+    color: var(--muted);
+    font-size: 9px;
+}
+
+.income-optional {
+    font-size: 9px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 10px 0 0;
+}
+
+.cost-summary em {
+    font-style: normal;
+}
+
+.cost-summary em small {
+    display: block;
+    color: var(--muted);
+    font-size: 8px;
+    font-weight: 400;
+    margin-top: 2px;
+}
+
+/* `.field` and `.field small` set display: block, which beats the browser's own
+   rule for the hidden attribute. Without this, the income hints never hide, and
+   neither does the Capability dropdown when the scope is Platform. */
+.field[hidden],
+.field small[hidden] {
+    display: none;
+}

@@ -211,6 +211,16 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
             ModelState.AddModelError(nameof(Description), "Description is required.");
         }
 
+        // US-06 and F9: an income line lowers rates for three to five years, so the record
+        // has to say where the money comes from and how long it is committed for. Checked
+        // on the server, as milestone M2 requires, so a hand-made request cannot skip it.
+        if (IsIncome && string.IsNullOrWhiteSpace(Notes))
+        {
+            ModelState.AddModelError(
+                nameof(Notes),
+                "Justification is required for income: say where it comes from and how long it is committed for.");
+        }
+
         if (YearAmounts.Take(YearCount).Any(x => x < 0))
         {
             ModelState.AddModelError(string.Empty, "Year amounts cannot be negative.");

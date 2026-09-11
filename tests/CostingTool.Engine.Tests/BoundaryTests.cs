@@ -73,6 +73,49 @@ public class BoundaryTests
     }
 
     [Fact]
+    public void NoIncomeAtAllIsValid()
+    {
+        // US-06: entering nothing is valid, because not every platform receives support
+        // [K §2]. With no income the UWA rate is simply cost over utilisation, and the
+        // APFR and commercial rates are that plus the uplift.
+        var inputs = Baseline() with { UwaIncome = 0m, NonUwaIncome = 0m };
+
+        var result = RateEngine.Calculate(inputs, Method());
+
+        Assert.Equal(150.00m, result.DisplayUwaRate);
+        Assert.Equal(202.50m, result.DisplayApfrRate);
+        Assert.Equal(202.50m, result.DisplayCommercialRate);
+    }
+
+    [Fact]
+    public void UwaIncomeLowersTheUwaRateButNotTheApfrRate()
+    {
+        // US-06 and requirements §4: UWA money is not deducted for an external researcher.
+        var withoutIncome = RateEngine.Calculate(Baseline() with { UwaIncome = 0m }, Method());
+        var withIncome = RateEngine.Calculate(Baseline(), Method());
+
+        Assert.Equal(120.00m, withoutIncome.DisplayUwaRate);
+        Assert.Equal(100.00m, withIncome.DisplayUwaRate);
+        Assert.Equal(withoutIncome.ApfrRate, withIncome.ApfrRate);
+        Assert.Equal(withoutIncome.CommercialRate, withIncome.CommercialRate);
+    }
+
+    [Fact]
+    public void NonUwaIncomeLowersBothTheUwaAndApfrRates()
+    {
+        // US-06 and requirements §4: State, Federal and Other money is deducted for both
+        // research categories. The commercial rate deducts no income at all.
+        var withoutIncome = RateEngine.Calculate(Baseline() with { NonUwaIncome = 0m }, Method());
+        var withIncome = RateEngine.Calculate(Baseline(), Method());
+
+        Assert.Equal(130.00m, withoutIncome.DisplayUwaRate);
+        Assert.Equal(100.00m, withIncome.DisplayUwaRate);
+        Assert.Equal(202.50m, withoutIncome.DisplayApfrRate);
+        Assert.Equal(162.00m, withIncome.DisplayApfrRate);
+        Assert.Equal(withoutIncome.CommercialRate, withIncome.CommercialRate);
+    }
+
+    [Fact]
     public void TheSplitAcrossUserCategoriesDoesNotChangeTheRates()
     {
         // Q2, closed against the client's workbook: a single U per capability drives the
