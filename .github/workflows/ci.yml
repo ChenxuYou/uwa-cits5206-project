@@ -5,11 +5,41 @@ name: CI
 # client's worked example drifts, the build fails and nothing merges.
 # See docs/decisions/adr-001-technology-stack.md and docs/project/plan.md §4.
 
+# A change that cannot affect the build does not need one — issue #21.
+#
+# paths-ignore skips the run only when EVERY changed file matches, so a pull request
+# touching a document *and* a source file still builds. The two lists below are
+# duplicated because GitHub Actions does not support YAML anchors; keep them the same.
+#
+# ONE TRAP, WRITTEN DOWN SO NOBODY HAS TO REDISCOVER IT: if these jobs are ever made
+# *required* status checks in branch protection, a docs-only pull request will wait
+# forever for a check that never starts. Either leave them unrequired, or require them
+# and delete this filter — not both.
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - 'presentations/**'
+      - 'reference/**'
+      - '**/*.md'
+      - 'NOTICE'
+      - 'issues.json'
+      - '.vscode/**'
+      - '.gitignore'
+      - '.gitattributes'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - 'presentations/**'
+      - 'reference/**'
+      - '**/*.md'
+      - 'NOTICE'
+      - 'issues.json'
+      - '.vscode/**'
+      - '.gitignore'
+      - '.gitattributes'
   workflow_dispatch:
 
 permissions:
