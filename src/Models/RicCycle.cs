@@ -44,9 +44,30 @@ public static class CostEntry
         public const string UwaGpInKind = "UWA GP / in-kind";
         public const string State = "State";
         public const string Federal = "Federal (incl. NCRIS)";
-        public const string Other = "Other recurrent support";
+
+        /// <summary>
+        /// Worded as the client's workbook and requirements §4 word it. This used to read
+        /// "Other recurrent support"; a row saved under the old label is still non-UWA
+        /// income, because only <see cref="UwaGpInKind"/> is treated as UWA money.
+        /// </summary>
+        public const string Other = "Other (e.g. philanthropic)";
 
         public static readonly string[] All = [UwaGpInKind, State, Federal, Other];
+
+        /// <summary>
+        /// True for the one line that is UWA money. Everything else is non-UWA. The engine
+        /// split and the on-screen explanation both come from here, so they cannot disagree.
+        /// </summary>
+        public static bool IsUwa(string? category) => category == UwaGpInKind;
+
+        /// <summary>
+        /// Which calculated rates a line lowers, in words a custodian can read beside the
+        /// field (US-06, requirements §4). The commercial rate deducts no income at all.
+        /// </summary>
+        public static string RatesReduced(string? category) =>
+            IsUwa(category)
+                ? "Lowers the UWA Researcher rate only"
+                : "Lowers the UWA Researcher and APFR rates";
     }
 }
 
@@ -206,7 +227,7 @@ public class RicCostEntry
     /// from the APFR rate. Derived from the category, never stored separately.
     /// </summary>
     [NotMapped]
-    public bool IsUwaIncome => IsIncome && Category == CostEntry.IncomeCategories.UwaGpInKind;
+    public bool IsUwaIncome => IsIncome && CostEntry.IncomeCategories.IsUwa(Category);
 }
 
 public class RicCostYearAmount
