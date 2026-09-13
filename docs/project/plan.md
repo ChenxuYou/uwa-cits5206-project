@@ -1,10 +1,11 @@
 # Project Plan — 24 August to 13 October 2026
 
-**Version:** 1.3 — 2 September 2026
+**Version:** 1.4 — 13 September 2026
 **Owner:** Chenxu You
 **Reviewed:** every Saturday team meeting
 **Companions:** [`risks.md`](risks.md) · [`skills-audit.md`](skills-audit.md) ·
-[`team.md`](team.md) · [ADR-001](../decisions/adr-001-technology-stack.md)
+[`team.md`](team.md) · [ADR-001](../decisions/adr-001-technology-stack.md) ·
+[ADR-002](../decisions/adr-002-pdf-generation.md)
 
 > **The scope this plan delivers was signed by the client on 20 August 2026.** Nothing below is
 > a proposal to the client; it is the sequence in which we build what they approved.
@@ -17,9 +18,9 @@
 | --- | --- | --- | --- |
 | M0 | ✅ Assignment 1 submitted | **25 Aug 2026** | **Met.** `Group13-Project Spec and Plans.pdf` uploaded by one member on 25 Aug, every linked resource open to the facilitator |
 | M1 | ✅ **Engine provably correct** | **4 Sep 2026** | **Met 2 Sep, two days early.** The client's worked example reproduces to the cent in `tests/CostingTool.Engine.Tests`, and `dotnet test` is a merge gate rather than a warning. The engine now sits in its own project with no package references, so the tests reach the arithmetic without EF or ASP.NET behind it |
-| M2 | Guided flow, validated server-side | **11 Sep 2026** | Costs, income, capacity and mandatory forecast utilisation captured and validated |
-| M3 | Rates, proposed rates and balance | **18 Sep 2026** | Three rates per capability with the figures behind each; proposed rates and the resulting surplus or deficit |
-| M4 | **Vertical slice complete** | **25 Sep 2026** | Sign in → create cycle → enter inputs → see rates → propose → justify → seal → export PDF → reopen |
+| M2 | ✅ **Guided flow, validated server-side** | **11 Sep 2026** | **Met.** Costs, income, capacity and forecast utilisation are captured and validated server-side across `Start → Costs → Capacity → Rates → Review`, and every step loads through `RicPageModel`, so no step can forget an `Include` or an ownership filter |
+| M3 | Rates, proposed rates and balance | **18 Sep 2026** | Three rates per capability with the figures behind each; proposed rates and the resulting surplus or deficit. **On track** — the screens exist; what S4 adds is US-10, US-12 and US-13 |
+| M4 | **Vertical slice complete** | **25 Sep 2026** | Sign in → create cycle → enter inputs → see rates → propose → justify → seal → export PDF → reopen. **The export was the one unbuilt link and is now spiked** — [ADR-002](../decisions/adr-002-pdf-generation.md), `src/CostingTool.Pdf` |
 | M5 | Staging live, client using it | **2 Oct 2026** | Deployed over HTTPS, seeded credentials replaced, the client reaches it unaccompanied |
 | M6 | Release candidate, feature freeze | **9 Oct 2026** | Critical fixes only; full regression pass; evidence pack assembled |
 | M7 | **Final release and handover** | **13 Oct 2026** | Tagged release deployed, handover notes written so UWA can rehost, final report submitted |
@@ -45,12 +46,14 @@ the review rule: the person who writes a story is never the person who verifies 
 | --- | --- | --- | --- | --- | --- | --- |
 | S1 | 24 Aug | Backlog, ADR, engine extracted from the page models | US-18 (partial), engine refactor | 8 | Wenmin Luo | Jaswanth Vericherla |
 | S2 | 31 Aug | **Engine provably right** — golden file, decimal, versioned config | US-09, US-18 | 16 | Wenmin Luo, Chenxu You | Jaswanth Vericherla |
-| S3 | 7 Sep | Costs, income, capacity, forecast utilisation | US-03, US-04, US-06, US-07, US-08 | 26 | Wenmin Luo, Chenxu You (US-03, US-07) · Dai Lam La La (US-04) · Jaswanth Vericherla (US-06) · Yichen Zhao (US-08) | Jaswanth Vericherla — except US-06, verified by Chenxu You |
-| S4 | 14 Sep | Rates, proposed rates, balance, justification | US-09, US-10, US-11, US-12, US-13 | 24 | Wenmin Luo (calc), Chenxu You (screens) · Dai Lam La La (US-13) | Dai Lam La La — except US-13, verified by Jaswanth Vericherla |
+| S3 ✅ | 7 Sep | Costs, income, capacity, forecast utilisation | US-03, US-04, US-06, US-07, US-08 | 26 | Wenmin Luo, Chenxu You (US-03, US-07) · Dai Lam La La (US-04) · Jaswanth Vericherla (US-06) · Yichen Zhao (US-08) | Jaswanth Vericherla — except US-06, verified by Chenxu You |
+| S4 ◀ | 14 Sep | Rates, proposed rates, balance, justification | US-09, US-10, US-11, US-12, US-13 | 24 | Wenmin Luo (calc), Chenxu You (screens) · Dai Lam La La (US-13) | Dai Lam La La — except US-13, verified by Jaswanth Vericherla |
 | S5 | 21 Sep | Seal, PDF with workings, retrieval, supersession | US-14, US-15, US-16, US-17, US-01, US-02 | 26 | Chenxu You (seal), Wenmin Luo (PDF) | Jaswanth Vericherla |
 | S6 | 28 Sep | Identity hardening and deploy to staging | US-19, deployment | 10 | Chenxu You (CD), Wenmin Luo (server) | Jaswanth Vericherla |
 | S7 | 5 Oct | Stabilise — critical fixes only | — | — | Whoever owns the fix | Dai Lam La La |
 | S8 | 12 Oct | Final release and handover | — | — | Chenxu You, Wenmin Luo | Whole team |
+
+**S3 closed on 13 September**; M2 was met on the 11th. **S4 is the sprint in flight.** US-16's renderer was brought forward out of S5 into a spike this week, because it was the only link in the M4 chain that nobody had built or costed — see [ADR-002](../decisions/adr-002-pdf-generation.md). What stays in S5 is wiring it to the approver's side, the supersession watermark question, and review.
 
 **Story points are re-estimated at each Saturday meeting.** The table above is the plan of
 record; the [board](https://github.com/users/ChenxuYou/projects/2) is the live state, and the
@@ -96,7 +99,7 @@ intentions. Detail in Assignment 1 §3.5.
 
 | Stage | Owner | By |
 | --- | --- | --- |
-| Hosting decision with the client — UWA VM, the UWA domain already shared with us, or team-provisioned; who administers it; whether sign-in must use UWA accounts | Yichen Zhao | 9 Sep |
+| Hosting decision with the client — UWA VM, the UWA domain already shared with us, or team-provisioned; who administers it; whether sign-in must use UWA accounts | Yichen Zhao | ⚠️ **9 Sep — no answer recorded in this repository.** Every row below it depends on it, and M5 is 2 Oct. If it is not settled at the 19 Sep meeting it stops being a date and becomes a risk with a fallback: provision a team-held server ourselves and hand the client the migration path at handover |
 | Provision and access | Wenmin Luo | 18 Sep |
 | CI extended to CD, with a documented rollback | Chenxu You | 25 Sep |
 | DNS, reverse proxy, TLS | Wenmin Luo, Chenxu You | 30 Sep |
@@ -114,13 +117,17 @@ intentions. Detail in Assignment 1 §3.5.
 | A15 | Report guide-vs-calculator divergences to the client as they surface. The commercial-rate divergence is already answered; a **line-by-line reconciliation of the calculator is deferred to the next cycle**, once the engine exists to compare against | Dai Lam La La | Rolling; first pass after **M1**, 4 Sep |
 | A17 | Give "the sealed PDF shows the calculator's workings" a requirement ID and a story estimate | Wenmin Luo | ⚠️ **Missed 26 Aug — re-dated to 5 Sep.** Tracked as issue #10, still open. It gates a Must story's estimate, so it cannot slip past the S4 planning on 14 Sep |
 | — | ~~**Create the GitHub Projects board** — populated from the eighteen Must stories. Carried out of Assignment 1 as the one artefact that has to be made by hand~~ | Wenmin Luo, Chenxu You | ✅ Done 1 Sep. Board #2, public and linked to the repository; 25 story issues carried their points, priority and sprint across. Built by [`scripts/seed-project-board.py`](../../scripts/seed-project-board.py), so it can be rebuilt from `user-stories.md` rather than by hand |
-| — | **Finish the board by hand** — rename Status `Todo` to `Backlog` and add `Review`, so the four columns match what §4 and the submitted PDF promise; add a board view grouped by Status; add issues #10, #21 and #60, which are not stories and so are not in `user-stories.md`; enable the three Workflows that move cards without anyone dragging them | Chenxu You | 5 Sep |
+| — | **Finish the board by hand** — rename Status `Todo` to `Backlog` and add `Review`; add a board view grouped by Status; add issues #10, #21 and #60, which are not stories and so are not in `user-stories.md`; enable the three Workflows that move cards without anyone dragging them | Chenxu You | ⚠️ **Missed 5 Sep — re-dated to 19 Sep.** Half of it is now automated: [`scripts/finish-project-board.py`](../../scripts/finish-project-board.py) adds the three issues and then audits the board against this row, printing what is still outstanding. The Status rename stays by hand **deliberately** — the GraphQL mutation that edits single-select options replaces the whole option list and clears every card's Status, so the two-minute job in the web UI is the safe one |
 | — | **Write up the 24 July and 5 August meetings.** Carried out of Assignment 1; the minutes rule applies from here on, and the 24 July record is a raw transcript, so what goes in `docs/meetings/` is written minutes | Jaswanth Vericherla | ⚠️ **Missed 29 Aug — re-dated to 5 Sep** |
 | — | ~~Add Option F to [`architecture.md` §8](../spec/architecture.md#8-options-assessed) and re-run the weighted comparison~~ | Chenxu You | ✅ Done 24 Aug |
 | — | ~~Stop tracking `src/bin/` and `src/obj/`~~ | Wenmin Luo | ✅ Done 24 Aug |
 | — | **Replace `EnsureCreated()` with EF Core migrations.** The schema cannot currently evolve, so a model change costs the local database. Harmless now; data loss once the client is entering figures on staging, which makes it a gate on M5 rather than a tidy-up | Wenmin Luo | 2 Oct (**M5**) |
 | — | **Confirm two modelling decisions that carry no source marker** — whether a multi-year cost profile is averaged into one annual figure, and whether the indirect-cost uplift is retained by the platform in the revenue projection. Both surfaced on 2 Sep while the engine was extracted; both are commented in the code as ours rather than the client's | Dai Lam La La | With the next question batch |
-| Q8 | Repository licence — unblocked by the client's written ownership confirmation; closes at handover | Chenxu You | 13 Oct |
+| — | **Commit the regenerated lockfiles.** `src/CostingTool.Pdf` adds a package reference, so `dotnet restore --force-evaluate` must be run once and both `packages.lock.json` files committed — CI restores against them | Chenxu You | 15 Sep |
+| — | **Move the web application to `src/CostingTool.Web/`.** `src/CostingTool.csproj` globs `**/*.cs` from its own directory, so every sibling project underneath it needs four `Remove` lines to avoid CS0436. The comment there said this was worth doing "before a third project is added"; `CostingTool.Pdf` is the third project. It is a folder move plus three path edits, and it is cheapest now, before the deploy sprint | Wenmin Luo | 26 Sep |
+| — | **Amend the ADR-001 stack table's *PDF export* row**, which still says "server-side HTML → PDF". [ADR-002](../decisions/adr-002-pdf-generation.md) decided otherwise and says why; two decision records that contradict each other in a reader's hands are worse than one | Chenxu You | 15 Sep |
+| — | **Minutes have not been committed since 20 August.** §4 promises a Saturday review with minutes inside 24 hours; four Saturdays have passed without one. The cadence is either kept or the plan stops claiming it — this row exists so the choice is made deliberately at the next meeting | Jaswanth Vericherla | 19 Sep |
+| Q8 | **Repository licence.** Unblocked by the client's written ownership confirmation of 20 August; [`NOTICE`](../../NOTICE) §1 and §2 now record that confirmation rather than still waiting for it (they were three weeks stale, and §1 still pointed at `docs/requirements.md`). What is left is agreeing the licence text with UWA — a licence granted by one joint owner alone may not be effective, so the team does not write one unilaterally | Chenxu You | 13 Oct |
 
 ---
 
@@ -134,3 +141,12 @@ Recorded so that neither is quietly forgotten and neither quietly becomes this s
 | 2 | **UWA single sign-on** | Treated as a system integration, which the signed scope defers. Local sign-in sits behind an SSO-shaped seam so it can be swapped |
 | 3 | **HR-system integration for staff roles** — raised by the client on 20 August | Raised, not accepted. It is the class of integration the signed scope defers and would need something traded out |
 | 4 | **Writing records directly into Content Manager (TRIM)** | Out of scope as stated: the custodian downloads the PDF and files it. Only becomes work if the client asks the tool to write to TRIM |
+
+---
+
+## 8. Change log
+
+| Version | Date | Change |
+| --- | --- | --- |
+| 1.4 | 13 Sep 2026 | **M2 met**, S3 closed, S4 marked as the sprint in flight. US-16's renderer brought forward out of S5 as a spike, with [ADR-002](../decisions/adr-002-pdf-generation.md) recording why MigraDoc and why the document is built from the sealed snapshot rather than from the live rows. Four §6 rows added — the regenerated lockfiles, the `src/CostingTool.Web/` move that the third project now forces, the contradicting *PDF export* row in ADR-001, and the fact that **no minutes have been committed since 20 August** although §4 promises them weekly. The board row and Q8 are re-dated rather than quietly carried: the board is half-automated and half deliberately manual, and Q8 is unblocked because [`NOTICE`](../../NOTICE) now records the client's written confirmation instead of still waiting for it. §5's hosting decision is marked as missed, because every deployment row below it depends on an answer this repository does not hold |
+| 1.3 | 2 Sep 2026 | Engine extracted and provably correct; M1 met two days early |

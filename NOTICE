@@ -14,12 +14,19 @@ position rather than an oversight.
 
 The intellectual property in this project is jointly held (see section 2), and a
 licence granted by one joint owner alone may not be effective. The team therefore
-does not purport to grant one. The licensing question is recorded as Q8 in
-docs/requirements.md and closes at handover, once the ownership position in
-section 2 has been confirmed in writing by the client.
+does not purport to grant one alone. The licensing question is recorded as Q8 in
+docs/spec/requirements.md.
 
-Until then: all rights are reserved, except for the permissions expressly granted
-in sections 3 and 4 below.
+THE CONDITION THIS SECTION NAMED HAS NOW BEEN MET. Section 2's ownership position
+was confirmed in writing by the client on 20 August 2026 -- confirmation 2 of the
+signed scope statement, docs/client/communication-history/2026-08-20-client-meeting/
+project-scope-summary-signed.pdf. So Q8 is no longer blocked on the client; what
+remains is to agree the licence text with them, which is done at handover on
+13 October 2026 because a licence is easier to settle over a finished thing than
+over an intention. It is an owned, dated action in docs/project/plan.md section 6.
+
+Until it is settled: all rights are reserved, except for the permissions expressly
+granted in sections 3 and 4 below.
 
 --------------------------------------------------------------------------------
 2. WHO OWNS WHAT
@@ -41,8 +48,11 @@ recorded in docs/meetings/2026-07-29-client-kickoff.md section 9, decision D5.
                                     calculator and then selling it onward would
                                     not be appropriate. The team accepts that.
 
-The joint-ownership position is transcribed from a spoken meeting and has not yet
-been confirmed in writing. Section 1 does not change until it is.
+The joint-ownership position was transcribed from a spoken meeting and was, for
+three weeks, unconfirmed in writing. It was put to the client as confirmation 2 of
+the scope statement and signed by Mathew Hall, Strategic Development Coordinator, on
+20 August 2026. The table above is therefore the client's written position and not
+only our note of a conversation.
 
 HOW DECISION D5 SHOULD BE READ. D5 records this as "The costing logic and
 overarching IP remain UWA's, jointly." That sentence carries two readings and
@@ -111,4 +121,6 @@ drawn from them, it is rewritten by us and the source is named in the text.
 
 --------------------------------------------------------------------------------
 
-Last reviewed: 15 August 2026.
+Last reviewed: 13 September 2026 -- section 1 and section 2 updated to record the
+client's written confirmation of 20 August 2026, and the Q8 path corrected to
+docs/spec/requirements.md.
