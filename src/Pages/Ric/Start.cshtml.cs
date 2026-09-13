@@ -21,8 +21,10 @@ public class StartModel(CostingDbContext db) : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
-        var names = CapabilityNames
-            .Split(['\n', ','], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        var names = (CapabilityNames ?? string.Empty)
+            .Split(
+                ['\n', ','],
+                StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
