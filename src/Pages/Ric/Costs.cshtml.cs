@@ -22,8 +22,6 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
     [BindProperty] public string Scope { get; set; } = CostEntry.Scopes.Capability;
 
-    [BindProperty] public string EntryKind { get; set; } = "Cost";
-
     [BindProperty] public string Category { get; set; } = CostEntry.CostCategories.Personnel;
 
     [BindProperty] public string? PersonnelName { get; set; }
@@ -62,14 +60,14 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
     public int YearCount => Cycle.EndYear - Cycle.StartYear + 1;
 
-    public bool IsIncome => EntryKind == "Income";
-
     public async Task<IActionResult> OnGetAsync(int cycleId)
     {
         if (!await Load(cycleId))
         {
             return NotFound();
         }
+
+        YearAmounts = Enumerable.Repeat(0m, YearCount).ToList();
 
         return Page();
     }
@@ -97,7 +95,7 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
             .Select(i => i < YearAmounts.Count ? YearAmounts[i] : 0)
             .ToList();
 
-        var isPersonnel = !IsIncome && Category == CostEntry.CostCategories.Personnel;
+        var isPersonnel = Category == CostEntry.CostCategories.Personnel;
 
         Db.RicCostEntries.Add(new RicCostEntry
         {
@@ -108,7 +106,7 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
             // RicCalculationService.InputsFor.
             RicCapabilityId = Scope == CostEntry.Scopes.Capability ? CapabilityId : null,
             Scope = Scope,
-            CostType = IsIncome ? CostEntry.Types.Income : CostEntry.Types.Cost,
+            CostType = CostEntry.Types.Cost,
             Category = Category,
             Amount = amounts.Average(),
             Notes = Notes,
@@ -146,7 +144,11 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
         var item = await Db.RicCostEntries
             .Include(x => x.RicCycle)
-            .FirstOrDefaultAsync(x => x.Id == id && x.RicCycleId == CycleId && x.RicCycle.CreatedBy == owner);
+            .FirstOrDefaultAsync(x =>
+                x.Id == id
+                && x.RicCycleId == CycleId
+                && x.CostType == CostEntry.Types.Cost
+                && x.RicCycle.CreatedBy == owner);
 
         if (item is null)
         {
@@ -164,11 +166,11 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
     private void Validate()
     {
-        var allowed = IsIncome ? CostEntry.IncomeCategories.All : CostEntry.CostCategories.All;
+        var allowed = CostEntry.CostCategories.All;
 
         if (!allowed.Contains(Category))
         {
-            ModelState.AddModelError(nameof(Category), $"Select a valid {(IsIncome ? "income" : "cost")} category.");
+            ModelState.AddModelError(nameof(Category), "Select a valid cost category.");
         }
 
         if (Scope == CostEntry.Scopes.Capability)
@@ -189,7 +191,7 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
             ModelState.AddModelError(nameof(Scope), "Select a valid scope.");
         }
 
-        if (!IsIncome && Category == CostEntry.CostCategories.Personnel)
+        if (Category == CostEntry.CostCategories.Personnel)
         {
             if (string.IsNullOrWhiteSpace(PersonnelName))
             {
@@ -209,16 +211,6 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
         else if (string.IsNullOrWhiteSpace(Description))
         {
             ModelState.AddModelError(nameof(Description), "Description is required.");
-        }
-
-        // US-06 and F9: an income line lowers rates for three to five years, so the record
-        // has to say where the money comes from and how long it is committed for. Checked
-        // on the server, as milestone M2 requires, so a hand-made request cannot skip it.
-        if (IsIncome && string.IsNullOrWhiteSpace(Notes))
-        {
-            ModelState.AddModelError(
-                nameof(Notes),
-                "Justification is required for income: say where it comes from and how long it is committed for.");
         }
 
         if (YearAmounts.Take(YearCount).Any(x => x < 0))

@@ -12,7 +12,7 @@
 }
 
 <div class="page-wrap ric-page">
-    <partial name="_RicSteps" model='new CostingTool.Pages.Ric.RicStepViewModel(4, Model.Cycle.Id)' />
+    <partial name="_RicSteps" model='new CostingTool.Pages.Ric.RicStepViewModel(5, Model.Cycle.Id)' />
 
     <div class="ric-title">
         <div>
@@ -50,7 +50,7 @@
                             {
                                 <p>
                                     Operating cost @rates.TotalOperatingCost.ToString("C")
-                                    · less income @rates.TotalIncome.ToString("C")
+                                    · less funding @rates.TotalIncome.ToString("C")
                                     · forecast use @rates.ForecastUtilisation.ToString("N1") @unit
                                 </p>
                             }
