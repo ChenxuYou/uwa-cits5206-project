@@ -44,7 +44,7 @@ public class ReviewModel(CostingDbContext db, RicCalculationService calculator) 
             ModelState.AddModelError(string.Empty, "Confirm that the assumptions and figures are complete and accurate.");
         }
 
-        if (Cycle.Capabilities.Count == 0 || Cycle.Costs.Count == 0)
+        if (Cycle.Capabilities.Count == 0 || !Cycle.Costs.Any(x => !x.IsIncome))
         {
             ModelState.AddModelError(string.Empty, "The cycle must contain capabilities and operating costs.");
         }

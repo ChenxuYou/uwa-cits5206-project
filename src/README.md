@@ -103,15 +103,16 @@ a page can render.
 ### The workflow
 
 1. **Start** — platform, pricing period, billable unit, capabilities.
-2. **Costs** — Personnel, Equipment, Maintenance, Travel, Animal and Other items by year,
-   plus the four non-variable income lines. A line is booked either to one capability or to
-   the platform, never both.
-3. **Capacity** — maximum capacity and forecast utilisation per user category. Forecast, not
+2. **Costs** — Personnel, Equipment, Maintenance, Travel, Animal and Other operating cost
+   items by year. A cost is booked either to one capability or to the platform, never both.
+3. **Funding** — the four non-variable funding lines, recorded separately from operating
+   costs with their source, commitment period and effect on each rate.
+4. **Capacity** — maximum capacity and forecast utilisation per user category. Forecast, not
    capacity: it is the divisor behind every rate.
-4. **Rates** — three minimum sustainable rates per capability, with the figures behind each,
+5. **Rates** — three minimum sustainable rates per capability, with the figures behind each,
    plus proposed rates and the resulting balance.
-5. **Review** — check and submit for delegated authority approval.
-6. **Approvals** — the approver sees the workings, then approves and seals, or returns the
+6. **Review** — check and submit for delegated authority approval.
+7. **Approvals** — the approver sees the workings, then approves and seals, or returns the
    cycle with required changes.
 
 Submitted cycles are read-only while awaiting a decision; returned cycles can be edited and
