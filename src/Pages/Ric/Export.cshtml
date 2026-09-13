@@ -1,0 +1,10 @@
+@page
+@model CostingTool.Pages.Ric.ExportModel
+@*
+    This page has no markup on purpose.
+
+    It exists so that the export has a route inside the guided workflow — /Ric/Export —
+    and so that the ownership check in RicPageModel applies to it exactly as it applies
+    to every other step. The handler always returns a file or a redirect; nothing here
+    is ever rendered.
+*@
