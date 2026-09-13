@@ -15,6 +15,9 @@ public class ReviewModel(CostingDbContext db, RicCalculationService calculator) 
 
     public string? SuccessMessage { get; private set; }
 
+    /// <summary>Why an export was refused, when one was. See <c>Export.cshtml.cs</c>.</summary>
+    public string? ErrorMessage { get; private set; }
+
     public async Task<IActionResult> OnGetAsync(int cycleId)
     {
         if (!await Load(cycleId))
@@ -23,6 +26,7 @@ public class ReviewModel(CostingDbContext db, RicCalculationService calculator) 
         }
 
         SuccessMessage = TempData["Success"] as string;
+        ErrorMessage = TempData["Error"] as string;
         return Page();
     }
 

@@ -81,12 +81,18 @@ CostingTool.sln
 │   │   ├── MethodConfig.cs         k, the rounding rule, and the version they belong to
 │   │   ├── CapabilityRateInputs.cs What the engine needs to price one capability
 │   │   └── RateEngine.cs           The three formulas, and the workings behind them
+│   ├── CostingTool.Pdf/        The sealed-record PDF. MigraDoc, and nothing else
+│   │   ├── SealedRecord.cs         The snapshot, read back — schema 1.1
+│   │   ├── SealedRecordPdf.cs      Rates beside the arithmetic that produced them
+│   │   ├── EmbeddedFontResolver.cs Why the font travels with the assembly
+│   │   └── Fonts/                  DejaVu Sans, embedded. Licence beside it
 │   └── CostingTool.csproj      The web application
 │       ├── Models/                 Entities, and the vocabulary of a cost entry
 │       ├── Data/                   The DbContext
 │       ├── Services/               The seam: cycle → engine inputs → page results
 │       └── Pages/                  Razor Pages
-└── tests/CostingTool.Engine.Tests/  References the engine and nothing else
+├── tests/CostingTool.Engine.Tests/  References the engine and nothing else
+└── tests/CostingTool.Pdf.Tests/     References the renderer and nothing else
 ```
 
 **The engine is a separate project on purpose.** `architecture.md` §3 rule R7 says the
@@ -151,6 +157,10 @@ Nothing in the engine reads a constant, and nothing in the UI states one either:
 dotnet test
 ```
 
+**`dotnet restore --force-evaluate` once, first.** `CostingTool.Pdf` adds a package
+reference, and both projects are pinned with a lockfile — a plain restore against a stale
+`packages.lock.json` fails with NU1004 rather than explaining itself.
+
 `tests/CostingTool.Engine.Tests` holds the golden file — the client's own worked example
 from the guide, Step 3:
 
@@ -161,6 +171,9 @@ from the guide, Step 3:
 These must reproduce **to the cent** or the build fails and nothing merges. The rest of the
 suite covers the boundaries: zero and negative utilisation, negative costs, income exceeding
 cost, a change to `k`, rounding at the half-cent, very large amounts, and determinism.
+
+`tests/CostingTool.Pdf.Tests` then asserts the **same three figures on the way out** — a
+correct engine behind a document that prints something else is not worth much.
 
 Figures come from the client's **guide**, never from the recorded walkthrough — see the
 withdrawn fixtures note in [`architecture.md` §3](../docs/spec/architecture.md).
@@ -174,7 +187,7 @@ Recorded here rather than discovered later.
 | Gap | Where it is tracked |
 | --- | --- |
 | **`EnsureCreated()`, not migrations.** The schema cannot evolve, so a model change means deleting the local database. That is fine locally and unacceptable once the client has entered data — moving to EF Core migrations is a gate on the staging deployment | [`plan.md` M5](../docs/project/plan.md) |
-| **No PDF export yet.** The sealed record exists as JSON with its hash; the client-facing PDF, showing the workings, is US-16 | [`user-stories.md`](../docs/spec/user-stories.md) |
+| **The PDF export is a spike, not finished work.** `src/CostingTool.Pdf` renders a sealed record and the custodian can download it from the review page; it has not been reviewed by a second member, the approver has no link to it yet, and nobody has printed one on A4. US-16 closes in S5 | [ADR-002](../docs/decisions/adr-002-pdf-generation.md), follow-on actions |
 | **Pay scales, capacity baselines and category lists are not in `MethodConfig` yet.** `k` and the rounding rule are; the rest of rule R5 is not, so the salary field carries a placeholder rather than a looked-up figure | [ADR-001 action 7](../docs/decisions/adr-001-technology-stack.md) |
 | **`Amount` is the mean of the per-year figures.** Averaging a multi-year profile into one annual number is our decision, not the client's; it is commented where it happens and needs confirming | `Models/RicCycle.cs` |
 | **The revenue projection divides the uplift back out** of the APFR and commercial proposed rates. Preserved from the spike and documented in `RateEngine`, but it carries no source marker in any client document | `Services/RicCalculationService.cs` |

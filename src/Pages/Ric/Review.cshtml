@@ -22,6 +22,16 @@
         </div>
     }
 
+    @if (Model.ErrorMessage is not null)
+    {
+        @* The export refuses rather than handing over a document with holes in it; when it
+           does, the reason is shown here rather than swallowed. *@
+        <div class="return-banner">
+            <strong>The record could not be exported</strong>
+            <p>@Model.ErrorMessage</p>
+        </div>
+    }
+
     @if (Model.Cycle.Status == "Returned")
     {
         <div class="return-banner">
@@ -133,6 +143,15 @@
                             under method version @Model.Cycle.MethodVersion.
                         </p>
                         <code>@Model.Cycle.SnapshotHash</code>
+                        <p>
+                            <a class="outline-action" asp-page="/Ric/Export" asp-route-cycleId="@Model.Cycle.Id">
+                                Download the sealed record (PDF)
+                            </a>
+                        </p>
+                        <small>
+                            Built from this snapshot, not from the live figures, and it shows the workings
+                            behind every rate. Attach it to the record in Content Manager.
+                        </small>
                     </div>
                 </article>
             }
