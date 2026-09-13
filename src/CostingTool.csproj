@@ -19,25 +19,36 @@
 
   <ItemGroup>
     <ProjectReference Include="CostingTool.Engine\CostingTool.Engine.csproj" />
+    <ProjectReference Include="CostingTool.Pdf\CostingTool.Pdf.csproj" />
   </ItemGroup>
 
   <!--
-    The engine project lives in a folder underneath this one, and this project's
-    SDK globs **/*.cs from its own directory. Without these Removes the engine's
-    source is compiled into BOTH assemblies — every engine type then exists twice
-    and the compiler cannot tell which one a page means (CS0436) — and the engine's
-    generated AssemblyInfo is pulled in on top of ours (CS0579).
+    Sibling projects live in folders underneath this one, and this project's SDK globs
+    **/*.cs from its own directory. Without these Removes their source is compiled into
+    BOTH assemblies — every type then exists twice and the compiler cannot tell which one
+    a page means (CS0436) — and their generated AssemblyInfo is pulled in on top of ours
+    (CS0579).
 
-    Excluding it here is the narrow fix. The wider one is to stop nesting a project
-    inside another project's directory: `src/CostingTool.Web/` beside
-    `src/CostingTool.Engine/` needs no Removes at all, because no project would
-    contain another. Worth doing before a third project is added.
+    The folders are listed one by one rather than globbed: a `CostingTool.*\**` pattern
+    that silently fails to expand would produce CS0436 on every type in the project it
+    was meant to exclude, and an explicit list cannot do that.
+
+    THE WIDER FIX IS NOW OVERDUE. The comment that used to sit here said this workaround
+    was "worth doing before a third project is added" — CostingTool.Pdf is that third
+    project, so the debt is called in rather than paid again: moving the web application
+    to `src/CostingTool.Web/`, beside its siblings rather than around them, removes this
+    ItemGroup entirely. Tracked in plan.md §6, owned and dated, not left as a comment.
   -->
   <ItemGroup>
     <Compile Remove="CostingTool.Engine\**" />
     <Content Remove="CostingTool.Engine\**" />
     <EmbeddedResource Remove="CostingTool.Engine\**" />
     <None Remove="CostingTool.Engine\**" />
+
+    <Compile Remove="CostingTool.Pdf\**" />
+    <Content Remove="CostingTool.Pdf\**" />
+    <EmbeddedResource Remove="CostingTool.Pdf\**" />
+    <None Remove="CostingTool.Pdf\**" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The sealed-record PDF renderer, on its own.
+
+    Like the engine, this project is deliberately small and deliberately isolated:
+    it references PDFsharp/MigraDoc and nothing else — no Entity Framework, no
+    ASP.NET Core, no reference to the web application. It takes the sealed
+    snapshot JSON as a string and returns bytes, which means a test can render a
+    record without a database, a browser or a signed-in user behind it.
+
+    ADR-002 records why MigraDoc rather than QuestPDF or a headless browser.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Same reason as src/CostingTool.csproj: pin the graph (risks.md R18). The
+         lockfile is written by the next `dotnet restore` and must be committed. -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- MIT. Platform-agnostic build: no GDI+, no libgdiplus on the server. -->
+    <PackageReference Include="PDFsharp-MigraDoc" Version="6.2.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      The font travels with the assembly.
+
+      PDFsharp's Core build has no font of its own and throws on any platform
+      where it cannot resolve one — see EmbeddedFontResolver. Embedding the face
+      means the PDF a custodian downloads from staging is byte-for-byte the same
+      document as the one produced on a developer's laptop, which is the whole
+      point of a sealed record. Licence: Fonts/LICENCE-DejaVu.txt.
+    -->
+    <EmbeddedResource Include="Fonts\DejaVuSans.ttf" />
+    <EmbeddedResource Include="Fonts\DejaVuSans-Bold.ttf" />
+  </ItemGroup>
+
+</Project>

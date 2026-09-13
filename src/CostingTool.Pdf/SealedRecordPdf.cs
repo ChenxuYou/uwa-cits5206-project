@@ -1,0 +1,496 @@
+using MigraDoc.DocumentObjectModel;
+using MigraDoc.DocumentObjectModel.Tables;
+using MigraDoc.Rendering;
+
+namespace CostingTool.Pdf;
+
+/// <summary>
+/// Turns a sealed snapshot into the document a custodian can attach to a Freedom of
+/// Information response.
+///
+/// <b>What the document has to survive.</b> Someone reads it in 2030, asks "why does this
+/// cost $50 an hour?", and must be able to answer from the page in front of them without
+/// the application, the database or us. So every rate is printed beside the arithmetic
+/// that produced it, the method version and factor are named, and the integrity hash is
+/// on the last page. That is US-16 and US-17, and it is the client's own request of
+/// 20 August 2026 that the record show "the workings for the calculator".
+///
+/// The renderer is deliberately dull: it reads a <see cref="SealedRecord"/> and writes it
+/// out. It calculates nothing. If a figure is not in the snapshot it does not appear.
+/// </summary>
+public static class SealedRecordPdf
+{
+    private const string Face = EmbeddedFontResolver.FamilyName;
+
+    // The one accent. Matches --red-600 in the presentation style guide, so a printed
+    // record and a deck put in front of the same client look like one project.
+    private static readonly Color Accent = new(0xC8, 0x10, 0x2E);
+    private static readonly Color Ink = new(0x0B, 0x0B, 0x0C);
+    private static readonly Color Muted = new(0x5C, 0x55, 0x4D);
+    private static readonly Color Panel = new(0xF1, 0xED, 0xE7);
+    private static readonly Color Rule = new(0xDD, 0xD6, 0xCC);
+
+    /// <summary>
+    /// Render a stored snapshot.
+    /// </summary>
+    /// <param name="snapshotJson">The cycle's <c>SnapshotJson</c>, exactly as sealed.</param>
+    /// <param name="snapshotHash">The cycle's <c>SnapshotHash</c>, printed for verification.</param>
+    public static byte[] Render(string snapshotJson, string? snapshotHash) =>
+        Render(SealedRecord.Parse(snapshotJson), snapshotHash);
+
+    /// <summary>Render a parsed snapshot.</summary>
+    public static byte[] Render(SealedRecord record, string? snapshotHash)
+    {
+        ArgumentNullException.ThrowIfNull(record);
+
+        EmbeddedFontResolver.Register();
+
+        var renderer = new PdfDocumentRenderer { Document = Build(record, snapshotHash) };
+        renderer.RenderDocument();
+
+        using var buffer = new MemoryStream();
+        renderer.PdfDocument.Save(buffer, false);
+        return buffer.ToArray();
+    }
+
+    /// <summary>
+    /// The document model, before it becomes bytes. Public so a test can assert on the
+    /// document without rendering one.
+    /// </summary>
+    public static Document Build(SealedRecord record, string? snapshotHash)
+    {
+        ArgumentNullException.ThrowIfNull(record);
+
+        var cycle = record.Cycle;
+        var platformName = string.IsNullOrWhiteSpace(cycle?.PlatformName) ? "Research platform" : cycle!.PlatformName!;
+
+        var document = new Document();
+        document.Info.Title = $"Costing record — {platformName}";
+        document.Info.Subject = "Sealed research infrastructure costing and pricing record";
+        document.Info.Author = "UWA Research Infrastructure Costing Tool";
+
+        var normal = document.Styles["Normal"]!;
+        normal.Font.Name = Face;
+        normal.Font.Size = 9.5;
+        normal.Font.Color = Ink;
+        normal.ParagraphFormat.SpaceAfter = Unit.FromPoint(4);
+
+        var section = document.AddSection();
+        section.PageSetup.PageFormat = PageFormat.A4;
+        section.PageSetup.Orientation = Orientation.Portrait;
+        section.PageSetup.TopMargin = Unit.FromCentimeter(2.0);
+        section.PageSetup.BottomMargin = Unit.FromCentimeter(2.0);
+        section.PageSetup.LeftMargin = Unit.FromCentimeter(2.2);
+        section.PageSetup.RightMargin = Unit.FromCentimeter(2.2);
+
+        AddRunningHead(section, platformName, cycle);
+        AddFooter(section, snapshotHash);
+
+        AddTitleBlock(section, record, platformName, cycle);
+        AddMethodBlock(section, record);
+
+        foreach (var capability in record.Capabilities)
+        {
+            AddCapability(section, capability, cycle?.BillableUnit);
+        }
+
+        AddPlatformSummary(section, record, cycle?.BillableUnit);
+        AddJustification(section, cycle);
+        AddIntegrityBlock(section, record, snapshotHash);
+
+        return document;
+    }
+
+    // ----------------------------------------------------------------------------------
+    // Page furniture
+    // ----------------------------------------------------------------------------------
+
+    private static void AddRunningHead(Section section, string platformName, SealedCycle? cycle)
+    {
+        var head = section.Headers.Primary.AddParagraph();
+        head.Format.Font.Size = 7.5;
+        head.Format.Font.Color = Muted;
+        head.Format.SpaceAfter = Unit.FromPoint(6);
+        head.Format.Borders.Bottom.Width = 0.5;
+        head.Format.Borders.Bottom.Color = Rule;
+        head.AddText($"{platformName}  ·  sealed costing record");
+
+        if (cycle is not null && cycle.StartYear > 0)
+        {
+            head.AddText($"  ·  {cycle.StartYear}–{cycle.EndYear}");
+        }
+    }
+
+    private static void AddFooter(Section section, string? snapshotHash)
+    {
+        var footer = section.Footers.Primary.AddParagraph();
+        footer.Format.Font.Size = 7.5;
+        footer.Format.Font.Color = Muted;
+        footer.Format.Alignment = ParagraphAlignment.Left;
+
+        if (!string.IsNullOrWhiteSpace(snapshotHash))
+        {
+            // The first twelve characters are enough to match a page against the record
+            // at a glance; the whole hash is printed once, on the last page.
+            footer.AddText($"SHA-256 {snapshotHash[..Math.Min(12, snapshotHash.Length)]}…    ");
+        }
+
+        footer.AddText("Page ");
+        footer.AddPageField();
+        footer.AddText(" of ");
+        footer.AddNumPagesField();
+    }
+
+    // ----------------------------------------------------------------------------------
+    // Content blocks
+    // ----------------------------------------------------------------------------------
+
+    private static void AddTitleBlock(Section section, SealedRecord record, string platformName, SealedCycle? cycle)
+    {
+        var eyebrow = section.AddParagraph("SEALED COSTING RECORD");
+        eyebrow.Format.Font.Size = 7.5;
+        eyebrow.Format.Font.Bold = true;
+        eyebrow.Format.Font.Color = Accent;
+        eyebrow.Format.SpaceAfter = Unit.FromPoint(2);
+
+        var title = section.AddParagraph(platformName);
+        title.Format.Font.Size = 20;
+        title.Format.Font.Bold = true;
+        title.Format.SpaceAfter = Unit.FromPoint(2);
+
+        var period = section.AddParagraph(
+            cycle is null || cycle.StartYear == 0
+                ? "Pricing period not recorded"
+                : $"Pricing period {cycle.StartYear}–{cycle.EndYear}  ·  billed in {(cycle.BillableUnit ?? "units").ToLower(RecordFormat.Culture)}");
+        period.Format.Font.Size = 10;
+        period.Format.Font.Color = Muted;
+        period.Format.SpaceAfter = Unit.FromPoint(10);
+        period.Format.Borders.Bottom.Width = 1.5;
+        period.Format.Borders.Bottom.Color = Accent;
+
+        var facts = KeyValueTable(section);
+        AddFact(facts, "Prepared by", cycle?.CreatedByDisplay);
+        AddFact(facts, "Submitted for approval", $"{cycle?.SubmittedBy ?? "—"}, {RecordFormat.Timestamp(cycle?.SubmittedAtUtc)}");
+        AddFact(facts, "Approved by delegated authority", $"{cycle?.ApprovedBy ?? "—"}, {RecordFormat.Timestamp(cycle?.ApprovedAtUtc)}");
+        AddFact(facts, "Rates effective from", RecordFormat.Date(cycle?.EffectiveDateUtc));
+        AddFact(facts, "Sealed", RecordFormat.Timestamp(record.SealedAtUtc));
+
+        if (!string.IsNullOrWhiteSpace(cycle?.ApprovalComment))
+        {
+            AddFact(facts, "Approver's comment", cycle!.ApprovalComment);
+        }
+
+        Space(section, 10);
+    }
+
+    private static void AddMethodBlock(Section section, SealedRecord record)
+    {
+        var method = record.Method;
+
+        Heading(section, "How these rates were calculated");
+
+        var lead = section.AddParagraph(
+            $"Version {method?.Version ?? record.MethodVersion ?? "—"} of the University's costing method, as it stood when this " +
+            "record was sealed. A later change to the method does not change this record: it is " +
+            "recalculated under the version named here, not under today's.");
+        lead.Format.Font.Size = 9;
+        lead.Format.Font.Color = Muted;
+        lead.Format.SpaceAfter = Unit.FromPoint(6);
+
+        var facts = KeyValueTable(section);
+        AddFact(facts, "Indirect cost recovery (k)", method is null
+            ? "—"
+            : $"{method.IndirectCostRecovery.ToString("0.00", RecordFormat.Culture)} — a {(method.IndirectCostRecovery - 1m) * 100m:0.#}% uplift");
+        AddFact(facts, "Rounding", method is null
+            ? "—"
+            : $"{method.RateDecimals} decimal places, {Humanise(method.MidpointRule)} at an exact half");
+        AddFact(facts, "Source of the method", method?.Source);
+
+        if (method?.Formulas is { } formulas)
+        {
+            Space(section, 6);
+            var table = FormulaTable(section);
+            AddFormula(table, "UWA researcher", formulas.UwaResearcher);
+            AddFormula(table, "APFR", formulas.Apfr);
+            AddFormula(table, "Commercial", formulas.Commercial);
+        }
+
+        Space(section, 10);
+    }
+
+    private static void AddCapability(Section section, SealedCapability capability, string? billableUnit)
+    {
+        var result = capability.Result;
+
+        Heading(section, capability.Name ?? result?.CapabilityName ?? "Capability");
+
+        if (result is null)
+        {
+            var missing = section.AddParagraph(
+                "No rates were stored for this capability. A record is never sealed around a " +
+                "capability that could not be priced, so a snapshot in this state means the " +
+                "stored record is damaged — raise it rather than re-sealing.");
+            missing.Format.Font.Color = Accent;
+            Space(section, 8);
+            return;
+        }
+
+        // ---- The three rates, and what was actually proposed --------------------------
+        var rates = section.AddTable();
+        rates.Borders.Width = 0;
+        rates.AddColumn(Unit.FromCentimeter(5.6));
+        rates.AddColumn(Unit.FromCentimeter(5.4));
+        rates.AddColumn(Unit.FromCentimeter(5.4));
+
+        var header = rates.AddRow();
+        header.Shading.Color = Panel;
+        header.TopPadding = Unit.FromPoint(3);
+        header.BottomPadding = Unit.FromPoint(3);
+        HeaderCell(header.Cells[0], "Rate");
+        HeaderCell(header.Cells[1], "Minimum sustainable", right: true);
+        HeaderCell(header.Cells[2], "Proposed and charged", right: true);
+
+        AddRateRow(rates, "UWA researcher", result.DisplayUwaRate, result.ProposedUwaRate, billableUnit);
+        AddRateRow(rates, "APFR", result.DisplayApfrRate, result.ProposedApfrRate, billableUnit);
+        AddRateRow(rates, "Commercial", result.DisplayCommercialRate, result.ProposedCommercialRate, billableUnit);
+
+        Space(section, 8);
+
+        // ---- The workings -------------------------------------------------------------
+        var workingsLead = section.AddParagraph("The figures behind those rates");
+        workingsLead.Format.Font.Size = 9;
+        workingsLead.Format.Font.Bold = true;
+        workingsLead.Format.SpaceAfter = Unit.FromPoint(4);
+
+        var facts = KeyValueTable(section);
+        AddFact(facts, "Operating cost booked to this capability", RecordFormat.Money(result.CapabilityOperatingCost));
+        AddFact(facts, "Share of platform-level cost", RecordFormat.Money(result.AllocatedPlatformCost));
+        AddFact(facts, "Total operating cost (C)", RecordFormat.Money(result.TotalOperatingCost));
+        AddFact(facts, "UWA non-variable income", RecordFormat.Money(result.UwaIncome));
+        AddFact(facts, "Non-UWA non-variable income", RecordFormat.Money(result.NonUwaIncome));
+        AddFact(facts, "Forecast utilisation (U)", RecordFormat.Quantity(result.ForecastUtilisation, billableUnit));
+
+        if (capability.Workings is { } workings)
+        {
+            Space(section, 6);
+            var arithmetic = FormulaTable(section);
+            AddFormula(arithmetic, "UWA researcher", workings.UwaResearcher);
+            AddFormula(arithmetic, "APFR", workings.Apfr);
+            AddFormula(arithmetic, "Commercial", workings.Commercial);
+        }
+
+        Space(section, 10);
+    }
+
+    private static void AddPlatformSummary(Section section, SealedRecord record, string? billableUnit)
+    {
+        var platform = record.Platform;
+        if (platform is null)
+        {
+            return;
+        }
+
+        Heading(section, "The platform, at the proposed rates");
+
+        var facts = KeyValueTable(section);
+        AddFact(facts, "Total operating cost", RecordFormat.Money(platform.TotalOperatingCost));
+        AddFact(facts, "Forecast revenue at the proposed rates", RecordFormat.Money(platform.ForecastRevenue));
+        AddFact(facts, "Forecast balance", RecordFormat.Balance(platform.ForecastBalance), emphasis: true);
+
+        var note = section.AddParagraph(
+            "A deficit here is not necessarily an error: the UWA researcher rate is set below full " +
+            "cost by design, because non-variable income has already been deducted from it. What " +
+            "the figure shows is how much of the platform's cost is not recovered from usage at " +
+            "the rates proposed.");
+        note.Format.Font.Size = 8.5;
+        note.Format.Font.Color = Muted;
+        note.Format.SpaceBefore = Unit.FromPoint(4);
+
+        Space(section, 10);
+    }
+
+    private static void AddJustification(Section section, SealedCycle? cycle)
+    {
+        if (cycle is null ||
+            (string.IsNullOrWhiteSpace(cycle.PricingJustification) && string.IsNullOrWhiteSpace(cycle.BenchmarkNotes)))
+        {
+            return;
+        }
+
+        Heading(section, "Why these rates were proposed");
+
+        if (!string.IsNullOrWhiteSpace(cycle.PricingJustification))
+        {
+            Quote(section, cycle.PricingJustification!);
+        }
+
+        if (!string.IsNullOrWhiteSpace(cycle.BenchmarkNotes))
+        {
+            var label = section.AddParagraph("Benchmarking");
+            label.Format.Font.Size = 9;
+            label.Format.Font.Bold = true;
+            label.Format.SpaceBefore = Unit.FromPoint(6);
+            label.Format.SpaceAfter = Unit.FromPoint(2);
+            Quote(section, cycle.BenchmarkNotes!);
+        }
+
+        Space(section, 10);
+    }
+
+    private static void AddIntegrityBlock(Section section, SealedRecord record, string? snapshotHash)
+    {
+        Heading(section, "Integrity");
+
+        var paragraph = section.AddParagraph();
+        paragraph.Format.Font.Size = 8.5;
+        paragraph.Format.Font.Color = Muted;
+        paragraph.Format.Shading.Color = Panel;
+        paragraph.Format.Borders.Left.Width = 2;
+        paragraph.Format.Borders.Left.Color = Accent;
+        paragraph.Format.LeftIndent = Unit.FromPoint(8);
+        paragraph.Format.SpaceBefore = Unit.FromPoint(2);
+
+        paragraph.AddText(
+            "This document was produced from the sealed snapshot of the record, not from the live " +
+            "database, so it says what was approved rather than what the system holds today. The " +
+            "snapshot is stored with the SHA-256 hash below; recomputing the hash over the stored " +
+            "snapshot reproduces it exactly if neither has been altered.");
+        paragraph.AddLineBreak();
+        paragraph.AddLineBreak();
+        paragraph.AddText($"Snapshot schema {record.SchemaVersion ?? "—"}   ·   method version {record.MethodVersion ?? "—"}");
+        paragraph.AddLineBreak();
+
+        var hash = paragraph.AddFormattedText(string.IsNullOrWhiteSpace(snapshotHash) ? "(not recorded)" : snapshotHash);
+        hash.Font.Size = 8;
+        hash.Font.Color = Ink;
+    }
+
+    // ----------------------------------------------------------------------------------
+    // Small builders
+    // ----------------------------------------------------------------------------------
+
+    private static void Heading(Section section, string text)
+    {
+        var heading = section.AddParagraph(text);
+        heading.Format.Font.Size = 12;
+        heading.Format.Font.Bold = true;
+        heading.Format.SpaceBefore = Unit.FromPoint(6);
+        heading.Format.SpaceAfter = Unit.FromPoint(5);
+        heading.Format.Borders.Bottom.Width = 0.5;
+        heading.Format.Borders.Bottom.Color = Rule;
+        heading.Format.KeepWithNext = true;
+    }
+
+    private static void Quote(Section section, string text)
+    {
+        var quote = section.AddParagraph(text);
+        quote.Format.Font.Size = 9;
+        quote.Format.LeftIndent = Unit.FromPoint(8);
+        quote.Format.Borders.Left.Width = 2;
+        quote.Format.Borders.Left.Color = Rule;
+        quote.Format.SpaceAfter = Unit.FromPoint(4);
+    }
+
+    private static void Space(Section section, double points)
+    {
+        var spacer = section.AddParagraph();
+        spacer.Format.SpaceAfter = Unit.FromPoint(points);
+    }
+
+    private static Table KeyValueTable(Section section)
+    {
+        var table = section.AddTable();
+        table.Borders.Width = 0;
+        table.Rows.LeftIndent = 0;
+        table.AddColumn(Unit.FromCentimeter(7.4));
+        table.AddColumn(Unit.FromCentimeter(9.0));
+        return table;
+    }
+
+    private static void AddFact(Table table, string label, string? value, bool emphasis = false)
+    {
+        var row = table.AddRow();
+        row.TopPadding = Unit.FromPoint(1.5);
+        row.BottomPadding = Unit.FromPoint(1.5);
+        row.Borders.Bottom.Width = 0.25;
+        row.Borders.Bottom.Color = Rule;
+
+        var key = row.Cells[0].AddParagraph(label);
+        key.Format.Font.Size = 9;
+        key.Format.Font.Color = Muted;
+
+        var text = row.Cells[1].AddParagraph(string.IsNullOrWhiteSpace(value) ? "—" : value);
+        text.Format.Font.Size = 9;
+        text.Format.Font.Bold = emphasis;
+    }
+
+    private static Table FormulaTable(Section section)
+    {
+        var table = section.AddTable();
+        table.Borders.Width = 0;
+        table.AddColumn(Unit.FromCentimeter(3.6));
+        table.AddColumn(Unit.FromCentimeter(12.8));
+        return table;
+    }
+
+    private static void AddFormula(Table table, string label, string? formula)
+    {
+        var row = table.AddRow();
+        row.TopPadding = Unit.FromPoint(2);
+        row.BottomPadding = Unit.FromPoint(2);
+        row.Shading.Color = Panel;
+
+        var key = row.Cells[0].AddParagraph(label);
+        key.Format.Font.Size = 8.5;
+        key.Format.Font.Color = Muted;
+
+        var text = row.Cells[1].AddParagraph(string.IsNullOrWhiteSpace(formula) ? "—" : formula);
+        text.Format.Font.Size = 8.5;
+    }
+
+    private static void AddRateRow(Table table, string label, decimal calculated, decimal proposed, string? billableUnit)
+    {
+        var row = table.AddRow();
+        row.TopPadding = Unit.FromPoint(3);
+        row.BottomPadding = Unit.FromPoint(3);
+        row.Borders.Bottom.Width = 0.25;
+        row.Borders.Bottom.Color = Rule;
+
+        var name = row.Cells[0].AddParagraph(label);
+        name.Format.Font.Size = 9.5;
+
+        var minimum = row.Cells[1].AddParagraph(RecordFormat.Rate(calculated, billableUnit));
+        minimum.Format.Font.Size = 9.5;
+        minimum.Format.Alignment = ParagraphAlignment.Right;
+
+        var charged = row.Cells[2].AddParagraph(RecordFormat.Rate(proposed, billableUnit));
+        charged.Format.Font.Size = 9.5;
+        charged.Format.Font.Bold = true;
+        charged.Format.Alignment = ParagraphAlignment.Right;
+
+        // Colour is never the only carrier: a rate below the sustainable one is marked in
+        // words as well, in the cell beside it.
+        if (proposed < calculated)
+        {
+            charged.AddText("  below cost");
+            charged.Format.Font.Color = Accent;
+        }
+    }
+
+    private static void HeaderCell(Cell cell, string text, bool right = false)
+    {
+        var paragraph = cell.AddParagraph(text);
+        paragraph.Format.Font.Size = 7.5;
+        paragraph.Format.Font.Bold = true;
+        paragraph.Format.Font.Color = Muted;
+        paragraph.Format.Alignment = right ? ParagraphAlignment.Right : ParagraphAlignment.Left;
+    }
+
+    private static string Humanise(string? midpointRule) => midpointRule switch
+    {
+        "AwayFromZero" => "rounding half away from zero",
+        "ToEven" => "rounding half to even",
+        null or "" => "rounding rule not recorded",
+        _ => midpointRule
+    };
+}
