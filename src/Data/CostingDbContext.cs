@@ -46,6 +46,7 @@ public class CostingDbContext(DbContextOptions<CostingDbContext> options) : DbCo
         modelBuilder.Entity<AppUser>().HasIndex(x => x.UserName).IsUnique();
         modelBuilder.Entity<AppUser>().Property(x => x.UserName).HasMaxLength(80);
         modelBuilder.Entity<AppUser>().Property(x => x.Role).HasMaxLength(30);
+        modelBuilder.Entity<AppUser>().Property(x => x.SecurityStamp).HasMaxLength(64);
 
         modelBuilder.Entity<AppNotification>().HasIndex(x => new { x.RecipientUserName, x.IsRead });
         modelBuilder.Entity<AppNotification>().Property(x => x.RecipientUserName).HasMaxLength(80);

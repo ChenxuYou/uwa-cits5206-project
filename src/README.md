@@ -70,6 +70,18 @@ staging cannot re-create the credentials that
 [`risks.md` R14](../docs/project/risks.md) makes a gate on deploying. A staging or
 production instance starts with no users, and accounts are provisioned deliberately.
 
+Passwords are never stored in plain text. ASP.NET Core's `PasswordHasher<AppUser>` creates a
+new random salt for every password and stores a versioned PBKDF2 hash containing its salt and
+work factor. The application currently uses Identity V3 format with 210,000 iterations. A
+successful login transparently upgrades an older hash when its work factor is no longer
+current.
+
+Five failed attempts lock an account for 15 minutes. Authentication cookies are HTTP-only,
+use `SameSite=Lax`, expire after two hours and carry a security stamp checked against the
+database. Changing a password rotates that stamp, invalidating older sessions. Signed-in
+users can change their password from the user area; new passwords require at least 12
+characters with uppercase, lowercase, number and symbol.
+
 ---
 
 ## How the code is arranged
