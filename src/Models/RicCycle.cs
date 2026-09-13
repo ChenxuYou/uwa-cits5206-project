@@ -132,6 +132,11 @@ public class AppUser
     public string PasswordHash { get; set; } = string.Empty;
     public string Role { get; set; } = Roles.DataEntry;
     public bool IsActive { get; set; } = true;
+    public int AccessFailedCount { get; set; }
+    public DateTime? LockoutEndUtc { get; set; }
+    public DateTime? LastLoginAtUtc { get; set; }
+    public DateTime PasswordChangedAtUtc { get; set; } = DateTime.UtcNow;
+    public string SecurityStamp { get; set; } = Guid.NewGuid().ToString("N");
 
     public static class Roles
     {

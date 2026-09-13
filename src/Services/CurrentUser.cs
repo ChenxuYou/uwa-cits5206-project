@@ -16,6 +16,12 @@ public static class CurrentUser
     /// <summary>The claim type carrying the username. Set at sign-in.</summary>
     public const string UserNameClaim = "username";
 
+    /// <summary>
+    /// Rotated whenever credentials change. A cookie carrying an old value is rejected,
+    /// which signs out other sessions after a password change or account reset.
+    /// </summary>
+    public const string SecurityStampClaim = "security_stamp";
+
     /// <summary>The signed-in user's username, or empty for an anonymous request.</summary>
     public static string UserName(this ClaimsPrincipal principal) =>
         principal.FindFirstValue(UserNameClaim) ?? string.Empty;

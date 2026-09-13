@@ -180,3 +180,14 @@ summary:focus-visible {
 .field small[hidden] {
     display: none;
 }
+
+.account-link {
+    color: #68758b;
+    font-size: 9px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.account-link:hover {
+    color: var(--blue);
+}
