@@ -8,8 +8,18 @@ name: CI
 on:
   push:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'CostingTool.sln'
+      - '.github/workflows/ci.yml'
   pull_request:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'CostingTool.sln'
+      - '.github/workflows/ci.yml'
   workflow_dispatch:
 
 permissions:
