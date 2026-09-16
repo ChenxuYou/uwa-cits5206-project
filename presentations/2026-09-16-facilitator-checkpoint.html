@@ -35,6 +35,9 @@
   hosting fallback (S4), SSO at handover (S5). The ADR-supersession ask was dropped:
   plan.md SS6 already resolves it by amending ADR-001's row.
 
+  Checked against origin/main after PRs #62-#64 (16 Sep): Funding is now its own step,
+  and S5 page 1 describes the hardened sign-in (2-hour session, lockout, PBKDF2, security stamp).
+
   Earlier revision, 13 September 2026: Assignment 2 and client pages added.
 
   NEXT DEADLINES: M4, the complete vertical slice, Friday 25 September 2026.
@@ -382,7 +385,7 @@ code{font-size:.95em}
     </thead>
     <tbody>
       <tr><td>M1 &middot; Engine provably correct</td><td>4 Sep</td><td>Met 2 Sep, two days early</td><td>Wenmin Luo</td></tr>
-      <tr><td>M2 &middot; Guided flow, validated</td><td>11 Sep</td><td>Met &mdash; five steps, validated server-side</td><td>Whole team</td></tr>
+      <tr><td>M2 &middot; Guided flow, validated</td><td>11 Sep</td><td>Met; Funding now split into its own step</td><td>Whole team</td></tr>
       <tr><td>M3 &middot; Rates and balance</td><td>18 Sep</td><td>On track; this sprint finishes it</td><td>Wenmin Luo, Yichen Zhao</td></tr>
       <tr class="is-key"><td>M4 &middot; Vertical slice complete</td><td>25 Sep</td><td>Seal and export are the last links</td><td>Chenxu You</td></tr>
       <tr><td>M5 &middot; Staging live</td><td>2 Oct</td><td>Waiting on hosting &mdash; section 4</td><td>Dai Lam La La</td></tr>
@@ -633,17 +636,17 @@ code{font-size:.95em}
 
 <section class="page" data-section="5">
   <div class="furniture top"><span data-section-indicator></span><span>Jaswanth Vericherla</span></div>
-  <p class="eyebrow">What sign-in does today, read from the code</p>
+  <p class="eyebrow">What sign-in does today &middot; hardened in PR #64, merged 16 September</p>
   <h1>The boundary is on the server, not in the menu</h1>
   <hr class="rule">
   <ul class="bullets">
-    <li>Cookie sign-in with an <strong>8-hour sliding session</strong>; passwords hashed by the framework, no custom cryptography.</li>
-    <li>Two roles, custodian and approver, enforced <strong>per folder of pages</strong> in <code>Program.cs</code> &mdash; hiding a link is never the control.</li>
-    <li>Every workflow step loads its cycle through one filter on the signed-in username, and returns <em>Not Found</em> for anyone else&rsquo;s &mdash; so a URL cannot reveal which records exist.</li>
-    <li>One message for a wrong username or a wrong password, so the form cannot be used to find accounts.</li>
+    <li>Two roles, custodian and approver, enforced <strong>per folder of pages</strong> in <code>Program.cs</code>; every workflow step returns <em>Not Found</em> for anyone else&rsquo;s cycle.</li>
+    <li>Passwords stored as <strong>PBKDF2 at 210,000 iterations</strong>, upgraded silently at the next sign-in when the work factor rises.</li>
+    <li><strong>Five failed attempts lock an account for 15 minutes</strong>, behind one message for a wrong username or password.</li>
+    <li>A <strong>2-hour sliding session</strong> in an HTTP-only cookie, Secure outside development. Changing a password rotates a security stamp and ends every older session.</li>
   </ul>
   <div class="spacer"></div>
-  <p class="small">Source: src/Program.cs &middot; src/Pages/Account/Login.cshtml.cs &middot; src/Pages/Ric/RicPageModel.cs &middot; risks.md R12, R16.</p>
+  <p class="small">Source: src/Program.cs &middot; src/Pages/Account/Login.cshtml.cs, ChangePassword.cshtml.cs &middot; src/Pages/Ric/RicPageModel.cs &middot; risks.md R12, R16.</p>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
 </section>
 
@@ -654,8 +657,8 @@ code{font-size:.95em}
   <hr class="rule">
   <ul class="bullets">
     <li>The <code>entry</code> and <code>approver</code> demo accounts are seeded <strong>only in Development</strong>, so a deploy cannot recreate them.</li>
-    <li>The flip side: there is no screen that creates an account yet. Provisioning real ones is a gate on staging (R14).</li>
-    <li>No automated test yet proves a custodian cannot open another platform&rsquo;s record. That test is the first piece of work in this layer.</li>
+    <li>The flip side: users can change their own password, but no screen creates an account yet. Provisioning real ones is a gate on staging (R14).</li>
+    <li>None of this is covered by an automated test yet &mdash; not the lockout, not the stamp, not a custodian opening another platform&rsquo;s record. Those tests come first in this layer.</li>
     <li>UWA single sign-on is <strong>deferred to the next cycle</strong>; local sign-in sits behind a seam SSO can be fitted to (US-19).</li>
   </ul>
   <div class="ask">
