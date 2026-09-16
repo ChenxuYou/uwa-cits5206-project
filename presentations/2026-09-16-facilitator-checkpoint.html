@@ -7,26 +7,35 @@
   Meeting with the lab facilitator, Wednesday 16 September 2026. Built against
   STYLE-GUIDE.md v2.3.
 
-  19 pages: cover + 5 x (divider + 2-3 pages) + closing. Five sections for the five
-  members in docs/project/team.md, per STYLE-GUIDE.md SS4.2. Inside the
-  3n+2 .. 4n+2 band (17-22 at n = 5). Sections 1 and 2 carry three pages.
+  22 pages: cover + 5 x (divider + 3 pages) + closing. Five sections for the five
+  members in docs/project/team.md, per STYLE-GUIDE.md SS4.2. At the top of the
+  3n+2 .. 4n+2 band (17-22 at n = 5).
 
-  Content is drawn from docs/project/plan.md v1.4, docs/decisions/adr-002-pdf-generation.md,
-  docs/project/risks.md, docs/client/mvp-agreement.md, the test projects under tests/,
+  Content is drawn from docs/meetings/2026-09-15-team-meeting.md, docs/project/plan.md v1.5,
+  docs/decisions/adr-002-pdf-generation.md, docs/project/risks.md, docs/client/mvp-agreement.md,
+  src/Program.cs and the account pages, the test projects under tests/,
   reference/unit/assignment-2-software-feature-report.md and
   docs/project/assignment-2-completion-plan.md.
 
   This is a status deck: where each area got to, and the five [ASK]s we want the
   facilitator's view on.
 
-  REVISED 13 September 2026, after the Software Feature Report brief was transcribed.
-  Two pages added, so the checkpoint covers all three things we need from the
-  facilitator rather than only the build:
-    - Section 1, page 3: Assignment 2 - how five individual reports will evidence
-      one shared repository, and how joint work should be claimed.
-    - Section 2, page 3: the client - what goes in the next question batch, and
-      whether to demonstrate the slice before or after M4.
-  The closing page now says five questions rather than three.
+  REVISED 16 September 2026, after the team meeting of 15 September split the build
+  into five layers with one owner each (plan.md v1.5 SS3):
+    Chenxu You - general backend      Yichen Zhao - front end
+    Wenmin Luo - backend, calculation Dai Lam La La - backend, deployment
+    Jaswanth Vericherla - authentication
+  Each section now speaks to its owner's layer:
+    - S1 opens with the split itself, adds a "carried by" column to the milestones.
+    - S2 (front end) takes the "what is tested" table, now with an owner per layer.
+    - S3 (calculation) takes the modelling assumptions and ADR-002.
+    - S4 (deployment) takes hosting, the deploy timeline and the three staging gates.
+    - S5 (authentication) is new: sign-in as built, and what it owes before staging.
+  The five [ASK]s: A2 seams (S1), demo date (S2), unconfirmed assumptions at M4 (S3),
+  hosting fallback (S4), SSO at handover (S5). The ADR-supersession ask was dropped:
+  plan.md SS6 already resolves it by amending ADR-001's row.
+
+  Earlier revision, 13 September 2026: Assignment 2 and client pages added.
 
   NEXT DEADLINES: M4, the complete vertical slice, Friday 25 September 2026.
                   Assignment 2, five individual PDFs, Tuesday 29 September 2026.
@@ -316,8 +325,8 @@ code{font-size:.95em}
   <h2 class="cover-title">Everything but the Last Link</h2>
   <hr class="rule">
   <p class="lead" style="color:var(--stone-400);max-width:56ch">
-    The engine is provably right, the guided flow is finished, and the one piece nobody
-    had built is the document the client actually keeps.
+    The engine is provably right and the guided flow is finished. As of yesterday, every layer
+    still to build has one name against it.
   </p>
   <div class="spacer"></div>
   <div class="cover-meta">
@@ -328,11 +337,11 @@ code{font-size:.95em}
 
 
 <!-- ==========================================================================
-     SECTION 1 — Application, Workflow and Release
+     SECTION 1 — General Backend, and Who Owns What
      ========================================================================== -->
 <section class="page ink no-furniture center" data-section="1">
   <p class="divider-num"></p>
-  <h2 class="divider-title">Application, Workflow and Release</h2>
+  <h2 class="divider-title">General Backend, and Who Owns What</h2>
   <p class="divider-owner">Chenxu You</p>
   <div class="spacer"></div>
   <p class="eyebrow" style="margin:0" data-section-label></p>
@@ -340,20 +349,43 @@ code{font-size:.95em}
 
 <section class="page" data-section="1">
   <div class="furniture top"><span data-section-indicator></span><span>Chenxu You</span></div>
-  <p class="eyebrow">Milestones &middot; the plan of record, checked against the repository</p>
-  <h1>Two milestones met, one week early between them</h1>
+  <p class="eyebrow">Team meeting, 15 September &middot; the split we run to handover</p>
+  <h1>Five layers, five owners</h1>
   <hr class="rule">
   <table>
-    <caption>Source: docs/project/plan.md v1.4 &sect;1, 13 September 2026.</caption>
+    <caption>Source: docs/meetings/2026-09-15-team-meeting.md &middot; docs/project/plan.md v1.5 &sect;3.</caption>
     <thead>
-      <tr><th>Milestone</th><th>Due</th><th>Where it stands</th></tr>
+      <tr><th>Member</th><th>Layer</th><th>Owns from here to handover</th></tr>
     </thead>
     <tbody>
-      <tr><td>M1 &middot; Engine provably correct</td><td>4 Sep</td><td>Met 2 Sep, two days early</td></tr>
-      <tr><td>M2 &middot; Guided flow, validated</td><td>11 Sep</td><td>Met &mdash; five steps, validated server-side</td></tr>
-      <tr><td>M3 &middot; Rates and balance</td><td>18 Sep</td><td>On track; this sprint finishes it</td></tr>
-      <tr class="is-key"><td>M4 &middot; Vertical slice complete</td><td>25 Sep</td><td>Turns on the export &mdash; next slide</td></tr>
-      <tr><td>M5 &middot; Staging live</td><td>2 Oct</td><td>Waiting on a hosting decision &mdash; section 2</td></tr>
+      <tr><td>Chenxu You</td><td>General backend</td><td>Page models and services, data model and migrations, the seal, CI</td></tr>
+      <tr><td>Yichen Zhao</td><td>Front end</td><td>Every screen of the guided flow and the approver&rsquo;s side</td></tr>
+      <tr><td>Wenmin Luo</td><td>Backend &middot; calculation</td><td>The engine, method configuration, the workings in the PDF</td></tr>
+      <tr><td>Dai Lam La La</td><td>Backend &middot; deployment</td><td>Server, CD and rollback, DNS and TLS, staging and release</td></tr>
+      <tr><td>Jaswanth Vericherla</td><td>Authentication</td><td>Sign-in, roles, access control, account provisioning</td></tr>
+    </tbody>
+  </table>
+  <p class="small">Until now two of five wrote production code (skills audit G6). The review rule does not move: nobody approves their own layer.</p>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="1">
+  <div class="furniture top"><span data-section-indicator></span><span>Chenxu You</span></div>
+  <p class="eyebrow">Milestones &middot; the plan of record, checked against the repository</p>
+  <h1>Two milestones met, and a named owner on each one left</h1>
+  <hr class="rule">
+  <table>
+    <caption>Source: docs/project/plan.md v1.5 &sect;1 and &sect;2, 16 September 2026.</caption>
+    <thead>
+      <tr><th>Milestone</th><th>Due</th><th>Where it stands</th><th>Carried by</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>M1 &middot; Engine provably correct</td><td>4 Sep</td><td>Met 2 Sep, two days early</td><td>Wenmin Luo</td></tr>
+      <tr><td>M2 &middot; Guided flow, validated</td><td>11 Sep</td><td>Met &mdash; five steps, validated server-side</td><td>Whole team</td></tr>
+      <tr><td>M3 &middot; Rates and balance</td><td>18 Sep</td><td>On track; this sprint finishes it</td><td>Wenmin Luo, Yichen Zhao</td></tr>
+      <tr class="is-key"><td>M4 &middot; Vertical slice complete</td><td>25 Sep</td><td>Seal and export are the last links</td><td>Chenxu You</td></tr>
+      <tr><td>M5 &middot; Staging live</td><td>2 Oct</td><td>Waiting on hosting &mdash; section 4</td><td>Dai Lam La La</td></tr>
     </tbody>
   </table>
   <div class="spacer"></div>
@@ -362,37 +394,17 @@ code{font-size:.95em}
 
 <section class="page" data-section="1">
   <div class="furniture top"><span data-section-indicator></span><span>Chenxu You</span></div>
-  <p class="eyebrow">ADR-002 &middot; the sealed record as a PDF</p>
-  <h1>We chose the library by reading its licence, not its API</h1>
-  <hr class="rule">
-  <ul class="bullets">
-    <li>The export was the only link in the M4 chain nobody had built or costed, so it was brought forward out of sprint 5 as a spike.</li>
-    <li>The nicest library on offer, QuestPDF, is free only below <strong>USD 1M annual revenue</strong>. UWA is not below it, and we hand this tool to UWA.</li>
-    <li>Choosing it would have handed the client a bill produced by our convenience, discovered after we had gone. <strong>MigraDoc, MIT licence,</strong> instead.</li>
-    <li>The document is built from the <strong>sealed snapshot</strong>, never from the live rows &mdash; so it cannot disagree with the record it claims to be.</li>
-  </ul>
-  <div class="ask">
-    <p><span class="tag">[ASK]</span> ADR-002 amends a row of ADR-001 rather than editing it. Is superseding a decision record with a second one what you expect to see, or should the original be corrected in place?</p>
-  </div>
-  <div class="spacer"></div>
-  <p class="small">Source: docs/decisions/adr-002-pdf-generation.md, 13 September 2026.</p>
-  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
-</section>
-
-
-<section class="page" data-section="1">
-  <div class="furniture top"><span data-section-indicator></span><span>Chenxu You</span></div>
   <p class="eyebrow">Assignment 2 &middot; five individual reports, due 29 September</p>
   <h1>The same repository, read five different ways</h1>
   <hr class="rule">
   <ul class="bullets">
-    <li>Each of us submits our own PDF on the 29th, marked out of 20 &mdash; artefacts 8, coordination 6, collaboration 6 &mdash; on contributions up to week&nbsp;9.</li>
-    <li>Reading the rubric, what separates the bands is <strong>attribution</strong>: &ldquo;unclear which parts have been written by the student&rdquo;, not the quality of the writing.</li>
-    <li>So the fortnight to M4 is being run to leave a trail &mdash; one issue per piece of work, the test in the pull request that adds the behaviour, reviews with comments in them.</li>
-    <li>Every link will be a full URL, and your access to the board, the milestones and the Actions runs is being checked signed-out on <strong>19 September</strong>.</li>
+    <li>Each of us submits our own PDF, marked out of 20 &mdash; artefacts 8, coordination 6, collaboration 6 &mdash; on contributions up to week&nbsp;9.</li>
+    <li>What separates the bands is <strong>attribution</strong>: &ldquo;unclear which parts have been written by the student&rdquo;, not the quality of the writing.</li>
+    <li>Yesterday&rsquo;s split helps directly: each report can <strong>lead with its own layer</strong>, and five layers do not overlap.</li>
+    <li>The fortnight to M4 is run to leave a trail &mdash; one issue per piece of work, the test in the PR that adds it, reviews with comments in them.</li>
   </ul>
   <div class="ask">
-    <p><span class="tag">[ASK]</span> Where two of us built one feature together &mdash; the engine and the screens either side of one story &mdash; would you rather see one owner claimed per artefact, or both of us named on the seam?</p>
+    <p><span class="tag">[ASK]</span> Where two layers meet &mdash; the engine and the screen that shows it, the sign-in and the page it protects &mdash; would you rather see one owner claimed per artefact, or both of us named on the seam?</p>
   </div>
   <div class="spacer"></div>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
@@ -400,11 +412,11 @@ code{font-size:.95em}
 
 
 <!-- ==========================================================================
-     SECTION 2 — The Client, and the Answer We Do Not Have
+     SECTION 2 — Front End, and the Client Who Will Use It
      ========================================================================== -->
 <section class="page ink no-furniture center" data-section="2">
   <p class="divider-num"></p>
-  <h2 class="divider-title">The Client, and the Answer We Do Not Have</h2>
+  <h2 class="divider-title">Front End, and the Client Who Will Use It</h2>
   <p class="divider-owner">Yichen Zhao</p>
   <div class="spacer"></div>
   <p class="eyebrow" style="margin:0" data-section-label></p>
@@ -412,14 +424,37 @@ code{font-size:.95em}
 
 <section class="page" data-section="2">
   <div class="furniture top"><span data-section-indicator></span><span>Yichen Zhao</span></div>
+  <p class="eyebrow">What is tested, and what plainly is not</p>
+  <h1>The arithmetic is guarded at both ends. The screens are not guarded at all</h1>
+  <hr class="rule">
+  <table>
+    <caption>Source: tests/, .github/workflows/ci.yml, 16 September 2026.</caption>
+    <thead>
+      <tr><th>Layer</th><th>Owner</th><th>Held to what</th><th>Blocks a merge?</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Calculation engine</td><td>Wenmin Luo</td><td>Golden file, boundaries, rounding</td><td>Yes</td></tr>
+      <tr><td>Sealed-record PDF</td><td>Wenmin Luo</td><td>The same three figures, on the way out</td><td>Yes, from this week</td></tr>
+      <tr class="is-key"><td>Razor Pages screens</td><td>Yichen Zhao</td><td>Nothing automated</td><td>No</td></tr>
+      <tr><td>Sign-in and access control</td><td>Jaswanth Vericherla</td><td>Nothing automated</td><td>No</td></tr>
+      <tr><td>Deployment</td><td>Dai Lam La La</td><td>Not yet exercised &mdash; there is no server</td><td>No</td></tr>
+    </tbody>
+  </table>
+  <div class="spacer"></div>
+  <p class="small">The skills audit rates nobody above 2 in automated testing. The three bottom rows now each have an owner, which is the first step to closing them.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="2">
+  <div class="furniture top"><span data-section-indicator></span><span>Yichen Zhao</span></div>
   <p class="eyebrow">Where the client relationship stands</p>
-  <h1>Nothing in the build is waiting on their inbox</h1>
+  <h1>Nothing in the build is waiting on their inbox &mdash; except hosting</h1>
   <hr class="rule">
   <ul class="bullets">
     <li>Scope statement <strong>signed 20 August</strong> by Mathew Hall; both confirmations &mdash; scope and ownership &mdash; returned in writing.</li>
     <li>All five open questions answered the same day. The rule that governs every disagreement is theirs: <span class="hi">the guide governs</span>.</li>
-    <li>Two modelling choices we made ourselves are queued for the next question batch, rather than being quietly kept &mdash; section 4.</li>
-    <li>Wednesday remains their preferred day, which is why this checkpoint sits on one.</li>
+    <li>They asked for <strong>batched questions</strong> rather than a weekly slot. The next batch holds three items: two modelling assumptions of ours (section 3) and hosting (section 4).</li>
+    <li>Hosting is a week overdue and gates staging on 2 October, so it goes first.</li>
   </ul>
   <div class="spacer"></div>
   <p class="small">Source: docs/client/mvp-agreement.md &middot; docs/meetings/2026-08-20-client-meeting.md.</p>
@@ -428,48 +463,29 @@ code{font-size:.95em}
 
 <section class="page" data-section="2">
   <div class="furniture top"><span data-section-indicator></span><span>Yichen Zhao</span></div>
-  <p class="eyebrow">One decision is a week overdue, and five rows depend on it</p>
-  <h1>Where the application will actually live</h1>
-  <hr class="rule">
-  <p class="lead">A UWA virtual machine, the domain they already shared with us, or a server we
-    provision ourselves &mdash; and who administers it afterwards. Due <strong>9 September</strong>;
-    this repository holds no answer.</p>
-  <p class="lead">Provisioning, DNS, TLS, continuous deployment and the client's own use of staging
-    all sit behind that one answer, and staging is promised live on <strong>2 October</strong>.</p>
-  <div class="ask">
-    <p><span class="tag">[ASK]</span> If it is still open on Saturday we provision a team-held server and hand over a migration path. Does that satisfy the deployment criterion, or does it read as avoiding the client?</p>
-  </div>
-  <div class="spacer"></div>
-  <p class="small">Source: docs/project/plan.md &sect;5.</p>
-  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
-</section>
-
-
-<section class="page" data-section="2">
-  <div class="furniture top"><span data-section-indicator></span><span>Yichen Zhao</span></div>
   <p class="eyebrow">The client &middot; Wednesdays on request, not on a standing slot</p>
-  <h1>What we take to them next, and when</h1>
+  <h1>They will judge the screens, not the code behind them</h1>
   <hr class="rule">
   <ul class="bullets">
-    <li>They asked us to digest and come back with <strong>batched questions</strong> rather than hold a weekly slot, so the batch closes before anything is booked.</li>
-    <li>Two of the three items are assumptions <em>we</em> made &mdash; the averaged multi-year profile and the indirect uplift &mdash; and are labelled as ours in the code.</li>
-    <li>The third is hosting, a week overdue, and it gates staging on 2 October.</li>
-    <li>We would rather demonstrate the vertical slice than describe it, and <strong>M4 lands on Friday 25 September</strong>.</li>
+    <li>We would rather <strong>demonstrate</strong> the vertical slice than describe it, and <strong>M4 lands on Friday 25 September</strong>.</li>
+    <li>What the screens still need for that: proposed rates with the balance they produce, justification throughout, and the approver&rsquo;s link to the sealed PDF.</li>
+    <li>The PDF has not yet been printed on A4 by anyone. A client files it; we check it on paper before they see it.</li>
   </ul>
   <div class="ask">
     <p><span class="tag">[ASK]</span> Demonstrate on Wednesday 23 September with the export half-wired, or 30 September with M4 complete but only a fortnight left to act on what they say?</p>
   </div>
   <div class="spacer"></div>
+  <p class="small">Source: src/README.md, Known gaps &middot; docs/project/plan.md &sect;2, sprints S4&ndash;S5.</p>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
 </section>
 
 
 <!-- ==========================================================================
-     SECTION 3 — Engine, Data and Infrastructure
+     SECTION 3 — Backend: the Calculation
      ========================================================================== -->
 <section class="page ink no-furniture center" data-section="3">
   <p class="divider-num"></p>
-  <h2 class="divider-title">Engine, Data and Infrastructure</h2>
+  <h2 class="divider-title">Backend: the Calculation</h2>
   <p class="divider-owner">Wenmin Luo</p>
   <div class="spacer"></div>
   <p class="eyebrow" style="margin:0" data-section-label></p>
@@ -477,7 +493,7 @@ code{font-size:.95em}
 
 <section class="page" data-section="3">
   <div class="furniture top"><span data-section-indicator></span><span>Wenmin Luo</span></div>
-  <p class="eyebrow">The golden file &middot; the client's own worked example</p>
+  <p class="eyebrow">The golden file &middot; the client&rsquo;s own worked example</p>
   <h1>Their arithmetic and ours, to the cent</h1>
   <hr class="rule">
   <table>
@@ -501,27 +517,46 @@ code{font-size:.95em}
 
 <section class="page" data-section="3">
   <div class="furniture top"><span data-section-indicator></span><span>Wenmin Luo</span></div>
-  <p class="eyebrow">A known gap, with a date on it</p>
-  <h1>The schema cannot change once the client is typing into it</h1>
+  <p class="eyebrow">Two decisions that are ours, and are labelled as ours</p>
+  <h1>Where the client&rsquo;s method runs out, we say so in the code</h1>
   <hr class="rule">
   <ul class="bullets">
-    <li>The database is currently built with <code>EnsureCreated()</code>, which cannot alter an existing schema.</li>
-    <li>Locally that costs a developer one deleted file. On staging it would cost <span class="hi">the client's entered figures</span>.</li>
-    <li>Moving to Entity Framework migrations is therefore <strong>a gate on deploying</strong>, not a tidy-up afterwards.</li>
-    <li>Written into the repository as a known gap on the day it was noticed, rather than discovered on 2 October.</li>
+    <li>Every requirement carries a source marker &mdash; client&rsquo;s answer, guide, workbook or our own minutes &mdash; so nothing anonymous reaches the engine.</li>
+    <li><strong>A multi-year cost profile is averaged into one annual figure.</strong> The guide&rsquo;s example is a single year and says nothing about the rest.</li>
+    <li><strong>The indirect uplift is divided back out</strong> of the revenue projection. Preserved from the spike; no client document says either way.</li>
+    <li>Both are commented where they happen and travel in the next question batch. <span class="hi">An assumption nobody can find is not an assumption.</span></li>
+  </ul>
+  <div class="ask">
+    <p><span class="tag">[ASK]</span> If the client has not confirmed either by M4, is shipping them as labelled defaults acceptable, or should a record refuse to seal until they are?</p>
+  </div>
+  <div class="spacer"></div>
+  <p class="small">Source: src/Models/RicCycle.cs &middot; src/Services/RicCalculationService.cs &middot; docs/project/plan.md &sect;6.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="3">
+  <div class="furniture top"><span data-section-indicator></span><span>Wenmin Luo</span></div>
+  <p class="eyebrow">ADR-002 &middot; the sealed record as a PDF, with its workings</p>
+  <h1>We chose the library by reading its licence, not its API</h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li>The export was the only link in the M4 chain nobody had built or costed, so it was brought forward out of sprint 5 as a spike.</li>
+    <li>The nicest library on offer, QuestPDF, is free only below <strong>USD 1M annual revenue</strong>. UWA is not below it, and we hand this tool to UWA. <strong>MigraDoc, MIT licence,</strong> instead.</li>
+    <li>The document prints each rate <strong>beside the arithmetic that produced it</strong> &mdash; the workings the client asked for on 20 August.</li>
+    <li>It is built from the <strong>sealed snapshot</strong>, never from the live rows &mdash; so it cannot disagree with the record it claims to be.</li>
   </ul>
   <div class="spacer"></div>
-  <p class="small">Source: src/README.md, Known gaps &middot; docs/project/plan.md &sect;6, due 2 October.</p>
+  <p class="small">Source: docs/decisions/adr-002-pdf-generation.md &middot; src/CostingTool.Pdf/SealedRecordPdf.cs.</p>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
 </section>
 
 
 <!-- ==========================================================================
-     SECTION 4 — Costing Logic and Risk
+     SECTION 4 — Backend: Deployment
      ========================================================================== -->
 <section class="page ink no-furniture center" data-section="4">
   <p class="divider-num"></p>
-  <h2 class="divider-title">Costing Logic and Risk</h2>
+  <h2 class="divider-title">Backend: Deployment</h2>
   <p class="divider-owner">Dai Lam La La</p>
   <div class="spacer"></div>
   <p class="eyebrow" style="margin:0" data-section-label></p>
@@ -529,45 +564,68 @@ code{font-size:.95em}
 
 <section class="page" data-section="4">
   <div class="furniture top"><span data-section-indicator></span><span>Dai Lam La La</span></div>
-  <p class="eyebrow">Two decisions that are ours, and are labelled as ours</p>
-  <h1>Where the client's method runs out, we say so in the code</h1>
+  <p class="eyebrow">One decision is a week overdue, and every deployment row depends on it</p>
+  <h1>Where the application will actually live</h1>
   <hr class="rule">
-  <ul class="bullets">
-    <li>Every requirement carries a source marker &mdash; client's answer, guide, workbook or our own minutes &mdash; so nothing anonymous reaches the build.</li>
-    <li><strong>A multi-year cost profile is averaged into one annual figure.</strong> Their guide's example is a single year and says nothing about the rest.</li>
-    <li><strong>The indirect uplift is divided back out</strong> of the revenue projection. Preserved from the spike; no client document says either way.</li>
-    <li>Both are commented at the line where they happen and both travel in the next question batch. <span class="hi">An assumption nobody can find is not an assumption.</span></li>
-  </ul>
+  <p class="lead">A UWA virtual machine, the domain they already shared with us, or a server we
+    provision ourselves &mdash; and who administers it afterwards. Due <strong>9 September</strong>;
+    this repository holds no answer.</p>
+  <p class="lead">Provisioning, DNS, TLS, continuous deployment and the client&rsquo;s own use of staging
+    all sit behind that one answer, and staging is promised live on <strong>2 October</strong>.</p>
+  <div class="ask">
+    <p><span class="tag">[ASK]</span> If it is still open on Saturday we provision a team-held server and hand over a migration path. Does that satisfy the deployment criterion, or does it read as avoiding the client?</p>
+  </div>
   <div class="spacer"></div>
-  <p class="small">Source: src/Models/RicCycle.cs &middot; src/CostingTool.Engine/RateEngine.cs &middot; docs/project/plan.md &sect;6.</p>
+  <p class="small">Source: docs/project/plan.md &sect;5 &middot; risks.md R6.</p>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
 </section>
 
 <section class="page" data-section="4">
   <div class="furniture top"><span data-section-indicator></span><span>Dai Lam La La</span></div>
-  <p class="eyebrow">The risk register, reviewed every Saturday</p>
-  <h1>The threat is not an attacker; it is a plausible wrong number</h1>
+  <p class="eyebrow">The deploy sprint, with a date and an owner on every step</p>
+  <h1>From no server to a tagged release in four weeks</h1>
   <hr class="rule">
-  <p class="lead">A rate is published for three to five years, embedded in grant budgets across the
-    University, and then defended in a Freedom of Information response. A spreadsheet flags none
-    of that: a cleared formula returns a number that looks fine.</p>
-  <div class="callout">
-    <p>Which is why the controls that count here are decimal arithmetic, a typed collection no
-      range can be dragged across, the immutable snapshot with its hash, and a test that stops
-      a merge &mdash; not a firewall.</p>
-  </div>
+  <table>
+    <caption>Source: docs/project/plan.md v1.5 &sect;5.</caption>
+    <thead>
+      <tr><th>Step</th><th>Owner</th><th>By</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Provision the server and team access</td><td>Dai Lam La La</td><td>18 Sep</td></tr>
+      <tr><td>CI extended to CD, with a documented rollback</td><td>Dai Lam La La</td><td>25 Sep</td></tr>
+      <tr><td>DNS, reverse proxy, TLS</td><td>Dai Lam La La</td><td>30 Sep</td></tr>
+      <tr class="is-key"><td>Staging live &mdash; build, release, rollback and reachability tested (M5)</td><td>Dai Lam La La, Jaswanth Vericherla</td><td>2 Oct</td></tr>
+      <tr><td>Tagged release and handover notes so UWA can rehost (M7)</td><td>Dai Lam La La, Chenxu You</td><td>13 Oct</td></tr>
+    </tbody>
+  </table>
+  <p class="small">Nobody on the team has taken an application to a server with TLS, DNS and a rollback path before (skills audit G2). That is why each step is dated, not implied.</p>
   <div class="spacer"></div>
-  <p class="small">Source: docs/project/risks.md &sect;1, v1.1 &middot; 21 rows, each with a trigger and an owner.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="4">
+  <div class="furniture top"><span data-section-indicator></span><span>Dai Lam La La</span></div>
+  <p class="eyebrow">Three gates on 2 October, each held by another layer</p>
+  <h1>A deploy that works can still lose the client&rsquo;s data</h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li><strong>Migrations</strong> &mdash; general backend. The schema is built with <code>EnsureCreated()</code>, which cannot alter an existing database. Locally that costs one deleted file; on staging it costs <span class="hi">the client&rsquo;s entered figures</span>.</li>
+    <li><strong>Accounts</strong> &mdash; authentication. A staging database starts with no users by design, so real accounts must be provisioned deliberately before the client can sign in.</li>
+    <li><strong>Hosting</strong> &mdash; the client, through Yichen Zhao. Nothing else in the table can start without it.</li>
+    <li>Each is a <strong>gate on deploying</strong>, not a tidy-up afterwards, and each is written into the plan with a date.</li>
+  </ul>
+  <div class="spacer"></div>
+  <p class="small">Source: src/README.md, Known gaps &middot; src/Program.cs &middot; risks.md R14 &middot; docs/project/plan.md &sect;6.</p>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
 </section>
 
 
 <!-- ==========================================================================
-     SECTION 5 — Verification and the Record
+     SECTION 5 — Authentication and Access
      ========================================================================== -->
 <section class="page ink no-furniture center" data-section="5">
   <p class="divider-num"></p>
-  <h2 class="divider-title">Verification and the Record</h2>
+  <h2 class="divider-title">Authentication and Access</h2>
   <p class="divider-owner">Jaswanth Vericherla</p>
   <div class="spacer"></div>
   <p class="eyebrow" style="margin:0" data-section-label></p>
@@ -575,39 +633,50 @@ code{font-size:.95em}
 
 <section class="page" data-section="5">
   <div class="furniture top"><span data-section-indicator></span><span>Jaswanth Vericherla</span></div>
-  <p class="eyebrow">What is tested, and what plainly is not</p>
-  <h1>The arithmetic is guarded at both ends. The screens are not guarded at all</h1>
+  <p class="eyebrow">What sign-in does today, read from the code</p>
+  <h1>The boundary is on the server, not in the menu</h1>
   <hr class="rule">
-  <table>
-    <caption>Source: tests/, .github/workflows/ci.yml, 13 September 2026.</caption>
-    <thead>
-      <tr><th>Layer</th><th>Held to what</th><th>Blocks a merge?</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>Calculation engine</td><td>Golden file, plus boundaries and rounding</td><td>Yes</td></tr>
-      <tr><td>Sealed-record PDF</td><td>The same three figures, asserted on the way out</td><td>Yes, from this week</td></tr>
-      <tr class="is-key"><td>Razor Pages and the seam between them</td><td>Nothing automated</td><td>No</td></tr>
-      <tr><td>Deployment</td><td>Not yet exercised &mdash; there is no server</td><td>No</td></tr>
-    </tbody>
-  </table>
+  <ul class="bullets">
+    <li>Cookie sign-in with an <strong>8-hour sliding session</strong>; passwords hashed by the framework, no custom cryptography.</li>
+    <li>Two roles, custodian and approver, enforced <strong>per folder of pages</strong> in <code>Program.cs</code> &mdash; hiding a link is never the control.</li>
+    <li>Every workflow step loads its cycle through one filter on the signed-in username, and returns <em>Not Found</em> for anyone else&rsquo;s &mdash; so a URL cannot reveal which records exist.</li>
+    <li>One message for a wrong username or a wrong password, so the form cannot be used to find accounts.</li>
+  </ul>
   <div class="spacer"></div>
-  <p class="small">The team's skills audit rates nobody above 2 in automated testing; this row is the consequence, stated rather than hidden.</p>
+  <p class="small">Source: src/Program.cs &middot; src/Pages/Account/Login.cshtml.cs &middot; src/Pages/Ric/RicPageModel.cs &middot; risks.md R12, R16.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="5">
+  <div class="furniture top"><span data-section-indicator></span><span>Jaswanth Vericherla</span></div>
+  <p class="eyebrow">What authentication still owes before 2 October</p>
+  <h1>Demo accounts are safe locally; staging has none at all</h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li>The <code>entry</code> and <code>approver</code> demo accounts are seeded <strong>only in Development</strong>, so a deploy cannot recreate them.</li>
+    <li>The flip side: there is no screen that creates an account yet. Provisioning real ones is a gate on staging (R14).</li>
+    <li>No automated test yet proves a custodian cannot open another platform&rsquo;s record. That test is the first piece of work in this layer.</li>
+    <li>UWA single sign-on is <strong>deferred to the next cycle</strong>; local sign-in sits behind a seam SSO can be fitted to (US-19).</li>
+  </ul>
+  <div class="ask">
+    <p><span class="tag">[ASK]</span> For a handover to UWA, is local sign-in behind an SSO-ready seam enough, or will the assessment expect single sign-on itself?</p>
+  </div>
+  <div class="spacer"></div>
+  <p class="small">Source: src/README.md, Demo sign-in &middot; docs/spec/user-stories.md US-19 &middot; docs/project/plan.md &sect;7.</p>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
 </section>
 
 <section class="page" data-section="5">
   <div class="furniture top"><span data-section-indicator></span><span>Jaswanth Vericherla</span></div>
   <p class="eyebrow">A cadence we promised and have not kept</p>
-  <h1>Four Saturdays, no minutes</h1>
+  <h1>Four Saturdays without minutes, and a restart</h1>
   <hr class="rule">
   <ul class="bullets">
-    <li>The plan promises a Saturday review with minutes committed inside 24 hours. The last minutes in the repository are dated <strong>20 August</strong>.</li>
-    <li>The meetings happened; the record of them did not. The plan now carries that as a dated, owned row rather than an implied cadence.</li>
-    <li>It is fixed this week or the plan stops claiming it &mdash; a process nobody follows is worse evidence than one nobody promised.</li>
+    <li>The plan promises a Saturday review with minutes committed inside 24 hours. Before this week, the last minutes in the repository were dated <strong>20 August</strong>.</li>
+    <li>The meetings happened; the record of them did not.</li>
+    <li>The meeting that set these five owners on <strong>15 September</strong> is minuted, and the decision is carried into the plan, the risk register and the ADR actions the same week.</li>
+    <li>Saturday 19 September decides it: the cadence is kept from here, or the plan stops claiming it.</li>
   </ul>
-  <div class="ask">
-    <p><span class="tag">[ASK]</span> For the project-management mark, does the assessment look at the repository's own meeting record, or at the account we give of it in the final report?</p>
-  </div>
   <div class="spacer"></div>
   <p class="small">Source: docs/meetings/ &middot; docs/project/plan.md &sect;4 and &sect;6.</p>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
@@ -618,7 +687,7 @@ code{font-size:.95em}
      CLOSING
      ========================================================================== -->
 <section class="page ink no-furniture center" data-section="0">
-  <p class="eyebrow">Four weeks to handover &mdash; <span class="accent">and five questions for you</span></p>
+  <p class="eyebrow">Five owners, four weeks to handover &mdash; <span class="accent">and five questions for you</span></p>
   <h2 class="cover-title" style="font-size:var(--t-section)">Research Infrastructure Costing &amp; Pricing Tool</h2>
   <hr class="rule">
   <p class="lead" style="color:var(--stone-400);max-width:56ch">
