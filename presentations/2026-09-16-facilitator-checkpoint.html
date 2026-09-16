@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  CITS5206 Capstone — Lab Facilitator Checkpoint
+  Research Infrastructure Costing & Pricing Tool
+
+  Meeting with the lab facilitator, Wednesday 16 September 2026. Built against
+  STYLE-GUIDE.md v2.3.
+
+  19 pages: cover + 5 x (divider + 2-3 pages) + closing. Five sections for the five
+  members in docs/project/team.md, per STYLE-GUIDE.md SS4.2. Inside the
+  3n+2 .. 4n+2 band (17-22 at n = 5). Sections 1 and 2 carry three pages.
+
+  Content is drawn from docs/project/plan.md v1.4, docs/decisions/adr-002-pdf-generation.md,
+  docs/project/risks.md, docs/client/mvp-agreement.md, the test projects under tests/,
+  reference/unit/assignment-2-software-feature-report.md and
+  docs/project/assignment-2-completion-plan.md.
+
+  This is a status deck: where each area got to, and the five [ASK]s we want the
+  facilitator's view on.
+
+  REVISED 13 September 2026, after the Software Feature Report brief was transcribed.
+  Two pages added, so the checkpoint covers all three things we need from the
+  facilitator rather than only the build:
+    - Section 1, page 3: Assignment 2 - how five individual reports will evidence
+      one shared repository, and how joint work should be claimed.
+    - Section 2, page 3: the client - what goes in the next question batch, and
+      whether to demonstrate the slice before or after M4.
+  The closing page now says five questions rather than three.
+
+  NEXT DEADLINES: M4, the complete vertical slice, Friday 25 September 2026.
+                  Assignment 2, five individual PDFs, Tuesday 29 September 2026.
+
+  ---------------------------------------------------------------------------
+  ENGINE: this file carries the deck engine from the 19 August checkpoint, which is
+  template.html's engine plus generated section indicators. It is not hand-edited here.
+  Section owners are filled in, so the unassigned-owner warning stays silent; the deck
+  is conforming as it stands. If a member cannot attend, reassign that section's owner
+  to whoever presents it, change the divider AND the top-right furniture to name only
+  that person, and record the swap in the commit message (SS4.2).
+  ---------------------------------------------------------------------------
+
+  NAVIGATION: arrows / space / PgUp / PgDn / Home / End / number keys / F
+              click left or right half / swipe
+  ============================================================================
+-->
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Facilitator Checkpoint, 16 September &mdash; Research Infrastructure Costing &amp; Pricing Tool | CITS5206</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================================================
+   1. TOKENS — the only place colour, type and space are defined.
+      Never hard-code a hex value below this block.
+   =========================================================================== */
+:root{
+  /* Ink — the black family. Never pure #000. */
+  --ink-900:#0B0B0C; --ink-800:#141416; --ink-700:#1C1C1F;
+  --ink-500:#3A3A40; --ink-300:#6E6E75;
+  /* Paper — the light family. Never pure #FFF. */
+  --paper:#FAF8F5; --paper-alt:#F1EDE7; --paper-rule:#DDD6CC;
+  /* Red — the single accent. */
+  --red-700:#9B0F22; --red-600:#C8102E; --red-400:#E8384F; --red-100:#F6E2E4;
+  /* Stone — warm neutrals. */
+  --stone-600:#5C554D; --stone-400:#8A8078; --stone-200:#C9C1B8;
+  /* Semantic */
+  --surplus:#1F6F5C; --deficit:#C8102E;
+
+  --font-display:"Playfair Display","Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --font-sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+
+  --t-cover:72px; --t-section:56px; --t-metric:84px; --t-title:44px;
+  --t-sub:28px;   --t-lead:24px;    --t-body:20px;   --t-small:16px; --t-label:13px;
+
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+
+  --pad-x:64px; --pad-y:56px;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+/* ===========================================================================
+   2. STAGE — fixed 1280x720 canvas, scaled to the viewport.
+   =========================================================================== */
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  background:var(--ink-800); color:var(--ink-900);
+  font-family:var(--font-sans); font-size:var(--t-body);
+  -webkit-font-smoothing:antialiased; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+}
+#stage{
+  position:relative; width:1280px; height:720px; flex:0 0 auto;
+  transform-origin:center center; background:var(--paper);
+  box-shadow:0 0 0 1px rgba(0,0,0,.35);
+}
+
+/* ===========================================================================
+   3. PAGE
+   =========================================================================== */
+.page{
+  position:absolute; inset:0; padding:var(--pad-y) var(--pad-x);
+  display:none; flex-direction:column; background:var(--paper);
+  opacity:0; transition:opacity 180ms var(--ease), transform 180ms var(--ease);
+}
+.page.is-active{display:flex; opacity:1}
+.page.is-enter{transform:translateY(16px); opacity:0}
+
+.page.ink{background:var(--ink-900); color:var(--paper)}
+.page.ink .eyebrow{color:var(--stone-400)}
+
+.center{justify-content:center}
+.spacer{flex:1 1 auto}
+
+/* ===========================================================================
+   4. TYPE
+   =========================================================================== */
+.eyebrow{
+  font-size:var(--t-label); font-weight:600; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--stone-600); margin:0 0 var(--s5);
+}
+.eyebrow .accent{color:var(--red-600)}
+.page.ink .eyebrow .accent{color:var(--red-400)}
+
+h1{
+  font-family:var(--font-display); font-weight:500; font-size:var(--t-title);
+  line-height:1.15; letter-spacing:-.02em; margin:0 0 var(--s5);
+}
+h2{font-size:var(--t-sub); font-weight:600; line-height:1.25; margin:0 0 var(--s4)}
+h3{
+  font-size:var(--t-label); font-weight:600; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--stone-600); margin:0 0 var(--s3);
+}
+p{margin:0 0 var(--s4); max-width:62ch; line-height:1.45}
+.lead{font-size:var(--t-lead); line-height:1.40; color:var(--stone-600); max-width:62ch}
+.small{font-size:var(--t-small); line-height:1.40; color:var(--stone-600)}
+.page.ink .small{color:var(--stone-400)}
+strong{font-weight:600}
+em{font-style:italic}
+.hi{color:var(--red-600); font-weight:600}
+.page.ink .hi{color:var(--red-400)}
+.num{font-variant-numeric:tabular-nums}
+
+.rule{width:56px; height:3px; background:var(--red-600); border:0; margin:0 0 var(--s5)}
+
+/* ===========================================================================
+   5. PAGE TYPES
+   =========================================================================== */
+.cover-title{
+  font-family:var(--font-display); font-weight:700; font-size:var(--t-cover);
+  line-height:1.05; letter-spacing:-.02em; margin:0 0 var(--s5); max-width:20ch;
+}
+.cover-meta{
+  display:flex; gap:var(--s8); font-size:var(--t-label); font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--stone-400);
+}
+
+.divider-num{
+  font-family:var(--font-display); font-weight:700; font-size:180px;
+  line-height:.85; color:var(--red-600); letter-spacing:-.04em; margin:0 0 var(--s5);
+}
+.divider-title{
+  font-family:var(--font-display); font-weight:500; font-size:var(--t-section);
+  line-height:1.08; letter-spacing:-.02em; margin:0 0 var(--s4); max-width:22ch;
+}
+.divider-owner{font-size:var(--t-lead); color:var(--stone-400)}
+
+.statement{
+  font-family:var(--font-display); font-weight:500; font-size:var(--t-title);
+  line-height:1.25; letter-spacing:-.02em; max-width:26ch; margin:0;
+}
+
+.metric{
+  font-family:var(--font-display); font-weight:700; font-size:var(--t-metric);
+  line-height:1; letter-spacing:-.03em; font-variant-numeric:tabular-nums;
+  margin:0 0 var(--s3);
+}
+.metric.is-deficit{color:var(--deficit)}
+.metric.is-surplus{color:var(--surplus)}
+
+blockquote{
+  margin:0; padding-left:var(--s5); border-left:3px solid var(--red-600);
+  font-family:var(--font-display); font-style:italic; font-weight:400;
+  font-size:var(--t-lead); line-height:1.45; max-width:56ch;
+}
+blockquote cite{
+  display:block; margin-top:var(--s5); font:600 var(--t-label)/1.2 var(--font-sans);
+  letter-spacing:.14em; text-transform:uppercase; font-style:normal; color:var(--stone-600);
+}
+
+.grid{display:grid; gap:var(--s5); align-items:start}
+.g-6-6{grid-template-columns:1fr 1fr}
+.g-8-4{grid-template-columns:2fr 1fr}
+.g-4-4-4{grid-template-columns:1fr 1fr 1fr}
+
+/* ===========================================================================
+   6. COMPONENTS
+   =========================================================================== */
+ul.bullets{margin:0; padding:0; list-style:none; max-width:62ch}
+ul.bullets li{
+  position:relative; padding-left:var(--s5); margin-bottom:var(--s3); line-height:1.45;
+}
+ul.bullets li::before{
+  content:""; position:absolute; left:0; top:.62em;
+  width:7px; height:7px; background:var(--red-600);
+}
+.page.ink ul.bullets li::before{background:var(--red-400)}
+
+.callout{
+  background:var(--red-100); border-left:3px solid var(--red-600);
+  padding:var(--s5); border-radius:2px; color:var(--red-700); max-width:62ch;
+}
+.callout p:last-child{margin-bottom:0}
+
+table{border-collapse:collapse; width:100%; font-size:var(--t-body)}
+caption{caption-side:bottom; text-align:left; padding-top:var(--s3);
+  font-size:var(--t-small); color:var(--stone-600)}
+thead th{
+  font:600 var(--t-label)/1.2 var(--font-sans); letter-spacing:.14em;
+  text-transform:uppercase; text-align:left; color:var(--stone-600);
+  background:var(--paper-alt); padding:var(--s3) var(--s4);
+}
+tbody td{padding:var(--s3) var(--s4); border-bottom:1px solid var(--paper-rule); vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right; font-variant-numeric:tabular-nums}
+tr.is-key td{background:var(--red-100); color:var(--red-700); font-weight:600}
+
+code,pre,.mono{font-family:var(--font-mono); font-variant-ligatures:none}
+pre{
+  background:var(--paper-alt); padding:var(--s5); border-radius:2px;
+  font-size:18px; line-height:1.6; margin:0; overflow:hidden;
+}
+code{font-size:.95em}
+
+/* [ASK] / [DECIDE] — an unconfirmed decision is never presented as agreed. */
+.tag{
+  display:inline-block; font:600 var(--t-label)/1 var(--font-sans);
+  letter-spacing:.14em; text-transform:uppercase; color:var(--red-600);
+  border:1px solid var(--red-600); padding:5px 8px; border-radius:2px;
+}
+/* SS2.2 rule 1: red text on an Ink surface must be --red-400, never --red-600.
+   No tag currently sits on an Ink page; this keeps it true if one ever does. */
+.page.ink .tag{color:var(--red-400); border-color:var(--red-400)}
+
+.ask{margin-top:var(--s5); max-width:62ch}
+.ask .tag{margin-right:var(--s3)}
+
+/* ===========================================================================
+   7. FURNITURE — quiet, consistent, never on cover or closing.
+      Page numbers, section indicators and progress segments are generated.
+   =========================================================================== */
+.furniture{
+  position:absolute; left:var(--pad-x); right:var(--pad-x);
+  font:600 var(--t-label)/1.2 var(--font-sans); letter-spacing:.14em;
+  text-transform:uppercase; color:var(--stone-600); pointer-events:none;
+}
+.furniture.top{top:24px; display:flex; justify-content:space-between}
+.furniture.bottom{bottom:22px; display:flex; justify-content:flex-end}
+.page.ink .furniture{color:var(--stone-400)}
+.page.no-furniture .furniture{display:none}
+
+#progress{
+  position:absolute; left:0; right:0; bottom:0; height:3px;
+  display:grid; gap:2px; z-index:5;
+}
+#progress span{background:var(--paper-rule); transition:background 180ms var(--ease)}
+#progress span.on{background:var(--red-600)}
+#progress.on-ink span{background:var(--ink-500)}
+#progress.on-ink span.on{background:var(--red-400)}
+
+#hint{
+  position:fixed; bottom:14px; left:50%; transform:translateX(-50%);
+  font:500 12px/1 var(--font-sans); letter-spacing:.1em; text-transform:uppercase;
+  color:var(--stone-400); opacity:.55; transition:opacity 400ms var(--ease);
+}
+#hint.hide{opacity:0}
+
+/* ===========================================================================
+   8. ACCESSIBILITY & PRINT
+   =========================================================================== */
+@media (prefers-reduced-motion:reduce){
+  .page{transition:none !important}
+  #progress span{transition:none !important}
+}
+
+@page{size:1280px 720px; margin:0}
+@media print{
+  body{display:block; background:#fff; overflow:visible}
+  #stage{transform:none !important; box-shadow:none; width:1280px; height:auto}
+  #hint{display:none}
+  .page{
+    position:relative !important; display:flex !important; opacity:1 !important;
+    transform:none !important; width:1280px; height:720px; break-after:page; page-break-after:always;
+  }
+  #progress{display:none}
+}
+</style>
+</head>
+
+<body>
+<div id="stage">
+
+<!-- ==========================================================================
+     COVER
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="0">
+  <p class="eyebrow">CITS5206 Professional Computing &middot; <span class="accent">Lab facilitator checkpoint</span></p>
+  <h2 class="cover-title">Everything but the Last Link</h2>
+  <hr class="rule">
+  <p class="lead" style="color:var(--stone-400);max-width:56ch">
+    The engine is provably right, the guided flow is finished, and the one piece nobody
+    had built is the document the client actually keeps.
+  </p>
+  <div class="spacer"></div>
+  <div class="cover-meta">
+    <span>CITS5206</span>
+    <span>16 September 2026</span>
+  </div>
+</section>
+
+
+<!-- ==========================================================================
+     SECTION 1 — Application, Workflow and Release
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="1">
+  <p class="divider-num"></p>
+  <h2 class="divider-title">Application, Workflow and Release</h2>
+  <p class="divider-owner">Chenxu You</p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0" data-section-label></p>
+</section>
+
+<section class="page" data-section="1">
+  <div class="furniture top"><span data-section-indicator></span><span>Chenxu You</span></div>
+  <p class="eyebrow">Milestones &middot; the plan of record, checked against the repository</p>
+  <h1>Two milestones met, one week early between them</h1>
+  <hr class="rule">
+  <table>
+    <caption>Source: docs/project/plan.md v1.4 &sect;1, 13 September 2026.</caption>
+    <thead>
+      <tr><th>Milestone</th><th>Due</th><th>Where it stands</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>M1 &middot; Engine provably correct</td><td>4 Sep</td><td>Met 2 Sep, two days early</td></tr>
+      <tr><td>M2 &middot; Guided flow, validated</td><td>11 Sep</td><td>Met &mdash; five steps, validated server-side</td></tr>
+      <tr><td>M3 &middot; Rates and balance</td><td>18 Sep</td><td>On track; this sprint finishes it</td></tr>
+      <tr class="is-key"><td>M4 &middot; Vertical slice complete</td><td>25 Sep</td><td>Turns on the export &mdash; next slide</td></tr>
+      <tr><td>M5 &middot; Staging live</td><td>2 Oct</td><td>Waiting on a hosting decision &mdash; section 2</td></tr>
+    </tbody>
+  </table>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="1">
+  <div class="furniture top"><span data-section-indicator></span><span>Chenxu You</span></div>
+  <p class="eyebrow">ADR-002 &middot; the sealed record as a PDF</p>
+  <h1>We chose the library by reading its licence, not its API</h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li>The export was the only link in the M4 chain nobody had built or costed, so it was brought forward out of sprint 5 as a spike.</li>
+    <li>The nicest library on offer, QuestPDF, is free only below <strong>USD 1M annual revenue</strong>. UWA is not below it, and we hand this tool to UWA.</li>
+    <li>Choosing it would have handed the client a bill produced by our convenience, discovered after we had gone. <strong>MigraDoc, MIT licence,</strong> instead.</li>
+    <li>The document is built from the <strong>sealed snapshot</strong>, never from the live rows &mdash; so it cannot disagree with the record it claims to be.</li>
+  </ul>
+  <div class="ask">
+    <p><span class="tag">[ASK]</span> ADR-002 amends a row of ADR-001 rather than editing it. Is superseding a decision record with a second one what you expect to see, or should the original be corrected in place?</p>
+  </div>
+  <div class="spacer"></div>
+  <p class="small">Source: docs/decisions/adr-002-pdf-generation.md, 13 September 2026.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+
+<section class="page" data-section="1">
+  <div class="furniture top"><span data-section-indicator></span><span>Chenxu You</span></div>
+  <p class="eyebrow">Assignment 2 &middot; five individual reports, due 29 September</p>
+  <h1>The same repository, read five different ways</h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li>Each of us submits our own PDF on the 29th, marked out of 20 &mdash; artefacts 8, coordination 6, collaboration 6 &mdash; on contributions up to week&nbsp;9.</li>
+    <li>Reading the rubric, what separates the bands is <strong>attribution</strong>: &ldquo;unclear which parts have been written by the student&rdquo;, not the quality of the writing.</li>
+    <li>So the fortnight to M4 is being run to leave a trail &mdash; one issue per piece of work, the test in the pull request that adds the behaviour, reviews with comments in them.</li>
+    <li>Every link will be a full URL, and your access to the board, the milestones and the Actions runs is being checked signed-out on <strong>19 September</strong>.</li>
+  </ul>
+  <div class="ask">
+    <p><span class="tag">[ASK]</span> Where two of us built one feature together &mdash; the engine and the screens either side of one story &mdash; would you rather see one owner claimed per artefact, or both of us named on the seam?</p>
+  </div>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+
+<!-- ==========================================================================
+     SECTION 2 — The Client, and the Answer We Do Not Have
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="2">
+  <p class="divider-num"></p>
+  <h2 class="divider-title">The Client, and the Answer We Do Not Have</h2>
+  <p class="divider-owner">Yichen Zhao</p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0" data-section-label></p>
+</section>
+
+<section class="page" data-section="2">
+  <div class="furniture top"><span data-section-indicator></span><span>Yichen Zhao</span></div>
+  <p class="eyebrow">Where the client relationship stands</p>
+  <h1>Nothing in the build is waiting on their inbox</h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li>Scope statement <strong>signed 20 August</strong> by Mathew Hall; both confirmations &mdash; scope and ownership &mdash; returned in writing.</li>
+    <li>All five open questions answered the same day. The rule that governs every disagreement is theirs: <span class="hi">the guide governs</span>.</li>
+    <li>Two modelling choices we made ourselves are queued for the next question batch, rather than being quietly kept &mdash; section 4.</li>
+    <li>Wednesday remains their preferred day, which is why this checkpoint sits on one.</li>
+  </ul>
+  <div class="spacer"></div>
+  <p class="small">Source: docs/client/mvp-agreement.md &middot; docs/meetings/2026-08-20-client-meeting.md.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="2">
+  <div class="furniture top"><span data-section-indicator></span><span>Yichen Zhao</span></div>
+  <p class="eyebrow">One decision is a week overdue, and five rows depend on it</p>
+  <h1>Where the application will actually live</h1>
+  <hr class="rule">
+  <p class="lead">A UWA virtual machine, the domain they already shared with us, or a server we
+    provision ourselves &mdash; and who administers it afterwards. Due <strong>9 September</strong>;
+    this repository holds no answer.</p>
+  <p class="lead">Provisioning, DNS, TLS, continuous deployment and the client's own use of staging
+    all sit behind that one answer, and staging is promised live on <strong>2 October</strong>.</p>
+  <div class="ask">
+    <p><span class="tag">[ASK]</span> If it is still open on Saturday we provision a team-held server and hand over a migration path. Does that satisfy the deployment criterion, or does it read as avoiding the client?</p>
+  </div>
+  <div class="spacer"></div>
+  <p class="small">Source: docs/project/plan.md &sect;5.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+
+<section class="page" data-section="2">
+  <div class="furniture top"><span data-section-indicator></span><span>Yichen Zhao</span></div>
+  <p class="eyebrow">The client &middot; Wednesdays on request, not on a standing slot</p>
+  <h1>What we take to them next, and when</h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li>They asked us to digest and come back with <strong>batched questions</strong> rather than hold a weekly slot, so the batch closes before anything is booked.</li>
+    <li>Two of the three items are assumptions <em>we</em> made &mdash; the averaged multi-year profile and the indirect uplift &mdash; and are labelled as ours in the code.</li>
+    <li>The third is hosting, a week overdue, and it gates staging on 2 October.</li>
+    <li>We would rather demonstrate the vertical slice than describe it, and <strong>M4 lands on Friday 25 September</strong>.</li>
+  </ul>
+  <div class="ask">
+    <p><span class="tag">[ASK]</span> Demonstrate on Wednesday 23 September with the export half-wired, or 30 September with M4 complete but only a fortnight left to act on what they say?</p>
+  </div>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+
+<!-- ==========================================================================
+     SECTION 3 — Engine, Data and Infrastructure
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="3">
+  <p class="divider-num"></p>
+  <h2 class="divider-title">Engine, Data and Infrastructure</h2>
+  <p class="divider-owner">Wenmin Luo</p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0" data-section-label></p>
+</section>
+
+<section class="page" data-section="3">
+  <div class="furniture top"><span data-section-indicator></span><span>Wenmin Luo</span></div>
+  <p class="eyebrow">The golden file &middot; the client's own worked example</p>
+  <h1>Their arithmetic and ours, to the cent</h1>
+  <hr class="rule">
+  <table>
+    <caption>$150,000 operating costs &middot; $20,000 UWA in-kind &middot; $30,000 State support &middot; 1,000 forecast hours.</caption>
+    <thead>
+      <tr><th>Rate</th><th class="n">The client's guide</th><th class="n">Our engine</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>UWA researcher</td><td class="n">$100.00</td><td class="n">$100.00</td></tr>
+      <tr><td>APFR</td><td class="n">$162.00</td><td class="n">$162.00</td></tr>
+      <tr class="is-key"><td>Commercial</td><td class="n">$202.50</td><td class="n">$202.50</td></tr>
+    </tbody>
+  </table>
+  <p>These three figures fail the build if they drift by a cent. The engine is a library with
+    <strong>no database and no web framework behind it</strong>, so the compiler enforces that
+    claim rather than a document making it.</p>
+  <div class="spacer"></div>
+  <p class="small">Source: tests/CostingTool.Engine.Tests &middot; .github/workflows/ci.yml, merge gate since 2 September.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="3">
+  <div class="furniture top"><span data-section-indicator></span><span>Wenmin Luo</span></div>
+  <p class="eyebrow">A known gap, with a date on it</p>
+  <h1>The schema cannot change once the client is typing into it</h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li>The database is currently built with <code>EnsureCreated()</code>, which cannot alter an existing schema.</li>
+    <li>Locally that costs a developer one deleted file. On staging it would cost <span class="hi">the client's entered figures</span>.</li>
+    <li>Moving to Entity Framework migrations is therefore <strong>a gate on deploying</strong>, not a tidy-up afterwards.</li>
+    <li>Written into the repository as a known gap on the day it was noticed, rather than discovered on 2 October.</li>
+  </ul>
+  <div class="spacer"></div>
+  <p class="small">Source: src/README.md, Known gaps &middot; docs/project/plan.md &sect;6, due 2 October.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+
+<!-- ==========================================================================
+     SECTION 4 — Costing Logic and Risk
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="4">
+  <p class="divider-num"></p>
+  <h2 class="divider-title">Costing Logic and Risk</h2>
+  <p class="divider-owner">Dai Lam La La</p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0" data-section-label></p>
+</section>
+
+<section class="page" data-section="4">
+  <div class="furniture top"><span data-section-indicator></span><span>Dai Lam La La</span></div>
+  <p class="eyebrow">Two decisions that are ours, and are labelled as ours</p>
+  <h1>Where the client's method runs out, we say so in the code</h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li>Every requirement carries a source marker &mdash; client's answer, guide, workbook or our own minutes &mdash; so nothing anonymous reaches the build.</li>
+    <li><strong>A multi-year cost profile is averaged into one annual figure.</strong> Their guide's example is a single year and says nothing about the rest.</li>
+    <li><strong>The indirect uplift is divided back out</strong> of the revenue projection. Preserved from the spike; no client document says either way.</li>
+    <li>Both are commented at the line where they happen and both travel in the next question batch. <span class="hi">An assumption nobody can find is not an assumption.</span></li>
+  </ul>
+  <div class="spacer"></div>
+  <p class="small">Source: src/Models/RicCycle.cs &middot; src/CostingTool.Engine/RateEngine.cs &middot; docs/project/plan.md &sect;6.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="4">
+  <div class="furniture top"><span data-section-indicator></span><span>Dai Lam La La</span></div>
+  <p class="eyebrow">The risk register, reviewed every Saturday</p>
+  <h1>The threat is not an attacker; it is a plausible wrong number</h1>
+  <hr class="rule">
+  <p class="lead">A rate is published for three to five years, embedded in grant budgets across the
+    University, and then defended in a Freedom of Information response. A spreadsheet flags none
+    of that: a cleared formula returns a number that looks fine.</p>
+  <div class="callout">
+    <p>Which is why the controls that count here are decimal arithmetic, a typed collection no
+      range can be dragged across, the immutable snapshot with its hash, and a test that stops
+      a merge &mdash; not a firewall.</p>
+  </div>
+  <div class="spacer"></div>
+  <p class="small">Source: docs/project/risks.md &sect;1, v1.1 &middot; 21 rows, each with a trigger and an owner.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+
+<!-- ==========================================================================
+     SECTION 5 — Verification and the Record
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="5">
+  <p class="divider-num"></p>
+  <h2 class="divider-title">Verification and the Record</h2>
+  <p class="divider-owner">Jaswanth Vericherla</p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0" data-section-label></p>
+</section>
+
+<section class="page" data-section="5">
+  <div class="furniture top"><span data-section-indicator></span><span>Jaswanth Vericherla</span></div>
+  <p class="eyebrow">What is tested, and what plainly is not</p>
+  <h1>The arithmetic is guarded at both ends. The screens are not guarded at all</h1>
+  <hr class="rule">
+  <table>
+    <caption>Source: tests/, .github/workflows/ci.yml, 13 September 2026.</caption>
+    <thead>
+      <tr><th>Layer</th><th>Held to what</th><th>Blocks a merge?</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Calculation engine</td><td>Golden file, plus boundaries and rounding</td><td>Yes</td></tr>
+      <tr><td>Sealed-record PDF</td><td>The same three figures, asserted on the way out</td><td>Yes, from this week</td></tr>
+      <tr class="is-key"><td>Razor Pages and the seam between them</td><td>Nothing automated</td><td>No</td></tr>
+      <tr><td>Deployment</td><td>Not yet exercised &mdash; there is no server</td><td>No</td></tr>
+    </tbody>
+  </table>
+  <div class="spacer"></div>
+  <p class="small">The team's skills audit rates nobody above 2 in automated testing; this row is the consequence, stated rather than hidden.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="5">
+  <div class="furniture top"><span data-section-indicator></span><span>Jaswanth Vericherla</span></div>
+  <p class="eyebrow">A cadence we promised and have not kept</p>
+  <h1>Four Saturdays, no minutes</h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li>The plan promises a Saturday review with minutes committed inside 24 hours. The last minutes in the repository are dated <strong>20 August</strong>.</li>
+    <li>The meetings happened; the record of them did not. The plan now carries that as a dated, owned row rather than an implied cadence.</li>
+    <li>It is fixed this week or the plan stops claiming it &mdash; a process nobody follows is worse evidence than one nobody promised.</li>
+  </ul>
+  <div class="ask">
+    <p><span class="tag">[ASK]</span> For the project-management mark, does the assessment look at the repository's own meeting record, or at the account we give of it in the final report?</p>
+  </div>
+  <div class="spacer"></div>
+  <p class="small">Source: docs/meetings/ &middot; docs/project/plan.md &sect;4 and &sect;6.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+
+<!-- ==========================================================================
+     CLOSING
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="0">
+  <p class="eyebrow">Four weeks to handover &mdash; <span class="accent">and five questions for you</span></p>
+  <h2 class="cover-title" style="font-size:var(--t-section)">Research Infrastructure Costing &amp; Pricing Tool</h2>
+  <hr class="rule">
+  <p class="lead" style="color:var(--stone-400);max-width:56ch">
+    Chenxu You &middot; Yichen Zhao &middot; Wenmin Luo &middot; Dai Lam La La &middot; Jaswanth Vericherla
+  </p>
+  <div class="spacer"></div>
+  <p class="mono" style="font-size:var(--t-small);color:var(--stone-400)">github.com/ChenxuYou/uwa-cits5206-project</p>
+</section>
+
+<!-- Section progress bar — segments generated by the engine -->
+<div id="progress" aria-hidden="true"></div>
+</div>
+
+<p id="hint">&larr; &rarr; to navigate &middot; number keys for sections &middot; F fullscreen</p>
+
+
+<script>
+/* ===========================================================================
+   DECK ENGINE — keyboard, click, swipe, hash, fullscreen, canvas scaling.
+   Self-contained; works with no network.
+
+   Nothing here is hard-coded to a section count. Sections, number-key
+   shortcuts, page numbers, divider numerals, section indicators and progress
+   segments are all derived from data-section in the markup.
+   =========================================================================== */
+(function () {
+  var stage    = document.getElementById('stage');
+  var progress = document.getElementById('progress');
+  var hint     = document.getElementById('hint');
+  var pages    = Array.prototype.slice.call(document.querySelectorAll('.page'));
+  var deckName = document.title;
+  var current  = 0;
+
+  /* --- Scale the fixed 1280x720 canvas to fit the viewport --- */
+  function fit() {
+    var s = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    stage.style.transform = 'scale(' + s + ')';
+  }
+
+  /* --- Derive the section map, and generate page numbers --- */
+  var sectionStart = {};   /* section number -> index of its first page */
+  var sectionTitle = {};   /* section number -> title, for the indicators */
+  var sectionCount = 0;
+
+  pages.forEach(function (p, i) {
+    var s = p.dataset.section;
+    if (s !== '0') {
+      if (sectionStart[s] === undefined) sectionStart[s] = i;
+      sectionCount = Math.max(sectionCount, parseInt(s, 10));
+    }
+    /* A divider carries the section's title; remember it for the indicators. */
+    var dt = p.querySelector('.divider-title');
+    if (dt) sectionTitle[s] = dt.textContent.trim();
+    /* Page numbers are generated, never typed. */
+    var n = p.querySelector('[data-pagenum]');
+    if (n) n.textContent = i + 1;
+    /* So is the big divider numeral: move a section, it renumbers itself. */
+    var dnum = p.querySelector('.divider-num');
+    if (dnum) dnum.textContent = s;
+    /* Divider labels: "SECTION n OF m" without anyone typing m. */
+    var label = p.querySelector('[data-section-label]');
+    if (label) label.dataset.n = s;
+  });
+
+  /* --- Section indicators, top-left, generated from the divider titles --- */
+  pages.forEach(function (p) {
+    var ind = p.querySelector('[data-section-indicator]');
+    if (!ind) return;
+    var s = p.dataset.section;
+    ind.textContent = s + ' · ' + (sectionTitle[s] || '');
+  });
+
+  /* --- Build the progress bar to match the section count --- */
+  var segments = [];
+  progress.style.gridTemplateColumns = 'repeat(' + Math.max(sectionCount, 1) + ',1fr)';
+  for (var k = 0; k < sectionCount; k++) {
+    var seg = document.createElement('span');
+    progress.appendChild(seg);
+    segments.push(seg);
+  }
+
+  /* --- Finish the "SECTION n OF m" labels now that m is known --- */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-section-label]'), function (el) {
+    el.textContent = 'Section ' + el.dataset.n + ' of ' + sectionCount;
+  });
+
+  function show(i, push) {
+    i = Math.max(0, Math.min(pages.length - 1, i));
+    pages.forEach(function (p) {
+      p.classList.remove('is-active');
+      p.setAttribute('aria-hidden', 'true');
+    });
+
+    var page = pages[i];
+    page.classList.add('is-active', 'is-enter');
+    page.setAttribute('aria-hidden', 'false');
+    /* force reflow so the enter transition actually runs */
+    void page.offsetWidth;
+    page.classList.remove('is-enter');
+
+    current = i;
+
+    var sec = parseInt(page.dataset.section, 10);
+    segments.forEach(function (s, n) { s.classList.toggle('on', n < sec); });
+    progress.classList.toggle('on-ink', page.classList.contains('ink'));
+
+    /* A deck is usually opened over file://, where some browsers refuse
+       history writes. Losing the linkable hash must never stop the deck. */
+    if (push !== false) {
+      try { history.replaceState(null, '', '#' + (i + 1)); } catch (err) {}
+    }
+    document.title = 'Slide ' + (i + 1) + ' / ' + pages.length + ' — ' + deckName;
+  }
+
+  var next = function () { show(current + 1); };
+  var prev = function () { show(current - 1); };
+
+  /* --- Keyboard --- */
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { e.preventDefault(); next(); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp')             { e.preventDefault(); prev(); }
+    else if (k === 'Home')  { e.preventDefault(); show(0); }
+    else if (k === 'End')   { e.preventDefault(); show(pages.length - 1); }
+    else if (k === 'f' || k === 'F') {
+      e.preventDefault();
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen();
+    }
+    else if (/^[0-9]$/.test(k) && sectionStart[k] !== undefined) { e.preventDefault(); show(sectionStart[k]); }
+    hideHint();
+  });
+
+  /* --- Click: right half forward, left half back. --- */
+  document.addEventListener('click', function (e) {
+    if (window.getSelection && String(window.getSelection())) return;
+    if (e.target.closest && e.target.closest('a,button,input,select,textarea')) return;
+    (e.clientX > window.innerWidth / 2 ? next : prev)();
+    hideHint();
+  });
+
+  /* --- Swipe --- */
+  var x0 = null;
+  document.addEventListener('touchstart', function (e) { x0 = e.changedTouches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 45) { (dx < 0 ? next : prev)(); hideHint(); }
+    x0 = null;
+  }, { passive: true });
+
+  var hintTimer = setTimeout(hideHint, 6000);
+  function hideHint() { clearTimeout(hintTimer); hint.classList.add('hide'); }
+
+  window.addEventListener('resize', fit);
+  document.addEventListener('fullscreenchange', fit);
+  window.addEventListener('hashchange', function () {
+    var n = parseInt(location.hash.slice(1), 10);
+    if (n && n - 1 !== current) show(n - 1, false);
+  });
+
+  fit();
+  var start = parseInt(location.hash.slice(1), 10);
+  show(start ? start - 1 : 0);
+
+  /* --- Owner check. SS4.2 requires every divider to name one person; this
+         deck ships with them deliberately blank so the meeting can fill them
+         in. The warning stops once they are real names. --- */
+  var unowned = Array.prototype.filter.call(
+    document.querySelectorAll('.divider-owner'),
+    function (el) { return /to be assigned/i.test(el.textContent); }
+  ).length;
+  if (unowned) {
+    console.warn('[deck] ' + unowned + ' of ' + sectionCount + ' section owner(s) still unassigned. ' +
+                 'Fill them in before the meeting and commit — do not show this deck to the ' +
+                 'facilitator or the client until the warning stops.');
+  }
+})();
+</script>
+</body>
+</html>
