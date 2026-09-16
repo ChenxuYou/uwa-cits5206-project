@@ -157,6 +157,12 @@ marker with five of these to read will thank a report that can be checked quickl
 
 ### Section 1 — Software Functionality (8 pts)
 
+**Anchor it in your layer.** Since 15 September each member owns one technical layer —
+general backend, calculation, deployment, front end or authentication
+([`plan.md` §3](plan.md), [`team.md`](team.md)). Open the section by naming yours in one sentence;
+it tells the marker where to look, and five layers that do not overlap are the simplest defence
+against A2-3. Work you did before the split still counts — describe it as it happened.
+
 Lead with **what the feature does for the user**, then what you wrote, then the proof it works.
 
 For each feature, a short block of:
@@ -305,9 +311,9 @@ first three boxes below exist because of them.
 | --- | --- | --- | --- | --- |
 | A2-1 | **The facilitator cannot open a linked resource**, and a whole section reads as unevidenced | B2 not closed by 19 Sep | Treat 19 Sep as hard. Test with a signed-out browser, not by asking "can you see it?" | Yichen Zhao |
 | A2-2 | **Links break in the LMS PDF viewer** — the brief warns of it, and **it already happened to us**: two marks on Assignment 1, criterion 2 | Any anchor word standing in for a URL, or any URL that wraps mid-path | §7, and the diagnosis in [`feedback.md` §4](../assignments/assignment-1/feedback.md). Checked on 28 Sep by copying every URL out of the built PDF | Jaswanth Vericherla |
-| A2-3 | **Two members claim the same work**, and both look like overclaiming | Overlapping stories, or an unclear split on joint work | The 26 Sep cross-read exists for this. [`plan.md` §2](plan.md)'s Build/Verify columns are the tie-breaker | Dai Lam La La |
+| A2-3 | **Two members claim the same work**, and both look like overclaiming | Overlapping stories, or an unclear split on joint work | The 26 Sep cross-read exists for this. [`plan.md` §3](plan.md)'s layers and §2's Build/Verify columns are the tie-breaker | Dai Lam La La |
 | A2-4 | **Thin evidence for section 2 or 3** because the work was done without issues or reviews | Discovered when §4 is run on 19 Sep | Run §4 **early**. Ten days remain in which the habits in §3 can still produce a real trail | Everyone |
-| A2-5 | **M4 slips past 25 September**, and Section 1's strongest claim goes with it | S5 not tracking by 22 Sep | Report what exists on the day. A partial slice described honestly beats a complete one described speculatively, and the marker can run the code | Chenxu You, Wenmin Luo |
+| A2-5 | **M4 slips past 25 September**, and Section 1's strongest claim goes with it | S5 not tracking by 22 Sep | Report what exists on the day. A partial slice described honestly beats a complete one described speculatively, and the marker can run the code | Chenxu You, with each layer's owner |
 | A2-6 | **A member leaves it to 29 September** and submits an unevidenced narrative | No draft by the 24 Sep cross-read | The cross-read is the checkpoint; a missing draft that day is visible to the whole team while there is still time | Whole team |
 | A2-7 | **`plan.md` §6 rows dated 15–19 Sep stay missed**, and the report cites a plan the repository contradicts | Any row still open on 26 Sep | These rows are individually owned and individually small. Closing yours is also §2 evidence | Row owners |
 
@@ -317,5 +323,6 @@ first three boxes below exist because of them.
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.2 | 16 Sep 2026 | The five technical layers agreed on 15 September ([minutes](../meetings/2026-09-15-team-meeting.md)) are folded in: Section 1 opens by naming your layer, A2-3's tie-breaker cites `plan.md` §3, and A2-5 is shared with every layer owner rather than the two members who used to write most of the code |
 | 1.1 | 13 Sep 2026 | Assignment 1's mark came back at 12/15 with two marks lost to unopenable links. §1 gains the rule that follows from it, §7 gains the cover page, the no-anchor-word and no-wrap checks, and A2-2 is rewritten from a warning into a recurrence. Diagnosis: [`docs/assignments/assignment-1/feedback.md`](../assignments/assignment-1/feedback.md) |
 | 1.0 | 13 Sep 2026 | Written the day the brief was transcribed, sixteen days out, so that the fortnight of S4 and S5 can be used to *create* evidence rather than only to describe it |
