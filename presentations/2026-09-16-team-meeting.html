@@ -1,43 +1,39 @@
 <!DOCTYPE html>
 <!--
   ============================================================================
-  CITS5206 Capstone — Lab Facilitator Checkpoint
+  CITS5206 Capstone — Team Working Meeting
   Research Infrastructure Costing & Pricing Tool
 
-  Meeting with the lab facilitator, Wednesday 16 September 2026. Built against
-  STYLE-GUIDE.md v2.3.
+  Internal team meeting, Wednesday 16 September 2026, immediately before the
+  lab facilitator checkpoint the same day. Built against STYLE-GUIDE.md v2.3.
 
-  19 pages: cover + 5 x (divider + 2-3 pages) + closing. Five sections for the five
-  members in docs/project/team.md, per STYLE-GUIDE.md SS4.2. Inside the
-  3n+2 .. 4n+2 band (17-22 at n = 5). Sections 1 and 2 carry three pages.
+  Two questions, answered together: how each of us completes the Software
+  Feature Report due 29 September, and how the project gets from M2 to M4.
+  They are the same fortnight, so they are the same deck — sprint 4 and 5 work
+  done with the right habits IS the evidence the report has to cite.
 
-  Content is drawn from docs/project/plan.md v1.4, docs/decisions/adr-002-pdf-generation.md,
-  docs/project/risks.md, docs/client/mvp-agreement.md, the test projects under tests/,
-  reference/unit/assignment-2-software-feature-report.md and
-  docs/project/assignment-2-completion-plan.md.
+  18 pages: cover + 5 x (divider + 2-3 pages) + closing. Five sections for the
+  five members in docs/project/team.md, per STYLE-GUIDE.md SS4.2. Inside the
+  3n+2 .. 4n+2 band (17-22 at n = 5). Section 1 carries three pages because the
+  assignment mechanics are the one thing nobody can work out alone on the night.
 
-  This is a status deck: where each area got to, and the five [ASK]s we want the
-  facilitator's view on.
+  Content is drawn from reference/unit/assignment-2-software-feature-report.md,
+  docs/project/assignment-2-completion-plan.md and docs/project/plan.md v1.4.
 
-  REVISED 13 September 2026, after the Software Feature Report brief was transcribed.
-  Two pages added, so the checkpoint covers all three things we need from the
-  facilitator rather than only the build:
-    - Section 1, page 3: Assignment 2 - how five individual reports will evidence
-      one shared repository, and how joint work should be claimed.
-    - Section 2, page 3: the client - what goes in the next question batch, and
-      whether to demonstrate the slice before or after M4.
-  The closing page now says five questions rather than three.
-
-  NEXT DEADLINES: M4, the complete vertical slice, Friday 25 September 2026.
-                  Assignment 2, five individual PDFs, Tuesday 29 September 2026.
+  This is a WORKING deck, not a status deck. It carries four [DECIDE] flags and
+  the meeting is not finished until all four have an answer in the minutes:
+    1. PDF naming, and who cross-reads whose draft (section 1)
+    2. The hosting fallback trigger on 19 September (section 2)
+    3. The client meeting date — 23 or 30 September (section 2)
+    4. What closes in the question batch on 19 September (section 4)
 
   ---------------------------------------------------------------------------
-  ENGINE: this file carries the deck engine from the 19 August checkpoint, which is
-  template.html's engine plus generated section indicators. It is not hand-edited here.
-  Section owners are filled in, so the unassigned-owner warning stays silent; the deck
-  is conforming as it stands. If a member cannot attend, reassign that section's owner
-  to whoever presents it, change the divider AND the top-right furniture to name only
-  that person, and record the swap in the commit message (SS4.2).
+  ENGINE: identical to the 16 September facilitator checkpoint, which is
+  template.html's engine plus generated section indicators. Not hand-edited
+  here. Section owners are filled in, so the unassigned-owner warning stays
+  silent. If a member cannot attend, reassign that section's owner to whoever
+  presents it, change the divider AND the top-right furniture to name only that
+  person, and record the swap in the commit message (SS4.2).
   ---------------------------------------------------------------------------
 
   NAVIGATION: arrows / space / PgUp / PgDn / Home / End / number keys / F
@@ -49,7 +45,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Facilitator Checkpoint, 16 September &mdash; Research Infrastructure Costing &amp; Pricing Tool | CITS5206</title>
+<title>Team Working Meeting, 16 September &mdash; Research Infrastructure Costing &amp; Pricing Tool | CITS5206</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -312,12 +308,12 @@ code{font-size:.95em}
      COVER
      ========================================================================== -->
 <section class="page ink no-furniture center" data-section="0">
-  <p class="eyebrow">CITS5206 Professional Computing &middot; <span class="accent">Lab facilitator checkpoint</span></p>
-  <h2 class="cover-title">Everything but the Last Link</h2>
+  <p class="eyebrow">CITS5206 Professional Computing &middot; <span class="accent">Team working meeting</span></p>
+  <h2 class="cover-title">Thirteen Days, Two Deadlines</h2>
   <hr class="rule">
   <p class="lead" style="color:var(--stone-400);max-width:56ch">
-    The engine is provably right, the guided flow is finished, and the one piece nobody
-    had built is the document the client actually keeps.
+    M4 on 25 September belongs to all of us. The Software Feature Report on
+    29 September is five separate submissions, and nobody can write yours.
   </p>
   <div class="spacer"></div>
   <div class="cover-meta">
@@ -328,11 +324,11 @@ code{font-size:.95em}
 
 
 <!-- ==========================================================================
-     SECTION 1 — Application, Workflow and Release
+     SECTION 1 — The Assignment, and What Decides the Mark
      ========================================================================== -->
 <section class="page ink no-furniture center" data-section="1">
   <p class="divider-num"></p>
-  <h2 class="divider-title">Application, Workflow and Release</h2>
+  <h2 class="divider-title">The Assignment, and What Decides the Mark</h2>
   <p class="divider-owner">Chenxu You</p>
   <div class="spacer"></div>
   <p class="eyebrow" style="margin:0" data-section-label></p>
@@ -340,20 +336,21 @@ code{font-size:.95em}
 
 <section class="page" data-section="1">
   <div class="furniture top"><span data-section-indicator></span><span>Chenxu You</span></div>
-  <p class="eyebrow">Milestones &middot; the plan of record, checked against the repository</p>
-  <h1>Two milestones met, one week early between them</h1>
+  <p class="eyebrow">Software Feature Report &middot; what the brief actually sets</p>
+  <h1>Five PDFs, not one</h1>
   <hr class="rule">
   <table>
-    <caption>Source: docs/project/plan.md v1.4 &sect;1, 13 September 2026.</caption>
+    <caption>Source: reference/unit/assignment-2-software-feature-report.md, transcribed 13 September 2026.</caption>
     <thead>
-      <tr><th>Milestone</th><th>Due</th><th>Where it stands</th></tr>
+      <tr><th>What</th><th>The brief</th></tr>
     </thead>
     <tbody>
-      <tr><td>M1 &middot; Engine provably correct</td><td>4 Sep</td><td>Met 2 Sep, two days early</td></tr>
-      <tr><td>M2 &middot; Guided flow, validated</td><td>11 Sep</td><td>Met &mdash; five steps, validated server-side</td></tr>
-      <tr><td>M3 &middot; Rates and balance</td><td>18 Sep</td><td>On track; this sprint finishes it</td></tr>
-      <tr class="is-key"><td>M4 &middot; Vertical slice complete</td><td>25 Sep</td><td>Turns on the export &mdash; next slide</td></tr>
-      <tr><td>M5 &middot; Staging live</td><td>2 Oct</td><td>Waiting on a hosting decision &mdash; section 2</td></tr>
+      <tr class="is-key"><td>Who submits</td><td>Every member, individually &mdash; this is not a group deliverable</td></tr>
+      <tr><td>When</td><td>Tuesday 29 September, 11:59 pm &mdash; we upload by 8:00 pm</td></tr>
+      <tr><td>Format</td><td>One PDF each, covering contributions up to week 9</td></tr>
+      <tr><td>Marks</td><td>20 &mdash; artefacts 8, coordination 6, collaboration 6</td></tr>
+      <tr><td>Links</td><td>Full visible URLs; the facilitator must be able to open every one</td></tr>
+      <tr><td>GenAI</td><td>Explained wherever it was used, not in a footer</td></tr>
     </tbody>
   </table>
   <div class="spacer"></div>
@@ -362,49 +359,52 @@ code{font-size:.95em}
 
 <section class="page" data-section="1">
   <div class="furniture top"><span data-section-indicator></span><span>Chenxu You</span></div>
-  <p class="eyebrow">ADR-002 &middot; the sealed record as a PDF</p>
-  <h1>We chose the library by reading its licence, not its API</h1>
+  <p class="eyebrow">The rubric&rsquo;s own words, in all three criteria</p>
+  <h1>The line is attribution, not writing</h1>
   <hr class="rule">
   <ul class="bullets">
-    <li>The export was the only link in the M4 chain nobody had built or costed, so it was brought forward out of sprint 5 as a spike.</li>
-    <li>The nicest library on offer, QuestPDF, is free only below <strong>USD 1M annual revenue</strong>. UWA is not below it, and we hand this tool to UWA.</li>
-    <li>Choosing it would have handed the client a bill produced by our convenience, discovered after we had gone. <strong>MigraDoc, MIT licence,</strong> instead.</li>
-    <li>The document is built from the <strong>sealed snapshot</strong>, never from the live rows &mdash; so it cannot disagree with the record it claims to be.</li>
+    <li>What keeps a section at <em>Competent</em> is &ldquo;unclear which parts have been written by the student&rdquo; &mdash; never the quality of the prose.</li>
+    <li>So the rule is <strong>evidence before prose</strong>: harvest the links first, write the paragraphs second. The other order invents claims you then have to hunt for.</li>
+    <li>One sentence, one artefact. A paragraph on &ldquo;improving the costing screens&rdquo; is worth less than one line naming a file and the pull request that merged it.</li>
+    <li>Where work was joint, say it was joint and name the other person. Five of us share one repository and the marker opens the same board we do.</li>
   </ul>
   <div class="ask">
-    <p><span class="tag">[ASK]</span> ADR-002 amends a row of ADR-001 rather than editing it. Is superseding a decision record with a second one what you expect to see, or should the original be corrected in place?</p>
+    <p><span class="tag">[DECIDE]</span> One naming pattern for all five PDFs, and who cross-reads whose draft on Thursday 24 September. Both now, in the room, not over chat on the 27th.</p>
   </div>
   <div class="spacer"></div>
-  <p class="small">Source: docs/decisions/adr-002-pdf-generation.md, 13 September 2026.</p>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
 </section>
 
-
 <section class="page" data-section="1">
   <div class="furniture top"><span data-section-indicator></span><span>Chenxu You</span></div>
-  <p class="eyebrow">Assignment 2 &middot; five individual reports, due 29 September</p>
-  <h1>The same repository, read five different ways</h1>
+  <p class="eyebrow">Thirteen days &middot; the same fortnight as sprints 4 and 5</p>
+  <h1>The calendar, so nobody drafts on the last night</h1>
   <hr class="rule">
-  <ul class="bullets">
-    <li>Each of us submits our own PDF on the 29th, marked out of 20 &mdash; artefacts 8, coordination 6, collaboration 6 &mdash; on contributions up to week&nbsp;9.</li>
-    <li>Reading the rubric, what separates the bands is <strong>attribution</strong>: &ldquo;unclear which parts have been written by the student&rdquo;, not the quality of the writing.</li>
-    <li>So the fortnight to M4 is being run to leave a trail &mdash; one issue per piece of work, the test in the pull request that adds the behaviour, reviews with comments in them.</li>
-    <li>Every link will be a full URL, and your access to the board, the milestones and the Actions runs is being checked signed-out on <strong>19 September</strong>.</li>
-  </ul>
-  <div class="ask">
-    <p><span class="tag">[ASK]</span> Where two of us built one feature together &mdash; the engine and the screens either side of one story &mdash; would you rather see one owner claimed per artefact, or both of us named on the seam?</p>
-  </div>
+  <table>
+    <caption>Source: docs/project/assignment-2-completion-plan.md &sect;6, 13 September 2026.</caption>
+    <thead>
+      <tr><th>When</th><th>What</th><th>Who</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Sat 19 Sep</td><td>Close the week&nbsp;9 date, facilitator access, PDF naming</td><td>Yichen, Chenxu</td></tr>
+      <tr><td>Sun 20 Sep</td><td>Harvest your own commits, branches, PRs, reviews, issues</td><td>Each of us</td></tr>
+      <tr><td>Mon&ndash;Wed 21&ndash;23 Sep</td><td>Draft all three sections in markdown, in the repository</td><td>Each of us</td></tr>
+      <tr><td>Thu 24 Sep</td><td>Cross-read in pairs &mdash; click every link signed out</td><td>Agreed pairs</td></tr>
+      <tr><td>Fri 25 Sep</td><td>M4. Fold the working slice into section&nbsp;1</td><td>All</td></tr>
+      <tr class="is-key"><td>Sun&ndash;Tue 27&ndash;29 Sep</td><td>Freeze, build the PDF, access check, upload by 8:00 pm</td><td>All</td></tr>
+    </tbody>
+  </table>
   <div class="spacer"></div>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
 </section>
 
 
 <!-- ==========================================================================
-     SECTION 2 — The Client, and the Answer We Do Not Have
+     SECTION 2 — The Client, and the Access Nobody Owns
      ========================================================================== -->
 <section class="page ink no-furniture center" data-section="2">
   <p class="divider-num"></p>
-  <h2 class="divider-title">The Client, and the Answer We Do Not Have</h2>
+  <h2 class="divider-title">The Client, and the Access Nobody Owns</h2>
   <p class="divider-owner">Yichen Zhao</p>
   <div class="spacer"></div>
   <p class="eyebrow" style="margin:0" data-section-label></p>
@@ -412,52 +412,34 @@ code{font-size:.95em}
 
 <section class="page" data-section="2">
   <div class="furniture top"><span data-section-indicator></span><span>Yichen Zhao</span></div>
-  <p class="eyebrow">Where the client relationship stands</p>
-  <h1>Nothing in the build is waiting on their inbox</h1>
-  <hr class="rule">
-  <ul class="bullets">
-    <li>Scope statement <strong>signed 20 August</strong> by Mathew Hall; both confirmations &mdash; scope and ownership &mdash; returned in writing.</li>
-    <li>All five open questions answered the same day. The rule that governs every disagreement is theirs: <span class="hi">the guide governs</span>.</li>
-    <li>Two modelling choices we made ourselves are queued for the next question batch, rather than being quietly kept &mdash; section 4.</li>
-    <li>Wednesday remains their preferred day, which is why this checkpoint sits on one.</li>
-  </ul>
-  <div class="spacer"></div>
-  <p class="small">Source: docs/client/mvp-agreement.md &middot; docs/meetings/2026-08-20-client-meeting.md.</p>
-  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
-</section>
-
-<section class="page" data-section="2">
-  <div class="furniture top"><span data-section-indicator></span><span>Yichen Zhao</span></div>
-  <p class="eyebrow">One decision is a week overdue, and five rows depend on it</p>
-  <h1>Where the application will actually live</h1>
+  <p class="eyebrow">Hosting &middot; due 9 September, and the repository holds no answer</p>
+  <h1>Five rows are waiting behind one decision</h1>
   <hr class="rule">
   <p class="lead">A UWA virtual machine, the domain they already shared with us, or a server we
-    provision ourselves &mdash; and who administers it afterwards. Due <strong>9 September</strong>;
-    this repository holds no answer.</p>
-  <p class="lead">Provisioning, DNS, TLS, continuous deployment and the client's own use of staging
-    all sit behind that one answer, and staging is promised live on <strong>2 October</strong>.</p>
+    provision ourselves &mdash; and who administers it afterwards. Provisioning, DNS, TLS,
+    continuous deployment and the client&rsquo;s own use of staging all sit behind it.</p>
+  <p class="lead">Staging is promised live on <strong>2 October</strong>. That is sixteen days,
+    and none of the work below the decision can start until it is made.</p>
   <div class="ask">
-    <p><span class="tag">[ASK]</span> If it is still open on Saturday we provision a team-held server and hand over a migration path. Does that satisfy the deployment criterion, or does it read as avoiding the client?</p>
+    <p><span class="tag">[DECIDE]</span> Saturday 19 September is the trigger: if there is still no written answer, we provision a team-held server ourselves and hand the client a migration path at handover. Agreed, or do we chase it further first?</p>
   </div>
   <div class="spacer"></div>
-  <p class="small">Source: docs/project/plan.md &sect;5.</p>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
 </section>
 
-
 <section class="page" data-section="2">
   <div class="furniture top"><span data-section-indicator></span><span>Yichen Zhao</span></div>
-  <p class="eyebrow">The client &middot; Wednesdays on request, not on a standing slot</p>
-  <h1>What we take to them next, and when</h1>
+  <p class="eyebrow">Two kinds of access, and one of them is worth eight marks</p>
+  <h1>A link the facilitator cannot open is not a link</h1>
   <hr class="rule">
   <ul class="bullets">
-    <li>They asked us to digest and come back with <strong>batched questions</strong> rather than hold a weekly slot, so the batch closes before anything is booked.</li>
-    <li>Two of the three items are assumptions <em>we</em> made &mdash; the averaged multi-year profile and the indirect uplift &mdash; and are labelled as ours in the code.</li>
-    <li>The third is hosting, a week overdue, and it gates staging on 2 October.</li>
+    <li>The client asked for <strong>batched questions on Wednesdays as needed</strong> rather than a standing slot &mdash; so the next batch has to be closed before we book anything.</li>
     <li>We would rather demonstrate the vertical slice than describe it, and <strong>M4 lands on Friday 25 September</strong>.</li>
+    <li>Separately: the facilitator must be able to open the repository, the board, every milestone and the Actions runs. Five reports depend on one person&rsquo;s access list.</li>
+    <li>Tested in a signed-out browser on <strong>19 September</strong>. Asking &ldquo;can you see it?&rdquo; is not a test.</li>
   </ul>
   <div class="ask">
-    <p><span class="tag">[ASK]</span> Demonstrate on Wednesday 23 September with the export half-wired, or 30 September with M4 complete but only a fortnight left to act on what they say?</p>
+    <p><span class="tag">[DECIDE]</span> Client meeting on Wednesday 23 September with the export still half-wired, or Wednesday 30 September with M4 complete but a fortnight of runway left?</p>
   </div>
   <div class="spacer"></div>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
@@ -465,11 +447,11 @@ code{font-size:.95em}
 
 
 <!-- ==========================================================================
-     SECTION 3 — Engine, Data and Infrastructure
+     SECTION 3 — What Sprints 4 and 5 Must Deliver
      ========================================================================== -->
 <section class="page ink no-furniture center" data-section="3">
   <p class="divider-num"></p>
-  <h2 class="divider-title">Engine, Data and Infrastructure</h2>
+  <h2 class="divider-title">What Sprints 4 and 5 Must Deliver</h2>
   <p class="divider-owner">Wenmin Luo</p>
   <div class="spacer"></div>
   <p class="eyebrow" style="margin:0" data-section-label></p>
@@ -477,51 +459,50 @@ code{font-size:.95em}
 
 <section class="page" data-section="3">
   <div class="furniture top"><span data-section-indicator></span><span>Wenmin Luo</span></div>
-  <p class="eyebrow">The golden file &middot; the client's own worked example</p>
-  <h1>Their arithmetic and ours, to the cent</h1>
+  <p class="eyebrow">The M4 chain &middot; nine links, and where it still breaks</p>
+  <h1>Sign in to sealed export, without a gap in the middle</h1>
   <hr class="rule">
-  <table>
-    <caption>$150,000 operating costs &middot; $20,000 UWA in-kind &middot; $30,000 State support &middot; 1,000 forecast hours.</caption>
-    <thead>
-      <tr><th>Rate</th><th class="n">The client's guide</th><th class="n">Our engine</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>UWA researcher</td><td class="n">$100.00</td><td class="n">$100.00</td></tr>
-      <tr><td>APFR</td><td class="n">$162.00</td><td class="n">$162.00</td></tr>
-      <tr class="is-key"><td>Commercial</td><td class="n">$202.50</td><td class="n">$202.50</td></tr>
-    </tbody>
-  </table>
-  <p>These three figures fail the build if they drift by a cent. The engine is a library with
-    <strong>no database and no web framework behind it</strong>, so the compiler enforces that
-    claim rather than a document making it.</p>
+  <ul class="bullets">
+    <li>Done: sign in, create a cycle, costs, income, capacity, forecast utilisation &mdash; five steps, validated server-side since M2 on 11 September.</li>
+    <li>This sprint: <code>US-10</code>, <code>US-12</code>, <code>US-13</code> &mdash; proposed rates, the surplus or deficit each produces, and the justification the approver reads.</li>
+    <li>Next sprint: wiring the renderer to the approver&rsquo;s side, the supersession watermark, and retrieval of a sealed record.</li>
+    <li><span class="hi">The renderer itself is spiked and building</span>, which is why M4 is a wiring job rather than an unknown.</li>
+  </ul>
   <div class="spacer"></div>
-  <p class="small">Source: tests/CostingTool.Engine.Tests &middot; .github/workflows/ci.yml, merge gate since 2 September.</p>
+  <p class="small">Source: docs/project/plan.md v1.4 &sect;2 &middot; docs/decisions/adr-002-pdf-generation.md.</p>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
 </section>
 
 <section class="page" data-section="3">
   <div class="furniture top"><span data-section-indicator></span><span>Wenmin Luo</span></div>
-  <p class="eyebrow">A known gap, with a date on it</p>
-  <h1>The schema cannot change once the client is typing into it</h1>
+  <p class="eyebrow">Four rows in the plan that are gates, not tidy-ups</p>
+  <h1>Each of these blocks something dated</h1>
   <hr class="rule">
-  <ul class="bullets">
-    <li>The database is currently built with <code>EnsureCreated()</code>, which cannot alter an existing schema.</li>
-    <li>Locally that costs a developer one deleted file. On staging it would cost <span class="hi">the client's entered figures</span>.</li>
-    <li>Moving to Entity Framework migrations is therefore <strong>a gate on deploying</strong>, not a tidy-up afterwards.</li>
-    <li>Written into the repository as a known gap on the day it was noticed, rather than discovered on 2 October.</li>
-  </ul>
+  <table>
+    <caption>Source: docs/project/plan.md v1.4 &sect;6, 13 September 2026.</caption>
+    <thead>
+      <tr><th>Item</th><th>Blocks</th><th>Owner</th><th>By</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Commit the regenerated lockfiles</td><td>CI restores against them</td><td>Chenxu</td><td>15 Sep</td></tr>
+      <tr><td>Amend the ADR-001 PDF-export row</td><td>Two records contradict</td><td>Chenxu</td><td>15 Sep</td></tr>
+      <tr><td>Move the web app to <code>CostingTool.Web/</code></td><td>A fourth project</td><td>Wenmin</td><td>26 Sep</td></tr>
+      <tr class="is-key"><td>EF migrations, not <code>EnsureCreated()</code></td><td>M5 &mdash; staging, 2 Oct</td><td>Wenmin</td><td>2 Oct</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:var(--s6)">Closing the row with your name on it is also the cheapest
+    evidence any of us can produce for the report&rsquo;s second criterion.</p>
   <div class="spacer"></div>
-  <p class="small">Source: src/README.md, Known gaps &middot; docs/project/plan.md &sect;6, due 2 October.</p>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
 </section>
 
 
 <!-- ==========================================================================
-     SECTION 4 — Costing Logic and Risk
+     SECTION 4 — Questions to the Client, and Who Claims What
      ========================================================================== -->
 <section class="page ink no-furniture center" data-section="4">
   <p class="divider-num"></p>
-  <h2 class="divider-title">Costing Logic and Risk</h2>
+  <h2 class="divider-title">Questions to the Client, and Who Claims What</h2>
   <p class="divider-owner">Dai Lam La La</p>
   <div class="spacer"></div>
   <p class="eyebrow" style="margin:0" data-section-label></p>
@@ -529,45 +510,47 @@ code{font-size:.95em}
 
 <section class="page" data-section="4">
   <div class="furniture top"><span data-section-indicator></span><span>Dai Lam La La</span></div>
-  <p class="eyebrow">Two decisions that are ours, and are labelled as ours</p>
-  <h1>Where the client's method runs out, we say so in the code</h1>
+  <p class="eyebrow">The next batch &middot; three items, all of them ours to close</p>
+  <h1>Assumptions we made, put back in front of them</h1>
   <hr class="rule">
   <ul class="bullets">
-    <li>Every requirement carries a source marker &mdash; client's answer, guide, workbook or our own minutes &mdash; so nothing anonymous reaches the build.</li>
-    <li><strong>A multi-year cost profile is averaged into one annual figure.</strong> Their guide's example is a single year and says nothing about the rest.</li>
-    <li><strong>The indirect uplift is divided back out</strong> of the revenue projection. Preserved from the spike; no client document says either way.</li>
-    <li>Both are commented at the line where they happen and both travel in the next question batch. <span class="hi">An assumption nobody can find is not an assumption.</span></li>
+    <li><strong>The multi-year cost profile is averaged into one annual figure.</strong> Their guide&rsquo;s worked example is a single year and says nothing about the rest.</li>
+    <li><strong>The indirect uplift is divided back out</strong> of the revenue projection. Kept from the spike; no client document says either way.</li>
+    <li><strong>A14</strong> &mdash; whether in-tool approval routing is required, or recording the approver is enough. Missed 26 August, re-dated, and still without an issue.</li>
+    <li>All three are commented in the code at the line where they happen, so none of them is an assumption nobody can find.</li>
   </ul>
+  <div class="ask">
+    <p><span class="tag">[DECIDE]</span> The batch closes Saturday 19 September and goes out that evening, so an answer is back before the demo. Anything else anyone wants in it?</p>
+  </div>
   <div class="spacer"></div>
-  <p class="small">Source: src/Models/RicCycle.cs &middot; src/CostingTool.Engine/RateEngine.cs &middot; docs/project/plan.md &sect;6.</p>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
 </section>
 
 <section class="page" data-section="4">
   <div class="furniture top"><span data-section-indicator></span><span>Dai Lam La La</span></div>
-  <p class="eyebrow">The risk register, reviewed every Saturday</p>
-  <h1>The threat is not an attacker; it is a plausible wrong number</h1>
+  <p class="eyebrow">The cross-read on Saturday 26 September</p>
+  <h1>Two of us cannot claim the same commit</h1>
   <hr class="rule">
-  <p class="lead">A rate is published for three to five years, embedded in grant budgets across the
-    University, and then defended in a Freedom of Information response. A spreadsheet flags none
-    of that: a cleared formula returns a number that looks fine.</p>
+  <p class="lead">Sprint 4 splits one story between a calculation and a screen; sprint 3 had one
+    member build <code>US-13</code> and another verify it. Read across the five drafts, those
+    seams are where the same work gets claimed twice in two different voices.</p>
   <div class="callout">
-    <p>Which is why the controls that count here are decimal arithmetic, a typed collection no
-      range can be dragged across, the immutable snapshot with its hash, and a test that stops
-      a merge &mdash; not a firewall.</p>
+    <p>The tie-breaker is the Build and Verify columns of the plan, not memory. Joint work is
+      described as joint, with the other person named &mdash; and it reads better in both reports
+      than either version of it reads alone.</p>
   </div>
   <div class="spacer"></div>
-  <p class="small">Source: docs/project/risks.md &sect;1, v1.1 &middot; 21 rows, each with a trigger and an owner.</p>
+  <p class="small">Source: docs/project/plan.md v1.4 &sect;2 &middot; docs/project/assignment-2-completion-plan.md &sect;8, risk A2-3.</p>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
 </section>
 
 
 <!-- ==========================================================================
-     SECTION 5 — Verification and the Record
+     SECTION 5 — The Record, and the Habits That Become Evidence
      ========================================================================== -->
 <section class="page ink no-furniture center" data-section="5">
   <p class="divider-num"></p>
-  <h2 class="divider-title">Verification and the Record</h2>
+  <h2 class="divider-title">The Record, and the Habits That Become Evidence</h2>
   <p class="divider-owner">Jaswanth Vericherla</p>
   <div class="spacer"></div>
   <p class="eyebrow" style="margin:0" data-section-label></p>
@@ -575,41 +558,34 @@ code{font-size:.95em}
 
 <section class="page" data-section="5">
   <div class="furniture top"><span data-section-indicator></span><span>Jaswanth Vericherla</span></div>
-  <p class="eyebrow">What is tested, and what plainly is not</p>
-  <h1>The arithmetic is guarded at both ends. The screens are not guarded at all</h1>
+  <p class="eyebrow">A cadence we promised and have not kept</p>
+  <h1>Four Saturdays, no minutes &mdash; and now it is worth marks</h1>
   <hr class="rule">
-  <table>
-    <caption>Source: tests/, .github/workflows/ci.yml, 13 September 2026.</caption>
-    <thead>
-      <tr><th>Layer</th><th>Held to what</th><th>Blocks a merge?</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>Calculation engine</td><td>Golden file, plus boundaries and rounding</td><td>Yes</td></tr>
-      <tr><td>Sealed-record PDF</td><td>The same three figures, asserted on the way out</td><td>Yes, from this week</td></tr>
-      <tr class="is-key"><td>Razor Pages and the seam between them</td><td>Nothing automated</td><td>No</td></tr>
-      <tr><td>Deployment</td><td>Not yet exercised &mdash; there is no server</td><td>No</td></tr>
-    </tbody>
-  </table>
+  <ul class="bullets">
+    <li>The plan promises a Saturday review with minutes committed inside 24 hours. The last minutes in the repository are dated <strong>20 August</strong>.</li>
+    <li>The meetings happened. The record of them did not, and the report&rsquo;s second criterion asks each of us to link meetings we attended and ran.</li>
+    <li>Today&rsquo;s meeting is minuted and committed <span class="hi">before Saturday</span>, along with the two from before the rule settled.</li>
+    <li>Either the cadence is kept from here, or the plan stops claiming it. A process nobody follows is worse evidence than one nobody promised.</li>
+  </ul>
   <div class="spacer"></div>
-  <p class="small">The team's skills audit rates nobody above 2 in automated testing; this row is the consequence, stated rather than hidden.</p>
+  <p class="small">Source: docs/meetings/ &middot; docs/project/plan.md v1.4 &sect;4 and &sect;6.</p>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
 </section>
 
 <section class="page" data-section="5">
   <div class="furniture top"><span data-section-indicator></span><span>Jaswanth Vericherla</span></div>
-  <p class="eyebrow">A cadence we promised and have not kept</p>
-  <h1>Four Saturdays, no minutes</h1>
+  <p class="eyebrow">Nine working days in which evidence can still be created</p>
+  <h1>Six habits worth more than six paragraphs</h1>
   <hr class="rule">
   <ul class="bullets">
-    <li>The plan promises a Saturday review with minutes committed inside 24 hours. The last minutes in the repository are dated <strong>20 August</strong>.</li>
-    <li>The meetings happened; the record of them did not. The plan now carries that as a dated, owned row rather than an implied cadence.</li>
-    <li>It is fixed this week or the plan stops claiming it &mdash; a process nobody follows is worse evidence than one nobody promised.</li>
+    <li><strong>One issue per piece of work</strong>, closed by the pull request that does it. <code>Closes #NN</code> is the whole mechanism.</li>
+    <li><strong>One branch per story, named for it.</strong> The brief asks for branches by name; <code>us-12-proposed-rates</code> reads as a contribution, <code>patch-3</code> does not.</li>
+    <li><strong>The test ships in the pull request that adds the behaviour</strong>, not in a tidy-up afterwards.</li>
+    <li><strong>Review with comments, not a rubber stamp.</strong> A review that caught a real defect is the strongest single artefact for criterion three.</li>
+    <li><strong>A comment at the top of anything non-obvious you wrote.</strong> The rubric asks for documentation you developed; this is the cheapest kind.</li>
+    <li><span class="hi">Do not manufacture any of it.</span> Back-dating and splitting one commit into ten are visible in the timeline.</li>
   </ul>
-  <div class="ask">
-    <p><span class="tag">[ASK]</span> For the project-management mark, does the assessment look at the repository's own meeting record, or at the account we give of it in the final report?</p>
-  </div>
   <div class="spacer"></div>
-  <p class="small">Source: docs/meetings/ &middot; docs/project/plan.md &sect;4 and &sect;6.</p>
   <div class="furniture bottom"><span class="num" data-pagenum></span></div>
 </section>
 
@@ -618,7 +594,7 @@ code{font-size:.95em}
      CLOSING
      ========================================================================== -->
 <section class="page ink no-furniture center" data-section="0">
-  <p class="eyebrow">Four weeks to handover &mdash; <span class="accent">and five questions for you</span></p>
+  <p class="eyebrow">Thirteen days &mdash; <span class="accent">and four decisions before we leave the room</span></p>
   <h2 class="cover-title" style="font-size:var(--t-section)">Research Infrastructure Costing &amp; Pricing Tool</h2>
   <hr class="rule">
   <p class="lead" style="color:var(--stone-400);max-width:56ch">
