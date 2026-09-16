@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 using CostingTool.Data;
 using CostingTool.Engine;
 using CostingTool.Models;
@@ -13,8 +15,37 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         options.LoginPath = "/Account/Login";
         options.AccessDeniedPath = "/Account/AccessDenied";
-        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.Cookie.Name = "RicCosting.Auth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+            ? CookieSecurePolicy.SameAsRequest
+            : CookieSecurePolicy.Always;
+        options.ExpireTimeSpan = TimeSpan.FromHours(2);
         options.SlidingExpiration = true;
+        options.Events.OnValidatePrincipal = async context =>
+        {
+            var idText = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var cookieStamp = context.Principal?.FindFirstValue(CurrentUser.SecurityStampClaim);
+
+            if (!int.TryParse(idText, out var userId) || string.IsNullOrWhiteSpace(cookieStamp))
+            {
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return;
+            }
+
+            var db = context.HttpContext.RequestServices.GetRequiredService<CostingDbContext>();
+            var user = await db.AppUsers.AsNoTracking()
+                .SingleOrDefaultAsync(x => x.Id == userId);
+
+            if (user is null || !user.IsActive || user.SecurityStamp != cookieStamp)
+            {
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            }
+        };
     });
 
 builder.Services.AddAuthorization(options =>
@@ -32,6 +63,7 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AllowAnonymousToPage("/Account/Login");
     options.Conventions.AllowAnonymousToPage("/Account/AccessDenied");
     options.Conventions.AllowAnonymousToPage("/Error");
+    options.Conventions.AuthorizePage("/Account/ChangePassword");
 });
 
 builder.Services.AddDbContext<CostingDbContext>(options =>
@@ -40,6 +72,11 @@ builder.Services.AddDbContext<CostingDbContext>(options =>
 
 builder.Services.AddScoped<MethodConfigProvider>();
 builder.Services.AddScoped<RicCalculationService>();
+builder.Services.Configure<PasswordHasherOptions>(options =>
+{
+    options.CompatibilityMode = PasswordHasherCompatibilityMode.IdentityV3;
+    options.IterationCount = 210_000;
+});
 builder.Services.AddScoped<IPasswordHasher<AppUser>, PasswordHasher<AppUser>>();
 
 var app = builder.Build();

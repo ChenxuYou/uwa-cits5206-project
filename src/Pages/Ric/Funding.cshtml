@@ -1,0 +1,100 @@
+@page
+@model CostingTool.Pages.Ric.FundingModel
+@{
+    ViewData["Title"] = "Funding sources";
+    var fundingItems = Model.Cycle.Costs.Where(x => x.IsIncome).OrderByDescending(x => x.Id).ToList();
+    var totalCost = Model.Cycle.Costs.Where(x => !x.IsIncome).Sum(x => x.Amount);
+    var totalFunding = fundingItems.Sum(x => x.Amount);
+    var uwaFunding = fundingItems.Where(x => x.IsUwaIncome).Sum(x => x.Amount);
+    var nonUwaFunding = totalFunding - uwaFunding;
+}
+
+<div class="page-wrap ric-page">
+    <partial name="_RicSteps" model='new CostingTool.Pages.Ric.RicStepViewModel(3, Model.Cycle.Id)' />
+
+    <div class="ric-title">
+        <div>
+            <span class="eyebrow">@Model.Cycle.PlatformName.ToUpper() · FUNDING SOURCES</span>
+            <h1>Record non-variable funding</h1>
+            <p>Enter recurrent funding separately from operating costs so each rate deducts the correct support.</p>
+        </div>
+        <div class="ric-total"><small>Average annual funding</small><strong>@totalFunding.ToString("C")</strong></div>
+    </div>
+
+    <div class="ric-two-column detailed-cost-layout">
+        <form method="post" asp-page-handler="Add" class="ric-card">
+            <input type="hidden" asp-for="CycleId" />
+            <div class="ric-card-title"><h2>Add funding source</h2><p>User fees are not funding sources and must not be entered here.</p></div>
+            <div asp-validation-summary="All" class="form-errors"></div>
+
+            <section class="detail-panel income-guide">
+                <h3>How funding affects calculated rates</h3>
+                <table class="income-lines">
+                    <thead><tr><th>Funding category</th><th>Effect on rates</th></tr></thead>
+                    <tbody>
+                        @foreach (var category in CostEntry.IncomeCategories.All)
+                        {
+                            <tr><td>@category</td><td>@CostEntry.IncomeCategories.RatesReduced(category)</td></tr>
+                        }
+                        <tr><td colspan="2"><small>The Commercial rate is not reduced by any funding.</small></td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <div class="form-grid two-columns">
+                <label class="field full-span">
+                    <span>Funding category *</span>
+                    <select asp-for="Category">
+                        @foreach (var category in CostEntry.IncomeCategories.All)
+                        {
+                            <option value="@category">@category</option>
+                        }
+                    </select>
+                </label>
+                <label class="field full-span"><span>Funding source name *</span><input asp-for="Description" placeholder="e.g. NCRIS operational funding" /></label>
+                <label class="field full-span"><span>Funding body</span><input asp-for="FundingBody" placeholder="e.g. Australian Government" /></label>
+            </div>
+
+            <section class="detail-panel">
+                <h3>Funding by year</h3>
+                <div class="year-grid">
+                    @for (var i = 0; i < Model.YearCount; i++)
+                    {
+                        <label class="field money-field"><span>@(Model.Cycle.StartYear + i)</span><div><b>$</b><input asp-for="YearAmounts[i]" type="number" min="0" step="0.01" /></div></label>
+                    }
+                </div>
+            </section>
+
+            <label class="field">
+                <span>Funding justification *</span>
+                <textarea asp-for="Justification" rows="3" placeholder="Explain where this funding comes from and how long it is committed for."></textarea>
+            </label>
+            <button class="primary-button full-button add-detail-button" type="submit">＋ Add funding source</button>
+        </form>
+
+        <section class="ric-card">
+            <div class="ric-card-title"><h2>Recorded funding sources</h2><p>@fundingItems.Count funding record(s)</p></div>
+            @if (fundingItems.Count == 0)
+            {
+                <div class="empty-state">No non-variable funding recorded. This is valid if the platform receives no recurrent support.</div>
+            }
+            @foreach (var item in fundingItems)
+            {
+                <div class="cost-row detailed-row">
+                    <div><strong>@item.Description</strong><small>@item.Category · @CostEntry.IncomeCategories.RatesReduced(item.Category)</small><em>@string.Join(" · ", item.YearAmounts.OrderBy(x => x.ProjectYear).Select((x, i) => $"{Model.Cycle.StartYear + i}: {x.Amount:C0}"))</em></div>
+                    <b>−@item.Amount.ToString("C")<small>annual avg.</small></b>
+                    <form method="post" asp-page-handler="Delete"><input type="hidden" name="CycleId" value="@Model.Cycle.Id" /><input type="hidden" name="id" value="@item.Id" /><button type="submit" aria-label="Delete @item.Description">×</button></form>
+                </div>
+            }
+
+            <div class="cost-summary">
+                <span><em>Total operating cost</em><b>@totalCost.ToString("C")</b></span>
+                <span><em>Less UWA funding<small>@CostEntry.IncomeCategories.RatesReduced(CostEntry.IncomeCategories.UwaGpInKind)</small></em><b>−@uwaFunding.ToString("C")</b></span>
+                <span><em>Less non-UWA funding<small>@CostEntry.IncomeCategories.RatesReduced(CostEntry.IncomeCategories.State)</small></em><b>−@nonUwaFunding.ToString("C")</b></span>
+                <span><em>Amount to recover in user fees</em><b>@((totalCost - totalFunding).ToString("C"))</b></span>
+            </div>
+        </section>
+    </div>
+
+    <div class="wizard-actions"><a class="secondary-action" asp-page="/Ric/Costs" asp-route-cycleId="@Model.Cycle.Id">← Back to costs</a><a class="primary-button" asp-page="/Ric/Capacity" asp-route-cycleId="@Model.Cycle.Id">Continue to capacity →</a></div>
+</div>
