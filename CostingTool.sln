@@ -8,6 +8,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CostingTool.Engine", "src\C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CostingTool.Engine.Tests", "tests\CostingTool.Engine.Tests\CostingTool.Engine.Tests.csproj", "{7C90E4B3-6F18-4A9D-B25E-8A31C0D7E933}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CostingTool.Pdf", "src\CostingTool.Pdf\CostingTool.Pdf.csproj", "{2D5A7C64-4E38-4F1B-9A07-63B8E1C4A705}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CostingTool.Pdf.Tests", "tests\CostingTool.Pdf.Tests\CostingTool.Pdf.Tests.csproj", "{8E13B0F7-52C6-4A44-BD91-0F7C6A2E4D18}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +30,14 @@ Global
 		{7C90E4B3-6F18-4A9D-B25E-8A31C0D7E933}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C90E4B3-6F18-4A9D-B25E-8A31C0D7E933}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C90E4B3-6F18-4A9D-B25E-8A31C0D7E933}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D5A7C64-4E38-4F1B-9A07-63B8E1C4A705}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D5A7C64-4E38-4F1B-9A07-63B8E1C4A705}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D5A7C64-4E38-4F1B-9A07-63B8E1C4A705}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D5A7C64-4E38-4F1B-9A07-63B8E1C4A705}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E13B0F7-52C6-4A44-BD91-0F7C6A2E4D18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E13B0F7-52C6-4A44-BD91-0F7C6A2E4D18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E13B0F7-52C6-4A44-BD91-0F7C6A2E4D18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E13B0F7-52C6-4A44-BD91-0F7C6A2E4D18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
