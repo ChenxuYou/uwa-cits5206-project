@@ -99,6 +99,10 @@
             </section>
 
             <label class="field"><span>Notes / assumptions</span><textarea asp-for="Notes" rows="3"></textarea></label>
+            @if (Model.NeedsLargeAmountConfirmation)
+            {
+                <label class="confirmation"><input type="checkbox" name="ConfirmLargeAmounts" value="true"><span>I have checked these amounts and they are correct.</span></label>
+            }
             <button class="primary-button full-button add-detail-button" type="submit">＋ Add cost item</button>
         </form>
 

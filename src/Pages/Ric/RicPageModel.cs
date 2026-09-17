@@ -43,4 +43,28 @@ public abstract class RicPageModel(CostingDbContext db) : PageModel
         Cycle = cycle;
         return true;
     }
+
+    /// <summary>
+    /// "Inputs[1].UwaUse" → "Cryo-EM: UWA forecast use", for a page that binds one row per
+    /// capability. Null for any key it does not recognise.
+    /// </summary>
+    protected string? IndexedFieldLabel(string key, IReadOnlyList<int> capabilityIds, IReadOnlyDictionary<string, string> fields)
+    {
+        const string prefix = "Inputs[";
+        var close = key.IndexOf("].", StringComparison.Ordinal);
+
+        if (!key.StartsWith(prefix, StringComparison.Ordinal)
+            || close < 0
+            || !int.TryParse(key.AsSpan(prefix.Length, close - prefix.Length), out var index)
+            || !fields.TryGetValue(key[(close + 2)..], out var field))
+        {
+            return null;
+        }
+
+        var name = index < capabilityIds.Count
+            ? Cycle.Capabilities.FirstOrDefault(x => x.Id == capabilityIds[index])?.Name
+            : null;
+
+        return name is null ? field : $"{name}: {field}";
+    }
 }

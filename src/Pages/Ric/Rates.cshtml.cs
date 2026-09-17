@@ -44,6 +44,8 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
             return RedirectToPage("/Ric/Review", new { cycleId = CycleId });
         }
 
+        EntryChecks.ExplainUnreadableNumbers(ModelState, FieldLabel, "a rate in dollars, such as 162.00");
+
         foreach (var input in Inputs)
         {
             if (Cycle.Capabilities.All(x => x.Id != input.Id))
@@ -106,4 +108,11 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
 
         public decimal Commercial { get; set; }
     }
+
+    private string? FieldLabel(string key) => IndexedFieldLabel(key, Inputs.Select(x => x.Id).ToList(), new Dictionary<string, string>
+    {
+        ["Uwa"] = "proposed UWA rate",
+        ["Apfr"] = "proposed APFR rate",
+        ["Commercial"] = "proposed commercial rate"
+    });
 }
