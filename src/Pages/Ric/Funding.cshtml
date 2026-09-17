@@ -69,6 +69,10 @@
                 <span>Funding justification *</span>
                 <textarea asp-for="Justification" rows="3" placeholder="Explain where this funding comes from and how long it is committed for."></textarea>
             </label>
+            @if (Model.NeedsLargeAmountConfirmation)
+            {
+                <label class="confirmation"><input type="checkbox" name="ConfirmLargeAmounts" value="true"><span>I have checked these amounts and they are correct.</span></label>
+            }
             <button class="primary-button full-button add-detail-button" type="submit">＋ Add funding source</button>
         </form>
 
