@@ -107,6 +107,19 @@ CostingTool.sln
 └── tests/CostingTool.Pdf.Tests/     References the renderer and nothing else
 ```
 
+### Who owns which part
+
+Agreed on 15 September 2026 — [`plan.md` §3](../docs/project/plan.md). Ask the owner first, and
+never approve a pull request in your own layer.
+
+| Part of the tree | Layer | Owner |
+| --- | --- | --- |
+| `Pages/**/*.cshtml.cs`, `Services/` (except the calculation), `Models/`, `Data/`, CI | General backend | Chenxu You |
+| `CostingTool.Engine/`, `Services/RicCalculationService.cs`, the workings in `CostingTool.Pdf/` | Backend — calculation | Wenmin Luo |
+| Server, CD, DNS, TLS, release | Backend — deployment | Dai Lam La La |
+| `Pages/**/*.cshtml`, `wwwroot/css/` | Front end | Yichen Zhao |
+| `Pages/Account/`, `Services/CurrentUser.cs`, the authorisation policies in `Program.cs` | Authentication | Jaswanth Vericherla |
+
 **The engine is a separate project on purpose.** `architecture.md` §3 rule R7 says the
 engine never sees a user, a session or a database row. Keeping it in its own project with
 no package references makes that a fact the compiler enforces rather than a claim in a
