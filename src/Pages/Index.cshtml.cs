@@ -21,6 +21,13 @@ public class IndexModel(CostingDbContext db) : PageModel
             return RedirectToPage("/Approvals/Index");
         }
 
+        // The overview below is a custodian's own workspace — their cycles, their
+        // notifications. An administrator owns neither, so they start where their work is.
+        if (User.IsInRole(AppUser.Roles.Administrator))
+        {
+            return RedirectToPage("/Admin/Cycles");
+        }
+
         var owner = User.UserName();
 
         Cycles = await db.RicCycles.AsNoTracking()

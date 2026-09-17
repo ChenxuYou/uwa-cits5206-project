@@ -1,0 +1,136 @@
+@page
+@model CostingTool.Pages.Admin.CycleDetailsModel
+@{
+    ViewData["Title"] = Model.Cycle.PlatformName;
+    var unit = Model.Cycle.BillableUnit.ToLowerInvariant();
+}
+<div class="page-wrap ric-page">
+    <nav class="breadcrumb"><a asp-page="/Admin/Cycles">All costing cycles</a><span>›</span><span>@Model.Cycle.PlatformName</span></nav>
+
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">ADMINISTRATION · READ ONLY</p>
+            <h1>@Model.Cycle.PlatformName</h1>
+            <p>@Model.Cycle.StartYear–@Model.Cycle.EndYear · billed in @unit · method @Model.Rates.Method.Version</p>
+        </div>
+        <span class="status-pill @Model.Cycle.Status.ToLowerInvariant()">@Model.Cycle.Status</span>
+    </div>
+
+    <div class="callout">
+        <span>!</span>
+        <div>
+            <strong>Nothing on this page can be changed</strong>
+            <p>Every record names the person who created, submitted and sealed it. An administrator editing a cycle would put the wrong name there, so the actions live with the custodian who owns it and the approver who seals it.</p>
+        </div>
+    </div>
+
+    <article class="review-card">
+        <div class="review-card-heading"><h2>Who did what</h2></div>
+        <div class="review-table-wrap">
+            <table class="review-table">
+                <tbody>
+                    <tr>
+                        <td><strong>Created</strong></td>
+                        <td>@Model.Cycle.CreatedByDisplay (@Model.Cycle.CreatedBy)@if (Model.Custodian is { IsActive: false }) { <small>Account is deactivated</small> }</td>
+                        <td>@Model.Cycle.CreatedAtUtc.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Submitted</strong></td>
+                        <td>@(Model.Cycle.SubmittedBy ?? "—")</td>
+                        <td>@(Model.Cycle.SubmittedAtUtc?.ToLocalTime().ToString("dd MMM yyyy HH:mm") ?? "—")</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Returned</strong></td>
+                        <td>@(Model.Cycle.ReturnedBy ?? "—")@if (Model.Cycle.ReturnReason is not null) { <small>@Model.Cycle.ReturnReason</small> }</td>
+                        <td>@(Model.Cycle.ReturnedAtUtc?.ToLocalTime().ToString("dd MMM yyyy HH:mm") ?? "—")</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Approved</strong></td>
+                        <td>@(Model.Cycle.ApprovedBy ?? "—")</td>
+                        <td>@(Model.Cycle.ApprovedAtUtc?.ToLocalTime().ToString("dd MMM yyyy HH:mm") ?? "—")</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sealed</strong></td>
+                        <td>@(Model.Cycle.SealedBy ?? "—")@if (Model.Cycle.SnapshotHash is not null) { <small>Snapshot @Model.Cycle.SnapshotHash</small> }</td>
+                        <td>@(Model.Cycle.SealedAtUtc?.ToLocalTime().ToString("dd MMM yyyy HH:mm") ?? "—")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="review-card">
+        <div class="review-card-heading">
+            <h2>Capability rates</h2>
+            <span>GST exclusive · method @Model.Rates.Method.Version</span>
+        </div>
+        <div class="review-table-wrap">
+            <table class="review-table">
+                <thead>
+                    <tr>
+                        <th>Capability</th>
+                        <th>Operating cost</th>
+                        <th>Income deducted</th>
+                        <th>Forecast use</th>
+                        <th>UWA calculated</th>
+                        <th>APFR calculated</th>
+                        <th>Commercial calculated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Cycle.Capabilities.Count == 0)
+                    {
+                        <tr><td colspan="7">No capabilities have been recorded.</td></tr>
+                    }
+                    @foreach (var capability in Model.Cycle.Capabilities)
+                    {
+                        var rates = Model.Rates.For(capability.Id);
+                        <tr>
+                            <td><strong>@capability.Name</strong></td>
+                            @if (rates is null)
+                            {
+                                <td colspan="6">@Model.Rates.ProblemFor(capability.Id)</td>
+                            }
+                            else
+                            {
+                                <td>@rates.TotalOperatingCost.ToString("C")</td>
+                                <td>@rates.TotalIncome.ToString("C")<small>UWA @rates.UwaIncome.ToString("C") · non-UWA @rates.NonUwaIncome.ToString("C")</small></td>
+                                <td>@rates.ForecastUtilisation.ToString("N1") @unit</td>
+                                <td>@rates.DisplayUwaRate.ToString("C")</td>
+                                <td>@rates.DisplayApfrRate.ToString("C")</td>
+                                <td>@rates.DisplayCommercialRate.ToString("C")</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="review-card">
+        <div class="review-card-heading"><h2>Recorded costs and income</h2><span>@Model.Cycle.Costs.Count record(s)</span></div>
+        <div class="review-table-wrap">
+            <table class="review-table">
+                <thead>
+                    <tr><th>Item</th><th>Category</th><th>Scope</th><th>Annual average</th><th>Notes</th></tr>
+                </thead>
+                <tbody>
+                    @if (Model.Cycle.Costs.Count == 0)
+                    {
+                        <tr><td colspan="5">No costs or income have been recorded.</td></tr>
+                    }
+                    @foreach (var item in Model.Cycle.Costs.OrderBy(x => x.IsIncome).ThenBy(x => x.Category))
+                    {
+                        <tr>
+                            <td><strong>@(item.Description ?? item.PersonnelName ?? item.Category)</strong><small>@(item.Capability?.Name ?? "Platform")</small></td>
+                            <td><span class="category-chip">@item.Category</span><small>@(item.IsIncome ? "Non-variable income" : "Operating cost")</small></td>
+                            <td>@item.Scope</td>
+                            <td><strong>@(item.IsIncome ? "−" : "")@item.Amount.ToString("C")</strong></td>
+                            <td class="notes-cell">@(item.Notes ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </article>
+</div>
