@@ -58,6 +58,12 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
     [BindProperty] public List<decimal> YearAmounts { get; set; } = [];
 
+    /// <summary>The custodian has looked at an unusually large amount and says it is right (US-18).</summary>
+    [BindProperty] public bool ConfirmLargeAmounts { get; set; }
+
+    /// <summary>True when the form should offer the "I have checked these amounts" tick.</summary>
+    public bool NeedsLargeAmountConfirmation { get; private set; }
+
     public int YearCount => Cycle.EndYear - Cycle.StartYear + 1;
 
     public async Task<IActionResult> OnGetAsync(int cycleId)
@@ -84,6 +90,7 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
             return RedirectToPage("/Ric/Review", new { cycleId = CycleId });
         }
 
+        ExplainUnreadableNumbers();
         Validate();
 
         if (!ModelState.IsValid)
@@ -213,11 +220,51 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
             ModelState.AddModelError(nameof(Description), "Description is required.");
         }
 
-        if (YearAmounts.Take(YearCount).Any(x => x < 0))
+        if (Category == CostEntry.CostCategories.Personnel)
+        {
+            // The form offers these as fixed choices, but a posted value is not bound to
+            // what the form offered — 500% FTE would otherwise be stored and costed.
+            foreach (var problem in new[]
+                     {
+                         EntryChecks.NotAPercentage(PercentWorked, "Percent worked"),
+                         EntryChecks.NotAPercentage(SuperannuationPercent, "Superannuation")
+                     })
+            {
+                if (problem is not null)
+                {
+                    ModelState.AddModelError(string.Empty, problem);
+                }
+            }
+        }
+
+        var entered = YearAmounts.Take(YearCount).ToList();
+
+        if (entered.Any(x => x < 0))
         {
             ModelState.AddModelError(string.Empty, "Year amounts cannot be negative.");
         }
+
+        // Only ask once everything else is right, so the tick is the last thing between
+        // the custodian and a saved line rather than one more error among several.
+        if (ModelState.IsValid && !ConfirmLargeAmounts)
+        {
+            var large = EntryChecks.UnusuallyLarge(
+                entered, Cycle.StartYear, Category, EntryChecks.ThresholdFor(Category));
+
+            foreach (var message in large)
+            {
+                ModelState.AddModelError(string.Empty, message);
+            }
+
+            NeedsLargeAmountConfirmation = large.Count > 0;
+        }
     }
+
+    private void ExplainUnreadableNumbers() =>
+        EntryChecks.ExplainUnreadableNumbers(
+            ModelState,
+            key => EntryChecks.YearIndex(key) is { } i ? $"{Cycle.StartYear + i} cost" : null,
+            "an amount in dollars, such as 20000.00");
 
     private async Task<bool> Load(int cycleId)
     {

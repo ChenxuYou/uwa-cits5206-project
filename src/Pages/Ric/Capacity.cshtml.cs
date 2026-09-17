@@ -36,6 +36,8 @@ public class CapacityModel(CostingDbContext db) : RicPageModel(db)
             return RedirectToPage("/Ric/Review", new { cycleId = CycleId });
         }
 
+        EntryChecks.ExplainUnreadableNumbers(ModelState, FieldLabel, "a number of billable units, such as 1200");
+
         foreach (var input in Inputs)
         {
             var capability = Cycle.Capabilities.FirstOrDefault(x => x.Id == input.Id);
@@ -110,4 +112,12 @@ public class CapacityModel(CostingDbContext db) : RicPageModel(db)
 
         public decimal CommercialUse { get; set; }
     }
+
+    private string? FieldLabel(string key) => IndexedFieldLabel(key, Inputs.Select(x => x.Id).ToList(), new Dictionary<string, string>
+    {
+        ["MaximumCapacity"] = "maximum capacity",
+        ["UwaUse"] = "UWA forecast use",
+        ["ApfrUse"] = "APFR forecast use",
+        ["CommercialUse"] = "commercial forecast use"
+    });
 }
