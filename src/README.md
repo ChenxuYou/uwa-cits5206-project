@@ -63,6 +63,7 @@ warning; `dotnet dev-certs https --trust` clears it for good.
 | --- | --- | --- | --- |
 | Platform custodian | `entry` | `Entry123!` | Their own cycles, the guided workflow, notifications |
 | Delegated approver | `approver` | `Approve123!` | The approval queue, and every submitted record |
+| Administrator | `admin` | `Admin123!` | Every cycle, whoever owns it, read-only — and the accounts themselves |
 
 **These exist in the Development environment only.** They are seeded by `Program.cs` behind
 an `IsDevelopment()` check, and the sign-in page prints them only there — so deploying to
@@ -70,11 +71,31 @@ staging cannot re-create the credentials that
 [`risks.md` R14](../docs/project/risks.md) makes a gate on deploying. A staging or
 production instance starts with no users, and accounts are provisioned deliberately.
 
+**Provisioning the first account.** With no users and no sign-up page, a fresh staging
+database would lock out the administrator who is meant to create the accounts. Supply
+`Bootstrap__AdminUserName` and `Bootstrap__AdminPassword` (and optionally
+`Bootstrap__AdminDisplayName`) as environment variables at first start: one administrator is
+created, only while the table is empty, and only if the password meets the policy below.
+Everyone else is then created from **Accounts** inside the application. Never commit these
+values.
+
+**What an administrator can and cannot do.** They see every cycle in the application and
+administer accounts — create, deactivate, reset a password. They cannot edit, submit or seal
+another person's cycle: those actions write a name into the record, and US-02, US-15 and
+US-16 depend on that name being the person who did the work. The role set beyond these three
+is [Q4](../docs/spec/requirements.md#9-open-questions), still open with the client. Accounts
+are deactivated rather than deleted, because their names appear on the records they created.
+
 Passwords are never stored in plain text. ASP.NET Core's `PasswordHasher<AppUser>` creates a
 new random salt for every password and stores a versioned PBKDF2 hash containing its salt and
 work factor. The application currently uses Identity V3 format with 210,000 iterations. A
 successful login transparently upgrades an older hash when its work factor is no longer
 current.
+
+The password rules live in one place, `Services/PasswordPolicy.cs`, so the change-password
+page and the administrator's create-and-reset screens cannot come to disagree about them.
+(The demo passwords above are shorter than the policy requires: they are development-only,
+typed constantly while building, and printed on the development sign-in page.)
 
 Five failed attempts lock an account for 15 minutes. Authentication cookies are HTTP-only,
 use `SameSite=Lax`, expire after two hours and carry a security stamp checked against the

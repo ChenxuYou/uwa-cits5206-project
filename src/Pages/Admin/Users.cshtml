@@ -1,0 +1,96 @@
+@page
+@model CostingTool.Pages.Admin.UsersModel
+@{
+    ViewData["Title"] = "Accounts";
+}
+<div class="page-wrap ric-page">
+    <div class="page-heading">
+        <div><p class="eyebrow">ADMINISTRATION</p><h1>Accounts</h1><p>Who can sign in, and what they are allowed to do. Accounts are deactivated rather than deleted, because their names are written into the records they created.</p></div>
+    </div>
+
+    @if (Model.SuccessMessage is not null)
+    {
+        <div class="submit-success"><span>✓</span><div><strong>Done</strong><p>@Model.SuccessMessage</p></div></div>
+    }
+
+    <div asp-validation-summary="All" class="form-errors"></div>
+
+    <article class="panel">
+        <div class="panel-heading compact"><div><h2>Existing accounts</h2><p>@Model.Users.Count account(s).</p></div></div>
+        <div class="review-table-wrap">
+            <table class="review-table">
+                <thead>
+                    <tr><th>Person</th><th>Role</th><th>State</th><th>Cycles owned</th><th>Reset password</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model.Users)
+                    {
+                        var owned = Model.CycleCounts.TryGetValue(user.UserName, out var count) ? count : 0;
+                        <tr>
+                            <td>
+                                <strong>@user.DisplayName</strong>
+                                <small>@user.UserName · last signed in @(user.LastLoginAtUtc?.ToLocalTime().ToString("dd MMM yyyy HH:mm") ?? "never")</small>
+                            </td>
+                            <td><span class="category-chip">@AppUser.Roles.Describe(user.Role)</span></td>
+                            <td>
+                                @if (user.IsActive)
+                                {
+                                    <span class="status-pill sealed">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="status-pill returned">Deactivated</span>
+                                }
+                                @if (user.LockoutEndUtc is not null && user.LockoutEndUtc > DateTime.UtcNow)
+                                {
+                                    <small>Locked until @user.LockoutEndUtc.Value.ToLocalTime().ToString("HH:mm")</small>
+                                }
+                                <form method="post" asp-page-handler="ToggleActive" asp-route-id="@user.Id">
+                                    <button class="secondary-action" type="submit">@(user.IsActive ? "Deactivate" : "Reactivate")</button>
+                                </form>
+                            </td>
+                            <td>@owned</td>
+                            <td>
+                                <form method="post" asp-page-handler="ResetPassword" asp-route-id="@user.Id" class="inline-reset">
+                                    <label class="field">
+                                        <span class="visually-hidden">New password for @user.UserName</span>
+                                        <input name="ResetPassword" type="password" autocomplete="new-password" placeholder="New password" />
+                                    </label>
+                                    <button class="secondary-action" type="submit">Reset</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <p class="income-optional">@PasswordPolicy.Description Resetting a password signs the account out everywhere.</p>
+    </article>
+
+    <form method="post" asp-page-handler="Create" class="ric-card narrow-card">
+        <div class="ric-heading">
+            <span>◆</span>
+            <div><h1>Create an account</h1><p>The display name is what appears on every record this person creates, so use the name they are known by.</p></div>
+        </div>
+
+        <div class="form-grid">
+            <label class="field"><span>Username *</span><input asp-for="NewUserName" autocomplete="off" /><small>Lower case, no spaces. It is never shown on a record.</small></label>
+            <label class="field"><span>Display name *</span><input asp-for="NewDisplayName" autocomplete="off" /></label>
+            <label class="field">
+                <span>Role *</span>
+                <select asp-for="NewRole">
+                    @foreach (var role in AppUser.Roles.All)
+                    {
+                        <option value="@role">@AppUser.Roles.Describe(role)</option>
+                    }
+                </select>
+            </label>
+            <label class="field"><span>Initial password *</span><input asp-for="NewPassword" type="password" autocomplete="new-password" /><small>@PasswordPolicy.Description</small></label>
+        </div>
+
+        <div class="wizard-actions">
+            <a class="secondary-action" asp-page="/Admin/Cycles">Cancel</a>
+            <button class="primary-button" type="submit">Create account</button>
+        </div>
+    </form>
+</div>
