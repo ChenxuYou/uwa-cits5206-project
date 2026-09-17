@@ -1,15 +1,19 @@
 # Team Members
 
-| Name | Also known as | Student ID | GitHub Username |
-|------|---------------|-----------|-----------------|
-| Chenxu You | Oliver | 24547664 | ChenxuYou |
-| Yichen Zhao | Evan | 24366018 | itsEvanZHAO |
-| Wenmin Luo | — | 24489475 | onikirinana |
-| Dai Lam La La | — | 24495605 | ladailam382 |
-| Jaswanth Vericherla | — | 24681985 | jaswanth-kumar24 |
+| Name | Also known as | Student ID | GitHub Username | Technical layer |
+|------|---------------|-----------|-----------------|-----------------|
+| Chenxu You | Oliver | 24547664 | ChenxuYou | General backend |
+| Yichen Zhao | Evan | 24366018 | itsEvanZHAO | Front end |
+| Wenmin Luo | — | 24489475 | onikirinana | Backend — calculation |
+| Dai Lam La La | — | 24495605 | ladailam382 | Backend — deployment |
+| Jaswanth Vericherla | — | 24681985 | jaswanth-kumar24 | Authentication |
 
 This table is the roster's only home. Presentations derive one section per member,
 in this order, from it — see [`presentations/STYLE-GUIDE.md`](../../presentations/STYLE-GUIDE.md) §4.2.
+
+**Technical layers** were agreed at the [team meeting of 15 September 2026](../meetings/2026-09-15-team-meeting.md).
+The column above is the short label only; what each layer builds, and the standing
+responsibilities beside it, live in [`plan.md` §3](plan.md).
 
 **Two members go by an English name as well as the name on their enrolment.** Chenxu You is
 **Oliver**; Yichen Zhao is **Evan**. Either name refers to the same person, and both turn up

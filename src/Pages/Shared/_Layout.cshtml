@@ -99,6 +99,7 @@
                             <strong>@displayName</strong>
                             <small>@(isApprover ? "Delegated approver" : "Platform custodian")</small>
                         </span>
+                        <a class="account-link" asp-page="/Account/ChangePassword">Password</a>
                         <form method="post" asp-page="/Account/Logout">
                             <button class="logout-button" type="submit">Sign out</button>
                         </form>

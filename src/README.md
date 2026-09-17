@@ -70,6 +70,18 @@ staging cannot re-create the credentials that
 [`risks.md` R14](../docs/project/risks.md) makes a gate on deploying. A staging or
 production instance starts with no users, and accounts are provisioned deliberately.
 
+Passwords are never stored in plain text. ASP.NET Core's `PasswordHasher<AppUser>` creates a
+new random salt for every password and stores a versioned PBKDF2 hash containing its salt and
+work factor. The application currently uses Identity V3 format with 210,000 iterations. A
+successful login transparently upgrades an older hash when its work factor is no longer
+current.
+
+Five failed attempts lock an account for 15 minutes. Authentication cookies are HTTP-only,
+use `SameSite=Lax`, expire after two hours and carry a security stamp checked against the
+database. Changing a password rotates that stamp, invalidating older sessions. Signed-in
+users can change their password from the user area; new passwords require at least 12
+characters with uppercase, lowercase, number and symbol.
+
 ---
 
 ## How the code is arranged
@@ -95,6 +107,19 @@ CostingTool.sln
 └── tests/CostingTool.Pdf.Tests/     References the renderer and nothing else
 ```
 
+### Who owns which part
+
+Agreed on 15 September 2026 — [`plan.md` §3](../docs/project/plan.md). Ask the owner first, and
+never approve a pull request in your own layer.
+
+| Part of the tree | Layer | Owner |
+| --- | --- | --- |
+| `Pages/**/*.cshtml.cs`, `Services/` (except the calculation), `Models/`, `Data/`, CI | General backend | Chenxu You |
+| `CostingTool.Engine/`, `Services/RicCalculationService.cs`, the workings in `CostingTool.Pdf/` | Backend — calculation | Wenmin Luo |
+| Server, CD, DNS, TLS, release | Backend — deployment | Dai Lam La La |
+| `Pages/**/*.cshtml`, `wwwroot/css/` | Front end | Yichen Zhao |
+| `Pages/Account/`, `Services/CurrentUser.cs`, the authorisation policies in `Program.cs` | Authentication | Jaswanth Vericherla |
+
 **The engine is a separate project on purpose.** `architecture.md` §3 rule R7 says the
 engine never sees a user, a session or a database row. Keeping it in its own project with
 no package references makes that a fact the compiler enforces rather than a claim in a
@@ -109,15 +134,16 @@ a page can render.
 ### The workflow
 
 1. **Start** — platform, pricing period, billable unit, capabilities.
-2. **Costs** — Personnel, Equipment, Maintenance, Travel, Animal and Other items by year,
-   plus the four non-variable income lines. A line is booked either to one capability or to
-   the platform, never both.
-3. **Capacity** — maximum capacity and forecast utilisation per user category. Forecast, not
+2. **Costs** — Personnel, Equipment, Maintenance, Travel, Animal and Other operating cost
+   items by year. A cost is booked either to one capability or to the platform, never both.
+3. **Funding** — the four non-variable funding lines, recorded separately from operating
+   costs with their source, commitment period and effect on each rate.
+4. **Capacity** — maximum capacity and forecast utilisation per user category. Forecast, not
    capacity: it is the divisor behind every rate.
-4. **Rates** — three minimum sustainable rates per capability, with the figures behind each,
+5. **Rates** — three minimum sustainable rates per capability, with the figures behind each,
    plus proposed rates and the resulting balance.
-5. **Review** — check and submit for delegated authority approval.
-6. **Approvals** — the approver sees the workings, then approves and seals, or returns the
+6. **Review** — check and submit for delegated authority approval.
+7. **Approvals** — the approver sees the workings, then approves and seals, or returns the
    cycle with required changes.
 
 Submitted cycles are read-only while awaiting a decision; returned cycles can be edited and
