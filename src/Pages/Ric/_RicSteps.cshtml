@@ -1,7 +1,53 @@
 @model CostingTool.Pages.Ric.RicStepViewModel
-<div class="ric-steps">
-@foreach (var item in new[] { (1,"Platform"), (2,"Costs"), (3,"Funding"), (4,"Capacity"), (5,"Rates"), (6,"Review") })
-{
-    <div class="ric-step @(item.Item1 == Model.Current ? "active" : item.Item1 < Model.Current ? "complete" : "")"><span>@(item.Item1 < Model.Current ? "✓" : item.Item1)</span><b>@item.Item2</b></div>
+@*
+    The step bar is navigation, not decoration (US-10: return to any earlier section, change a
+    value, come back to the rates). A completed step is a link to that screen; the current step
+    is marked with aria-current; steps still to come are plain text.
+
+    Step 1 creates the cycle, so there is nothing to return to and it is never a link. Nothing
+    links forward: a later screen may depend on figures this one has not saved yet.
+
+    Step names are hidden visually on narrow screens (site.css) but stay in the accessibility
+    tree, because a link whose only content is a tick has no name.
+*@
+@{
+    var steps = new (int Number, string Name, string? Page)[]
+    {
+        (1, "Platform", null),
+        (2, "Costs", "/Ric/Costs"),
+        (3, "Funding", "/Ric/Funding"),
+        (4, "Capacity", "/Ric/Capacity"),
+        (5, "Rates", "/Ric/Rates"),
+        (6, "Review", "/Ric/Review")
+    };
 }
-</div>
+<nav aria-label="Costing steps">
+    <ol class="ric-steps">
+        @foreach (var step in steps)
+        {
+            var isCurrent = step.Number == Model.Current;
+            var isComplete = step.Number < Model.Current;
+            var state = isCurrent ? "active" : isComplete ? "complete" : "";
+            var isLink = isComplete && Model.CanNavigate && step.Page is not null && Model.CycleId is not null;
+
+            <li class="ric-step @state">
+                @if (isLink)
+                {
+                    <a class="ric-step-link" asp-page="@step.Page" asp-route-cycleId="@Model.CycleId">
+                        <span aria-hidden="true">✓</span><b>@step.Name</b><small class="visually-hidden">(completed)</small>
+                    </a>
+                }
+                else
+                {
+                    <div class="ric-step-link" aria-current="@(isCurrent ? "step" : null)">
+                        <span aria-hidden="true">@(isComplete ? "✓" : step.Number.ToString())</span><b>@step.Name</b>
+                        @if (isComplete)
+                        {
+                            <small class="visually-hidden">(completed)</small>
+                        }
+                    </div>
+                }
+            </li>
+        }
+    </ol>
+</nav>

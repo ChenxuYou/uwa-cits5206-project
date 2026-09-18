@@ -15,6 +15,12 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
 
     [BindProperty] public string? PricingJustification { get; set; }
 
+    /// <summary>
+    /// True when the page is showing the balance for rates the custodian has typed but not
+    /// saved (<see cref="OnPostPreviewAsync"/>), so the view can say so.
+    /// </summary>
+    public bool IsPreview { get; private set; }
+
     public async Task<IActionResult> OnGetAsync(int cycleId)
     {
         if (!await Load(cycleId))
@@ -44,6 +50,59 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
             return RedirectToPage("/Ric/Review", new { cycleId = CycleId });
         }
 
+        ValidateInputs();
+
+        if (!ModelState.IsValid)
+        {
+            return Page();
+        }
+
+        ApplyInputs();
+
+        Cycle.BenchmarkNotes = BenchmarkNotes;
+        Cycle.PricingJustification = PricingJustification;
+        Cycle.UpdatedAtUtc = DateTime.UtcNow;
+        await Db.SaveChangesAsync();
+
+        return RedirectToPage("/Ric/Review", new { cycleId = CycleId });
+    }
+
+    /// <summary>
+    /// "What if" (US-10, US-12): recalculate the balance at the proposed rates typed on the
+    /// page, without saving them. The calculation stays on the server — no formula or
+    /// coefficient is sent to the browser (US-09, N1) — so seeing a new balance costs a round
+    /// trip, and nothing reaches the database until the custodian continues to the review.
+    /// </summary>
+    public async Task<IActionResult> OnPostPreviewAsync()
+    {
+        if (!await Load(CycleId))
+        {
+            return NotFound();
+        }
+
+        if (!Cycle.IsEditable)
+        {
+            return RedirectToPage("/Ric/Review", new { cycleId = CycleId });
+        }
+
+        ValidateInputs();
+
+        if (!ModelState.IsValid)
+        {
+            return Page();
+        }
+
+        // In memory only: this handler never calls SaveChanges, and the context is scoped to
+        // the request, so the tracked entities are discarded with it.
+        ApplyInputs();
+        Rates = calculator.Calculate(Cycle);
+        IsPreview = true;
+
+        return Page();
+    }
+
+    private void ValidateInputs()
+    {
         foreach (var input in Inputs)
         {
             if (Cycle.Capabilities.All(x => x.Id != input.Id))
@@ -55,12 +114,10 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
                 ModelState.AddModelError(string.Empty, "Proposed rates cannot be negative.");
             }
         }
+    }
 
-        if (!ModelState.IsValid)
-        {
-            return Page();
-        }
-
+    private void ApplyInputs()
+    {
         foreach (var input in Inputs)
         {
             var capability = Cycle.Capabilities.First(x => x.Id == input.Id);
@@ -68,13 +125,6 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
             capability.ProposedApfrRate = input.Apfr;
             capability.ProposedCommercialRate = input.Commercial;
         }
-
-        Cycle.BenchmarkNotes = BenchmarkNotes;
-        Cycle.PricingJustification = PricingJustification;
-        Cycle.UpdatedAtUtc = DateTime.UtcNow;
-        await Db.SaveChangesAsync();
-
-        return RedirectToPage("/Ric/Review", new { cycleId = CycleId });
     }
 
     private async Task<bool> Load(int cycleId)
