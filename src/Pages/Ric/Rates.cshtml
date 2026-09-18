@@ -1,5 +1,6 @@
 @page
 @model CostingTool.Pages.Ric.RatesModel
+@using CostingTool.Models
 @{
     ViewData["Title"] = "Sustainable rates";
 
@@ -9,6 +10,7 @@
     var k = Model.Rates.Method.IndirectCostRecovery;
     var upliftLabel = $"Includes {(k - 1m) * 100m:0.#}% indirect cost recovery";
     var unit = Model.Cycle.BillableUnit.ToLowerInvariant();
+    var perUnit = Model.Cycle.BillableUnit.TrimEnd('s').ToLowerInvariant();
 }
 
 <div class="page-wrap ric-page">
@@ -18,7 +20,7 @@
         <div>
             <span class="eyebrow">@Model.Cycle.PlatformName.ToUpper()</span>
             <h1>Sustainable and proposed rates</h1>
-            <p>Calculated rates are GST exclusive. Proposed rates can vary, but the financial effect must be visible.</p>
+            <p>Every rate on this page is @RateCategories.GstLabel, per @perUnit.</p>
         </div>
         <div class="ric-total">
             <small>Method version</small>
@@ -29,6 +31,14 @@
     <form method="post">
         <input type="hidden" asp-for="CycleId" />
         <div asp-validation-summary="All" class="form-errors"></div>
+
+        <section class="ric-card">
+            <div class="ric-card-title">
+                <h2>How to read these rates</h2>
+                <p>@RateCategories.ProposedRateFraming</p>
+            </div>
+            <p><small>@RateCategories.UpliftExplanation</small></p>
+        </section>
 
         <div class="rate-list">
             @for (var i = 0; i < Model.Inputs.Count; i++)
@@ -73,37 +83,136 @@
                     {
                         <div class="rate-grid">
                             <div class="rate-column">
-                                <span>UWA Researcher</span>
-                                <small>Minimum sustainable</small>
+                                <span>@RateCategories.UwaResearcher.Name</span>
+                                <small>Minimum sustainable · @RateCategories.GstLabel</small>
                                 <strong>@rates.DisplayUwaRate.ToString("C")</strong>
+                                <small>@RateCategories.UwaResearcher.Eligibility</small>
+                                <small>@RateCategories.UwaResearcher.IncomeDeducted</small>
+                                <small>No indirect cost recovery is added to this rate.</small>
                                 <label>
                                     Proposed rate
                                     <input asp-for="Inputs[i].Uwa" type="number" min="0" step="0.01" />
                                 </label>
+                                @if (rates.ProposedUwaRate > 0)
+                                {
+                                    <small>
+                                        Variance @rates.UwaRateVariance.ToString("C")
+                                        @(rates.UwaRateVariancePercent is null ? "" : $"({rates.UwaRateVariancePercent:+0.0;-0.0;0.0}%)")
+                                        against the calculated rate
+                                    </small>
+                                }
                             </div>
                             <div class="rate-column">
-                                <span>APFR</span>
-                                <small>@upliftLabel</small>
+                                <span>@RateCategories.Apfr.Name</span>
+                                <small>@upliftLabel · @RateCategories.GstLabel</small>
                                 <strong>@rates.DisplayApfrRate.ToString("C")</strong>
+                                <small>@RateCategories.Apfr.Eligibility</small>
+                                <small>@RateCategories.Apfr.IncomeDeducted</small>
                                 <label>
                                     Proposed rate
                                     <input asp-for="Inputs[i].Apfr" type="number" min="0" step="0.01" />
                                 </label>
+                                @if (rates.ProposedApfrRate > 0)
+                                {
+                                    <small>
+                                        Variance @rates.ApfrRateVariance.ToString("C")
+                                        @(rates.ApfrRateVariancePercent is null ? "" : $"({rates.ApfrRateVariancePercent:+0.0;-0.0;0.0}%)")
+                                        against the calculated rate
+                                    </small>
+                                }
                             </div>
                             <div class="rate-column">
-                                <span>Commercial</span>
-                                <small>@upliftLabel</small>
+                                <span>@RateCategories.Commercial.Name</span>
+                                <small>@upliftLabel · @RateCategories.GstLabel</small>
                                 <strong>@rates.DisplayCommercialRate.ToString("C")</strong>
+                                <small>@RateCategories.Commercial.Eligibility</small>
+                                <small>@RateCategories.Commercial.IncomeDeducted</small>
                                 <label>
                                     Proposed rate
                                     <input asp-for="Inputs[i].Commercial" type="number" min="0" step="0.01" />
                                 </label>
+                                @if (rates.ProposedCommercialRate > 0)
+                                {
+                                    <small>
+                                        Variance @rates.CommercialRateVariance.ToString("C")
+                                        @(rates.CommercialRateVariancePercent is null ? "" : $"({rates.CommercialRateVariancePercent:+0.0;-0.0;0.0}%)")
+                                        against the calculated rate
+                                    </small>
+                                }
                             </div>
+                        </div>
+
+                        @if (rates.CommercialRateVaries)
+                        {
+                            <div class="callout">
+                                <span>!</span>
+                                <div>
+                                    <strong>Competitive neutrality</strong>
+                                    <p>@RateCategories.CompetitiveNeutrality</p>
+                                </div>
+                            </div>
+                        }
+
+                        <details class="rate-workings">
+                            <summary>The figures behind these rates</summary>
+                            <div class="review-table-wrap">
+                                <table class="review-table">
+                                    <tbody>
+                                        <tr><td>Operating cost booked to this capability</td><td>@rates.CapabilityOperatingCost.ToString("C")</td></tr>
+                                        <tr><td>Share of platform-level cost</td><td>@rates.AllocatedPlatformCost.ToString("C")</td></tr>
+                                        <tr><td><strong>Total operating cost</strong></td><td><strong>@rates.TotalOperatingCost.ToString("C")</strong></td></tr>
+                                        <tr><td>Less UWA non-variable income</td><td>−@rates.UwaIncome.ToString("C")</td></tr>
+                                        <tr><td>Less non-UWA non-variable income</td><td>−@rates.NonUwaIncome.ToString("C")</td></tr>
+                                        <tr><td><strong>Cost to recover from usage</strong></td><td><strong>@rates.NetCostToRecover.ToString("C")</strong></td></tr>
+                                        <tr>
+                                            <td>Forecast utilisation — the divisor</td>
+                                            <td>
+                                                @rates.ForecastUtilisation.ToString("N1") @unit
+                                                (UWA @rates.ForecastUwaUse.ToString("N1") ·
+                                                APFR @rates.ForecastApfrUse.ToString("N1") ·
+                                                commercial @rates.ForecastCommercialUse.ToString("N1"))
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </details>
+
+                        <div class="cost-summary">
+                            <span><em>Billed to users at the proposed rates</em><b>@rates.GrossForecastRevenue.ToString("C")</b></span>
+                            <span><em>Less University overheads recovered<small>@upliftLabel</small></em><b>−@rates.OverheadsRecovered.ToString("C")</b></span>
+                            <span><em>Retained by the platform</em><b>@rates.ForecastRevenue.ToString("C")</b></span>
+                            <span><em>Cost to recover from usage</em><b>@rates.NetCostToRecover.ToString("C")</b></span>
+                            <span class="@(rates.ForecastBalance >= 0 ? "positive-text" : "negative-text")">
+                                <em>Forecast @(rates.ForecastBalance >= 0 ? "surplus" : "deficit")<small>Against full economic cost: @rates.FullEconomicCostBalance.ToString("C")</small></em>
+                                <b>@rates.ForecastBalance.ToString("C")</b>
+                            </span>
                         </div>
                     }
                 </article>
             }
         </div>
+
+        <section class="ric-card rate-notes">
+            <div class="ric-card-title">
+                <h2>The platform at the proposed rates</h2>
+                <p>Summed over every capability that priced — never a stored total.</p>
+            </div>
+            <div class="cost-summary">
+                <span><em>Total operating cost</em><b>@Model.Rates.TotalOperatingCost.ToString("C")</b></span>
+                <span><em>Less non-variable income</em><b>−@Model.Rates.TotalIncome.ToString("C")</b></span>
+                <span><em>Cost to recover from usage</em><b>@Model.Rates.NetCostToRecover.ToString("C")</b></span>
+                <span><em>Retained revenue at the proposed rates<small>University overheads recovered: @Model.Rates.OverheadsRecovered.ToString("C")</small></em><b>@Model.Rates.ForecastRevenue.ToString("C")</b></span>
+                <span class="@(Model.Rates.ForecastBalance >= 0 ? "positive-text" : "negative-text")">
+                    <em>Forecast @(Model.Rates.ForecastBalance >= 0 ? "surplus" : "deficit")<small>Against full economic cost: @Model.Rates.FullEconomicCostBalance.ToString("C")</small></em>
+                    <b>@Model.Rates.ForecastBalance.ToString("C")</b>
+                </span>
+            </div>
+            @if (!Model.Rates.IsComplete)
+            {
+                <p><small>Capabilities that could not be priced are not in these totals.</small></p>
+            }
+        </section>
 
         <section class="ric-card rate-notes">
             <div class="form-grid two-columns">
@@ -113,13 +222,15 @@
                 </label>
                 <label class="field">
                     <span>Pricing justification</span>
-                    <textarea asp-for="PricingJustification" rows="5" placeholder="Explain why the proposed rates differ from the calculated minimums..."></textarea>
+                    <textarea asp-for="PricingJustification" rows="5" placeholder="Explain why the proposed rates differ from the calculated minimums, and how a forecast deficit will be carried."></textarea>
+                    <span asp-validation-for="PricingJustification" class="field-error"></span>
                 </label>
             </div>
         </section>
 
         <div class="wizard-actions">
-            <a class="secondary-action" asp-page="/Ric/Capacity" asp-route-cycleId="@Model.Cycle.Id">← Back to capacity</a>
+            @* A link here would have thrown away everything typed on this screen — US-10. *@
+            <button class="secondary-action" type="submit" asp-page-handler="Back">← Save and go back to capacity</button>
             <button class="primary-button" type="submit">Review costing cycle →</button>
         </div>
     </form>
