@@ -1,5 +1,5 @@
 {
-  "SchemaVersion": "1.1",
+  "SchemaVersion": "1.2",
   "SealedAtUtc": "2026-09-16T02:15:00Z",
   "MethodVersion": "2026.1",
   "Method": {
@@ -29,12 +29,18 @@
     "ApprovedBy": "Dr Chen",
     "ApprovedAtUtc": "2026-09-16T02:15:00Z",
     "ApprovalComment": "Approved. Revisit the cryo-EM commercial rate at the first annual review.",
-    "EffectiveDateUtc": "2027-01-01T00:00:00Z"
+    "EffectiveDateUtc": "2027-01-01T00:00:00Z",
+    "UtilisationAssumptions": "Forecast from the 2025 booking system export, less 15 days of planned maintenance per instrument and the training block in February. Commercial use is held flat on last year."
   },
   "Platform": {
     "TotalOperatingCost": 250000,
+    "TotalIncome": 70000,
+    "NetCostToRecover": 180000,
+    "GrossForecastRevenue": 224475,
+    "OverheadsRecovered": 30975,
     "ForecastRevenue": 193500,
-    "ForecastBalance": -56500
+    "ForecastBalance": 13500,
+    "FullEconomicCostBalance": -56500
   },
   "Capabilities": [
     {
@@ -61,16 +67,20 @@
         "TotalIncome": 50000,
         "ForecastUtilisation": 1000,
         "UwaRate": 100,
-        "ApfrRate": 162.00,
-        "CommercialRate": 202.50,
+        "ApfrRate": 162.0,
+        "CommercialRate": 202.5,
         "ProposedUwaRate": 100,
         "ProposedApfrRate": 162,
         "ProposedCommercialRate": 202.5,
         "ForecastRevenue": 112500,
-        "ForecastBalance": -37500,
-        "DisplayUwaRate": 100.00,
-        "DisplayApfrRate": 162.00,
-        "DisplayCommercialRate": 202.50
+        "ForecastBalance": 12500,
+        "DisplayUwaRate": 100.0,
+        "DisplayApfrRate": 162.0,
+        "DisplayCommercialRate": 202.5,
+        "GrossForecastRevenue": 130875,
+        "OverheadsRecovered": 18375,
+        "NetCostToRecover": 100000,
+        "FullEconomicCostBalance": -37500
       },
       "Workings": {
         "C": "140000 capability + 10000 allocated platform = 150000",
@@ -107,16 +117,20 @@
         "TotalIncome": 20000,
         "ForecastUtilisation": 500,
         "UwaRate": 160,
-        "ApfrRate": 216.00,
-        "CommercialRate": 270.00,
+        "ApfrRate": 216.0,
+        "CommercialRate": 270.0,
         "ProposedUwaRate": 160,
         "ProposedApfrRate": 216,
         "ProposedCommercialRate": 240,
         "ForecastRevenue": 81000,
-        "ForecastBalance": -19000,
-        "DisplayUwaRate": 160.00,
-        "DisplayApfrRate": 216.00,
-        "DisplayCommercialRate": 270.00
+        "ForecastBalance": 1000,
+        "DisplayUwaRate": 160.0,
+        "DisplayApfrRate": 216.0,
+        "DisplayCommercialRate": 270.0,
+        "GrossForecastRevenue": 93600,
+        "OverheadsRecovered": 12600,
+        "NetCostToRecover": 80000,
+        "FullEconomicCostBalance": -19000
       },
       "Workings": {
         "C": "90000 capability + 10000 allocated platform = 100000",

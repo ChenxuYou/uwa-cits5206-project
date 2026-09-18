@@ -101,6 +101,15 @@ public class RicCycle
     /// <summary>The owner's name as it should appear on screen and in the sealed record.</summary>
     public string CreatedByDisplay { get; set; } = string.Empty;
 
+    /// <summary>
+    /// How the forecast utilisation was arrived at.
+    ///
+    /// The guide's Step 5 checklist requires utilisation assumptions to be documented before
+    /// approval, and US-13 asks for the explanation to sit in the section it explains rather
+    /// than all at the end. Required by the capacity step, carried into the sealed record.
+    /// </summary>
+    public string? UtilisationAssumptions { get; set; }
+
     public string? BenchmarkNotes { get; set; }
     public string? PricingJustification { get; set; }
     public string? SubmittedBy { get; set; }

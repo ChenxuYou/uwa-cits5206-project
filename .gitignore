@@ -143,6 +143,20 @@ projects.json
 
 
 # -----------------------------------------------------------------------------
+# 3c. Output from AI coding assistants
+#
+# Claude Code and anything like it writes its working output to a folder in the
+# tree: PR reviews, drafts, scratch analysis. It is written for whoever asked
+# for it, against the tree as it stood at that moment, and it is stale by the
+# next commit. Whatever is worth keeping gets actioned in the code or in the
+# documents, which is where a reviewer will look for it. A review of a pull
+# request pushed onto the branch it reviews is noise on that pull request.
+# -----------------------------------------------------------------------------
+Claude outputs/
+claude-outputs/
+
+
+# -----------------------------------------------------------------------------
 # 4. Credentials and secrets
 #
 # Nothing here is currently needed, but the calculation service will have a

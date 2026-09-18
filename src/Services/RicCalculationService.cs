@@ -170,9 +170,28 @@ public sealed class CycleRates(
     // total — architecture.md §4.
     public decimal TotalOperatingCost => results.Values.Sum(x => x.TotalOperatingCost);
 
+    /// <summary>Non-variable income carried by the priced capabilities.</summary>
+    public decimal TotalIncome => results.Values.Sum(x => x.TotalIncome);
+
+    /// <summary>Operating cost less non-variable income — what usage has to recover.</summary>
+    public decimal NetCostToRecover => results.Values.Sum(x => x.NetCostToRecover);
+
+    /// <summary>Billed to users at the proposed rates, uplift included.</summary>
+    public decimal GrossForecastRevenue => results.Values.Sum(x => x.GrossForecastRevenue);
+
     public decimal ForecastRevenue => results.Values.Sum(x => x.ForecastRevenue);
 
-    public decimal ForecastBalance => ForecastRevenue - TotalOperatingCost;
+    /// <summary>The University's indirect cost recovery, on its own line (US-12).</summary>
+    public decimal OverheadsRecovered => results.Values.Sum(x => x.OverheadsRecovered);
+
+    /// <summary>
+    /// Surplus or deficit at the proposed rates, against cost less income — the same
+    /// measure the capability figures use, summed over the capabilities that priced.
+    /// </summary>
+    public decimal ForecastBalance => ForecastRevenue - NetCostToRecover;
+
+    /// <summary>The same projection against full economic cost, with no income deducted.</summary>
+    public decimal FullEconomicCostBalance => ForecastRevenue - TotalOperatingCost;
 
     /// <summary>Round a rolled-up figure by the same rule the engine applies to a rate.</summary>
     public decimal Round(decimal value) => Math.Round(value, Method.RateDecimals, Method.MidpointRule);

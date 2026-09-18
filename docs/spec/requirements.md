@@ -393,6 +393,18 @@ Before rates take effect, the guide requires **[G, Step 5]**:
 the custodian's justification. A tool that only shows the calculated rate does not meet the
 requirement.
 
+**What the balance is measured against.** US-12 words it as "against total cost less income",
+so the forecast balance is *revenue retained at the proposed rates* less *operating cost less
+non-variable income*. Non-variable income is money the platform already holds; measuring the
+same revenue against the full operating cost counts it twice and overstates the shortfall.
+The workbook's other line — the recovery of **full economic cost**, with no income deducted —
+is reported beside it rather than instead of it, because an approver reads the two together,
+and the university overheads recovered are shown on a line of their own **[W, sheet 3 rows
+39–42]**. The engine therefore returns four figures where it used to return two: billed,
+overheads recovered, retained, and the balance against each of the two costs. Adopted
+18 September 2026 with US-09 to US-13; before that date the balance compared retained revenue
+with full operating cost only.
+
 ### Step 6 — Communicate price changes
 
 Approved rates are communicated to users, explaining why prices changed, the methodology used,
