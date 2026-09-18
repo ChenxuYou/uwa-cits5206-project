@@ -1,5 +1,7 @@
 @page
 @model CostingTool.Pages.Ric.RatesModel
+@using System.Globalization
+@using CostingTool.Pdf
 @{
     ViewData["Title"] = "Sustainable rates";
 
@@ -9,6 +11,17 @@
     var k = Model.Rates.Method.IndirectCostRecovery;
     var upliftLabel = $"Includes {(k - 1m) * 100m:0.#}% indirect cost recovery";
     var unit = Model.Cycle.BillableUnit.ToLowerInvariant();
+
+    // A proposed rate of zero means "not entered yet" (the model stores decimals, not nulls,
+    // and submission refuses a zero rate). Until one is entered the page says so, rather than
+    // showing a deficit equal to the whole operating cost.
+    var anyProposed = Model.Rates.All.Any(x =>
+        x.ProposedUwaRate > 0 || x.ProposedApfrRate > 0 || x.ProposedCommercialRate > 0);
+
+    // The balance is written the way the sealed PDF writes it (RecordFormat.Balance): the word
+    // and the brackets carry the meaning, never colour alone. Rounded first, so a figure that
+    // shows as $0.00 is never called a deficit.
+    var platformBalance = Model.Rates.Round(Model.Rates.ForecastBalance);
 }
 
 <div class="page-wrap ric-page">
@@ -18,7 +31,11 @@
         <div>
             <span class="eyebrow">@Model.Cycle.PlatformName.ToUpper()</span>
             <h1>Sustainable and proposed rates</h1>
-            <p>Calculated rates are GST exclusive. Proposed rates can vary, but the financial effect must be visible.</p>
+            <p>
+                Calculated rates are GST exclusive. They are a starting point for pricing decisions before
+                considering market conditions or strategic adjustments. Proposed rates can vary, but the
+                financial effect must be visible.
+            </p>
         </div>
         <div class="ric-total">
             <small>Method version</small>
@@ -71,39 +88,135 @@
                     }
                     else
                     {
+                        // data-calculated carries the number the page already shows, so the
+                        // browser can work out the variance as the custodian types. It is
+                        // culture-invariant because a script reads it.
+                        var uwaCalculated = rates.DisplayUwaRate.ToString(CultureInfo.InvariantCulture);
+                        var apfrCalculated = rates.DisplayApfrRate.ToString(CultureInfo.InvariantCulture);
+                        var commercialCalculated = rates.DisplayCommercialRate.ToString(CultureInfo.InvariantCulture);
+
+                        var showCommercialNote = rates.ProposedCommercialRate > 0
+                            && RateVariance.Between(rates.DisplayCommercialRate, rates.ProposedCommercialRate).IsVaried;
+
+                        var proposedCount = new[] { rates.ProposedUwaRate, rates.ProposedApfrRate, rates.ProposedCommercialRate }.Count(x => x > 0);
+                        var balance = rates.Round(rates.ForecastBalance);
+
                         <div class="rate-grid">
-                            <div class="rate-column">
+                            <div class="rate-column" data-kind="uwa" data-calculated="@uwaCalculated">
                                 <span>UWA Researcher</span>
                                 <small>Minimum sustainable</small>
                                 <strong>@rates.DisplayUwaRate.ToString("C")</strong>
                                 <label>
                                     Proposed rate
-                                    <input asp-for="Inputs[i].Uwa" type="number" min="0" step="0.01" />
+                                    <input asp-for="Inputs[i].Uwa" type="number" min="0" step="0.01" aria-describedby="variance-@(i)-uwa" />
                                 </label>
+                                <p class="rate-variance" id="variance-@(i)-uwa">@RateVariance.Describe(rates.DisplayUwaRate, rates.ProposedUwaRate)</p>
                             </div>
-                            <div class="rate-column">
+                            <div class="rate-column" data-kind="apfr" data-calculated="@apfrCalculated">
                                 <span>APFR</span>
                                 <small>@upliftLabel</small>
                                 <strong>@rates.DisplayApfrRate.ToString("C")</strong>
                                 <label>
                                     Proposed rate
-                                    <input asp-for="Inputs[i].Apfr" type="number" min="0" step="0.01" />
+                                    <input asp-for="Inputs[i].Apfr" type="number" min="0" step="0.01" aria-describedby="variance-@(i)-apfr" />
                                 </label>
+                                <p class="rate-variance" id="variance-@(i)-apfr">@RateVariance.Describe(rates.DisplayApfrRate, rates.ProposedApfrRate)</p>
                             </div>
-                            <div class="rate-column">
+                            <div class="rate-column" data-kind="commercial" data-calculated="@commercialCalculated">
                                 <span>Commercial</span>
                                 <small>@upliftLabel</small>
                                 <strong>@rates.DisplayCommercialRate.ToString("C")</strong>
                                 <label>
                                     Proposed rate
-                                    <input asp-for="Inputs[i].Commercial" type="number" min="0" step="0.01" />
+                                    <input asp-for="Inputs[i].Commercial" type="number" min="0" step="0.01" aria-describedby="variance-@(i)-commercial" />
                                 </label>
+                                <p class="rate-variance" id="variance-@(i)-commercial">@RateVariance.Describe(rates.DisplayCommercialRate, rates.ProposedCommercialRate)</p>
                             </div>
+                        </div>
+
+                        @* US-11: where a commercial rate is varied, the University's obligations
+                           under competitive neutrality are surfaced. The wording below is ours,
+                           written from requirements.md; it must be checked against Step 3 of the
+                           client's guide before the client sees it. *@
+                        <div class="callout commercial-note" role="note" hidden="@(showCommercialNote ? null : "hidden")">
+                            <span aria-hidden="true">i</span>
+                            <div>
+                                <strong>Commercial rate differs from the calculated rate</strong>
+                                <p>
+                                    The University has obligations under competitive neutrality when it prices commercial
+                                    services. Check Step 3 of the UWA Costing &amp; Pricing Guide before settling this rate,
+                                    and record your reasoning in the pricing justification below.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="rate-balance @(proposedCount == 0 ? "" : balance >= 0 ? "positive" : "negative")">
+                            <span>Forecast balance at proposed rates</span>
+                            @if (proposedCount == 0)
+                            {
+                                <small>Enter proposed rates to see the effect.</small>
+                            }
+                            else
+                            {
+                                <strong>@RecordFormat.Balance(balance)</strong>
+                                <small>
+                                    revenue @rates.ForecastRevenue.ToString("C")
+                                    against operating cost @rates.TotalOperatingCost.ToString("C")
+                                    @if (proposedCount < 3)
+                                    {
+                                        <text> · not all three proposed rates are entered, so this understates revenue</text>
+                                    }
+                                </small>
+                            }
                         </div>
                     }
                 </article>
             }
         </div>
+
+        <section class="ric-card rate-effect" aria-labelledby="rate-effect-heading">
+            <h2 id="rate-effect-heading">Effect on the platform balance</h2>
+
+            @if (Model.IsPreview)
+            {
+                <div class="callout" role="status">
+                    <span aria-hidden="true">i</span>
+                    <div>
+                        <strong>Balance updated</strong>
+                        <p>These figures use the rates you have typed. They are not saved until you continue to the review.</p>
+                    </div>
+                </div>
+            }
+
+            @if (!anyProposed)
+            {
+                <p class="rate-effect-note">Enter proposed rates to see the forecast surplus or deficit they produce.</p>
+            }
+            else
+            {
+                <div class="review-kpis">
+                    <div><span>Total operating cost</span><strong>@Model.Rates.TotalOperatingCost.ToString("C")</strong></div>
+                    <div><span>Forecast platform revenue</span><strong>@Model.Rates.ForecastRevenue.ToString("C")</strong></div>
+                    <div class="@(platformBalance >= 0 ? "positive-kpi" : "negative-kpi")">
+                        <span>Forecast balance</span>
+                        <strong>@RecordFormat.Balance(platformBalance)</strong>
+                    </div>
+                </div>
+
+                @if (!Model.Rates.IsComplete)
+                {
+                    <p class="rate-effect-note">These totals leave out the capabilities above that could not be priced.</p>
+                }
+            }
+
+            <div class="rate-effect-actions">
+                @* Enter in a rate box submits the first button in the form, so it previews the
+                   balance rather than saving. Nothing is lost by that; saving is the button
+                   at the bottom. *@
+                <button type="submit" class="outline-button" asp-page-handler="Preview" asp-route-cycleId="@Model.Cycle.Id">Update balance</button>
+                <span>Change a proposed rate, then update the balance to see its effect. Nothing is saved until you continue.</span>
+            </div>
+        </section>
 
         <section class="ric-card rate-notes">
             <div class="form-grid two-columns">
@@ -124,3 +237,65 @@
         </div>
     </form>
 </div>
+
+@section Scripts {
+    <script>
+        // Live variance as the custodian types. This repeats the sentence RateVariance.Describe
+        // writes on the server, using only numbers already on the page (data-calculated and the
+        // typed value); no formula or coefficient is involved. Whole cents throughout, so
+        // 50.00 - 36.64 is 13.36 and not 13.360000000000003.
+        (function () {
+            var money = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' });
+
+            // The number inputs are followed by a hidden __Invariant field that ASP.NET adds, so the
+        // script asks for the number input by type.
+        function cents(value) {
+                return Math.round((Number(value) || 0) * 100);
+            }
+
+            function describe(calculated, typed) {
+                if (!(Number(typed) > 0)) {
+                    return 'Enter a proposed rate to compare with the calculated rate.';
+                }
+                var diff = cents(typed) - cents(calculated);
+                if (diff === 0) {
+                    return 'Matches the calculated rate.';
+                }
+                var text = money.format(Math.abs(diff) / 100);
+                if (cents(calculated) !== 0) {
+                    text += ' (' + (Math.abs(diff) / Math.abs(cents(calculated)) * 100).toFixed(1) + '%)';
+                }
+                return text + (diff > 0 ? ' above' : ' below') + ' the calculated rate.';
+            }
+
+            function showsNote(column) {
+                var typed = column.querySelector('input[type="number"]').value;
+                return Number(typed) > 0 && cents(typed) !== cents(column.dataset.calculated);
+            }
+
+            document.querySelectorAll('.rate-card').forEach(function (card) {
+                var note = card.querySelector('.commercial-note');
+                var commercial = card.querySelector('.rate-column[data-kind="commercial"]');
+
+                function refresh(column) {
+                    var input = column.querySelector('input[type="number"]');
+                    var output = column.querySelector('.rate-variance');
+                    if (input && output) {
+                        output.textContent = describe(column.dataset.calculated, input.value);
+                    }
+                    if (note && commercial) {
+                        note.hidden = !showsNote(commercial);
+                    }
+                }
+
+                card.querySelectorAll('.rate-column[data-calculated]').forEach(function (column) {
+                    var input = column.querySelector('input[type="number"]');
+                    if (input) {
+                        input.addEventListener('input', function () { refresh(column); });
+                    }
+                    refresh(column);
+                });
+            });
+        })();
+    </script>
+}
