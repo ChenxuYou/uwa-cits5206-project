@@ -9,6 +9,8 @@ public class CapacityModel(CostingDbContext db) : RicPageModel(db)
 
     [BindProperty] public List<CapacityInput> Inputs { get; set; } = [];
 
+    [BindProperty] public string? UtilisationAssumptions { get; set; }
+
     public async Task<IActionResult> OnGetAsync(int cycleId)
     {
         if (!await LoadCycleAsync(cycleId))
@@ -20,6 +22,8 @@ public class CapacityModel(CostingDbContext db) : RicPageModel(db)
         Inputs = Cycle.Capabilities
             .Select(x => new CapacityInput(x.Id, x.MaximumCapacity, x.ForecastUwaUse, x.ForecastApfrUse, x.ForecastCommercialUse))
             .ToList();
+
+        UtilisationAssumptions = Cycle.UtilisationAssumptions;
 
         return Page();
     }
@@ -73,10 +77,24 @@ public class CapacityModel(CostingDbContext db) : RicPageModel(db)
             }
         }
 
+        // The guide's Step 5 checklist asks for the utilisation assumptions to be documented,
+        // and utilisation is the divisor behind every rate — so this is one of the three
+        // places the tool insists on an explanation rather than merely offering room for one
+        // (US-13).
+        if (string.IsNullOrWhiteSpace(UtilisationAssumptions))
+        {
+            ModelState.AddModelError(
+                nameof(UtilisationAssumptions),
+                "Say how these forecast figures were arrived at — bookings, last year's usage, "
+                + "planned downtime. Every rate is divided by them.");
+        }
+
         if (!ModelState.IsValid)
         {
             return Page();
         }
+
+        Cycle.UtilisationAssumptions = UtilisationAssumptions;
 
         foreach (var input in Inputs)
         {
