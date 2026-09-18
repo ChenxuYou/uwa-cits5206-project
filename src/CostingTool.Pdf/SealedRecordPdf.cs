@@ -293,15 +293,43 @@ public static class SealedRecordPdf
         Heading(section, "The platform, at the proposed rates");
 
         var facts = KeyValueTable(section);
+        // Schema 1.2 added the workbook's other lines. A record sealed under 1.1 does not
+        // carry them, and they are not back-filled here: a figure this document never held
+        // is not a figure the approver saw.
+        var carriesTheBalanceLines = platform.NetCostToRecover is not null;
+
         AddFact(facts, "Total operating cost", RecordFormat.Money(platform.TotalOperatingCost));
-        AddFact(facts, "Forecast revenue at the proposed rates", RecordFormat.Money(platform.ForecastRevenue));
+
+        if (carriesTheBalanceLines)
+        {
+            AddFact(facts, "Less non-variable income", RecordFormat.Money(platform.TotalIncome ?? 0m));
+            AddFact(facts, "Cost to recover from usage", RecordFormat.Money(platform.NetCostToRecover!.Value));
+            AddFact(facts, "Billed to users at the proposed rates", RecordFormat.Money(platform.GrossForecastRevenue ?? 0m));
+            AddFact(facts, "Less University overheads recovered", RecordFormat.Money(platform.OverheadsRecovered ?? 0m));
+        }
+
+        AddFact(
+            facts,
+            carriesTheBalanceLines ? "Retained by the platform" : "Forecast revenue at the proposed rates",
+            RecordFormat.Money(platform.ForecastRevenue));
         AddFact(facts, "Forecast balance", RecordFormat.Balance(platform.ForecastBalance), emphasis: true);
 
-        var note = section.AddParagraph(
-            "A deficit here is not necessarily an error: the UWA researcher rate is set below full " +
-            "cost by design, because non-variable income has already been deducted from it. What " +
-            "the figure shows is how much of the platform's cost is not recovered from usage at " +
-            "the rates proposed.");
+        if (platform.FullEconomicCostBalance is not null)
+        {
+            AddFact(facts, "Against full economic cost", RecordFormat.Balance(platform.FullEconomicCostBalance.Value));
+        }
+
+        var note = section.AddParagraph(carriesTheBalanceLines
+            ? "The forecast balance measures what the platform retains at the proposed rates against "
+              + "its operating cost less non-variable income — the money usage actually has to recover. "
+              + "The line beneath it measures the same revenue against full economic cost, with no "
+              + "income deducted, and is negative wherever recurrent funding carries part of the cost. "
+              + "A deficit is not an error; it is the amount that will not be recovered at the rates "
+              + "proposed, and the record says why it was accepted."
+            : "A deficit here is not necessarily an error: the UWA researcher rate is set below full "
+              + "cost by design, because non-variable income has already been deducted from it. What "
+              + "the figure shows is how much of the platform's cost is not recovered from usage at "
+              + "the rates proposed.");
         note.Format.Font.Size = 8.5;
         note.Format.Font.Color = Muted;
         note.Format.SpaceBefore = Unit.FromPoint(4);
@@ -312,7 +340,9 @@ public static class SealedRecordPdf
     private static void AddJustification(Section section, SealedCycle? cycle)
     {
         if (cycle is null ||
-            (string.IsNullOrWhiteSpace(cycle.PricingJustification) && string.IsNullOrWhiteSpace(cycle.BenchmarkNotes)))
+            (string.IsNullOrWhiteSpace(cycle.PricingJustification)
+             && string.IsNullOrWhiteSpace(cycle.BenchmarkNotes)
+             && string.IsNullOrWhiteSpace(cycle.UtilisationAssumptions)))
         {
             return;
         }
@@ -322,6 +352,15 @@ public static class SealedRecordPdf
         if (!string.IsNullOrWhiteSpace(cycle.PricingJustification))
         {
             Quote(section, cycle.PricingJustification!);
+        }
+
+        if (!string.IsNullOrWhiteSpace(cycle.UtilisationAssumptions))
+        {
+            var utilisationLabel = section.AddParagraph("Utilisation assumptions");
+            utilisationLabel.Format.Font.Size = 9;
+            utilisationLabel.Format.Font.Bold = true;
+            utilisationLabel.Format.SpaceBefore = Unit.FromPoint(8);
+            Quote(section, cycle.UtilisationAssumptions!);
         }
 
         if (!string.IsNullOrWhiteSpace(cycle.BenchmarkNotes))

@@ -16,7 +16,7 @@ namespace CostingTool.Pdf.Tests;
 /// asserted again here, on the way out.
 ///
 /// The fixture is a sealed snapshot in the shape <c>Approvals/Details.cshtml.cs</c>
-/// writes, schema 1.1, built around that worked example.
+/// writes, schema 1.2, built around that worked example.
 /// </summary>
 public class SealedRecordPdfTests
 {
@@ -146,12 +146,59 @@ public class SealedRecordPdfTests
     [Fact]
     public void A_schema_version_this_renderer_does_not_know_is_refused()
     {
-        var future = Snapshot().Replace("\"SchemaVersion\": \"1.1\"", "\"SchemaVersion\": \"2.0\"", StringComparison.Ordinal);
+        var future = Snapshot().Replace("\"SchemaVersion\": \"1.2\"", "\"SchemaVersion\": \"2.0\"", StringComparison.Ordinal);
 
         var error = Assert.Throws<SealedRecordFormatException>(() => SealedRecord.Parse(future));
 
         Assert.Contains("2.0", error.Message, StringComparison.Ordinal);
     }
+
+    /// <summary>
+    /// A record sealed before 18 September 2026 carries schema 1.1, which has no line for
+    /// the cost net of income and measures its balance against full operating cost. It is
+    /// still rendered, and rendered as it was sealed: the lines it does not carry are left
+    /// out rather than printed as zero, and the note under the figure is the one that
+    /// matches the measure it used.
+    /// </summary>
+    [Fact]
+    public void A_record_sealed_under_the_previous_schema_still_renders_as_it_was_sealed()
+    {
+        var text = AllText(SealedRecordPdf.Build(SealedRecord.Parse(SealedUnderSchema11), Hash));
+
+        Assert.Contains("($56,500.00) deficit", text, StringComparison.Ordinal);
+        Assert.Contains("Forecast revenue at the proposed rates", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("Cost to recover from usage", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("Against full economic cost", text, StringComparison.Ordinal);
+    }
+
+    private const string SealedUnderSchema11 = """
+        {
+          "SchemaVersion": "1.1",
+          "SealedAtUtc": "2026-09-16T02:20:00Z",
+          "MethodVersion": "2026.1",
+          "Method": {
+            "Version": "2026.1",
+            "IndirectCostRecovery": 1.35,
+            "RateDecimals": 2,
+            "MidpointRule": "AwayFromZero",
+            "Source": "UWA Costing & Pricing Guide, Step 3"
+          },
+          "Cycle": {
+            "Id": 1,
+            "PlatformName": "Microscopy",
+            "StartYear": 2026,
+            "EndYear": 2027,
+            "BillableUnit": "Hours",
+            "CreatedByDisplay": "Priya Lal"
+          },
+          "Platform": {
+            "TotalOperatingCost": 250000,
+            "ForecastRevenue": 193500,
+            "ForecastBalance": -56500
+          },
+          "Capabilities": []
+        }
+        """;
 
     [Fact]
     public void Damaged_json_is_refused_rather_than_half_rendered()
