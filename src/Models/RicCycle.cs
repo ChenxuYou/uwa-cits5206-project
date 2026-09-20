@@ -142,6 +142,28 @@ public class AppUser
     {
         public const string DataEntry = "DataEntry";
         public const string Approver = "Approver";
+
+        /// <summary>
+        /// Sees every cycle, whoever created it and whatever state it is in, and
+        /// administers the accounts themselves (US-19).
+        ///
+        /// <b>Deliberately not a super-custodian.</b> An administrator cannot edit, submit
+        /// or seal another person's cycle: those actions write a name into the record, and
+        /// US-02, US-15 and US-16 rest on that name being the person who did the work.
+        /// The role set beyond this is [Q4], still open with the client.
+        /// </summary>
+        public const string Administrator = "Administrator";
+
+        /// <summary>Every role the application recognises, for account administration.</summary>
+        public static readonly string[] All = [DataEntry, Approver, Administrator];
+
+        /// <summary>The role in words, for a screen.</summary>
+        public static string Describe(string? role) => role switch
+        {
+            Approver => "Delegated approver",
+            Administrator => "Administrator",
+            _ => "Platform custodian"
+        };
     }
 }
 

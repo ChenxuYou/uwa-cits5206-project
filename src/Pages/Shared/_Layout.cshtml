@@ -2,6 +2,7 @@
 @{
     var isCustodian = User.IsInRole(AppUser.Roles.DataEntry);
     var isApprover = User.IsInRole(AppUser.Roles.Approver);
+    var isAdministrator = User.IsInRole(AppUser.Roles.Administrator);
 
     var unreadNotifications = User.Identity?.IsAuthenticated == true && isCustodian
         ? LayoutDb.AppNotifications.Count(x => x.RecipientUserName == User.UserName() && !x.IsRead)
@@ -58,6 +59,15 @@
                         <span class="nav-icon" aria-hidden="true">✓</span><span>Approval queue</span>
                     </a>
                 }
+                @if (isAdministrator)
+                {
+                    <a class="@NavClass("/admin/cycles")" asp-page="/Admin/Cycles">
+                        <span class="nav-icon" aria-hidden="true">▤</span><span>All costing cycles</span>
+                    </a>
+                    <a class="@NavClass("/admin/users")" asp-page="/Admin/Users">
+                        <span class="nav-icon" aria-hidden="true">◈</span><span>Accounts</span>
+                    </a>
+                }
             </nav>
 
             @*
@@ -97,7 +107,7 @@
                         <span class="avatar" aria-hidden="true">@initials</span>
                         <span>
                             <strong>@displayName</strong>
-                            <small>@(isApprover ? "Delegated approver" : "Platform custodian")</small>
+                            <small>@AppUser.Roles.Describe(isApprover ? AppUser.Roles.Approver : isAdministrator ? AppUser.Roles.Administrator : AppUser.Roles.DataEntry)</small>
                         </span>
                         <a class="account-link" asp-page="/Account/ChangePassword">Password</a>
                         <form method="post" asp-page="/Account/Logout">

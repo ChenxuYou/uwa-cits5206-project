@@ -66,19 +66,11 @@ public class ChangePasswordModel(CostingDbContext db, IPasswordHasher<AppUser> h
             ModelState.AddModelError(nameof(CurrentPassword), "Current password is required.");
         }
 
-        if (password.Length < 12)
+        // The rules themselves live in PasswordPolicy, so that this page and the
+        // administrator's create-and-reset screens cannot come to disagree about them.
+        foreach (var problem in PasswordPolicy.Problems(password))
         {
-            ModelState.AddModelError(nameof(NewPassword), "The new password must contain at least 12 characters.");
-        }
-
-        if (!password.Any(char.IsUpper)
-            || !password.Any(char.IsLower)
-            || !password.Any(char.IsDigit)
-            || password.All(char.IsLetterOrDigit))
-        {
-            ModelState.AddModelError(
-                nameof(NewPassword),
-                "Use at least one uppercase letter, lowercase letter, number and symbol.");
+            ModelState.AddModelError(nameof(NewPassword), problem);
         }
 
         if (password != ConfirmPassword)
