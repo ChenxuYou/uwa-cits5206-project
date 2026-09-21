@@ -1,11 +1,16 @@
 @page "{id:int}"
 @model CostingTool.Pages.Approvals.DetailsModel
+@using CostingTool.Pdf
 @{
     ViewData["Title"] = "Approval review";
     var totalCost = Model.Rates.TotalOperatingCost;
     var netCost = Model.Rates.NetCostToRecover;
     var revenue = Model.Rates.ForecastRevenue;
-    var balance = Model.Rates.ForecastBalance;
+
+    // The balance is the roll-up the model already computes, not revenue minus cost worked out
+    // again here (architecture.md §4, rule R8), and it is written as the sealed PDF writes it.
+    var balance = Model.Rates.Round(Model.Rates.ForecastBalance);
+    var fullEconomicCostBalance = Model.Rates.Round(Model.Rates.FullEconomicCostBalance);
 }
 <div class="page-wrap approval-page">
     <div class="breadcrumb"><a asp-page="/Approvals/Index">Approvals</a><span>›</span><span>@Model.Cycle.PlatformName</span></div>
@@ -16,8 +21,8 @@
         <main>
             @* The balance is read from the roll-up rather than re-subtracted here: the approver and the
        custodian must not be able to see two different answers to the same question. *@
-            <section class="review-kpis"><div><span>Total operating cost</span><strong>@totalCost.ToString("C")</strong></div><div><span>Cost to recover from usage<small>after non-variable income</small></span><strong>@netCost.ToString("C")</strong></div><div><span>Retained at the proposed rates<small>University overheads recovered: @Model.Rates.OverheadsRecovered.ToString("C")</small></span><strong>@revenue.ToString("C")</strong></div><div class="@(balance>=0?"positive-kpi":"negative-kpi")"><span>Forecast @(balance >= 0 ? "surplus" : "deficit")<small>against full economic cost: @Model.Rates.FullEconomicCostBalance.ToString("C")</small></span><strong>@balance.ToString("C")</strong></div></section>
-            <article class="review-card"><div class="review-card-heading"><h2>Rates requiring approval</h2><span>GST exclusive</span></div><div class="review-table-wrap"><table class="review-table"><thead><tr><th>Capability</th><th>Operating cost</th><th>UWA rate</th><th>APFR rate</th><th>Commercial rate</th><th>Balance</th></tr></thead><tbody>
+            <section class="review-kpis"><div><span>Total operating cost</span><strong>@totalCost.ToString("C")</strong></div><div><span>Cost to recover from usage<small>after non-variable income</small></span><strong>@netCost.ToString("C")</strong></div><div><span>Retained at the proposed rates<small>University overheads recovered: @Model.Rates.OverheadsRecovered.ToString("C")</small></span><strong>@revenue.ToString("C")</strong></div><div class="@(balance >= 0 ? "positive-kpi" : "negative-kpi")"><span>Forecast balance<small>against full economic cost: @RecordFormat.Balance(fullEconomicCostBalance)</small></span><strong>@RecordFormat.Balance(balance)</strong></div></section>
+            <article class="review-card"><div class="review-card-heading"><h2>Rates requiring approval</h2><span>GST exclusive</span></div><div class="review-table-wrap" role="region" aria-label="Rates requiring approval" tabindex="0"><table class="review-table"><thead><tr><th scope="col">Capability</th><th scope="col">Operating cost</th><th scope="col">UWA rate</th><th scope="col">APFR rate</th><th scope="col">Commercial rate</th><th scope="col">Balance</th></tr></thead><tbody>
             @foreach (var c in Model.Cycle.Capabilities)
             {
                 var r = Model.Rates.For(c.Id);
@@ -33,7 +38,7 @@
                         <td>@c.ProposedUwaRate.ToString("C")</td>
                         <td>@c.ProposedApfrRate.ToString("C")</td>
                         <td>@c.ProposedCommercialRate.ToString("C")</td>
-                        <td class="@(r.ForecastBalance >= 0 ? "positive-text" : "negative-text")">@r.ForecastBalance.ToString("C")</td>
+                        <td class="@(r.ForecastBalance >= 0 ? "positive-text" : "negative-text")">@RecordFormat.Balance(r.Round(r.ForecastBalance))</td>
                     }
                 </tr>
             }
@@ -52,17 +57,17 @@
                     <div><h2>How each rate was calculated</h2><p>Method version @Model.Rates.Method.Version · k = @Model.Rates.Method.IndirectCostRecovery</p></div>
                     <span>Unrounded</span>
                 </div>
-                <div class="review-table-wrap">
+                <div class="review-table-wrap" role="region" aria-label="How each rate was calculated" tabindex="0">
                     <table class="review-table capacity-evidence-table">
                         <thead>
                             <tr>
-                                <th>Capability</th>
-                                <th>C — operating cost</th>
-                                <th>I total / non-UWA</th>
-                                <th>U — forecast use</th>
-                                <th>UWA researcher</th>
-                                <th>APFR</th>
-                                <th>Commercial</th>
+                                <th scope="col">Capability</th>
+                                <th scope="col">C — operating cost</th>
+                                <th scope="col">I total / non-UWA</th>
+                                <th scope="col">U — forecast use</th>
+                                <th scope="col">UWA researcher</th>
+                                <th scope="col">APFR</th>
+                                <th scope="col">Commercial</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -99,10 +104,10 @@
                     </table>
                 </div>
             </article>
-            <article class="review-card"><div class="review-card-heading"><div><h2>Capacity and utilisation evidence</h2><p>Forecast demand used by the rate calculation.</p></div><span>@Model.Cycle.BillableUnit</span></div><div class="review-table-wrap"><table class="review-table capacity-evidence-table"><thead><tr><th>Capability</th><th>Maximum capacity</th><th>UWA use</th><th>APFR use</th><th>Commercial use</th><th>Total forecast</th><th>Utilisation</th></tr></thead><tbody>
+            <article class="review-card"><div class="review-card-heading"><div><h2>Capacity and utilisation evidence</h2><p>Forecast demand used by the rate calculation.</p></div><span>@Model.Cycle.BillableUnit</span></div><div class="review-table-wrap" role="region" aria-label="Capacity and utilisation evidence" tabindex="0"><table class="review-table capacity-evidence-table"><thead><tr><th scope="col">Capability</th><th scope="col">Maximum capacity</th><th scope="col">UWA use</th><th scope="col">APFR use</th><th scope="col">Commercial use</th><th scope="col">Total forecast</th><th scope="col">Utilisation</th></tr></thead><tbody>
             @foreach(var c in Model.Cycle.Capabilities){var forecast=c.ForecastUwaUse+c.ForecastApfrUse+c.ForecastCommercialUse;var utilisation=c.MaximumCapacity>0?forecast/c.MaximumCapacity*100:0;<tr><td><strong>@c.Name</strong></td><td>@c.MaximumCapacity.ToString("N1")</td><td>@c.ForecastUwaUse.ToString("N1")</td><td>@c.ForecastApfrUse.ToString("N1")</td><td>@c.ForecastCommercialUse.ToString("N1")</td><td><strong>@forecast.ToString("N1")</strong></td><td>@utilisation.ToString("N1")%</td></tr>}
             </tbody></table></div></article>
-            <article class="review-card"><div class="review-card-heading"><div><h2>Detailed cost and funding sources</h2><p>Every submitted line item and annual amount retained for audit.</p></div><span>@Model.Cycle.Costs.Count records</span></div><div class="review-table-wrap"><table class="review-table approval-cost-table"><thead><tr><th>Item</th><th>Classification</th><th>Source / personnel basis</th><th>Annual amounts</th><th>Average</th><th>Notes</th></tr></thead><tbody>
+            <article class="review-card"><div class="review-card-heading"><div><h2>Detailed cost and funding sources</h2><p>Every submitted line item and annual amount retained for audit.</p></div><span>@Model.Cycle.Costs.Count records</span></div><div class="review-table-wrap" role="region" aria-label="Detailed cost and funding sources" tabindex="0"><table class="review-table approval-cost-table"><thead><tr><th scope="col">Item</th><th scope="col">Classification</th><th scope="col">Source / personnel basis</th><th scope="col">Annual amounts</th><th scope="col">Average</th><th scope="col">Notes</th></tr></thead><tbody>
             @foreach(var item in Model.Cycle.Costs.OrderBy(x=>x.Scope).ThenBy(x=>x.RicCapabilityId).ThenBy(x=>x.Category))
             {
                 var capability = Model.Cycle.Capabilities.FirstOrDefault(x=>x.Id==item.RicCapabilityId)?.Name ?? "Whole platform";

@@ -1,5 +1,6 @@
 @page
 @model CostingTool.Pages.Ric.ReviewModel
+@using CostingTool.Pdf
 @{
     ViewData["Title"] = "Review RIC cycle";
 
@@ -9,13 +10,16 @@
     var netCost = Model.Rates.NetCostToRecover;
     var revenue = Model.Rates.ForecastRevenue;
     var overheads = Model.Rates.OverheadsRecovered;
-    var balance = Model.Rates.ForecastBalance;
-    var fullEconomicCostBalance = Model.Rates.FullEconomicCostBalance;
+    // Written the way the sealed PDF writes it (RecordFormat.Balance): the word and the brackets
+    // carry the meaning, so a deficit does not depend on being able to see red. Rounded first,
+    // so a figure that shows as $0.00 is never called a deficit.
+    var balance = Model.Rates.Round(Model.Rates.ForecastBalance);
+    var fullEconomicCostBalance = Model.Rates.Round(Model.Rates.FullEconomicCostBalance);
     var unit = Model.Cycle.BillableUnit.ToLowerInvariant();
 }
 
 <div class="page-wrap ric-page">
-    <partial name="_RicSteps" model='new CostingTool.Pages.Ric.RicStepViewModel(6, Model.Cycle.Id)' />
+    <partial name="_RicSteps" model='new CostingTool.Pages.Ric.RicStepViewModel(6, Model.Cycle.Id, Model.IsEditable)' />
 
     @if (Model.SuccessMessage is not null)
     {
@@ -77,8 +81,8 @@
                 <div><span>Cost to recover from usage<small>after non-variable income</small></span><strong>@netCost.ToString("C")</strong></div>
                 <div><span>Retained at the proposed rates<small>University overheads recovered: @overheads.ToString("C")</small></span><strong>@revenue.ToString("C")</strong></div>
                 <div class="@(balance >= 0 ? "positive-kpi" : "negative-kpi")">
-                    <span>Forecast @(balance >= 0 ? "surplus" : "deficit")<small>against full economic cost: @fullEconomicCostBalance.ToString("C")</small></span>
-                    <strong>@balance.ToString("C")</strong>
+                    <span>Forecast balance<small>against full economic cost: @RecordFormat.Balance(fullEconomicCostBalance)</small></span>
+                    <strong>@RecordFormat.Balance(balance)</strong>
                 </div>
             </section>
 
@@ -87,17 +91,17 @@
                     <h2>Capability rates</h2>
                     <span>GST exclusive · method @Model.Rates.Method.Version</span>
                 </div>
-                <div class="review-table-wrap">
+                <div class="review-table-wrap" role="region" aria-label="Capability rates" tabindex="0">
                     <table class="review-table">
                         <thead>
                             <tr>
-                                <th>Capability</th>
-                                <th>Operating cost</th>
-                                <th>Forecast use</th>
-                                <th>UWA proposed</th>
-                                <th>APFR proposed</th>
-                                <th>Commercial proposed</th>
-                                <th>Balance</th>
+                                <th scope="col">Capability</th>
+                                <th scope="col">Operating cost</th>
+                                <th scope="col">Forecast use</th>
+                                <th scope="col">UWA proposed</th>
+                                <th scope="col">APFR proposed</th>
+                                <th scope="col">Commercial proposed</th>
+                                <th scope="col">Balance</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -118,7 +122,7 @@
                                         <td>@capability.ProposedApfrRate.ToString("C")</td>
                                         <td>@capability.ProposedCommercialRate.ToString("C")</td>
                                         <td class="@(rates.ForecastBalance >= 0 ? "positive-text" : "negative-text")">
-                                            @rates.ForecastBalance.ToString("C")
+                                            @RecordFormat.Balance(rates.Round(rates.ForecastBalance))
                                         </td>
                                     }
                                 </tr>

@@ -15,6 +15,12 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
 
     [BindProperty] public string? PricingJustification { get; set; }
 
+    /// <summary>
+    /// True when the page is showing the balance for rates the custodian has typed but not
+    /// saved (<see cref="OnPostPreviewAsync"/>), so the view can say so.
+    /// </summary>
+    public bool IsPreview { get; private set; }
+
     public async Task<IActionResult> OnGetAsync(int cycleId)
     {
         if (!await Load(cycleId))
@@ -55,32 +61,14 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
             return RedirectToPage("/Ric/Review", new { cycleId = CycleId });
         }
 
-        EntryChecks.ExplainUnreadableNumbers(ModelState, FieldLabel, "a rate in dollars, such as 162.00");
-
-        foreach (var input in Inputs)
-        {
-            if (Cycle.Capabilities.All(x => x.Id != input.Id))
-            {
-                ModelState.AddModelError(string.Empty, "Invalid capability.");
-            }
-            else if (new[] { input.Uwa, input.Apfr, input.Commercial }.Any(x => x < 0))
-            {
-                ModelState.AddModelError(string.Empty, "Proposed rates cannot be negative.");
-            }
-        }
+        ValidateInputs();
 
         if (!ModelState.IsValid)
         {
             return Page();
         }
 
-        foreach (var input in Inputs)
-        {
-            var capability = Cycle.Capabilities.First(x => x.Id == input.Id);
-            capability.ProposedUwaRate = input.Uwa;
-            capability.ProposedApfrRate = input.Apfr;
-            capability.ProposedCommercialRate = input.Commercial;
-        }
+        ApplyInputs();
 
         Cycle.BenchmarkNotes = BenchmarkNotes;
         Cycle.PricingJustification = PricingJustification;
@@ -100,6 +88,75 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
         await Db.SaveChangesAsync();
 
         return RedirectToPage(nextPage, new { cycleId = CycleId });
+    }
+
+    /// <summary>
+    /// "What if" (US-10, US-12): recalculate the balance at the proposed rates typed on the
+    /// page, without saving them. The calculation stays on the server — no formula or
+    /// coefficient is sent to the browser (US-09, N1) — so seeing a new balance costs a round
+    /// trip, and nothing reaches the database until the custodian continues to the review.
+    ///
+    /// No justification is asked for here: a preview is a question, not a decision. The
+    /// requirement is enforced when the rates are saved (<see cref="RequireJustification"/>).
+    /// </summary>
+    public async Task<IActionResult> OnPostPreviewAsync()
+    {
+        if (!await Load(CycleId))
+        {
+            return NotFound();
+        }
+
+        if (!Cycle.IsEditable)
+        {
+            return RedirectToPage("/Ric/Review", new { cycleId = CycleId });
+        }
+
+        ValidateInputs();
+
+        if (!ModelState.IsValid)
+        {
+            return Page();
+        }
+
+        // In memory only: this handler never calls SaveChanges, and the context is scoped to
+        // the request, so the tracked entities are discarded with it.
+        ApplyInputs();
+        Rates = calculator.Calculate(Cycle);
+        IsPreview = true;
+
+        return Page();
+    }
+
+    /// <summary>
+    /// The checks shared by saving and previewing: the figures must be readable numbers,
+    /// belong to this cycle's capabilities, and not be negative.
+    /// </summary>
+    private void ValidateInputs()
+    {
+        EntryChecks.ExplainUnreadableNumbers(ModelState, FieldLabel, "a rate in dollars, such as 162.00");
+
+        foreach (var input in Inputs)
+        {
+            if (Cycle.Capabilities.All(x => x.Id != input.Id))
+            {
+                ModelState.AddModelError(string.Empty, "Invalid capability.");
+            }
+            else if (new[] { input.Uwa, input.Apfr, input.Commercial }.Any(x => x < 0))
+            {
+                ModelState.AddModelError(string.Empty, "Proposed rates cannot be negative.");
+            }
+        }
+    }
+
+    private void ApplyInputs()
+    {
+        foreach (var input in Inputs)
+        {
+            var capability = Cycle.Capabilities.First(x => x.Id == input.Id);
+            capability.ProposedUwaRate = input.Uwa;
+            capability.ProposedApfrRate = input.Apfr;
+            capability.ProposedCommercialRate = input.Commercial;
+        }
     }
 
     /// <summary>
