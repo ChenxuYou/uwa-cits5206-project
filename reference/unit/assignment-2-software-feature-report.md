@@ -53,9 +53,6 @@ LMS item: https://lms.uwa.edu.au/ultra/courses/_113158_1/outline
 > 3. Demonstrate how you have collaborated with others to integrate all contributions? (your pull
 >    request reviews, any training or joint work, milestone management)
 >
-> See the marking rubric for guidance on how these three sections will be assessed. Please note
-> you need to explain how do you use GenAI wherever you used it.
->
 > Please give full URLs for your links. It seems that pdf links don't work from LMS marking
 > system.
 
@@ -69,7 +66,6 @@ Each of these is stated in §2 and each one is a way to lose marks without writi
 | --- | --- | --- |
 | **C1** | *"Please give full URLs for your links. It seems that pdf links don't work from LMS marking system."* | **This already cost this team two marks.** A hyperlink behind a word arrives at the marker as dead text, and a visible URL that wraps mid-path is copied out broken. Assignment 1 did both — see [`docs/assignments/assignment-1/feedback.md` §4](../../docs/assignments/assignment-1/feedback.md). Every link must be a complete visible `https://…` URL that survives being copied out of the PDF by hand |
 | **C2** | *"Ensure that your group facilitator has access to all linked resources."* | A link that resolves for us and 404s for the facilitator scores as no link at all. Covers GitHub (repository, issues, PRs, board, milestones, Actions runs), the MS Teams area, and anything else cited |
-| **C3** | *"You need to explain how do you use GenAI wherever you used it."* | A disclosure, placed where the use occurred, not a blanket sentence. It applies to code, tests, documents and the report itself |
 
 **The rubric's own recurring theme is attribution.** All three criteria ask which parts are
 *yours* — "Unclear which parts have been written by the student" is what separates *Competent*

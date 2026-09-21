@@ -92,6 +92,10 @@ public class RatesPreviewTests
             Assert.IsType<PageResult>(result);
             Assert.True(model.IsPreview);
 
+            // These rates vary from the calculated ones and no justification has been typed.
+            // Saving would refuse that (RateProposalTests); a preview must not.
+            Assert.True(model.ModelState.IsValid);
+
             // 500 x $50 + 300 x ($100 / 1.35) + 200 x ($100 / 1.35), against $150,000.
             Assert.Equal(62037.04m, Math.Round(model.Rates.ForecastRevenue, 2));
             Assert.Equal(-87962.96m, Math.Round(model.Rates.ForecastBalance, 2));
@@ -144,6 +148,9 @@ public class RatesPreviewTests
         await using (var db = new CostingDbContext(options))
         {
             var model = CreateModel(db, 50m, 100m, 100m);
+
+            // The rates vary from the calculated ones, so saving needs a justification (US-11).
+            model.PricingJustification = "Priced to match the regional facility's published rates.";
 
             var result = await model.OnPostAsync();
 

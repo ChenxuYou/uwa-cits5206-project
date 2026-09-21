@@ -1,0 +1,59 @@
+@page
+@model CostingTool.Pages.Admin.CyclesModel
+@{
+    ViewData["Title"] = "All costing cycles";
+}
+<div class="page-wrap approval-page">
+    <div class="page-heading">
+        <div><p class="eyebrow">ADMINISTRATION</p><h1>All costing cycles</h1><p>Every cycle in the application, whoever created it. Records are read-only here: only the custodian who owns a cycle can change it, and only the delegated approver can seal it.</p></div>
+    </div>
+
+    <section class="approval-summary">
+        <div><span>Cycles in total</span><strong>@Model.TotalCount</strong></div>
+        <div><span>Shown by this filter</span><strong>@Model.Cycles.Count</strong></div>
+    </section>
+
+    <form method="get" class="admin-filters">
+        <label class="field">
+            <span>Status</span>
+            <select name="status">
+                <option value="">All statuses</option>
+                @foreach (var status in new[] { "Draft", "Submitted", "Returned", "Sealed" })
+                {
+                    <option value="@status" selected="@(Model.Status == status)">@status</option>
+                }
+            </select>
+        </label>
+        <label class="field">
+            <span>Custodian</span>
+            <select name="owner">
+                <option value="">All custodians</option>
+                @foreach (var custodian in Model.Custodians)
+                {
+                    <option value="@custodian.UserName" selected="@(Model.Owner == custodian.UserName)">@custodian.DisplayName</option>
+                }
+            </select>
+        </label>
+        <button class="secondary-action" type="submit">Apply</button>
+        <a class="secondary-action" asp-page="/Admin/Cycles">Clear</a>
+    </form>
+
+    <article class="panel approval-list">
+        @if (Model.Cycles.Count == 0)
+        {
+            <div class="empty-state">No costing cycles match this filter.</div>
+        }
+        @foreach (var cycle in Model.Cycles)
+        {
+            <a class="approval-row" asp-page="/Admin/CycleDetails" asp-route-id="@cycle.Id">
+                <span class="status-pill @cycle.Status.ToLowerInvariant()">@cycle.Status</span>
+                <div>
+                    <strong>@cycle.PlatformName</strong>
+                    <small>@cycle.StartYear–@cycle.EndYear · @cycle.Capabilities.Count capability(ies) · @cycle.CreatedByDisplay</small>
+                </div>
+                <time>@cycle.UpdatedAtUtc.ToLocalTime().ToString("dd MMM yyyy")</time>
+                <b>Open →</b>
+            </a>
+        }
+    </article>
+</div>

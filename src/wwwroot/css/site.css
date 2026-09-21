@@ -202,6 +202,9 @@ summary:focus-visible {
    screens, where they were hidden with display: none.
    --------------------------------------------------------------------------- */
 
+/* A label that a screen reader announces and a sighted user never sees. Also used
+   by the administration pages, where a visible label would repeat the column
+   heading beside it. */
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -392,6 +395,38 @@ a.ric-step-link:focus-visible {
 .integrity-card .outline-action {
     display: inline-block;
     margin-top: 4px;
+}
+
+/* ---------------------------------------------------------------------------
+   Administration (US-19)
+   ---------------------------------------------------------------------------
+   The filter bar on the all-cycles list, and the inline password reset in the
+   accounts table. Everything else on those pages reuses the review and
+   approval styles above.
+   --------------------------------------------------------------------------- */
+
+.admin-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.admin-filters .field {
+    min-width: 180px;
+    margin: 0;
+}
+
+.inline-reset {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.inline-reset .field {
+    margin: 0;
+    min-width: 150px;
 }
 
 /* ---------------------------------------------------------------------------

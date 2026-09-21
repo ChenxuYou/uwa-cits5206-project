@@ -15,6 +15,14 @@ public class LoginModel(CostingDbContext db, IPasswordHasher<AppUser> hasher) : 
     private const int MaximumFailedAttempts = 5;
     private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
 
+    /// <summary>
+    /// A real hash, of a password nobody holds, verified against when there is no user to
+    /// verify against. See <see cref="SpendTheSameTime"/>. Built once per process from the
+    /// configured hasher so that it carries the configured work factor; a hash made with
+    /// default settings would verify in a different time and defeat the purpose.
+    /// </summary>
+    private static string? decoyHash;
+
     [BindProperty] public string UserName { get; set; } = string.Empty;
 
     [BindProperty] public string Password { get; set; } = string.Empty;
@@ -35,12 +43,14 @@ public class LoginModel(CostingDbContext db, IPasswordHasher<AppUser> hasher) : 
         // used to find out which usernames exist.
         if (user is null)
         {
+            SpendTheSameTime(suppliedPassword);
             AddInvalidLoginError();
             return Page();
         }
 
         if (user.LockoutEndUtc is not null && user.LockoutEndUtc > now)
         {
+            SpendTheSameTime(suppliedPassword);
             AddInvalidLoginError();
             return Page();
         }
@@ -98,7 +108,23 @@ public class LoginModel(CostingDbContext db, IPasswordHasher<AppUser> hasher) : 
             return LocalRedirect(ReturnUrl);
         }
 
-        return LocalRedirect(user.Role == AppUser.Roles.Approver ? "/Approvals" : "/");
+        return LocalRedirect(HomeFor(user.Role));
+    }
+
+    /// <summary>
+    /// Verify the supplied password against a decoy hash, and discard the answer.
+    ///
+    /// The identical error message above stops the form naming which usernames exist. The
+    /// clock would have told anyway: verifying a real hash is deliberately slow, so a reply
+    /// that skipped it came back measurably sooner, and "no such user" and "locked" were
+    /// both distinguishable from "wrong password" by timing alone. Every path now pays the
+    /// same cost.
+    /// </summary>
+    private void SpendTheSameTime(string suppliedPassword)
+    {
+        var decoy = new AppUser { UserName = "decoy" };
+        decoyHash ??= hasher.HashPassword(decoy, Guid.NewGuid().ToString("N"));
+        hasher.VerifyHashedPassword(decoy, decoyHash, suppliedPassword);
     }
 
     private void AddInvalidLoginError() =>
@@ -106,5 +132,15 @@ public class LoginModel(CostingDbContext db, IPasswordHasher<AppUser> hasher) : 
             string.Empty,
             "Invalid username or password. Repeated failed attempts temporarily lock the account.");
 
-    private string Home() => User.IsInRole(AppUser.Roles.Approver) ? "/Approvals" : "/";
+    private string Home() => HomeFor(
+        User.IsInRole(AppUser.Roles.Approver) ? AppUser.Roles.Approver
+        : User.IsInRole(AppUser.Roles.Administrator) ? AppUser.Roles.Administrator
+        : AppUser.Roles.DataEntry);
+
+    private static string HomeFor(string role) => role switch
+    {
+        AppUser.Roles.Approver => "/Approvals",
+        AppUser.Roles.Administrator => "/Admin/Cycles",
+        _ => "/"
+    };
 }

@@ -52,6 +52,7 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy(AppUser.Roles.DataEntry, policy => policy.RequireRole(AppUser.Roles.DataEntry));
     options.AddPolicy(AppUser.Roles.Approver, policy => policy.RequireRole(AppUser.Roles.Approver));
+    options.AddPolicy(AppUser.Roles.Administrator, policy => policy.RequireRole(AppUser.Roles.Administrator));
 });
 
 builder.Services.AddRazorPages(options =>
@@ -60,10 +61,24 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AuthorizeFolder("/Ric", AppUser.Roles.DataEntry);
     options.Conventions.AuthorizeFolder("/Notifications", AppUser.Roles.DataEntry);
     options.Conventions.AuthorizeFolder("/Approvals", AppUser.Roles.Approver);
+    options.Conventions.AuthorizeFolder("/Admin", AppUser.Roles.Administrator);
     options.Conventions.AllowAnonymousToPage("/Account/Login");
     options.Conventions.AllowAnonymousToPage("/Account/AccessDenied");
     options.Conventions.AllowAnonymousToPage("/Error");
     options.Conventions.AuthorizePage("/Account/ChangePassword");
+})
+.AddMvcOptions(options =>
+{
+    // US-18: text in a numeric field is refused with a message a custodian can act on.
+    // These are the fallback wordings; the guided-workflow pages replace them with the
+    // on-screen name of the field (EntryChecks.ExplainUnreadableNumbers).
+    var messages = options.ModelBindingMessageProvider;
+    messages.SetAttemptedValueIsInvalidAccessor((value, field) =>
+        $"\"{value}\" is not a valid value for {field}. Enter a number, such as 20000.00.");
+    messages.SetValueMustBeANumberAccessor(field => $"{field} must be a number, such as 20000.00.");
+    messages.SetUnknownValueIsInvalidAccessor(field => $"{field} must be a number, such as 20000.00.");
+    messages.SetNonPropertyAttemptedValueIsInvalidAccessor(value =>
+        $"\"{value}\" is not a number. Enter a number, such as 20000.00.");
 });
 
 builder.Services.AddDbContext<CostingDbContext>(options =>
@@ -147,6 +162,8 @@ static async Task SeedAsync(WebApplication app)
         await db.SaveChangesAsync();
     }
 
+    var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<AppUser>>();
+
     // Demo accounts exist for local development and are seeded ONLY there.
     //
     // This used to run in every environment, which meant that deploying to a fresh staging
@@ -155,13 +172,43 @@ static async Task SeedAsync(WebApplication app)
     // instance now starts with no users, and accounts are provisioned deliberately.
     if (!app.Environment.IsDevelopment())
     {
+        // "Provisioned deliberately" needs a way in. With no users and no sign-up, a fresh
+        // staging database locks everyone out, including the administrator who would create
+        // the accounts. One bootstrap administrator is created from configuration — supply
+        // Bootstrap__AdminUserName and Bootstrap__AdminPassword as environment variables at
+        // first start — and never from a value committed to the repository. It is created
+        // once, only while the table is empty, and the password must satisfy the same policy
+        // as any other.
+        var bootstrapName = (app.Configuration["Bootstrap:AdminUserName"] ?? string.Empty).Trim().ToLowerInvariant();
+        var bootstrapPassword = app.Configuration["Bootstrap:AdminPassword"] ?? string.Empty;
+
+        if (bootstrapName.Length > 0 && !await db.AppUsers.AnyAsync())
+        {
+            if (!PasswordPolicy.IsAcceptable(bootstrapPassword))
+            {
+                app.Logger.LogError(
+                    "Bootstrap administrator not created: the supplied password does not meet the password policy.");
+            }
+            else
+            {
+                var bootstrap = new AppUser
+                {
+                    UserName = bootstrapName,
+                    DisplayName = app.Configuration["Bootstrap:AdminDisplayName"] ?? "Administrator",
+                    Role = AppUser.Roles.Administrator
+                };
+                bootstrap.PasswordHash = hasher.HashPassword(bootstrap, bootstrapPassword);
+                db.AppUsers.Add(bootstrap);
+                await db.SaveChangesAsync();
+                app.Logger.LogInformation("Bootstrap administrator {UserName} created.", bootstrapName);
+            }
+        }
+
         return;
     }
 
     if (!await db.AppUsers.AnyAsync())
     {
-        var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<AppUser>>();
-
         var entry = new AppUser
         {
             UserName = "entry",
@@ -178,7 +225,18 @@ static async Task SeedAsync(WebApplication app)
         };
         approver.PasswordHash = hasher.HashPassword(approver, "Approve123!");
 
-        db.AppUsers.AddRange(entry, approver);
+        // The demo passwords are shorter than PasswordPolicy requires. That is deliberate
+        // and confined to development: they are typed dozens of times a day while building,
+        // they are printed on the development sign-in page, and they exist nowhere else.
+        var administrator = new AppUser
+        {
+            UserName = "admin",
+            DisplayName = "Sam Okafor",
+            Role = AppUser.Roles.Administrator
+        };
+        administrator.PasswordHash = hasher.HashPassword(administrator, "Admin123!");
+
+        db.AppUsers.AddRange(entry, approver, administrator);
         await db.SaveChangesAsync();
     }
 }

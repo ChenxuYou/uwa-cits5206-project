@@ -4,11 +4,13 @@
 @{
     ViewData["Title"] = "Approval review";
     var totalCost = Model.Rates.TotalOperatingCost;
+    var netCost = Model.Rates.NetCostToRecover;
     var revenue = Model.Rates.ForecastRevenue;
 
     // The balance is the roll-up the model already computes, not revenue minus cost worked out
     // again here (architecture.md §4, rule R8), and it is written as the sealed PDF writes it.
     var balance = Model.Rates.Round(Model.Rates.ForecastBalance);
+    var fullEconomicCostBalance = Model.Rates.Round(Model.Rates.FullEconomicCostBalance);
 }
 <div class="page-wrap approval-page">
     <div class="breadcrumb"><a asp-page="/Approvals/Index">Approvals</a><span>›</span><span>@Model.Cycle.PlatformName</span></div>
@@ -17,7 +19,9 @@
     <div asp-validation-summary="All" class="form-errors approval-errors"></div>
     <div class="review-layout">
         <main>
-            <section class="review-kpis"><div><span>Total operating cost</span><strong>@totalCost.ToString("C")</strong></div><div><span>Forecast revenue</span><strong>@revenue.ToString("C")</strong></div><div class="@(balance >= 0 ? "positive-kpi" : "negative-kpi")"><span>Forecast balance</span><strong>@RecordFormat.Balance(balance)</strong></div></section>
+            @* The balance is read from the roll-up rather than re-subtracted here: the approver and the
+       custodian must not be able to see two different answers to the same question. *@
+            <section class="review-kpis"><div><span>Total operating cost</span><strong>@totalCost.ToString("C")</strong></div><div><span>Cost to recover from usage<small>after non-variable income</small></span><strong>@netCost.ToString("C")</strong></div><div><span>Retained at the proposed rates<small>University overheads recovered: @Model.Rates.OverheadsRecovered.ToString("C")</small></span><strong>@revenue.ToString("C")</strong></div><div class="@(balance >= 0 ? "positive-kpi" : "negative-kpi")"><span>Forecast balance<small>against full economic cost: @RecordFormat.Balance(fullEconomicCostBalance)</small></span><strong>@RecordFormat.Balance(balance)</strong></div></section>
             <article class="review-card"><div class="review-card-heading"><h2>Rates requiring approval</h2><span>GST exclusive</span></div><div class="review-table-wrap" role="region" aria-label="Rates requiring approval" tabindex="0"><table class="review-table"><thead><tr><th scope="col">Capability</th><th scope="col">Operating cost</th><th scope="col">UWA rate</th><th scope="col">APFR rate</th><th scope="col">Commercial rate</th><th scope="col">Balance</th></tr></thead><tbody>
             @foreach (var c in Model.Cycle.Capabilities)
             {

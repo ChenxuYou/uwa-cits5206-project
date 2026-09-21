@@ -15,14 +15,22 @@ namespace CostingTool.Pdf;
 /// (architecture.md §4, requirements §9 Q5).
 ///
 /// The shape below mirrors <c>Pages/Approvals/Details.cshtml.cs</c> — <c>BuildSnapshot()</c>,
-/// schema 1.1. The two must move together: adding a field to the snapshot without adding
-/// it here means the PDF silently stops showing it, so <see cref="SupportedSchemaVersion"/>
+/// schema 1.2. The two must move together: adding a field to the snapshot without adding
+/// it here means the PDF silently stops showing it, so <see cref="SupportedSchemaVersions"/>
 /// is checked on the way in rather than trusted.
+///
+/// <b>Older snapshots keep rendering.</b> Schema 1.2 added the balance lines US-12 asks for;
+/// a record sealed under 1.1 does not carry them, so they are nullable here and the document
+/// leaves them out rather than printing a zero the approver never saw. A snapshot is never
+/// rewritten — the renderer is what learns the older shape.
 /// </summary>
 public sealed class SealedRecord
 {
-    /// <summary>The snapshot schema this renderer was written against.</summary>
-    public const string SupportedSchemaVersion = "1.1";
+    /// <summary>The schema new snapshots are written in.</summary>
+    public const string CurrentSchemaVersion = "1.2";
+
+    /// <summary>Every schema this renderer can read, oldest first.</summary>
+    public static readonly string[] SupportedSchemaVersions = ["1.1", CurrentSchemaVersion];
 
     private static readonly JsonSerializerOptions ReadOptions = new()
     {
@@ -78,12 +86,12 @@ public sealed class SealedRecord
             throw new SealedRecordFormatException("The sealed snapshot is empty.");
         }
 
-        if (record.SchemaVersion != SupportedSchemaVersion)
+        if (record.SchemaVersion is null || !SupportedSchemaVersions.Contains(record.SchemaVersion))
         {
             throw new SealedRecordFormatException(
                 $"The sealed snapshot is schema version '{record.SchemaVersion ?? "(none)"}', and this " +
-                $"renderer understands version {SupportedSchemaVersion}. Snapshots are never rewritten, " +
-                "so the renderer is what has to learn the older shape.");
+                $"renderer understands {string.Join(" and ", SupportedSchemaVersions)}. Snapshots are " +
+                "never rewritten, so the renderer is what has to learn the older shape.");
         }
 
         return record;
@@ -128,6 +136,8 @@ public sealed class SealedCycle
 
     public string? CreatedByDisplay { get; set; }
 
+    public string? UtilisationAssumptions { get; set; }
+
     public string? BenchmarkNotes { get; set; }
 
     public string? PricingJustification { get; set; }
@@ -149,9 +159,28 @@ public sealed class SealedPlatform
 {
     public decimal TotalOperatingCost { get; set; }
 
+    /// <summary>Schema 1.2 onwards; null on a record sealed under 1.1.</summary>
+    public decimal? TotalIncome { get; set; }
+
+    /// <summary>Operating cost less non-variable income — what usage has to recover. 1.2 onwards.</summary>
+    public decimal? NetCostToRecover { get; set; }
+
+    /// <summary>Billed to users at the proposed rates, uplift included. 1.2 onwards.</summary>
+    public decimal? GrossForecastRevenue { get; set; }
+
+    /// <summary>The University's indirect cost recovery, on its own line (US-12). 1.2 onwards.</summary>
+    public decimal? OverheadsRecovered { get; set; }
+
     public decimal ForecastRevenue { get; set; }
 
+    /// <summary>
+    /// Surplus or deficit. Against cost less income from schema 1.2; against full operating
+    /// cost in a record sealed under 1.1, which is how that record was approved.
+    /// </summary>
     public decimal ForecastBalance { get; set; }
+
+    /// <summary>The same projection against full economic cost. 1.2 onwards.</summary>
+    public decimal? FullEconomicCostBalance { get; set; }
 }
 
 public sealed class SealedCapability
@@ -208,9 +237,17 @@ public sealed class SealedResult
 
     public decimal ProposedCommercialRate { get; set; }
 
+    public decimal? GrossForecastRevenue { get; set; }
+
+    public decimal? OverheadsRecovered { get; set; }
+
+    public decimal? NetCostToRecover { get; set; }
+
     public decimal ForecastRevenue { get; set; }
 
     public decimal ForecastBalance { get; set; }
+
+    public decimal? FullEconomicCostBalance { get; set; }
 }
 
 /// <summary>The arithmetic written out with this capability's own numbers in it.</summary>

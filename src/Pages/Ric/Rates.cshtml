@@ -1,6 +1,7 @@
 @page
 @model CostingTool.Pages.Ric.RatesModel
 @using System.Globalization
+@using CostingTool.Models
 @using CostingTool.Pdf
 @{
     ViewData["Title"] = "Sustainable rates";
@@ -11,6 +12,7 @@
     var k = Model.Rates.Method.IndirectCostRecovery;
     var upliftLabel = $"Includes {(k - 1m) * 100m:0.#}% indirect cost recovery";
     var unit = Model.Cycle.BillableUnit.ToLowerInvariant();
+    var perUnit = Model.Cycle.BillableUnit.TrimEnd('s').ToLowerInvariant();
 
     // A proposed rate of zero means "not entered yet" (the model stores decimals, not nulls,
     // and submission refuses a zero rate). Until one is entered the page says so, rather than
@@ -31,11 +33,7 @@
         <div>
             <span class="eyebrow">@Model.Cycle.PlatformName.ToUpper()</span>
             <h1>Sustainable and proposed rates</h1>
-            <p>
-                Calculated rates are GST exclusive. They are a starting point for pricing decisions before
-                considering market conditions or strategic adjustments. Proposed rates can vary, but the
-                financial effect must be visible.
-            </p>
+            <p>Every rate on this page is @RateCategories.GstLabel, per @perUnit.</p>
         </div>
         <div class="ric-total">
             <small>Method version</small>
@@ -46,6 +44,14 @@
     <form method="post">
         <input type="hidden" asp-for="CycleId" />
         <div asp-validation-summary="All" class="form-errors"></div>
+
+        <section class="ric-card">
+            <div class="ric-card-title">
+                <h2>How to read these rates</h2>
+                <p>@RateCategories.ProposedRateFraming</p>
+            </div>
+            <p><small>@RateCategories.UpliftExplanation</small></p>
+        </section>
 
         <div class="rate-list">
             @for (var i = 0; i < Model.Inputs.Count; i++)
@@ -95,17 +101,17 @@
                         var apfrCalculated = rates.DisplayApfrRate.ToString(CultureInfo.InvariantCulture);
                         var commercialCalculated = rates.DisplayCommercialRate.ToString(CultureInfo.InvariantCulture);
 
-                        var showCommercialNote = rates.ProposedCommercialRate > 0
-                            && RateVariance.Between(rates.DisplayCommercialRate, rates.ProposedCommercialRate).IsVaried;
-
                         var proposedCount = new[] { rates.ProposedUwaRate, rates.ProposedApfrRate, rates.ProposedCommercialRate }.Count(x => x > 0);
                         var balance = rates.Round(rates.ForecastBalance);
 
                         <div class="rate-grid">
                             <div class="rate-column" data-kind="uwa" data-calculated="@uwaCalculated">
-                                <span>UWA Researcher</span>
-                                <small>Minimum sustainable</small>
+                                <span>@RateCategories.UwaResearcher.Name</span>
+                                <small>Minimum sustainable · @RateCategories.GstLabel</small>
                                 <strong>@rates.DisplayUwaRate.ToString("C")</strong>
+                                <small>@RateCategories.UwaResearcher.Eligibility</small>
+                                <small>@RateCategories.UwaResearcher.IncomeDeducted</small>
+                                <small>No indirect cost recovery is added to this rate.</small>
                                 <label>
                                     Proposed rate
                                     <input asp-for="Inputs[i].Uwa" type="number" min="0" step="0.01" aria-describedby="variance-@(i)-uwa" />
@@ -113,9 +119,11 @@
                                 <p class="rate-variance" id="variance-@(i)-uwa">@RateVariance.Describe(rates.DisplayUwaRate, rates.ProposedUwaRate)</p>
                             </div>
                             <div class="rate-column" data-kind="apfr" data-calculated="@apfrCalculated">
-                                <span>APFR</span>
-                                <small>@upliftLabel</small>
+                                <span>@RateCategories.Apfr.Name</span>
+                                <small>@upliftLabel · @RateCategories.GstLabel</small>
                                 <strong>@rates.DisplayApfrRate.ToString("C")</strong>
+                                <small>@RateCategories.Apfr.Eligibility</small>
+                                <small>@RateCategories.Apfr.IncomeDeducted</small>
                                 <label>
                                     Proposed rate
                                     <input asp-for="Inputs[i].Apfr" type="number" min="0" step="0.01" aria-describedby="variance-@(i)-apfr" />
@@ -123,9 +131,11 @@
                                 <p class="rate-variance" id="variance-@(i)-apfr">@RateVariance.Describe(rates.DisplayApfrRate, rates.ProposedApfrRate)</p>
                             </div>
                             <div class="rate-column" data-kind="commercial" data-calculated="@commercialCalculated">
-                                <span>Commercial</span>
-                                <small>@upliftLabel</small>
+                                <span>@RateCategories.Commercial.Name</span>
+                                <small>@upliftLabel · @RateCategories.GstLabel</small>
                                 <strong>@rates.DisplayCommercialRate.ToString("C")</strong>
+                                <small>@RateCategories.Commercial.Eligibility</small>
+                                <small>@RateCategories.Commercial.IncomeDeducted</small>
                                 <label>
                                     Proposed rate
                                     <input asp-for="Inputs[i].Commercial" type="number" min="0" step="0.01" aria-describedby="variance-@(i)-commercial" />
@@ -134,48 +144,76 @@
                             </div>
                         </div>
 
-                        @* US-11: where a commercial rate is varied, the University's obligations
-                           under competitive neutrality are surfaced. The wording below is ours,
-                           written from requirements.md; it must be checked against Step 3 of the
-                           client's guide before the client sees it. *@
-                        <div class="callout commercial-note" role="note" hidden="@(showCommercialNote ? null : "hidden")">
-                            <span aria-hidden="true">i</span>
+                        @* US-11: where a commercial rate is varied, the University's competitive
+                           neutrality obligations are surfaced, in the guide's words [G, Step 3].
+                           Rendered on every card and shown or hidden by the script below as the
+                           custodian types, with the same test the server uses
+                           (CommercialRateVaries) for the first render. *@
+                        <div class="callout commercial-note" role="note" hidden="@(rates.CommercialRateVaries ? null : "hidden")">
+                            <span aria-hidden="true">!</span>
                             <div>
-                                <strong>Commercial rate differs from the calculated rate</strong>
-                                <p>
-                                    The University has obligations under competitive neutrality when it prices commercial
-                                    services. Check Step 3 of the UWA Costing &amp; Pricing Guide before settling this rate,
-                                    and record your reasoning in the pricing justification below.
-                                </p>
+                                <strong>Competitive neutrality</strong>
+                                <p>@RateCategories.CompetitiveNeutrality</p>
                             </div>
                         </div>
 
-                        <div class="rate-balance @(proposedCount == 0 ? "" : balance >= 0 ? "positive" : "negative")">
-                            <span>Forecast balance at proposed rates</span>
-                            @if (proposedCount == 0)
-                            {
+                        <details class="rate-workings">
+                            <summary>The figures behind these rates</summary>
+                            <div class="review-table-wrap">
+                                <table class="review-table">
+                                    <tbody>
+                                        <tr><td>Operating cost booked to this capability</td><td>@rates.CapabilityOperatingCost.ToString("C")</td></tr>
+                                        <tr><td>Share of platform-level cost</td><td>@rates.AllocatedPlatformCost.ToString("C")</td></tr>
+                                        <tr><td><strong>Total operating cost</strong></td><td><strong>@rates.TotalOperatingCost.ToString("C")</strong></td></tr>
+                                        <tr><td>Less UWA non-variable income</td><td>−@rates.UwaIncome.ToString("C")</td></tr>
+                                        <tr><td>Less non-UWA non-variable income</td><td>−@rates.NonUwaIncome.ToString("C")</td></tr>
+                                        <tr><td><strong>Cost to recover from usage</strong></td><td><strong>@rates.NetCostToRecover.ToString("C")</strong></td></tr>
+                                        <tr>
+                                            <td>Forecast utilisation — the divisor</td>
+                                            <td>
+                                                @rates.ForecastUtilisation.ToString("N1") @unit
+                                                (UWA @rates.ForecastUwaUse.ToString("N1") ·
+                                                APFR @rates.ForecastApfrUse.ToString("N1") ·
+                                                commercial @rates.ForecastCommercialUse.ToString("N1"))
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </details>
+
+                        @if (proposedCount == 0)
+                        {
+                            <div class="rate-balance">
+                                <span>Forecast balance at proposed rates</span>
                                 <small>Enter proposed rates to see the effect.</small>
-                            }
-                            else
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="cost-summary">
+                                <span><em>Billed to users at the proposed rates</em><b>@rates.GrossForecastRevenue.ToString("C")</b></span>
+                                <span><em>Less University overheads recovered<small>@upliftLabel</small></em><b>−@rates.OverheadsRecovered.ToString("C")</b></span>
+                                <span><em>Retained by the platform</em><b>@rates.ForecastRevenue.ToString("C")</b></span>
+                                <span><em>Cost to recover from usage</em><b>@rates.NetCostToRecover.ToString("C")</b></span>
+                                <span class="@(balance >= 0 ? "positive-text" : "negative-text")">
+                                    <em>Forecast balance<small>Against full economic cost: @RecordFormat.Balance(rates.Round(rates.FullEconomicCostBalance))</small></em>
+                                    <b>@RecordFormat.Balance(balance)</b>
+                                </span>
+                            </div>
+                            @if (proposedCount < 3)
                             {
-                                <strong>@RecordFormat.Balance(balance)</strong>
-                                <small>
-                                    revenue @rates.ForecastRevenue.ToString("C")
-                                    against operating cost @rates.TotalOperatingCost.ToString("C")
-                                    @if (proposedCount < 3)
-                                    {
-                                        <text> · not all three proposed rates are entered, so this understates revenue</text>
-                                    }
-                                </small>
+                                <p class="rate-effect-note">Not all three proposed rates are entered, so this understates revenue.</p>
                             }
-                        </div>
+                        }
                     }
                 </article>
             }
         </div>
 
         <section class="ric-card rate-effect" aria-labelledby="rate-effect-heading">
-            <h2 id="rate-effect-heading">Effect on the platform balance</h2>
+            <h2 id="rate-effect-heading">The platform at the proposed rates</h2>
+            <p class="rate-effect-note">Summed over every capability that priced — never a stored total.</p>
 
             @if (Model.IsPreview)
             {
@@ -183,7 +221,7 @@
                     <span aria-hidden="true">i</span>
                     <div>
                         <strong>Balance updated</strong>
-                        <p>These figures use the rates you have typed. They are not saved until you continue to the review.</p>
+                        <p>These figures use the rates you have typed. They are not saved until you continue to the review or go back a step.</p>
                     </div>
                 </div>
             }
@@ -194,27 +232,28 @@
             }
             else
             {
-                <div class="review-kpis">
-                    <div><span>Total operating cost</span><strong>@Model.Rates.TotalOperatingCost.ToString("C")</strong></div>
-                    <div><span>Forecast platform revenue</span><strong>@Model.Rates.ForecastRevenue.ToString("C")</strong></div>
-                    <div class="@(platformBalance >= 0 ? "positive-kpi" : "negative-kpi")">
-                        <span>Forecast balance</span>
-                        <strong>@RecordFormat.Balance(platformBalance)</strong>
-                    </div>
+                <div class="cost-summary">
+                    <span><em>Total operating cost</em><b>@Model.Rates.TotalOperatingCost.ToString("C")</b></span>
+                    <span><em>Less non-variable income</em><b>−@Model.Rates.TotalIncome.ToString("C")</b></span>
+                    <span><em>Cost to recover from usage</em><b>@Model.Rates.NetCostToRecover.ToString("C")</b></span>
+                    <span><em>Retained revenue at the proposed rates<small>University overheads recovered: @Model.Rates.OverheadsRecovered.ToString("C")</small></em><b>@Model.Rates.ForecastRevenue.ToString("C")</b></span>
+                    <span class="@(platformBalance >= 0 ? "positive-text" : "negative-text")">
+                        <em>Forecast balance<small>Against full economic cost: @RecordFormat.Balance(Model.Rates.Round(Model.Rates.FullEconomicCostBalance))</small></em>
+                        <b>@RecordFormat.Balance(platformBalance)</b>
+                    </span>
                 </div>
-
                 @if (!Model.Rates.IsComplete)
                 {
-                    <p class="rate-effect-note">These totals leave out the capabilities above that could not be priced.</p>
+                    <p class="rate-effect-note">Capabilities that could not be priced are not in these totals.</p>
                 }
             }
 
             <div class="rate-effect-actions">
                 @* Enter in a rate box submits the first button in the form, so it previews the
-                   balance rather than saving. Nothing is lost by that; saving is the button
-                   at the bottom. *@
+                   balance rather than saving or going back. Nothing is lost by that; saving is
+                   the button at the bottom. *@
                 <button type="submit" class="outline-button" asp-page-handler="Preview" asp-route-cycleId="@Model.Cycle.Id">Update balance</button>
-                <span>Change a proposed rate, then update the balance to see its effect. Nothing is saved until you continue.</span>
+                <span>Change a proposed rate, then update the balance to see its effect. Nothing is saved until you continue or go back.</span>
             </div>
         </section>
 
@@ -226,13 +265,15 @@
                 </label>
                 <label class="field">
                     <span>Pricing justification</span>
-                    <textarea asp-for="PricingJustification" rows="5" placeholder="Explain why the proposed rates differ from the calculated minimums..."></textarea>
+                    <textarea asp-for="PricingJustification" rows="5" placeholder="Explain why the proposed rates differ from the calculated minimums, and how a forecast deficit will be carried."></textarea>
+                    <span asp-validation-for="PricingJustification" class="field-error"></span>
                 </label>
             </div>
         </section>
 
         <div class="wizard-actions">
-            <a class="secondary-action" asp-page="/Ric/Capacity" asp-route-cycleId="@Model.Cycle.Id">← Back to capacity</a>
+            @* A link here would have thrown away everything typed on this screen — US-10. *@
+            <button class="secondary-action" type="submit" asp-page-handler="Back">← Save and go back to capacity</button>
             <button class="primary-button" type="submit">Review costing cycle →</button>
         </div>
     </form>
