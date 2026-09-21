@@ -155,6 +155,14 @@ static async Task SeedAsync(WebApplication app)
             IndirectCostRecovery = 1.35m,
             RateDecimals = 2,
             MidpointRule = MidpointRounding.AwayFromZero,
+
+            // Capacity baselines [W, sheet 2 rows 3–4] — configuration under N7, like k.
+            MachineAvailableDays = 251m,
+            MachineAvailabilityBasis = "365 days less 104 weekend days and 10 WA public holidays",
+            StaffAvailableDays = 230m,
+            StaffAvailabilityBasis = "working days per year under the enterprise agreement",
+            HoursPerDay = 7.5m,
+
             Source = "UWA Costing & Pricing Guide, Step 3; University Indirect Cost Recovery Policy",
             Notes = "Initial version. Supersede rather than edit: add a new row and move IsCurrent.",
             IsCurrent = true

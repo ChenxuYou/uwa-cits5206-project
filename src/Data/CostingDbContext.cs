@@ -60,6 +60,11 @@ public class CostingDbContext(DbContextOptions<CostingDbContext> options) : DbCo
         modelBuilder.Entity<MethodConfig>().Property(x => x.Source).HasMaxLength(200);
         modelBuilder.Entity<MethodConfig>().Property(x => x.IndirectCostRecovery).HasPrecision(9, 4);
         modelBuilder.Entity<MethodConfig>().Property(x => x.MidpointRule).HasConversion<string>().HasMaxLength(20);
+        modelBuilder.Entity<MethodConfig>().Property(x => x.MachineAvailableDays).HasPrecision(9, 2);
+        modelBuilder.Entity<MethodConfig>().Property(x => x.StaffAvailableDays).HasPrecision(9, 2);
+        modelBuilder.Entity<MethodConfig>().Property(x => x.HoursPerDay).HasPrecision(9, 2);
+        modelBuilder.Entity<MethodConfig>().Property(x => x.MachineAvailabilityBasis).HasMaxLength(200);
+        modelBuilder.Entity<MethodConfig>().Property(x => x.StaffAvailabilityBasis).HasMaxLength(200);
 
         // Deleting a cycle takes its capabilities, cost lines and per-year amounts with it.
         // Stated rather than left to convention: an orphaned cost line would be summed into
