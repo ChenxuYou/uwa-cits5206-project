@@ -25,12 +25,15 @@ public static class EntryChecks
     public static readonly IReadOnlyDictionary<string, decimal> ConfirmAbove =
         new Dictionary<string, decimal>
         {
-            [CostEntry.CostCategories.Personnel] = 250_000m,
-            ["Equipment"] = 500_000m,
-            ["Maintenance"] = 100_000m,
-            ["Travel"] = 50_000m,
-            ["Animal Cost"] = 100_000m,
-            ["Other"] = 100_000m
+            [CostEntry.CostCategories.EmployeeSalaryAndOnCosts] = 250_000m,
+            [CostEntry.CostCategories.PlatformLeaderSalary] = 250_000m,
+            ["Non-capital equipment purchases"] = 100_000m,
+            ["Repairs and maintenance"] = 100_000m,
+            ["Maintenance contracts"] = 150_000m,
+            ["Rental, hiring and leasing fees"] = 150_000m,
+            ["Decommissioning costs"] = 250_000m,
+            [CostEntry.CostCategories.LaboratoryFloorArea] = 250_000m,
+            [CostEntry.CostCategories.OfficeFloorArea] = 100_000m
         };
 
     /// <summary>Income lines are usually larger than any single cost line.</summary>

@@ -28,6 +28,9 @@ public class CostingDbContext(DbContextOptions<CostingDbContext> options) : DbCo
         modelBuilder.Entity<RicCostEntry>().Property(x => x.CostType).HasMaxLength(40);
         modelBuilder.Entity<RicCostEntry>().Property(x => x.Category).HasMaxLength(60);
         modelBuilder.Entity<RicCostYearAmount>().Property(x => x.Amount).HasPrecision(18, 2);
+        modelBuilder.Entity<RicCostEntry>().Property(x => x.Position).HasMaxLength(40);
+        modelBuilder.Entity<RicCostEntry>().Property(x => x.FloorArea).HasPrecision(18, 2);
+        modelBuilder.Entity<RicCostEntry>().Property(x => x.FloorAreaRate).HasPrecision(18, 2);
 
         modelBuilder.Entity<RicCapability>().Property(x => x.MaximumCapacity).HasPrecision(18, 2);
         modelBuilder.Entity<RicCapability>().Property(x => x.ForecastUwaUse).HasPrecision(18, 2);

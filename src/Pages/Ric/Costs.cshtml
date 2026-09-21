@@ -3,7 +3,15 @@
 @{
     ViewData["Title"] = "Detailed costs";
     var costItems = Model.Cycle.Costs.Where(x => !x.IsIncome).OrderByDescending(x => x.Id).ToList();
-    var totalCost = costItems.Sum(x => x.Amount);
+    var costs = Model.Costs;
+    var totalCost = costs.Total;
+    var ways = costs.Divisor;
+    var categoryGroups = new (string Scope, string Heading, IReadOnlyList<string> Categories)[]
+    {
+        (CostEntry.Scopes.Capability, "Directly incurred by the capability", CostEntry.CostCategories.DirectlyIncurred),
+        (CostEntry.Scopes.Platform, "Directly allocated from the platform", CostEntry.CostCategories.DirectlyAllocated),
+        (CostEntry.Scopes.Platform, "Indirect — floor area", CostEntry.CostCategories.Indirect)
+    };
 }
 
 <div class="page-wrap ric-page">
@@ -13,10 +21,10 @@
         <div>
             <span class="eyebrow">@Model.Cycle.PlatformName.ToUpper() · DETAILED COST ENTRY</span>
             <h1>Add operating cost items</h1>
-            <p>Record Personnel, Equipment, Maintenance, Travel, Animal Cost or Other operating costs. Funding is entered separately in the next step.</p>
+            <p>Enter what each capability costs to run by the client's categories, and the platform's shared and floor-area costs once. Funding is entered separately in the next step.</p>
         </div>
         <div class="ric-total">
-            <small>Average annual operating cost</small>
+            <small>Platform operating cost, average per year</small>
             <strong>@totalCost.ToString("C")</strong>
         </div>
     </div>
@@ -44,12 +52,21 @@
                 </label>
                 <label class="field full-span">
                     <span>Cost category</span>
-                    <select asp-for="Category" id="category">
-                        @foreach (var category in CostEntry.CostCategories.All)
+                    @* Written by hand rather than with asp-for: the same category name appears
+                       under both scopes ("Materials and supplies"), and the tag helper would
+                       mark both copies selected. The script shows only the current scope's. *@
+                    <select name="Category" id="category">
+                        @foreach (var group in categoryGroups)
                         {
-                            <option value="@category">@category</option>
+                            <optgroup label="@group.Heading" data-scope="@group.Scope">
+                                @foreach (var category in group.Categories)
+                                {
+                                    <option value="@category" selected="@(Model.Scope == group.Scope && Model.Category == category)">@category</option>
+                                }
+                            </optgroup>
                         }
                     </select>
+                    <small id="categoryHint"></small>
                 </label>
             </div>
 
@@ -57,6 +74,17 @@
                 <h3>Personnel details</h3>
                 <div class="form-grid two-columns">
                     <label class="field full-span"><span>Name *</span><input asp-for="PersonnelName" /></label>
+                    <label class="field full-span" id="positionField">
+                        <span>Position *</span>
+                        <select asp-for="Position" id="position">
+                            <option value="">Select</option>
+                            @foreach (var position in CostEntry.Positions.All)
+                            {
+                                <option value="@position">@position</option>
+                            }
+                        </select>
+                        <small>The workbook costs a capability's staff under these two roles. The platform leader's share of platform work goes under the platform-level "Platform leader salary and on-costs".</small>
+                    </label>
                     <label class="field"><span>Position funding type *</span><select asp-for="FundingType" id="fundingType"><option value="">Select</option><option>ARC Fellow</option><option>ARC Funded Position</option><option>Chief Investigator – UWA funded</option></select></label>
                     <label class="field" id="fellowshipField" hidden><span>Fellowship Type *</span><select asp-for="FellowshipType" id="fellowshipType"><option value="">Select</option><option>DECRA</option><option>DIA</option><option>FT</option></select></label>
                     <label class="field"><span>Step/Option</span><select asp-for="StepOption"><option>100% option</option><option>75% option</option><option>50% option</option></select></label>
@@ -88,7 +116,18 @@
                 </div>
             </section>
 
-            <section class="detail-panel">
+            <section id="floorAreaPanel" class="detail-panel" hidden>
+                <h3>Floor area</h3>
+                <p class="panel-note">Indirect cost: the space the platform occupies, at the University's rate per m² per year. It is the same each year of the cycle.</p>
+                <div class="form-grid two-columns">
+                    <label class="field"><span>Floor area (m²) *</span><input asp-for="FloorArea" id="floorArea" type="number" min="0" step="0.01" /></label>
+                    <label class="field money-field"><span>Rate per m² per year *</span><div><b>$</b><input asp-for="FloorAreaRate" id="floorAreaRate" type="number" min="0" step="0.01" /></div></label>
+                    <label class="field full-span"><span>Location</span><input asp-for="Description" id="floorAreaDescription" placeholder="e.g. Level 2 laboratory, Bayliss Building" /></label>
+                </div>
+                <p class="panel-note" id="floorAreaResult" aria-live="polite"></p>
+            </section>
+
+            <section class="detail-panel" id="yearPanel">
                 <h3>Cost by year</h3>
                 <div class="year-grid">
                     @for (var i = 0; i < Model.YearCount; i++)
@@ -106,6 +145,78 @@
             <button class="primary-button full-button add-detail-button" type="submit">＋ Add cost item</button>
         </form>
 
+        <div class="cost-side">
+        <section class="ric-card cost-rollup" aria-labelledby="rollup-heading">
+            <div class="ric-card-title">
+                <h2 id="rollup-heading">Running totals</h2>
+                <p>Average per year. Each capability's own costs, and its share of the platform's.</p>
+            </div>
+            <div class="rollup-table-wrap" role="region" aria-label="Running totals by capability" tabindex="0">
+                <table class="rollup-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Capability</th>
+                            <th scope="col">Directly incurred</th>
+                            <th scope="col">Allocated from platform</th>
+                            <th scope="col">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var capability in costs.Capabilities)
+                        {
+                            <tr>
+                                <th scope="row">@capability.Name</th>
+                                <td>@capability.DirectlyIncurred.ToString("C")</td>
+                                <td>@capability.Allocated.ToString("C")</td>
+                                <td>@capability.Total.ToString("C")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th scope="row">All capabilities</th>
+                            <td>@costs.DirectlyIncurred.ToString("C")</td>
+                            <td>@costs.PlatformLevel.ToString("C")</td>
+                            <td>@costs.Capabilities.Sum(x => x.Total).ToString("C")</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="cost-summary">
+                <span><em>Directly incurred by capabilities</em><b>@costs.DirectlyIncurred.ToString("C")</b></span>
+                <span><em>Directly allocated at platform level</em><b>@costs.DirectlyAllocated.ToString("C")</b></span>
+                <span><em>Indirect — floor area</em><b>@costs.Indirect.ToString("C")</b></span>
+                <span><em>Platform operating cost</em><b>@totalCost.ToString("C")</b></span>
+            </div>
+            @if (costs.Reconciles)
+            {
+                <p class="rollup-check">✓ The capability totals add up to the platform operating cost.</p>
+            }
+            else if (ways > 0)
+            {
+                <p class="rollup-check rollup-check-fail" role="alert">The capability totals do not add up to the platform operating cost. Report this: the figures are being summed over different lines.</p>
+            }
+
+            @* US-04: say plainly how a platform-level cost reaches a capability, including where
+               this tool departs from the workbook, rather than leaving it to be discovered. *@
+            <details class="rollup-rule" open="@(costs.PlatformLevel > 0 ? "open" : null)">
+                <summary>How platform-level costs reach each capability</summary>
+                <p>
+                    Every platform-level line — directly allocated or indirect — is split evenly across the
+                    @ways @(ways == 1 ? "capability" : "capabilities") in this cycle, so each carries
+                    @(ways > 0 ? $"one {(ways == 1 ? "whole" : OrdinalShare(ways))}" : "none") of it:
+                    <strong>@costs.AllocatedToEach.ToString("C")</strong> each at the moment. It is shown against each
+                    capability as allocated, never as a cost the capability incurred itself.
+                </p>
+                <p>
+                    The client's workbook divides administration costs and the platform leader's salary across one
+                    more column — Analysis/Consulting — than its other platform-level rows. This tool uses the same
+                    divisor for every category: if Analysis/Consulting is costed here, add it as a capability and it
+                    takes an equal share of every platform-level line.
+                </p>
+            </details>
+        </section>
+
         <section class="ric-card">
             <div class="ric-card-title"><h2>Recorded costs</h2><p>@costItems.Count operating cost record(s)</p></div>
             @if (costItems.Count == 0)
@@ -115,20 +226,44 @@
             @foreach (var item in costItems)
             {
                 <div class="cost-row detailed-row">
-                    <div><strong>@item.Description</strong><small>@item.Category · @(item.Capability?.Name ?? "Platform")</small><em>@string.Join(" · ", item.YearAmounts.OrderBy(x => x.ProjectYear).Select((x, i) => $"{Model.Cycle.StartYear + i}: {x.Amount:C0}"))</em></div>
+                    <div>
+                        <strong>@item.Description</strong>
+                        <small>@CostEntry.CostCategories.ClassOf(item.Scope, item.Category) · @item.Category@(item.Position is null ? "" : $" ({item.Position})") · @(item.Capability?.Name ?? $"Platform, split {ways} ways")</small>
+                        @if (item.FloorArea is not null)
+                        {
+                            <em>@item.FloorArea.Value.ToString("N1") m² × @item.FloorAreaRate?.ToString("C") per m² per year</em>
+                        }
+                        else
+                        {
+                            <em>@string.Join(" · ", item.YearAmounts.OrderBy(x => x.ProjectYear).Select((x, i) => $"{Model.Cycle.StartYear + i}: {x.Amount:C0}"))</em>
+                        }
+                    </div>
                     <b>@item.Amount.ToString("C")<small>annual avg.</small></b>
                     <form method="post" asp-page-handler="Delete"><input type="hidden" name="CycleId" value="@Model.Cycle.Id" /><input type="hidden" name="id" value="@item.Id" /><button type="submit" aria-label="Delete @item.Description">×</button></form>
                 </div>
             }
-            <div class="cost-summary"><span><em>Average annual operating cost</em><b>@totalCost.ToString("C")</b></span></div>
         </section>
+        </div>
     </div>
 
     <div class="wizard-actions"><a href="/" class="secondary-action">Save &amp; exit</a><a class="primary-button" asp-page="/Ric/Funding" asp-route-cycleId="@Model.Cycle.Id">Continue to funding sources →</a></div>
 </div>
 
+@functions {
+    private static string OrdinalShare(int ways) => ways switch
+    {
+        2 => "half",
+        3 => "third",
+        4 => "quarter",
+        _ => $"{ways}th"
+    };
+}
+
 @section Scripts {
     <script>
+        const personnelCategories = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new[] { CostEntry.CostCategories.EmployeeSalaryAndOnCosts, CostEntry.CostCategories.PlatformLeaderSalary }));
+        const floorAreaCategories = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(CostEntry.CostCategories.Indirect));
+        const employeeCategory = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(CostEntry.CostCategories.EmployeeSalaryAndOnCosts));
         const category = document.getElementById('category');
         const scope = document.getElementById('scope');
         const capability = document.getElementById('capabilityField');
@@ -138,15 +273,58 @@
         const fellowship = document.getElementById('fellowshipField');
         const fellowshipSelect = document.getElementById('fellowshipType');
 
+        const floorArea = document.getElementById('floorAreaPanel');
+        const yearPanel = document.getElementById('yearPanel');
+        const positionField = document.getElementById('positionField');
+        const hint = document.getElementById('categoryHint');
+        const money = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' });
+
         function setEnabled(panel, enabled) { panel.querySelectorAll('input, select, textarea').forEach(input => input.disabled = !enabled); }
-        function updateCategory() { const isPersonnel = category.value === 'Personnel'; personnel.hidden = !isPersonnel; generic.hidden = isPersonnel; setEnabled(personnel, isPersonnel); setEnabled(generic, !isPersonnel); updateFellowship(); }
-        function updateScope() { const isCapability = scope.value === 'Capability'; capability.hidden = !isCapability; capability.querySelector('select').disabled = !isCapability; }
+        function updateCategory() {
+            const isPersonnel = personnelCategories.includes(category.value);
+            const isFloorArea = floorAreaCategories.includes(category.value);
+            personnel.hidden = !isPersonnel; setEnabled(personnel, isPersonnel);
+            floorArea.hidden = !isFloorArea; setEnabled(floorArea, isFloorArea);
+            generic.hidden = isPersonnel || isFloorArea; setEnabled(generic, !isPersonnel && !isFloorArea);
+            yearPanel.hidden = isFloorArea; setEnabled(yearPanel, !isFloorArea);
+            const needsPosition = category.value === employeeCategory;
+            positionField.hidden = !needsPosition; positionField.querySelector('select').disabled = !isPersonnel || !needsPosition;
+            updateFellowship();
+            updateFloorArea();
+        }
+        // Only the current scope's categories can be chosen: a capability takes directly
+        // incurred costs, the platform directly allocated and indirect ones.
+        function updateScope() {
+            const isCapability = scope.value === 'Capability';
+            capability.hidden = !isCapability; capability.querySelector('select').disabled = !isCapability;
+            let keep = false;
+            category.querySelectorAll('optgroup').forEach(group => {
+                const allowed = group.dataset.scope === scope.value;
+                group.hidden = !allowed; group.disabled = !allowed;
+                if (allowed && group.contains(category.selectedOptions[0])) keep = true;
+            });
+            if (!keep) {
+                const first = category.querySelector(`optgroup[data-scope="${scope.value}"] option`);
+                if (first) first.selected = true;
+            }
+            hint.textContent = isCapability
+                ? 'Costs this capability incurs itself.'
+                : 'Entered once for the platform and split evenly across every capability.';
+            updateCategory();
+        }
+        function updateFloorArea() {
+            const out = document.getElementById('floorAreaResult');
+            const area = Number(document.getElementById('floorArea').value) || 0;
+            const rate = Number(document.getElementById('floorAreaRate').value) || 0;
+            out.textContent = area > 0 && rate > 0 ? `${area} m² × ${money.format(rate)} = ${money.format(Math.round(area * rate * 100) / 100)} per year` : '';
+        }
+        document.getElementById('floorArea').addEventListener('input', updateFloorArea);
+        document.getElementById('floorAreaRate').addEventListener('input', updateFloorArea);
         function updateFellowship() { const visible = funding.value === 'ARC Fellow'; fellowship.hidden = !visible; fellowshipSelect.disabled = !visible; if (!visible) fellowshipSelect.value = ''; }
 
         category.addEventListener('change', updateCategory);
         scope.addEventListener('change', updateScope);
         funding.addEventListener('change', updateFellowship);
-        updateCategory();
         updateScope();
     </script>
 }

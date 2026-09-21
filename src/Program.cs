@@ -83,7 +83,7 @@ builder.Services.AddRazorPages(options =>
 
 builder.Services.AddDbContext<CostingDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("CostingDb")
-                      ?? "Data Source=ric-costing-v5.db"));
+                      ?? "Data Source=ric-costing-v7.db"));
 
 builder.Services.AddScoped<MethodConfigProvider>();
 builder.Services.AddScoped<RicCalculationService>();

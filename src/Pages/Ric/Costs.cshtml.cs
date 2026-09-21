@@ -22,7 +22,16 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
     [BindProperty] public string Scope { get; set; } = CostEntry.Scopes.Capability;
 
-    [BindProperty] public string Category { get; set; } = CostEntry.CostCategories.Personnel;
+    [BindProperty] public string Category { get; set; } = CostEntry.CostCategories.EmployeeSalaryAndOnCosts;
+
+    /// <summary>Platform leader or research officer, for a capability staff line.</summary>
+    [BindProperty] public string? Position { get; set; }
+
+    /// <summary>Square metres, for a floor-area line (US-04).</summary>
+    [BindProperty] public decimal FloorArea { get; set; }
+
+    /// <summary>Dollars per m² per annum, for a floor-area line.</summary>
+    [BindProperty] public decimal FloorAreaRate { get; set; }
 
     [BindProperty] public string? PersonnelName { get; set; }
 
@@ -66,6 +75,13 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
     public int YearCount => Cycle.EndYear - Cycle.StartYear + 1;
 
+    /// <summary>
+    /// The running totals the screen shows while costs are entered: each capability's own
+    /// costs, its share of the platform's, and the reconciliation between them (US-03, US-04).
+    /// The same roll-up the engine prices from.
+    /// </summary>
+    public CycleCosts Costs => RicCalculationService.CostsOf(Cycle);
+
     public async Task<IActionResult> OnGetAsync(int cycleId)
     {
         if (!await Load(cycleId))
@@ -98,11 +114,9 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
             return Page();
         }
 
-        var amounts = Enumerable.Range(0, YearCount)
-            .Select(i => i < YearAmounts.Count ? YearAmounts[i] : 0)
-            .ToList();
-
-        var isPersonnel = Category == CostEntry.CostCategories.Personnel;
+        var amounts = AmountsByYear();
+        var isPersonnel = CostEntry.CostCategories.IsPersonnel(Category);
+        var isFloorArea = CostEntry.CostCategories.IsFloorArea(Category);
 
         Db.RicCostEntries.Add(new RicCostEntry
         {
@@ -117,8 +131,15 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
             Category = Category,
             Amount = amounts.Average(),
             Notes = Notes,
-            Description = isPersonnel ? PersonnelName : Description,
+            Description = isPersonnel ? PersonnelName
+                : isFloorArea && string.IsNullOrWhiteSpace(Description) ? Category
+                : Description,
             Supplier = Supplier,
+            Position = Category == CostEntry.CostCategories.PlatformLeaderSalary
+                ? CostEntry.Positions.PlatformLeader
+                : isPersonnel ? Position : null,
+            FloorArea = isFloorArea ? FloorArea : null,
+            FloorAreaRate = isFloorArea ? FloorAreaRate : null,
 
             PersonnelName = isPersonnel ? PersonnelName : null,
             FundingType = isPersonnel ? FundingType : null,
@@ -173,11 +194,15 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
     private void Validate()
     {
-        var allowed = CostEntry.CostCategories.All;
-
-        if (!allowed.Contains(Category))
+        // The category list depends on where the cost sits: a capability takes directly
+        // incurred costs, the platform directly allocated and indirect ones [W, sheet 1].
+        if (!CostEntry.CostCategories.For(Scope).Contains(Category))
         {
-            ModelState.AddModelError(nameof(Category), "Select a valid cost category.");
+            ModelState.AddModelError(
+                nameof(Category),
+                Scope == CostEntry.Scopes.Platform
+                    ? "Select a platform-level cost category."
+                    : "Select a cost category for the capability.");
         }
 
         if (Scope == CostEntry.Scopes.Capability)
@@ -198,8 +223,14 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
             ModelState.AddModelError(nameof(Scope), "Select a valid scope.");
         }
 
-        if (Category == CostEntry.CostCategories.Personnel)
+        if (CostEntry.CostCategories.IsPersonnel(Category))
         {
+            if (Category == CostEntry.CostCategories.EmployeeSalaryAndOnCosts
+                && !CostEntry.Positions.All.Contains(Position))
+            {
+                ModelState.AddModelError(nameof(Position), "Say whether this is the platform leader or a research officer.");
+            }
+
             if (string.IsNullOrWhiteSpace(PersonnelName))
             {
                 ModelState.AddModelError(nameof(PersonnelName), "Personnel name is required.");
@@ -215,12 +246,24 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
                 ModelState.AddModelError(nameof(FellowshipType), "Fellowship type is required for ARC Fellows.");
             }
         }
+        else if (CostEntry.CostCategories.IsFloorArea(Category))
+        {
+            if (FloorArea <= 0)
+            {
+                ModelState.AddModelError(nameof(FloorArea), "Enter the floor area in square metres, greater than zero.");
+            }
+
+            if (FloorAreaRate <= 0)
+            {
+                ModelState.AddModelError(nameof(FloorAreaRate), "Enter the rate per m² per year, greater than zero.");
+            }
+        }
         else if (string.IsNullOrWhiteSpace(Description))
         {
             ModelState.AddModelError(nameof(Description), "Description is required.");
         }
 
-        if (Category == CostEntry.CostCategories.Personnel)
+        if (CostEntry.CostCategories.IsPersonnel(Category))
         {
             // The form offers these as fixed choices, but a posted value is not bound to
             // what the form offered — 500% FTE would otherwise be stored and costed.
@@ -237,7 +280,7 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
             }
         }
 
-        var entered = YearAmounts.Take(YearCount).ToList();
+        var entered = AmountsByYear();
 
         if (entered.Any(x => x < 0))
         {
@@ -260,11 +303,32 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
         }
     }
 
-    private void ExplainUnreadableNumbers() =>
+    /// <summary>
+    /// The line's amount for each year of the cycle. A floor-area line is the same every
+    /// year — area × rate — and is worked out here rather than trusted from the browser.
+    /// </summary>
+    private List<decimal> AmountsByYear() =>
+        CostEntry.CostCategories.IsFloorArea(Category)
+            ? Enumerable.Repeat(FloorArea * FloorAreaRate, YearCount).ToList()
+            : Enumerable.Range(0, YearCount).Select(i => i < YearAmounts.Count ? YearAmounts[i] : 0).ToList();
+
+    private void ExplainUnreadableNumbers()
+    {
         EntryChecks.ExplainUnreadableNumbers(
             ModelState,
             key => EntryChecks.YearIndex(key) is { } i ? $"{Cycle.StartYear + i} cost" : null,
             "an amount in dollars, such as 20000.00");
+
+        EntryChecks.ExplainUnreadableNumbers(
+            ModelState,
+            key => key switch
+            {
+                nameof(FloorArea) => "Floor area",
+                nameof(FloorAreaRate) => "Rate per m²",
+                _ => null
+            },
+            "a number, such as 120 or 450.00");
+    }
 
     private async Task<bool> Load(int cycleId)
     {
