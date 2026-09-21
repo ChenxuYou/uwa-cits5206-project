@@ -56,9 +56,14 @@ public static class RateEngine
             ApfrRate = apfrRate,
             CommercialRate = commercialRate,
 
+            ForecastUwaUse = inputs.ForecastUwaUse,
+            ForecastApfrUse = inputs.ForecastApfrUse,
+            ForecastCommercialUse = inputs.ForecastCommercialUse,
+
             ProposedUwaRate = inputs.ProposedUwaRate,
             ProposedApfrRate = inputs.ProposedApfrRate,
             ProposedCommercialRate = inputs.ProposedCommercialRate,
+            GrossForecastRevenue = GrossForecastRevenue(inputs),
             ForecastRevenue = ForecastRevenue(inputs, k)
         };
     }
@@ -79,6 +84,19 @@ public static class RateEngine
         inputs.ForecastUwaUse * inputs.ProposedUwaRate
         + inputs.ForecastApfrUse * (inputs.ProposedApfrRate / k)
         + inputs.ForecastCommercialUse * (inputs.ProposedCommercialRate / k);
+
+    /// <summary>
+    /// What users are billed at the proposed rates, before the indirect cost uplift is
+    /// separated out.
+    ///
+    /// The difference between this and the retained <c>ForecastRevenue</c> is the University's
+    /// overhead recovery, which US-12 asks to see on a line of its own rather than folded
+    /// into the platform's own revenue [W, sheet 3 rows 39-42].
+    /// </summary>
+    private static decimal GrossForecastRevenue(CapabilityRateInputs inputs) =>
+        inputs.ForecastUwaUse * inputs.ProposedUwaRate
+        + inputs.ForecastApfrUse * inputs.ProposedApfrRate
+        + inputs.ForecastCommercialUse * inputs.ProposedCommercialRate;
 
     private static void Guard(CapabilityRateInputs inputs)
     {
@@ -146,6 +164,17 @@ public sealed record CapabilityRateResult
     /// <summary><c>U</c></summary>
     public required decimal ForecastUtilisation { get; init; }
 
+    /// <summary>
+    /// The forecast split across the three user categories. It does not move a rate — the
+    /// divisor is their sum — but it is what the revenue projection is built from, so a
+    /// record that shows a balance has to carry it (requirements §9, Q2).
+    /// </summary>
+    public required decimal ForecastUwaUse { get; init; }
+
+    public required decimal ForecastApfrUse { get; init; }
+
+    public required decimal ForecastCommercialUse { get; init; }
+
     // ---- The answers -----------------------------------------------------------------
 
     public required decimal UwaRate { get; init; }
@@ -160,10 +189,82 @@ public sealed record CapabilityRateResult
 
     public required decimal ProposedCommercialRate { get; init; }
 
+    /// <summary>Billed to users at the proposed rates, uplift included.</summary>
+    public required decimal GrossForecastRevenue { get; init; }
+
+    /// <summary>Retained by the platform: the billed amount less the University's uplift.</summary>
     public required decimal ForecastRevenue { get; init; }
 
-    /// <summary>Surplus, or deficit if negative, at the proposed rates.</summary>
-    public decimal ForecastBalance => ForecastRevenue - TotalOperatingCost;
+    /// <summary>
+    /// The University's indirect cost recovery, shown separately from the recovery of full
+    /// economic cost because the workbook shows it separately and US-12 asks for the same.
+    /// </summary>
+    public decimal OverheadsRecovered => GrossForecastRevenue - ForecastRevenue;
+
+    /// <summary>
+    /// <c>C - I_total</c> — what usage has to recover once non-variable income is counted.
+    /// </summary>
+    public decimal NetCostToRecover => TotalOperatingCost - TotalIncome;
+
+    /// <summary>
+    /// Surplus, or deficit if negative, at the proposed rates.
+    ///
+    /// <b>This is measured against cost less income</b>, which is what US-12 asks for:
+    /// "proposed rates x forecast utilisation by user type, against total cost less income".
+    /// Non-variable income is money the platform already holds, so measuring against the
+    /// full cost counts it twice and overstates the shortfall. Before 18 September 2026 this
+    /// compared revenue with the full operating cost; that figure is kept as
+    /// <see cref="FullEconomicCostBalance"/> rather than dropped, because the workbook
+    /// reports both and an approver reads them together.
+    /// </summary>
+    public decimal ForecastBalance => ForecastRevenue - NetCostToRecover;
+
+    /// <summary>
+    /// The same projection measured against the platform's <b>full</b> economic cost, with
+    /// no income deducted. Negative by design wherever income carries part of the cost.
+    /// </summary>
+    public decimal FullEconomicCostBalance => ForecastRevenue - TotalOperatingCost;
+
+    /// <summary>
+    /// What the custodian proposes, less what the method calculates. Positive means they
+    /// propose to charge more than the minimum sustainable rate (US-11).
+    /// </summary>
+    public decimal UwaRateVariance => ProposedUwaRate - UwaRate;
+
+    public decimal ApfrRateVariance => ProposedApfrRate - ApfrRate;
+
+    public decimal CommercialRateVariance => ProposedCommercialRate - CommercialRate;
+
+    /// <summary>The same variance as a percentage, or null when there is no rate to vary from.</summary>
+    public decimal? UwaRateVariancePercent => Percent(UwaRateVariance, UwaRate);
+
+    public decimal? ApfrRateVariancePercent => Percent(ApfrRateVariance, ApfrRate);
+
+    public decimal? CommercialRateVariancePercent => Percent(CommercialRateVariance, CommercialRate);
+
+    /// <summary>
+    /// True when a rate the custodian has actually entered differs from the calculated one.
+    ///
+    /// A rate still left at zero is not a variance — it is an unanswered question, caught
+    /// at submission instead. The comparison is made on the rounded figures, so a fraction
+    /// of a cent the screen never showed does not demand a justification (US-11, F9).
+    /// </summary>
+    public bool VariesFromCalculated =>
+        Varies(ProposedUwaRate, DisplayUwaRate)
+        || Varies(ProposedApfrRate, DisplayApfrRate)
+        || Varies(ProposedCommercialRate, DisplayCommercialRate);
+
+    /// <summary>
+    /// True when the commercial rate in particular is varied, which is where the University's
+    /// competitive neutrality obligations apply [G, Step 3].
+    /// </summary>
+    public bool CommercialRateVaries => Varies(ProposedCommercialRate, DisplayCommercialRate);
+
+    private bool Varies(decimal proposed, decimal calculated) =>
+        proposed > 0 && Round(proposed) != calculated;
+
+    private static decimal? Percent(decimal variance, decimal calculated) =>
+        calculated == 0 ? null : variance / calculated * 100m;
 
     /// <summary>
     /// The single rounding rule, applied once, on the way to a screen or a PDF — rule R3.

@@ -66,6 +66,19 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AllowAnonymousToPage("/Account/AccessDenied");
     options.Conventions.AllowAnonymousToPage("/Error");
     options.Conventions.AuthorizePage("/Account/ChangePassword");
+})
+.AddMvcOptions(options =>
+{
+    // US-18: text in a numeric field is refused with a message a custodian can act on.
+    // These are the fallback wordings; the guided-workflow pages replace them with the
+    // on-screen name of the field (EntryChecks.ExplainUnreadableNumbers).
+    var messages = options.ModelBindingMessageProvider;
+    messages.SetAttemptedValueIsInvalidAccessor((value, field) =>
+        $"\"{value}\" is not a valid value for {field}. Enter a number, such as 20000.00.");
+    messages.SetValueMustBeANumberAccessor(field => $"{field} must be a number, such as 20000.00.");
+    messages.SetUnknownValueIsInvalidAccessor(field => $"{field} must be a number, such as 20000.00.");
+    messages.SetNonPropertyAttemptedValueIsInvalidAccessor(value =>
+        $"\"{value}\" is not a number. Enter a number, such as 20000.00.");
 });
 
 builder.Services.AddDbContext<CostingDbContext>(options =>

@@ -3,7 +3,9 @@
 @{
     ViewData["Title"] = "Approval review";
     var totalCost = Model.Rates.TotalOperatingCost;
+    var netCost = Model.Rates.NetCostToRecover;
     var revenue = Model.Rates.ForecastRevenue;
+    var balance = Model.Rates.ForecastBalance;
 }
 <div class="page-wrap approval-page">
     <div class="breadcrumb"><a asp-page="/Approvals/Index">Approvals</a><span>›</span><span>@Model.Cycle.PlatformName</span></div>
@@ -12,7 +14,9 @@
     <div asp-validation-summary="All" class="form-errors approval-errors"></div>
     <div class="review-layout">
         <main>
-            <section class="review-kpis"><div><span>Total operating cost</span><strong>@totalCost.ToString("C")</strong></div><div><span>Forecast revenue</span><strong>@revenue.ToString("C")</strong></div><div class="@(revenue-totalCost>=0?"positive-kpi":"negative-kpi")"><span>Forecast balance</span><strong>@((revenue-totalCost).ToString("C"))</strong></div></section>
+            @* The balance is read from the roll-up rather than re-subtracted here: the approver and the
+       custodian must not be able to see two different answers to the same question. *@
+            <section class="review-kpis"><div><span>Total operating cost</span><strong>@totalCost.ToString("C")</strong></div><div><span>Cost to recover from usage<small>after non-variable income</small></span><strong>@netCost.ToString("C")</strong></div><div><span>Retained at the proposed rates<small>University overheads recovered: @Model.Rates.OverheadsRecovered.ToString("C")</small></span><strong>@revenue.ToString("C")</strong></div><div class="@(balance>=0?"positive-kpi":"negative-kpi")"><span>Forecast @(balance >= 0 ? "surplus" : "deficit")<small>against full economic cost: @Model.Rates.FullEconomicCostBalance.ToString("C")</small></span><strong>@balance.ToString("C")</strong></div></section>
             <article class="review-card"><div class="review-card-heading"><h2>Rates requiring approval</h2><span>GST exclusive</span></div><div class="review-table-wrap"><table class="review-table"><thead><tr><th>Capability</th><th>Operating cost</th><th>UWA rate</th><th>APFR rate</th><th>Commercial rate</th><th>Balance</th></tr></thead><tbody>
             @foreach (var c in Model.Cycle.Capabilities)
             {

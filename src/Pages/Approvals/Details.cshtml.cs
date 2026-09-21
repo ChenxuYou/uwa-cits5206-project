@@ -145,7 +145,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
         var snapshot = new
         {
-            SchemaVersion = "1.1",
+            SchemaVersion = "1.2",
             SealedAtUtc = Cycle.SealedAtUtc,
             MethodVersion = method.Version,
             Method = new
@@ -171,6 +171,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
                 Cycle.BillableUnit,
                 Cycle.CreatedBy,
                 Cycle.CreatedByDisplay,
+                Cycle.UtilisationAssumptions,
                 Cycle.BenchmarkNotes,
                 Cycle.PricingJustification,
                 Cycle.SubmittedBy,
@@ -183,8 +184,13 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
             Platform = new
             {
                 TotalOperatingCost = Rates.TotalOperatingCost,
+                TotalIncome = Rates.TotalIncome,
+                NetCostToRecover = Rates.NetCostToRecover,
+                GrossForecastRevenue = Rates.GrossForecastRevenue,
+                OverheadsRecovered = Rates.OverheadsRecovered,
                 ForecastRevenue = Rates.ForecastRevenue,
-                ForecastBalance = Rates.ForecastBalance
+                ForecastBalance = Rates.ForecastBalance,
+                FullEconomicCostBalance = Rates.FullEconomicCostBalance
             },
             Capabilities = Cycle.Capabilities.OrderBy(x => x.Id).Select(capability => new
             {

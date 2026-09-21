@@ -214,21 +214,6 @@ The trap here is writing about the team instead of about yourself. Every sentenc
 - **Milestone management.** If you tracked a milestone, chased a dependency, or re-planned when
   one slipped, say so with the dates.
 
-### The GenAI statement
-
-The brief requires it: *"explain how do you use GenAI wherever you used it"*. Do not put a
-disclaimer in the footer. Instead:
-
-- **Inline**, where the use occurred — "the first draft of this validator was generated with an
-  LLM from the acceptance criteria; I rewrote the rounding and added the boundary cases in
-  `…Tests.cs`".
-- **Plus a short closing subsection** listing the tools, what each was used for (code, tests,
-  documents, this report), and **what you did to verify the output**. Verification is the part a
-  marker is actually looking for.
-
-Be accurate. An under-declaration that the commit history contradicts is worse than any honest
-declaration.
-
 ---
 
 ## 6. Day by day
@@ -293,8 +278,6 @@ first three boxes below exist because of them.
 - [ ] Section 1 names tests and shows a passing CI run
 - [ ] Section 2 shows at least one issue you opened *and* one you resolved
 - [ ] Section 3 links at least two PR reviews **you** wrote
-- [ ] The GenAI statement is present, inline as well as summarised, and matches what the history
-      shows
 - [ ] Nothing confidential is in it — the client's own material stays in `reference/client/`,
       which is not committed ([`README.md` §Confidential material](../../README.md#confidential-material))
 

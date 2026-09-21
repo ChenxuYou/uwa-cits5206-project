@@ -6,8 +6,11 @@
     // The platform figure is a roll-up over the capability collection, computed once in
     // CycleRates rather than re-summed here — architecture.md §4 and engine rule R8.
     var totalCost = Model.Rates.TotalOperatingCost;
+    var netCost = Model.Rates.NetCostToRecover;
     var revenue = Model.Rates.ForecastRevenue;
+    var overheads = Model.Rates.OverheadsRecovered;
     var balance = Model.Rates.ForecastBalance;
+    var fullEconomicCostBalance = Model.Rates.FullEconomicCostBalance;
     var unit = Model.Cycle.BillableUnit.ToLowerInvariant();
 }
 
@@ -71,9 +74,11 @@
 
             <section class="review-kpis">
                 <div><span>Total operating cost</span><strong>@totalCost.ToString("C")</strong></div>
-                <div><span>Forecast platform revenue</span><strong>@revenue.ToString("C")</strong></div>
+                <div><span>Cost to recover from usage<small>after non-variable income</small></span><strong>@netCost.ToString("C")</strong></div>
+                <div><span>Retained at the proposed rates<small>University overheads recovered: @overheads.ToString("C")</small></span><strong>@revenue.ToString("C")</strong></div>
                 <div class="@(balance >= 0 ? "positive-kpi" : "negative-kpi")">
-                    <span>Forecast balance</span><strong>@balance.ToString("C")</strong>
+                    <span>Forecast @(balance >= 0 ? "surplus" : "deficit")<small>against full economic cost: @fullEconomicCostBalance.ToString("C")</small></span>
+                    <strong>@balance.ToString("C")</strong>
                 </div>
             </section>
 
@@ -126,6 +131,7 @@
             <article class="review-card">
                 <div class="review-card-heading"><h2>Assumptions and evidence</h2></div>
                 <div class="review-notes">
+                    <div><span>Utilisation assumptions</span><p>@(Model.Cycle.UtilisationAssumptions ?? "Not recorded")</p></div>
                     <div><span>Benchmarking</span><p>@(Model.Cycle.BenchmarkNotes ?? "Not recorded")</p></div>
                     <div><span>Pricing justification</span><p>@(Model.Cycle.PricingJustification ?? "Not recorded")</p></div>
                 </div>
