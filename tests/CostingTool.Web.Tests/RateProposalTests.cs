@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using CostingTool.Data;
+using CostingTool.Engine;
 using CostingTool.Models;
 using CostingTool.Pages.Ric;
 using Microsoft.AspNetCore.Http;
@@ -228,14 +229,24 @@ public class RateProposalTests
     {
         var cycle = db.RicCycles.Include(x => x.Capabilities).Single();
 
-        return new CapacityModel(db)
+        return new CapacityModel(db, new MethodConfigProvider(db))
         {
             PageContext = SignedInAsEntry(),
             CycleId = cycle.Id,
             UtilisationAssumptions = assumptions,
             Inputs =
             [
-                new CapacityModel.CapacityInput(cycle.Capabilities.Single().Id, 1_000m, 600m, 250m, 150m)
+                // The guide's worked example: 1,000 hours of capacity, all of it forecast.
+                new CapacityModel.CapacityInput
+                {
+                    Id = cycle.Capabilities.Single().Id,
+                    Baseline = CapacityBaseline.Stated,
+                    StatedBaseline = 1_000m,
+                    StatedBaselineNote = "The guide's worked example",
+                    UwaUse = 600m,
+                    ApfrUse = 250m,
+                    CommercialUse = 150m
+                }
             ]
         };
     }

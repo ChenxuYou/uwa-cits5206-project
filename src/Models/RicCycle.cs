@@ -274,6 +274,15 @@ public class RicCapability
     public int RicCycleId { get; set; }
     public RicCycle RicCycle { get; set; } = null!;
     public string Name { get; set; } = string.Empty;
+    /// <summary>
+    /// Usable annual capacity, in the billable unit.
+    ///
+    /// Since US-07 this is <b>worked out</b>, not typed: the capacity step builds it from
+    /// <see cref="CapacityBaseline"/>, the <see cref="CapacityDeductions"/> and the staff cap
+    /// through <c>CapacityEngine</c>, and stores the result here so that every later screen,
+    /// the sealed snapshot and the PDF read one figure. The name is kept from before, when it
+    /// was a single typed number, so that sealed records and their schema do not move.
+    /// </summary>
     public decimal MaximumCapacity { get; set; }
     public decimal ForecastUwaUse { get; set; }
     public decimal ForecastApfrUse { get; set; }
@@ -282,11 +291,62 @@ public class RicCapability
     public decimal ProposedApfrRate { get; set; }
     public decimal ProposedCommercialRate { get; set; }
 
+    // ---- How MaximumCapacity was built (US-07) --------------------------------------------
+
+    /// <summary>
+    /// <see cref="Engine.CapacityBaseline.Machine"/>, <see cref="Engine.CapacityBaseline.Staff"/>
+    /// or <see cref="Engine.CapacityBaseline.Stated"/>; empty until the capacity step is saved.
+    /// </summary>
+    public string CapacityBaseline { get; set; } = string.Empty;
+
+    /// <summary>The custodian's own baseline, used only when <see cref="CapacityBaseline"/> is Stated.</summary>
+    public decimal StatedBaseline { get; set; }
+
+    /// <summary>Where a stated baseline came from. Required with one.</summary>
+    public string? StatedBaselineNote { get; set; }
+
+    /// <summary>A person must be present to run it, so capacity is capped at their FTE [W, sheet 2 row 18].</summary>
+    public bool IsStaffReliant { get; set; }
+
+    /// <summary>FTE allocated to the capability when it is staff-reliant, e.g. 0.05.</summary>
+    public decimal StaffFte { get; set; }
+
+    /// <summary>
+    /// Why the forecast is above usable capacity. Allowed, but never unexplained (US-08):
+    /// required whenever the forecast exceeds <see cref="MaximumCapacity"/>.
+    /// </summary>
+    public string? AboveCapacityReason { get; set; }
+
+    /// <summary>What is taken off the baseline, each with its note.</summary>
+    public List<RicCapacityDeduction> CapacityDeductions { get; set; } = [];
+
     /// <summary>
     /// <c>U</c> — forecast annual utilisation, the divisor behind all three rates. The
     /// per-category split drives only the revenue projection (requirements §9, Q2).
     /// </summary>
     public decimal ForecastUtilisation => ForecastUwaUse + ForecastApfrUse + ForecastCommercialUse;
+}
+
+/// <summary>
+/// One reason a capability is unavailable for part of its baseline (US-07): maintenance,
+/// downtime, compliance, setup and pack-down, or planned outages [G, Step 2].
+/// </summary>
+public class RicCapacityDeduction
+{
+    /// <summary>The deductions the guide names, in the order it names them [G, Step 2].</summary>
+    public static readonly string[] Kinds =
+        ["Maintenance", "Downtime", "Compliance requirements", "Setup and pack-down", "Planned outages"];
+
+    public int Id { get; set; }
+    public int RicCapabilityId { get; set; }
+    public RicCapability RicCapability { get; set; } = null!;
+    public string Kind { get; set; } = string.Empty;
+
+    /// <summary>In the capability's billable unit.</summary>
+    public decimal Amount { get; set; }
+
+    /// <summary>Why this much is taken off. Required: each deduction takes a note (US-07).</summary>
+    public string Note { get; set; } = string.Empty;
 }
 
 public class RicCostEntry

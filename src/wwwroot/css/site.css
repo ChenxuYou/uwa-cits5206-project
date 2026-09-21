@@ -490,6 +490,220 @@ a.ric-step-link:focus-visible {
 }
 
 /* ---------------------------------------------------------------------------
+   Capacity, then forecast use (US-07, US-08)
+   --------------------------------------------------------------------------- */
+
+.forecast-warning {
+    margin-bottom: 18px;
+    padding: 16px 18px;
+    border: 1px solid #f3dda9;
+    border-left: 4px solid var(--amber);
+    border-radius: 8px;
+    background: #fff9ed;
+    color: #5b4320;
+}
+
+.forecast-warning h2 {
+    margin: 0 0 6px;
+    font: 700 15px Manrope;
+}
+
+.forecast-warning p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.capacity-card.ric-card {
+    margin-bottom: 18px;
+}
+
+.capacity-steps {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 20px;
+}
+
+.capacity-part {
+    min-width: 0;
+    margin: 0;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+
+.capacity-part legend {
+    padding: 0 6px;
+    font: 700 14px Manrope;
+}
+
+.forecast-part {
+    background: #f7fbff;
+    border-color: #cfe0f7;
+}
+
+.baseline-options {
+    display: grid;
+    gap: 8px;
+}
+
+.baseline-option {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.baseline-option:has(input:checked) {
+    border-color: var(--blue);
+    background: #f4f8ff;
+}
+
+/* .field input is width: 100%, which would stretch a radio across the option. */
+.baseline-option input {
+    flex: 0 0 auto;
+    width: auto;
+    margin-top: 3px;
+}
+
+/* The grid and field classes set a display, which beats the browser's rule for [hidden]. */
+.capacity-card [hidden] {
+    display: none !important;
+}
+
+.baseline-option b,
+.baseline-option small {
+    display: block;
+}
+
+.baseline-option b {
+    font-size: 14px;
+}
+
+.baseline-option small {
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.stated-baseline {
+    margin-top: 12px;
+}
+
+.deductions {
+    margin-top: 16px;
+}
+
+.deductions summary {
+    cursor: pointer;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.deduction-count {
+    font-weight: 400;
+    color: var(--muted);
+}
+
+.deduction-row {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    align-items: end;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.deduction-row .field > span {
+    margin-bottom: 4px;
+}
+
+.staff-cap {
+    margin-top: 12px;
+}
+
+.staff-fte {
+    max-width: 260px;
+}
+
+.capacity-sum {
+    margin: 14px 0 0;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f5f8fc;
+}
+
+.capacity-sum div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 0;
+    font-size: 13px;
+}
+
+.capacity-sum dt,
+.capacity-sum dd {
+    margin: 0;
+}
+
+.capacity-sum .capacity-total {
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid #dbe3ed;
+    font-weight: 700;
+    color: var(--navy);
+}
+
+.forecast-grid {
+    grid-template-columns: 1fr;
+}
+
+.forecast-share {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    align-items: baseline;
+    margin: 14px 0 0;
+    font-size: 13px;
+    color: #46536a;
+}
+
+.forecast-share strong {
+    font: 700 16px Manrope;
+    color: var(--blue);
+}
+
+.above-capacity {
+    margin-top: 12px;
+}
+
+.above-capacity .field {
+    margin-top: 8px;
+}
+
+.prompt-list {
+    margin: 6px 0 10px;
+    padding-left: 18px;
+    columns: 2;
+    font-size: 13px;
+    color: #46536a;
+}
+
+@media (max-width: 900px) {
+    .capacity-steps,
+    .deduction-row {
+        grid-template-columns: 1fr;
+    }
+
+    .prompt-list {
+        columns: 1;
+    }
+}
+
+/* ---------------------------------------------------------------------------
    Administration (US-19)
    ---------------------------------------------------------------------------
    The filter bar on the all-cycles list, and the inline password reset in the

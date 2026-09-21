@@ -1,4 +1,5 @@
 using CostingTool.Data;
+using CostingTool.Engine;
 using CostingTool.Models;
 using CostingTool.Pages.Ric;
 using Microsoft.AspNetCore.Http;
@@ -49,15 +50,18 @@ public class ValidationTests
     private static CapacityModel CreateModel(CostingDbContext db, RicCycle cycle)
     {
         var capability = cycle.Capabilities.Single();
-        var model = new CapacityModel(db)
+        var model = new CapacityModel(db, new MethodConfigProvider(db))
         {
             CycleId = cycle.Id,
+            UtilisationAssumptions = "2025 bookings",
             Inputs =
             [
                 new CapacityModel.CapacityInput
                 {
                     Id = capability.Id,
-                    MaximumCapacity = capability.MaximumCapacity,
+                    Baseline = CapacityBaseline.Stated,
+                    StatedBaseline = 1000m,
+                    StatedBaselineNote = "Booking system maximum",
                     UwaUse = capability.ForecastUwaUse,
                     ApfrUse = capability.ForecastApfrUse,
                     CommercialUse = capability.ForecastCommercialUse
@@ -78,24 +82,43 @@ public class ValidationTests
     }
 
     [Fact]
-    public async Task CapacityModelRejectsForecastUtilisationAboveCapacity()
+    public async Task AForecastAboveCapacityIsNotSavedUntilItIsExplained()
     {
+        // US-08: warned about and explained, not blocked. This test used to assert the
+        // opposite — "cannot exceed capacity" — which contradicted the story's criteria.
         await using var db = CreateDb();
         var cycle = db.RicCycles.Include(x => x.Capabilities).Single();
         var model = CreateModel(db, cycle);
-        model.Inputs[0] = new CapacityModel.CapacityInput
-        {
-            Id = cycle.Capabilities.Single().Id,
-            MaximumCapacity = 1000m,
-            UwaUse = 400m,
-            ApfrUse = 350m,
-            CommercialUse = 300m
-        };
+        model.Inputs[0].UwaUse = 400m;
+        model.Inputs[0].ApfrUse = 350m;
+        model.Inputs[0].CommercialUse = 300m;
 
         var result = await model.OnPostAsync();
 
         Assert.IsType<PageResult>(result);
-        Assert.Contains(model.ModelState, kvp => kvp.Key == string.Empty && kvp.Value.Errors.Any(e => e.ErrorMessage.Contains("forecast utilisation cannot exceed capacity", StringComparison.OrdinalIgnoreCase)));
+        Assert.Contains(model.ModelState, kvp => kvp.Key == string.Empty && kvp.Value.Errors.Any(e =>
+            e.ErrorMessage.Contains("above the usable capacity of 1,000.0 hours", StringComparison.Ordinal)
+            && e.ErrorMessage.Contains("That is allowed, but say why", StringComparison.Ordinal)));
+    }
+
+    [Fact]
+    public async Task AForecastAboveCapacityIsSavedWithItsReason()
+    {
+        await using var db = CreateDb();
+        var cycle = db.RicCycles.Include(x => x.Capabilities).Single();
+        var model = CreateModel(db, cycle);
+        model.Inputs[0].UwaUse = 400m;
+        model.Inputs[0].ApfrUse = 350m;
+        model.Inputs[0].CommercialUse = 300m;
+        model.Inputs[0].AboveCapacityReason = "A second shift starts in March under the new ARC grant.";
+
+        var result = await model.OnPostAsync();
+
+        Assert.IsType<RedirectToPageResult>(result);
+        var saved = db.RicCapabilities.Single();
+        Assert.Equal(1_050m, saved.ForecastUtilisation);
+        Assert.Equal(1_000m, saved.MaximumCapacity);
+        Assert.Equal("A second shift starts in March under the new ARC grant.", saved.AboveCapacityReason);
     }
 
     [Fact]
@@ -104,14 +127,6 @@ public class ValidationTests
         await using var db = CreateDb();
         var cycle = db.RicCycles.Include(x => x.Capabilities).Single();
         var model = CreateModel(db, cycle);
-        model.Inputs[0] = new CapacityModel.CapacityInput
-        {
-            Id = cycle.Capabilities.Single().Id,
-            MaximumCapacity = 1000m,
-            UwaUse = 0m,
-            ApfrUse = 0m,
-            CommercialUse = 0m
-        };
 
         var result = await model.OnPostAsync();
 

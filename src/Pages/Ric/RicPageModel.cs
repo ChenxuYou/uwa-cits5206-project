@@ -30,7 +30,7 @@ public abstract class RicPageModel(CostingDbContext db) : PageModel
         var owner = User.UserName();
 
         var cycle = await Db.RicCycles
-            .Include(x => x.Capabilities)
+            .Include(x => x.Capabilities).ThenInclude(x => x.CapacityDeductions)
             .Include(x => x.Costs).ThenInclude(x => x.Capability)
             .Include(x => x.Costs).ThenInclude(x => x.YearAmounts)
             .FirstOrDefaultAsync(x => x.Id == cycleId && x.CreatedBy == owner);

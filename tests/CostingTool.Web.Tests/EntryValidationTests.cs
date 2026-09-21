@@ -134,7 +134,7 @@ public class EntryValidationTests
     {
         await using var db = CreateDb();
         var capability = Cycle(db).Capabilities.Single();
-        var page = new CapacityModel(db)
+        var page = new CapacityModel(db, new MethodConfigProvider(db))
         {
             PageContext = SignedInAsEntry(),
             CycleId = Cycle(db).Id,
@@ -143,7 +143,6 @@ public class EntryValidationTests
                 new CapacityModel.CapacityInput
                 {
                     Id = capability.Id,
-                    MaximumCapacity = 1000m,
                     UwaUse = 500m,
                     ApfrUse = 0m,
                     CommercialUse = 0m
