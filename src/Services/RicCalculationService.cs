@@ -59,18 +59,46 @@ public class RicCalculationService(MethodConfigProvider methods)
     public CycleRates CalculateAsAt(RicCycle cycle, string? methodVersion) =>
         Calculate(cycle, methods.ForVersion(methodVersion));
 
+    /// <summary>
+    /// Where every operating cost in the cycle sits: against which capability, or at platform
+    /// level and split across them (US-03, US-04).
+    ///
+    /// The costs screen shows this as a running total, and <see cref="InputsFor"/> prices
+    /// from it, so the figure a custodian watches while typing is the figure the engine
+    /// receives — never a second summation that could be taken over a different set of lines
+    /// (N14, rule R8). It needs no capacity or utilisation, so it works before either exists.
+    /// </summary>
+    public static CycleCosts CostsOf(RicCycle cycle)
+    {
+        ArgumentNullException.ThrowIfNull(cycle);
+
+        var costLines = cycle.Costs.Where(x => !x.IsIncome).ToList();
+        var platformLines = costLines.Where(x => x.RicCapabilityId is null).ToList();
+
+        return new CycleCosts(
+            cycle.Capabilities
+                .Select(capability => new CapabilityCosts(
+                    capability.Id,
+                    capability.Name,
+                    costLines.Where(x => x.RicCapabilityId == capability.Id).Sum(x => x.Amount)))
+                .ToList(),
+            directlyAllocated: platformLines.Where(x => !CostEntry.CostCategories.IsFloorArea(x.Category)).Sum(x => x.Amount),
+            indirect: platformLines.Where(x => CostEntry.CostCategories.IsFloorArea(x.Category)).Sum(x => x.Amount));
+    }
+
     private static CycleRates Calculate(RicCycle cycle, MethodConfig method)
     {
         ArgumentNullException.ThrowIfNull(cycle);
 
         var results = new Dictionary<int, CapabilityRateResult>();
         var errors = new Dictionary<int, string>();
+        var costs = CostsOf(cycle);
 
         foreach (var capability in cycle.Capabilities)
         {
             try
             {
-                results[capability.Id] = RateEngine.Calculate(InputsFor(cycle, capability), method);
+                results[capability.Id] = RateEngine.Calculate(InputsFor(cycle, capability, costs), method);
             }
             catch (RateCalculationException error)
             {
@@ -90,16 +118,12 @@ public class RicCalculationService(MethodConfigProvider methods)
     /// set from the figures it is compared against is the workbook's defect, and the fix is
     /// to make it unrepresentable rather than merely unlikely.
     /// </summary>
-    private static CapabilityRateInputs InputsFor(RicCycle cycle, RicCapability capability)
+    private static CapabilityRateInputs InputsFor(RicCycle cycle, RicCapability capability, CycleCosts costs)
     {
         // Platform-level amounts are split evenly across capability columns [W, sheet 1].
         // A cycle with no capabilities never reaches here — the loop above has nothing to
         // iterate — so the divisor cannot be zero.
         var capabilityCount = Math.Max(1, cycle.Capabilities.Count);
-
-        decimal CapabilityLines(bool income) => cycle.Costs
-            .Where(x => x.RicCapabilityId == capability.Id && x.IsIncome == income)
-            .Sum(x => x.Amount);
 
         decimal PlatformShare(bool income, Func<RicCostEntry, bool> also) => cycle.Costs
             .Where(x => x.RicCapabilityId is null && x.IsIncome == income && also(x))
@@ -109,8 +133,9 @@ public class RicCalculationService(MethodConfigProvider methods)
         {
             CapabilityName = capability.Name,
 
-            CapabilityOperatingCost = CapabilityLines(income: false),
-            AllocatedPlatformCost = PlatformShare(income: false, _ => true),
+            // Cost comes from the same roll-up the costs screen shows, so the two agree.
+            CapabilityOperatingCost = costs.For(capability.Id).DirectlyIncurred,
+            AllocatedPlatformCost = costs.AllocatedToEach,
 
             // Income is scoped exactly as cost is. A grant booked against one capability
             // belongs to that capability; only platform-level income is shared out. Before
@@ -135,6 +160,65 @@ public class RicCalculationService(MethodConfigProvider methods)
             ProposedCommercialRate = capability.ProposedCommercialRate
         };
     }
+}
+
+/// <summary>
+/// The operating costs of a cycle, by where they sit (US-03, US-04).
+///
+/// <b>The allocation rule is an even split</b> across every capability in the cycle
+/// [W, sheet 1: <c>=$C$27/COUNTA($D$8:$J$8)</c>], one divisor for every platform-level line.
+/// The workbook divides administration and the platform leader's salary by one more column —
+/// Analysis/Consulting — than its other platform rows (requirements §4 Step 1). This tool does
+/// not: an Analysis/Consulting line is costed as a capability, and takes the same share of
+/// every platform-level line as the others. The costs screen says so in words.
+/// </summary>
+public sealed class CycleCosts(IReadOnlyList<CapabilityCosts> capabilities, decimal directlyAllocated, decimal indirect)
+{
+    public IReadOnlyList<CapabilityCosts> Capabilities { get; } =
+        capabilities.Select(x => x with { Allocated = Share(directlyAllocated + indirect, capabilities.Count) }).ToList();
+
+    /// <summary>Platform-level lines other than floor area [W, sheet 1 rows 27–36].</summary>
+    public decimal DirectlyAllocated { get; } = directlyAllocated;
+
+    /// <summary>Floor area at a rate per m² [W, sheet 1 rows 40–41].</summary>
+    public decimal Indirect { get; } = indirect;
+
+    public decimal PlatformLevel => DirectlyAllocated + Indirect;
+
+    /// <summary>How many ways each platform-level line is split: every capability in the cycle.</summary>
+    public int Divisor => Capabilities.Count;
+
+    /// <summary>Each capability's share of the platform-level lines.</summary>
+    public decimal AllocatedToEach => Share(PlatformLevel, Divisor);
+
+    public decimal DirectlyIncurred => Capabilities.Sum(x => x.DirectlyIncurred);
+
+    /// <summary>Every operating cost line, counted once.</summary>
+    public decimal Total => DirectlyIncurred + PlatformLevel;
+
+    /// <summary>
+    /// True when the capability totals add back up to <see cref="Total"/> to the cent — the
+    /// reconciliation US-03 asks the screen to show. A platform line split three ways leaves
+    /// a fraction of a cent that no screen shows, so the comparison is made at the cent.
+    /// With no capabilities there is nothing to split, and nothing reconciles.
+    /// </summary>
+    public bool Reconciles =>
+        Divisor > 0 && Math.Round(Capabilities.Sum(x => x.Total), 2) == Math.Round(Total, 2);
+
+    public CapabilityCosts For(int capabilityId) =>
+        Capabilities.FirstOrDefault(x => x.CapabilityId == capabilityId)
+        ?? new CapabilityCosts(capabilityId, string.Empty, 0m) { Allocated = AllocatedToEach };
+
+    private static decimal Share(decimal amount, int ways) => ways == 0 ? 0m : amount / ways;
+}
+
+/// <summary>One capability's operating cost: its own lines, and its share of the platform's.</summary>
+public sealed record CapabilityCosts(int CapabilityId, string Name, decimal DirectlyIncurred)
+{
+    /// <summary>Allocated from platform-level costs — never incurred by the capability directly (US-04).</summary>
+    public decimal Allocated { get; init; }
+
+    public decimal Total => DirectlyIncurred + Allocated;
 }
 
 /// <summary>

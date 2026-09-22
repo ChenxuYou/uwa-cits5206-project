@@ -1,11 +1,256 @@
 @page
 @model CostingTool.Pages.Ric.CapacityModel
-@{ViewData["Title"]="Capacity and utilisation";}
-<div class="page-wrap ric-page"><partial name="_RicSteps" model='new CostingTool.Pages.Ric.RicStepViewModel(4, Model.Cycle.Id)' />
-<div class="ric-title"><div><span class="eyebrow">@Model.Cycle.PlatformName.ToUpper()</span><h1>Capacity and forecast utilisation</h1><p>Enter realistic annual figures in @Model.Cycle.BillableUnit.ToLower(). Rates use forecast utilisation—not maximum capacity.</p></div></div>
-<form method="post" class="ric-card"><input type="hidden" asp-for="CycleId"><div asp-validation-summary="All" class="form-errors"></div>
-<div class="capacity-note"><b>Reference baseline</b><span>Staff availability: 230 days × 7.5 hours = 1,725 hours. Adjust for maintenance, downtime, staff availability and planned outages.</span></div>
-<div class="capacity-list">@for(var i=0;i<Model.Inputs.Count;i++){var c=Model.Cycle.Capabilities.First(x=>x.Id==Model.Inputs[i].Id);<section class="capacity-card"><input type="hidden" asp-for="Inputs[i].Id"><div class="capacity-name"><span>@(i+1)</span><div><h2>@c.Name</h2><p>Annual figures · @Model.Cycle.BillableUnit</p></div><strong class="utilisation-display" data-index="@i">0%</strong></div><div class="form-grid capacity-grid"><label class="field"><span>Maximum capacity</span><input asp-for="Inputs[i].MaximumCapacity" class="capacity-value" data-index="@i" type="number" min="0" step="0.01"></label><label class="field"><span>UWA forecast use</span><input asp-for="Inputs[i].UwaUse" class="use-value" data-index="@i" type="number" min="0" step="0.01"></label><label class="field"><span>APFR forecast use</span><input asp-for="Inputs[i].ApfrUse" class="use-value" data-index="@i" type="number" min="0" step="0.01"></label><label class="field"><span>Commercial forecast use</span><input asp-for="Inputs[i].CommercialUse" class="use-value" data-index="@i" type="number" min="0" step="0.01"></label></div></section>}</div>
-<label class="field"><span>Utilisation assumptions *</span><textarea asp-for="UtilisationAssumptions" rows="3" placeholder="How were these forecasts arrived at? Bookings, last year's usage, planned downtime, training load."></textarea><span asp-validation-for="UtilisationAssumptions" class="field-error"></span></label>
-<div class="wizard-actions"><a class="secondary-action" asp-page="/Ric/Funding" asp-route-cycleId="@Model.Cycle.Id">← Back to funding</a><button class="primary-button" type="submit">Calculate rates →</button></div></form></div>
-@section Scripts{<script>function calc(i){const cap=Number(document.querySelector(`.capacity-value[data-index="${i}"]`).value)||0;const use=[...document.querySelectorAll(`.use-value[data-index="${i}"]`)].reduce((s,x)=>s+(Number(x.value)||0),0);document.querySelector(`.utilisation-display[data-index="${i}"]`).textContent=cap?`${(use/cap*100).toFixed(1)}%`:'0%';}document.querySelectorAll('.capacity-value,.use-value').forEach(x=>{x.oninput=()=>calc(x.dataset.index);calc(x.dataset.index)});</script>}
+@using System.Globalization
+@{
+    ViewData["Title"] = "Capacity and utilisation";
+    var unit = Model.Cycle.BillableUnit.ToLowerInvariant();
+    var method = Model.Method;
+    var staffPerFte = Model.StaffPerFte;
+    string Figure(decimal value) => $"{value:#,##0.##} {unit}";
+    string BaselineLabel(CapacityBaseline b) => b.Key == CapacityBaseline.Machine
+        ? $"Machine availability — {Figure(b.Amount)}"
+        : $"Staff availability — {Figure(b.Amount)}";
+    string BaselineBasis(CapacityBaseline b) => unit == "hours"
+        ? b.Key == CapacityBaseline.Machine
+            ? $"{b.Days:#,##0.##} days ({method.MachineAvailabilityBasis}) × {method.HoursPerDay:0.##} hours"
+            : $"{b.Days:#,##0.##} {method.StaffAvailabilityBasis} × {method.HoursPerDay:0.##} hours"
+        : b.Key == CapacityBaseline.Machine ? method.MachineAvailabilityBasis : method.StaffAvailabilityBasis;
+}
+
+<div class="page-wrap ric-page">
+    <partial name="_RicSteps" model='new CostingTool.Pages.Ric.RicStepViewModel(4, Model.Cycle.Id)' />
+
+    <div class="ric-title">
+        <div>
+            <span class="eyebrow">@Model.Cycle.PlatformName.ToUpper()</span>
+            <h1>Capacity, then forecast use</h1>
+            <p>Every figure on this page is per year, in @unit. Capacity is the ceiling; the rates are divided by forecast use.</p>
+        </div>
+        <div class="ric-total">
+            <small>Method version</small>
+            <strong>@method.Version</strong>
+        </div>
+    </div>
+
+    @* US-08: say it unmissably, and in the client's words, before anything is typed. *@
+    <section class="forecast-warning" aria-labelledby="forecast-warning-heading">
+        <h2 id="forecast-warning-heading">Forecast use is not capacity</h2>
+        <p><strong>@UtilisationGuidance.SignificantAssumption</strong></p>
+        <p>“@UtilisationGuidance.NotCapacity” Every rate is divided by the forecast, not by the capacity.</p>
+    </section>
+
+    <form method="post" asp-page="/Ric/Capacity" asp-route-cycleId="@Model.Cycle.Id">
+        <input type="hidden" asp-for="CycleId" />
+        <div asp-validation-summary="All" class="form-errors"></div>
+
+        <div class="capacity-list">
+            @for (var i = 0; i < Model.Inputs.Count; i++)
+            {
+                var input = Model.Inputs[i];
+                var capability = Model.Cycle.Capabilities.First(x => x.Id == input.Id);
+                var preview = Model.Preview(input);
+                var usable = preview?.Usable;
+                var over = usable is > 0 && input.Forecast > usable;
+                var percent = usable is > 0 ? input.Forecast / usable.Value * 100m : (decimal?)null;
+
+                <section class="ric-card capacity-card" data-index="@i" data-staff-per-fte="@staffPerFte?.ToString(CultureInfo.InvariantCulture)" aria-labelledby="capability-@i">
+                    <input type="hidden" asp-for="Inputs[i].Id" />
+                    <div class="capacity-name">
+                        <span aria-hidden="true">@(i + 1)</span>
+                        <div><h2 id="capability-@i">@capability.Name</h2><p>Annual figures · @Model.Cycle.BillableUnit</p></div>
+                    </div>
+
+                    <div class="capacity-steps">
+                        <fieldset class="capacity-part">
+                            <legend>1 · Usable capacity</legend>
+
+                            <div class="field">
+                                <span>Baseline</span>
+                                <div class="baseline-options">
+                                    @foreach (var baseline in Model.Baselines)
+                                    {
+                                        <label class="baseline-option">
+                                            <input type="radio" name="Inputs[@i].Baseline" value="@baseline.Key" checked="@(input.Baseline == baseline.Key)" data-amount="@baseline.Amount.ToString(CultureInfo.InvariantCulture)" />
+                                            <span><b>@BaselineLabel(baseline)</b><small>@BaselineBasis(baseline)</small></span>
+                                        </label>
+                                    }
+                                    <label class="baseline-option">
+                                        <input type="radio" name="Inputs[@i].Baseline" value="@CapacityBaseline.Stated" checked="@(input.Baseline == CapacityBaseline.Stated || Model.Baselines.Count == 0)" />
+                                        <span><b>A baseline I state</b><small>@(Model.Baselines.Count == 0 ? $"Capacity in {unit} has no standard baseline, so state yours and say where it comes from." : "For a capability that runs on a different working year. Say where it comes from.")</small></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-grid two-columns stated-baseline" data-stated>
+                                <label class="field"><span>Stated baseline (@unit)</span><input asp-for="Inputs[i].StatedBaseline" type="number" min="0" step="0.01" class="stated-amount" /></label>
+                                <label class="field"><span>Where it comes from</span><input asp-for="Inputs[i].StatedBaselineNote" placeholder="e.g. booking system maximum, 2025" /></label>
+                            </div>
+
+                            @* Folded away until used, so seven capabilities stay workable on one page;
+                               open whenever something has been deducted, so nothing is hidden. *@
+                            <details class="deductions" open="@(input.Deductions.Any(x => x.Amount > 0) ? "open" : null)">
+                                <summary>Deductions from the baseline<span class="deduction-count">@(preview is { TotalDeductions: > 0 } ? $" — {Figure(preview.TotalDeductions)} taken off" : "")</span></summary>
+                                <p class="panel-note">@UtilisationGuidance.Deductions</p>
+                                @for (var d = 0; d < input.Deductions.Count; d++)
+                                {
+                                    <div class="deduction-row">
+                                        <input type="hidden" asp-for="Inputs[i].Deductions[d].Kind" />
+                                        <label class="field"><span>@input.Deductions[d].Kind (@unit)</span><input asp-for="Inputs[i].Deductions[d].Amount" type="number" min="0" step="0.01" class="deduction-amount" data-kind="@input.Deductions[d].Kind.ToLowerInvariant()" /></label>
+                                        <label class="field"><span>Note</span><input asp-for="Inputs[i].Deductions[d].Note" placeholder="Why this much is taken off" /></label>
+                                    </div>
+                                }
+                            </details>
+
+                            <div class="staff-cap">
+                                <label class="confirmation">
+                                    <input type="checkbox" asp-for="Inputs[i].IsStaffReliant" class="staff-reliant" />
+                                    <span>A person must be present to run it. Cap its capacity at the staff time allocated to it.</span>
+                                </label>
+                                <label class="field staff-fte" data-staff>
+                                    <span>FTE allocated@(staffPerFte is { } per ? $" (1 FTE = {Figure(per)} a year)" : "")</span>
+                                    <input asp-for="Inputs[i].StaffFte" type="number" min="0" step="0.01" class="staff-fte-value" />
+                                </label>
+                            </div>
+
+                            @* US-07: the result, in the billable unit, with the deductions itemised. *@
+                            <dl class="capacity-sum" aria-live="polite">
+                                @if (preview is null)
+                                {
+                                    <div><dt>Usable capacity</dt><dd>Choose a baseline to work it out.</dd></div>
+                                }
+                                else
+                                {
+                                    <div><dt>Baseline</dt><dd>@Figure(preview.Baseline)</dd></div>
+                                    @foreach (var deduction in preview.Deductions)
+                                    {
+                                        <div><dt>Less @deduction.Kind.ToLowerInvariant()</dt><dd>−@Figure(deduction.Amount)</dd></div>
+                                    }
+                                    @if (preview.StaffCap is { } cap)
+                                    {
+                                        <div><dt>Staff cap: @preview.StaffFte?.ToString("0.###") FTE × @Figure(preview.StaffBaseline ?? 0)</dt><dd>@Figure(cap)@(preview.IsStaffCapped ? " — this is the limit" : "")</dd></div>
+                                    }
+                                    <div class="capacity-total"><dt>Usable capacity</dt><dd>@Figure(preview.Usable)</dd></div>
+                                }
+                            </dl>
+                        </fieldset>
+
+                        <fieldset class="capacity-part forecast-part">
+                            <legend>2 · Forecast use — not capacity</legend>
+                            <div class="form-grid forecast-grid">
+                                <label class="field"><span>UWA forecast use</span><input asp-for="Inputs[i].UwaUse" type="number" min="0" step="0.01" class="use-value" /></label>
+                                <label class="field"><span>APFR forecast use</span><input asp-for="Inputs[i].ApfrUse" type="number" min="0" step="0.01" class="use-value" /></label>
+                                <label class="field"><span>Commercial forecast use</span><input asp-for="Inputs[i].CommercialUse" type="number" min="0" step="0.01" class="use-value" /></label>
+                            </div>
+                            <p class="forecast-share" aria-live="polite">
+                                <span class="forecast-total">Forecast @Figure(input.Forecast)</span>
+                                <span class="forecast-against">@(usable is > 0 ? $"of {Figure(usable.Value)} usable capacity" : "")</span>
+                                <strong class="forecast-percent">@(percent is { } p ? $"{p:0.#}% of capacity" : "")</strong>
+                            </p>
+                            <div class="callout above-capacity" role="note" hidden="@(over ? null : "hidden")">
+                                <span aria-hidden="true">!</span>
+                                <div>
+                                    <strong>The forecast is above usable capacity</strong>
+                                    <p>That is allowed — but say how it can be met, or reconsider the forecast. Every rate is divided by it.</p>
+                                    <label class="field"><span>Why the forecast can exceed capacity</span><textarea asp-for="Inputs[i].AboveCapacityReason" rows="2"></textarea></label>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </section>
+            }
+        </div>
+
+        <section class="ric-card">
+            <label class="field">
+                <span>Utilisation assumptions *</span>
+                <small>The guide asks the forecast to take into account:</small>
+                <ul class="prompt-list">
+                    @foreach (var prompt in UtilisationGuidance.Prompts)
+                    {
+                        <li>@prompt</li>
+                    }
+                </ul>
+                <textarea asp-for="UtilisationAssumptions" rows="4" placeholder="How were these forecasts arrived at? Say which of the above applied and how."></textarea>
+                <span asp-validation-for="UtilisationAssumptions" class="field-error"></span>
+            </label>
+        </section>
+
+        <div class="wizard-actions">
+            <a class="secondary-action" asp-page="/Ric/Funding" asp-route-cycleId="@Model.Cycle.Id">← Back to funding</a>
+            <button class="primary-button" type="submit">Calculate rates →</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // A live preview of what the server works out on save (CapacityEngine): the baseline,
+        // less the deductions, capped by staff time, and the forecast as a share of it. Only
+        // figures already on the page are used; the server recalculates and is what is stored.
+        (function () {
+            function num(value) { return Number(value) || 0; }
+            function fmt(value) { return value.toLocaleString('en-AU', { maximumFractionDigits: 2 }) + ' @unit'; }
+
+            document.querySelectorAll('.capacity-card').forEach(function (card) {
+                var perFte = card.dataset.staffPerFte ? num(card.dataset.staffPerFte) : null;
+
+                function refresh() {
+                    var chosen = card.querySelector('input[type="radio"]:checked');
+                    var stated = chosen && chosen.value === '@CapacityBaseline.Stated';
+                    card.querySelector('[data-stated]').hidden = !stated;
+
+                    var reliant = card.querySelector('.staff-reliant').checked;
+                    card.querySelector('[data-staff]').hidden = !reliant;
+
+                    var baseline = !chosen ? 0 : stated ? num(card.querySelector('.stated-amount').value) : num(chosen.dataset.amount);
+                    var deducted = 0;
+                    card.querySelectorAll('.deduction-amount').forEach(function (x) { deducted += num(x.value); });
+                    var afterDeductions = baseline - deducted;
+                    var usable = afterDeductions;
+                    var cap = null;
+                    if (reliant && perFte !== null) {
+                        var fte = num(card.querySelector('.staff-fte-value').value);
+                        cap = fte * perFte;
+                        usable = Math.min(afterDeductions, cap);
+                    }
+
+                    card.querySelector('.deduction-count').textContent = deducted > 0 ? ' — ' + fmt(deducted) + ' taken off' : '';
+
+                    // The itemised sum, rebuilt as the custodian types.
+                    var sum = card.querySelector('.capacity-sum');
+                    sum.replaceChildren();
+                    function row(label, value, cls) {
+                        var div = document.createElement('div');
+                        if (cls) div.className = cls;
+                        var dt = document.createElement('dt'); dt.textContent = label;
+                        var dd = document.createElement('dd'); dd.textContent = value;
+                        div.append(dt, dd); sum.append(div);
+                    }
+                    if (baseline <= 0) {
+                        row('Usable capacity', stated ? 'Enter the stated baseline to work it out.' : 'Choose a baseline to work it out.');
+                    } else {
+                        row('Baseline', fmt(baseline));
+                        card.querySelectorAll('.deduction-amount').forEach(function (x) {
+                            if (num(x.value) > 0) row('Less ' + x.dataset.kind, '−' + fmt(num(x.value)));
+                        });
+                        if (cap !== null) {
+                            row('Staff cap: ' + num(card.querySelector('.staff-fte-value').value) + ' FTE × ' + fmt(perFte), fmt(cap) + (cap < afterDeductions ? ' — this is the limit' : ''));
+                        }
+                        row('Usable capacity', usable > 0 ? fmt(usable) : 'None left after deductions', 'capacity-total');
+                    }
+
+                    var forecast = 0;
+                    card.querySelectorAll('.use-value').forEach(function (x) { forecast += num(x.value); });
+
+                    card.querySelector('.forecast-total').textContent = 'Forecast ' + fmt(forecast);
+                    card.querySelector('.forecast-against').textContent = usable > 0 ? 'of ' + fmt(usable) + ' usable capacity' : '';
+                    card.querySelector('.forecast-percent').textContent = usable > 0 ? (forecast / usable * 100).toFixed(1).replace(/\.0$/, '') + '% of capacity' : '';
+                    card.querySelector('.above-capacity').hidden = !(usable > 0 && forecast > usable);
+                }
+
+                card.querySelectorAll('input').forEach(function (x) { x.addEventListener('input', refresh); x.addEventListener('change', refresh); });
+                refresh();
+            });
+        })();
+    </script>
+}

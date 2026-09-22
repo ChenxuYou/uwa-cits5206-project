@@ -136,6 +136,10 @@
                 <div class="review-card-heading"><h2>Assumptions and evidence</h2></div>
                 <div class="review-notes">
                     <div><span>Utilisation assumptions</span><p>@(Model.Cycle.UtilisationAssumptions ?? "Not recorded")</p></div>
+                    @foreach (var above in Model.Cycle.Capabilities.Where(x => !string.IsNullOrWhiteSpace(x.AboveCapacityReason)))
+                    {
+                        <div><span>@above.Name: forecast above usable capacity</span><p>@above.AboveCapacityReason</p></div>
+                    }
                     <div><span>Benchmarking</span><p>@(Model.Cycle.BenchmarkNotes ?? "Not recorded")</p></div>
                     <div><span>Pricing justification</span><p>@(Model.Cycle.PricingJustification ?? "Not recorded")</p></div>
                 </div>

@@ -72,6 +72,7 @@ public class EntryValidationTests
             Category = category,
             Description = "Service contract",
             PersonnelName = "Alex Tan",
+            Position = CostEntry.Positions.ResearchOfficer,
             FundingType = "ARC Funded Position",
             YearAmounts = amounts.ToList()
         };
@@ -93,7 +94,7 @@ public class EntryValidationTests
     public async Task TextInACostAmountIsRefusedNamingTheYearAndTheExpectedFormat()
     {
         await using var db = CreateDb();
-        var page = CostLine(db, "Maintenance", 1_000m, 0m);
+        var page = CostLine(db, "Repairs and maintenance", 1_000m, 0m);
         PostedText(page, "YearAmounts[1]", "twenty thousand");
 
         var result = await page.OnPostAddAsync();
@@ -133,7 +134,7 @@ public class EntryValidationTests
     {
         await using var db = CreateDb();
         var capability = Cycle(db).Capabilities.Single();
-        var page = new CapacityModel(db)
+        var page = new CapacityModel(db, new MethodConfigProvider(db))
         {
             PageContext = SignedInAsEntry(),
             CycleId = Cycle(db).Id,
@@ -142,7 +143,6 @@ public class EntryValidationTests
                 new CapacityModel.CapacityInput
                 {
                     Id = capability.Id,
-                    MaximumCapacity = 1000m,
                     UwaUse = 500m,
                     ApfrUse = 0m,
                     CommercialUse = 0m
@@ -163,7 +163,7 @@ public class EntryValidationTests
     public async Task TwoHundredThousandWhereTwentyThousandWasMeantAsksForConfirmation()
     {
         await using var db = CreateDb();
-        var page = CostLine(db, "Maintenance", 20_000m, 200_000m);
+        var page = CostLine(db, "Repairs and maintenance", 20_000m, 200_000m);
 
         var result = await page.OnPostAddAsync();
 
@@ -171,7 +171,7 @@ public class EntryValidationTests
         Assert.True(page.NeedsLargeAmountConfirmation);
         var message = Assert.Single(Errors(page));
         Assert.StartsWith("2027:", message);
-        Assert.Contains("unusually large for Maintenance", message);
+        Assert.Contains("unusually large for Repairs and maintenance", message);
         Assert.Empty(db.RicCostEntries);
     }
 
@@ -179,7 +179,7 @@ public class EntryValidationTests
     public async Task AConfirmedLargeAmountIsSaved()
     {
         await using var db = CreateDb();
-        var page = CostLine(db, "Maintenance", 20_000m, 200_000m);
+        var page = CostLine(db, "Repairs and maintenance", 20_000m, 200_000m);
         page.ConfirmLargeAmounts = true;
 
         var result = await page.OnPostAddAsync();
@@ -192,7 +192,7 @@ public class EntryValidationTests
     public async Task AnOrdinaryAmountNeedsNoConfirmation()
     {
         await using var db = CreateDb();
-        var page = CostLine(db, "Maintenance", 20_000m, 21_000m);
+        var page = CostLine(db, "Repairs and maintenance", 20_000m, 21_000m);
 
         var result = await page.OnPostAddAsync();
 
@@ -205,7 +205,7 @@ public class EntryValidationTests
     public async Task ConfirmationIsNotOfferedWhileOtherErrorsRemain()
     {
         await using var db = CreateDb();
-        var page = CostLine(db, "Maintenance", 200_000m, -1m);
+        var page = CostLine(db, "Repairs and maintenance", 200_000m, -1m);
 
         var result = await page.OnPostAddAsync();
 
@@ -244,7 +244,7 @@ public class EntryValidationTests
     public async Task APercentageOutsideZeroToOneHundredIsRefused(int percentWorked, int super, string expected)
     {
         await using var db = CreateDb();
-        var page = CostLine(db, CostEntry.CostCategories.Personnel, 90_000m, 90_000m);
+        var page = CostLine(db, CostEntry.CostCategories.EmployeeSalaryAndOnCosts, 90_000m, 90_000m);
         page.PercentWorked = percentWorked;
         page.SuperannuationPercent = super;
 
@@ -259,7 +259,7 @@ public class EntryValidationTests
     public async Task ANegativeCostIsRefused()
     {
         await using var db = CreateDb();
-        var page = CostLine(db, "Travel", -500m, 0m);
+        var page = CostLine(db, "Other expenses", -500m, 0m);
 
         var result = await page.OnPostAddAsync();
 
@@ -281,9 +281,9 @@ public class EntryValidationTests
         var ids = cycle.Capabilities.Select(x => x.Id).ToList();
 
         db.RicCostEntries.AddRange(
-            new RicCostEntry { RicCycleId = cycle.Id, RicCapabilityId = ids[0], Category = "Equipment", Amount = 10_000m },
-            new RicCostEntry { RicCycleId = cycle.Id, RicCapabilityId = ids[1], Category = "Travel", Amount = 2_500m },
-            new RicCostEntry { RicCycleId = cycle.Id, Scope = CostEntry.Scopes.Platform, Category = "Other", Amount = 100_000m });
+            new RicCostEntry { RicCycleId = cycle.Id, RicCapabilityId = ids[0], Category = "Non-capital equipment purchases", Amount = 10_000m },
+            new RicCostEntry { RicCycleId = cycle.Id, RicCapabilityId = ids[1], Category = "Other expenses", Amount = 2_500m },
+            new RicCostEntry { RicCycleId = cycle.Id, Scope = CostEntry.Scopes.Platform, Category = "Administration costs", Amount = 100_000m });
         db.SaveChanges();
 
         var loaded = db.RicCycles

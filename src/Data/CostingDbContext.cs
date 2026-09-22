@@ -10,6 +10,7 @@ public class CostingDbContext(DbContextOptions<CostingDbContext> options) : DbCo
     public DbSet<RicCapability> RicCapabilities => Set<RicCapability>();
     public DbSet<RicCostEntry> RicCostEntries => Set<RicCostEntry>();
     public DbSet<RicCostYearAmount> RicCostYearAmounts => Set<RicCostYearAmount>();
+    public DbSet<RicCapacityDeduction> RicCapacityDeductions => Set<RicCapacityDeduction>();
     public DbSet<AppUser> AppUsers => Set<AppUser>();
     public DbSet<AppNotification> AppNotifications => Set<AppNotification>();
     public DbSet<MethodConfig> MethodConfigs => Set<MethodConfig>();
@@ -28,6 +29,9 @@ public class CostingDbContext(DbContextOptions<CostingDbContext> options) : DbCo
         modelBuilder.Entity<RicCostEntry>().Property(x => x.CostType).HasMaxLength(40);
         modelBuilder.Entity<RicCostEntry>().Property(x => x.Category).HasMaxLength(60);
         modelBuilder.Entity<RicCostYearAmount>().Property(x => x.Amount).HasPrecision(18, 2);
+        modelBuilder.Entity<RicCostEntry>().Property(x => x.Position).HasMaxLength(40);
+        modelBuilder.Entity<RicCostEntry>().Property(x => x.FloorArea).HasPrecision(18, 2);
+        modelBuilder.Entity<RicCostEntry>().Property(x => x.FloorAreaRate).HasPrecision(18, 2);
 
         modelBuilder.Entity<RicCapability>().Property(x => x.MaximumCapacity).HasPrecision(18, 2);
         modelBuilder.Entity<RicCapability>().Property(x => x.ForecastUwaUse).HasPrecision(18, 2);
@@ -36,6 +40,11 @@ public class CostingDbContext(DbContextOptions<CostingDbContext> options) : DbCo
         modelBuilder.Entity<RicCapability>().Property(x => x.ProposedUwaRate).HasPrecision(18, 2);
         modelBuilder.Entity<RicCapability>().Property(x => x.ProposedApfrRate).HasPrecision(18, 2);
         modelBuilder.Entity<RicCapability>().Property(x => x.ProposedCommercialRate).HasPrecision(18, 2);
+        modelBuilder.Entity<RicCapability>().Property(x => x.CapacityBaseline).HasMaxLength(20);
+        modelBuilder.Entity<RicCapability>().Property(x => x.StatedBaseline).HasPrecision(18, 2);
+        modelBuilder.Entity<RicCapability>().Property(x => x.StaffFte).HasPrecision(9, 4);
+        modelBuilder.Entity<RicCapacityDeduction>().Property(x => x.Kind).HasMaxLength(40);
+        modelBuilder.Entity<RicCapacityDeduction>().Property(x => x.Amount).HasPrecision(18, 2);
 
         modelBuilder.Entity<RicCycle>().Property(x => x.MethodVersion).HasMaxLength(20);
         modelBuilder.Entity<RicCycle>().Property(x => x.Status).HasMaxLength(30);
@@ -60,6 +69,11 @@ public class CostingDbContext(DbContextOptions<CostingDbContext> options) : DbCo
         modelBuilder.Entity<MethodConfig>().Property(x => x.Source).HasMaxLength(200);
         modelBuilder.Entity<MethodConfig>().Property(x => x.IndirectCostRecovery).HasPrecision(9, 4);
         modelBuilder.Entity<MethodConfig>().Property(x => x.MidpointRule).HasConversion<string>().HasMaxLength(20);
+        modelBuilder.Entity<MethodConfig>().Property(x => x.MachineAvailableDays).HasPrecision(9, 2);
+        modelBuilder.Entity<MethodConfig>().Property(x => x.StaffAvailableDays).HasPrecision(9, 2);
+        modelBuilder.Entity<MethodConfig>().Property(x => x.HoursPerDay).HasPrecision(9, 2);
+        modelBuilder.Entity<MethodConfig>().Property(x => x.MachineAvailabilityBasis).HasMaxLength(200);
+        modelBuilder.Entity<MethodConfig>().Property(x => x.StaffAvailabilityBasis).HasMaxLength(200);
 
         // Deleting a cycle takes its capabilities, cost lines and per-year amounts with it.
         // Stated rather than left to convention: an orphaned cost line would be summed into
@@ -74,6 +88,12 @@ public class CostingDbContext(DbContextOptions<CostingDbContext> options) : DbCo
             .HasMany(x => x.Costs)
             .WithOne(x => x.RicCycle)
             .HasForeignKey(x => x.RicCycleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<RicCapability>()
+            .HasMany(x => x.CapacityDeductions)
+            .WithOne(x => x.RicCapability)
+            .HasForeignKey(x => x.RicCapabilityId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<RicCostEntry>()

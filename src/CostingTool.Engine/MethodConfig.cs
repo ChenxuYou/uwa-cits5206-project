@@ -50,6 +50,35 @@ public class MethodConfig
     /// </summary>
     public MidpointRounding MidpointRule { get; set; } = MidpointRounding.AwayFromZero;
 
+    // ---- Capacity baselines (US-07, requirements §4 Step 2) --------------------------------
+    //
+    // The two baselines the client's workbook builds capacity from [W, sheet 2 rows 3–4].
+    // Configuration rather than constants, because requirement N7 names them alongside k:
+    // the working year and the public-holiday count change, and a record sealed under one
+    // method version must still explain its own capacity figures under the next.
+
+    /// <summary>
+    /// Days a machine can be run in a year: 365 less 104 weekend days and 10 WA public
+    /// holidays, 251 as at 2026 [W, sheet 2 row 3].
+    /// </summary>
+    public decimal MachineAvailableDays { get; set; } = 251m;
+
+    /// <summary>How <see cref="MachineAvailableDays"/> was arrived at, in words a custodian reads.</summary>
+    public string MachineAvailabilityBasis { get; set; } =
+        "365 days less 104 weekend days and 10 WA public holidays";
+
+    /// <summary>
+    /// Working days a full-time member of staff is available: 230 per year under the
+    /// enterprise agreement as at 2026 [G, Step 2; W, sheet 2 row 4].
+    /// </summary>
+    public decimal StaffAvailableDays { get; set; } = 230m;
+
+    /// <summary>How <see cref="StaffAvailableDays"/> was arrived at.</summary>
+    public string StaffAvailabilityBasis { get; set; } = "working days per year under the enterprise agreement";
+
+    /// <summary>Hours in a working day, 7.5 as at 2026 [G, Step 2; W, sheet 2].</summary>
+    public decimal HoursPerDay { get; set; } = 7.5m;
+
     /// <summary>Where the figures in this version came from, so a reader can check them.</summary>
     public string Source { get; set; } = string.Empty;
 

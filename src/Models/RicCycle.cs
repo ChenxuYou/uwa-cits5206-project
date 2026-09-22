@@ -24,13 +24,90 @@ public static class CostEntry
         public const string Platform = "Platform";
     }
 
-    /// <summary>Operating cost categories, from the client's guide, Step 1.</summary>
+    /// <summary>
+    /// Operating cost categories, as the client's workbook lays them out [W, sheet 1] and
+    /// requirements §4 Step 1 lists them.
+    ///
+    /// <b>Which list applies depends on where the cost sits.</b> A capability carries its
+    /// <i>directly incurred</i> costs (rows 11–23). The platform carries <i>directly
+    /// allocated</i> costs (rows 27–36) and <i>indirect</i> floor-area costs (rows 40–41),
+    /// entered once and split across the capabilities. The same words — "materials and
+    /// supplies", say — appear in both lists because the workbook has both rows; which one a
+    /// line is depends on its scope, not its name.
+    ///
+    /// These replaced a list of six (Personnel, Equipment, Maintenance, Travel, Animal Cost,
+    /// Other) that matched no client document. Travel and animal costs now go under
+    /// "Other expenses".
+    /// </summary>
     public static class CostCategories
     {
-        public const string Personnel = "Personnel";
+        /// <summary>A capability's staff: base salary and on-costs [W, rows 11–14].</summary>
+        public const string EmployeeSalaryAndOnCosts = "Employee salary and on-costs";
 
-        public static readonly string[] All =
-            [Personnel, "Equipment", "Maintenance", "Travel", "Animal Cost", "Other"];
+        /// <summary>The platform leader's salary, entered once at platform level [W, rows 35–36].</summary>
+        public const string PlatformLeaderSalary = "Platform leader salary and on-costs";
+
+        public const string LaboratoryFloorArea = "Laboratory floor area";
+        public const string OfficeFloorArea = "Office floor area";
+
+        /// <summary>Booked against one capability [W, sheet 1 rows 11–23].</summary>
+        public static readonly string[] DirectlyIncurred =
+        [
+            EmployeeSalaryAndOnCosts,
+            "Materials and supplies",
+            "Non-capital equipment purchases",
+            "Other expenses",
+            "Rental, hiring and leasing fees",
+            "Repairs and maintenance",
+            "Maintenance contracts",
+            "R&M assumption threshold",
+            "Decommissioning costs",
+            "Utilities and rates"
+        ];
+
+        /// <summary>Entered once for the platform and apportioned [W, sheet 1 rows 27–36].</summary>
+        public static readonly string[] DirectlyAllocated =
+        [
+            PlatformLeaderSalary,
+            "Materials and supplies",
+            "Other expenses",
+            "Repairs and maintenance",
+            "Cleaning and waste disposal",
+            "IT costs",
+            "Rental, hiring and leasing fees",
+            "Anticipated R&M cost buffer",
+            "Administration costs"
+        ];
+
+        /// <summary>Floor area at a rate per m² per annum [W, sheet 1 rows 40–41].</summary>
+        public static readonly string[] Indirect = [LaboratoryFloorArea, OfficeFloorArea];
+
+        /// <summary>The categories a line in this scope may take.</summary>
+        public static IReadOnlyList<string> For(string? scope) =>
+            scope == Scopes.Platform ? [.. DirectlyAllocated, .. Indirect] : DirectlyIncurred;
+
+        /// <summary>A line entered as a person, with the personnel details.</summary>
+        public static bool IsPersonnel(string? category) =>
+            category is EmployeeSalaryAndOnCosts or PlatformLeaderSalary;
+
+        /// <summary>A line entered as floor area × a rate per m², rather than as dollars by year.</summary>
+        public static bool IsFloorArea(string? category) =>
+            category is LaboratoryFloorArea or OfficeFloorArea;
+
+        /// <summary>The workbook's three kinds of cost, in words for a screen.</summary>
+        public static string ClassOf(string? scope, string? category) =>
+            scope != Scopes.Platform ? "Directly incurred"
+            : IsFloorArea(category) ? "Indirect"
+            : "Directly allocated";
+    }
+
+    /// <summary>The roles the workbook costs staff under [W, sheet 1 rows 11–14].</summary>
+    public static class Positions
+    {
+        public const string PlatformLeader = "Platform leader";
+        public const string ResearchOfficer = "Research officer";
+
+        public static readonly string[] All = [PlatformLeader, ResearchOfficer];
     }
 
     /// <summary>
@@ -197,6 +274,15 @@ public class RicCapability
     public int RicCycleId { get; set; }
     public RicCycle RicCycle { get; set; } = null!;
     public string Name { get; set; } = string.Empty;
+    /// <summary>
+    /// Usable annual capacity, in the billable unit.
+    ///
+    /// Since US-07 this is <b>worked out</b>, not typed: the capacity step builds it from
+    /// <see cref="CapacityBaseline"/>, the <see cref="CapacityDeductions"/> and the staff cap
+    /// through <c>CapacityEngine</c>, and stores the result here so that every later screen,
+    /// the sealed snapshot and the PDF read one figure. The name is kept from before, when it
+    /// was a single typed number, so that sealed records and their schema do not move.
+    /// </summary>
     public decimal MaximumCapacity { get; set; }
     public decimal ForecastUwaUse { get; set; }
     public decimal ForecastApfrUse { get; set; }
@@ -205,11 +291,62 @@ public class RicCapability
     public decimal ProposedApfrRate { get; set; }
     public decimal ProposedCommercialRate { get; set; }
 
+    // ---- How MaximumCapacity was built (US-07) --------------------------------------------
+
+    /// <summary>
+    /// <see cref="Engine.CapacityBaseline.Machine"/>, <see cref="Engine.CapacityBaseline.Staff"/>
+    /// or <see cref="Engine.CapacityBaseline.Stated"/>; empty until the capacity step is saved.
+    /// </summary>
+    public string CapacityBaseline { get; set; } = string.Empty;
+
+    /// <summary>The custodian's own baseline, used only when <see cref="CapacityBaseline"/> is Stated.</summary>
+    public decimal StatedBaseline { get; set; }
+
+    /// <summary>Where a stated baseline came from. Required with one.</summary>
+    public string? StatedBaselineNote { get; set; }
+
+    /// <summary>A person must be present to run it, so capacity is capped at their FTE [W, sheet 2 row 18].</summary>
+    public bool IsStaffReliant { get; set; }
+
+    /// <summary>FTE allocated to the capability when it is staff-reliant, e.g. 0.05.</summary>
+    public decimal StaffFte { get; set; }
+
+    /// <summary>
+    /// Why the forecast is above usable capacity. Allowed, but never unexplained (US-08):
+    /// required whenever the forecast exceeds <see cref="MaximumCapacity"/>.
+    /// </summary>
+    public string? AboveCapacityReason { get; set; }
+
+    /// <summary>What is taken off the baseline, each with its note.</summary>
+    public List<RicCapacityDeduction> CapacityDeductions { get; set; } = [];
+
     /// <summary>
     /// <c>U</c> — forecast annual utilisation, the divisor behind all three rates. The
     /// per-category split drives only the revenue projection (requirements §9, Q2).
     /// </summary>
     public decimal ForecastUtilisation => ForecastUwaUse + ForecastApfrUse + ForecastCommercialUse;
+}
+
+/// <summary>
+/// One reason a capability is unavailable for part of its baseline (US-07): maintenance,
+/// downtime, compliance, setup and pack-down, or planned outages [G, Step 2].
+/// </summary>
+public class RicCapacityDeduction
+{
+    /// <summary>The deductions the guide names, in the order it names them [G, Step 2].</summary>
+    public static readonly string[] Kinds =
+        ["Maintenance", "Downtime", "Compliance requirements", "Setup and pack-down", "Planned outages"];
+
+    public int Id { get; set; }
+    public int RicCapabilityId { get; set; }
+    public RicCapability RicCapability { get; set; } = null!;
+    public string Kind { get; set; } = string.Empty;
+
+    /// <summary>In the capability's billable unit.</summary>
+    public decimal Amount { get; set; }
+
+    /// <summary>Why this much is taken off. Required: each deduction takes a note (US-07).</summary>
+    public string Note { get; set; } = string.Empty;
 }
 
 public class RicCostEntry
@@ -253,6 +390,16 @@ public class RicCostEntry
     public decimal? BaseSalary { get; set; }
     public string? Description { get; set; }
     public string? Supplier { get; set; }
+
+    /// <summary>Platform leader or research officer, for a staff line [W, sheet 1 rows 11–14].</summary>
+    public string? Position { get; set; }
+
+    /// <summary>Square metres, for an indirect floor-area line [W, sheet 1 rows 40–41].</summary>
+    public decimal? FloorArea { get; set; }
+
+    /// <summary>Dollars per m² per annum, for an indirect floor-area line.</summary>
+    public decimal? FloorAreaRate { get; set; }
+
     public List<RicCostYearAmount> YearAmounts { get; set; } = [];
 
     [NotMapped]
