@@ -22,8 +22,19 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
     [BindProperty] public DateTime? EffectiveDate { get; set; }
 
-    public async Task<IActionResult> OnGetAsync(int id) =>
-        await Load(id) ? Page() : NotFound();
+    /// <summary>What the last decision on this record did, shown once after the redirect.</summary>
+    public string? SuccessMessage { get; private set; }
+
+    public async Task<IActionResult> OnGetAsync(int id)
+    {
+        if (!await Load(id))
+        {
+            return NotFound();
+        }
+
+        SuccessMessage = TempData["Success"] as string;
+        return Page();
+    }
 
     public async Task<IActionResult> OnPostReturnAsync(int id)
     {
@@ -53,7 +64,10 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
         await db.SaveChangesAsync();
         TempData["Success"] = "The cycle was returned to the submitter for changes.";
-        return RedirectToPage("/Ric/Review", new { cycleId = id });
+
+        // Back to this record, not the custodian's review page: /Ric is the custodian's
+        // folder, so an approver sent there was shown "access denied" after every decision.
+        return RedirectToPage(new { id });
     }
 
     public async Task<IActionResult> OnPostApproveAsync(int id, bool confirmApproval)
@@ -117,7 +131,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
         await db.SaveChangesAsync();
         TempData["Success"] = "The costing cycle was approved and sealed.";
-        return RedirectToPage("/Ric/Review", new { cycleId = id });
+        return RedirectToPage(new { id });
     }
 
     private void Notify(string type, string title, string message) =>
