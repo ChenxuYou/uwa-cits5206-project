@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  CITS5206 Capstone — Client Meeting
+  Research Infrastructure Costing & Pricing Tool
+
+  Meeting with UWA Research Infrastructure, Tuesday 22 September 2026 (afternoon).
+  Built against STYLE-GUIDE.md v2.3.
+
+  22 pages: cover + 5 x (divider + 3 pages) + closing. Five sections for the five
+  members in docs/project/team.md, in that file's order (SS4.2). At the top of the
+  3n+2 .. 4n+2 band (17-22 at n = 5).
+
+  Purpose: show the client how the build is divided (one technical layer, one
+  owner — agreed 15 September) and how far each layer has got, and put the
+  decisions that are theirs in front of them:
+    S1 general backend  - the split, the end-to-end path, what the backend guarantees;
+                          [ASK] the extra-zero thresholds in EntryChecks
+    S2 front end        - the rates screen, the UX rules, what changes next;
+                          [ASK] a custodian to try staging
+    S3 calculation      - the golden file, the engine's rules;
+                          [ASK] four modelling defaults that are ours, not the guide's
+    S4 deployment       - what a host needs, options A/B/C (recommend C);
+                          [ASK] five hosting questions
+    S5 authentication   - roles, six principles, tests and the SSO seam;
+                          [ASK] UWA sign-on at go-live, and the first administrator
+
+  Content is drawn from origin/main at 382ae0a (21 Sep) and the branch in review,
+  us-10-13-explore-and-explain at 314d117 (22 Sep, plan.md v1.7): src/Program.cs,
+  src/Pages/Ric/*, src/Services/EntryChecks.cs, src/CostingTool.Engine/*,
+  src/Models/RateCategories.cs, tests/, docs/project/plan.md, docs/spec/requirements.md,
+  docs/meetings/2026-09-15-team-meeting.md, docs/meetings/2026-08-20-client-meeting.md.
+  Test counts are [Fact]s plus [InlineData] rows: 163 including the branch in review
+  (116 on main); SignInTests + IdentityTests = 32.
+
+  The rates-screen figure on S2 is an illustration drawn in the deck's own tokens,
+  not a screenshot: the guide's worked example, three sample proposed rates, and
+  the screen's own wording from Rates.cshtml, RateVariance.cs and RateCategories.cs.
+
+  PRESENTER FOR SECTION 5: Jaswanth Vericherla, who owns the authentication layer,
+  cannot attend on 22 September. The section is reassigned for this delivery to
+  Chenxu You, and the divider and the three pages' top-right furniture name only
+  him (SS4.2). Jaswanth remains the layer's owner on the S1 diagram. Record the
+  swap in the commit message.
+
+  ---------------------------------------------------------------------------
+  ENGINE: carried unchanged from the 16 September facilitator checkpoint, which is
+  template.html's engine plus generated section indicators.
+  ---------------------------------------------------------------------------
+-->
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Client Meeting, 22 September 2026 &mdash; Research Infrastructure Costing &amp; Pricing Tool | CITS5206</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================================================
+   1. TOKENS — the only place colour, type and space are defined.
+      Never hard-code a hex value below this block.
+   =========================================================================== */
+:root{
+  /* Ink — the black family. Never pure #000. */
+  --ink-900:#0B0B0C; --ink-800:#141416; --ink-700:#1C1C1F;
+  --ink-500:#3A3A40; --ink-300:#6E6E75;
+  /* Paper — the light family. Never pure #FFF. */
+  --paper:#FAF8F5; --paper-alt:#F1EDE7; --paper-rule:#DDD6CC;
+  /* Red — the single accent. */
+  --red-700:#9B0F22; --red-600:#C8102E; --red-400:#E8384F; --red-100:#F6E2E4;
+  /* Stone — warm neutrals. */
+  --stone-600:#5C554D; --stone-400:#8A8078; --stone-200:#C9C1B8;
+  /* Semantic */
+  --surplus:#1F6F5C; --deficit:#C8102E;
+
+  --font-display:"Playfair Display","Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --font-sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+
+  --t-cover:72px; --t-section:56px; --t-metric:84px; --t-title:44px;
+  --t-sub:28px;   --t-lead:24px;    --t-body:20px;   --t-small:16px; --t-label:13px;
+
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+
+  --pad-x:64px; --pad-y:56px;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+/* ===========================================================================
+   2. STAGE — fixed 1280x720 canvas, scaled to the viewport.
+   =========================================================================== */
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  background:var(--ink-800); color:var(--ink-900);
+  font-family:var(--font-sans); font-size:var(--t-body);
+  -webkit-font-smoothing:antialiased; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+}
+#stage{
+  position:relative; width:1280px; height:720px; flex:0 0 auto;
+  transform-origin:center center; background:var(--paper);
+  box-shadow:0 0 0 1px rgba(0,0,0,.35);
+}
+
+/* ===========================================================================
+   3. PAGE
+   =========================================================================== */
+.page{
+  position:absolute; inset:0; padding:var(--pad-y) var(--pad-x);
+  display:none; flex-direction:column; background:var(--paper);
+  opacity:0; transition:opacity 180ms var(--ease), transform 180ms var(--ease);
+}
+.page.is-active{display:flex; opacity:1}
+.page.is-enter{transform:translateY(16px); opacity:0}
+
+.page.ink{background:var(--ink-900); color:var(--paper)}
+.page.ink .eyebrow{color:var(--stone-400)}
+
+.center{justify-content:center}
+.spacer{flex:1 1 auto}
+
+/* ===========================================================================
+   4. TYPE
+   =========================================================================== */
+.eyebrow{
+  font-size:var(--t-label); font-weight:600; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--stone-600); margin:0 0 var(--s5);
+}
+.eyebrow .accent{color:var(--red-600)}
+.page.ink .eyebrow .accent{color:var(--red-400)}
+
+h1{
+  font-family:var(--font-display); font-weight:500; font-size:var(--t-title);
+  line-height:1.15; letter-spacing:-.02em; margin:0 0 var(--s5);
+}
+h2{font-size:var(--t-sub); font-weight:600; line-height:1.25; margin:0 0 var(--s4)}
+h3{
+  font-size:var(--t-label); font-weight:600; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--stone-600); margin:0 0 var(--s3);
+}
+p{margin:0 0 var(--s4); max-width:62ch; line-height:1.45}
+.lead{font-size:var(--t-lead); line-height:1.40; color:var(--stone-600); max-width:62ch}
+.small{font-size:var(--t-small); line-height:1.40; color:var(--stone-600)}
+.page.ink .small{color:var(--stone-400)}
+strong{font-weight:600}
+em{font-style:italic}
+.hi{color:var(--red-600); font-weight:600}
+.page.ink .hi{color:var(--red-400)}
+.num{font-variant-numeric:tabular-nums}
+
+.rule{width:56px; height:3px; background:var(--red-600); border:0; margin:0 0 var(--s5)}
+
+/* ===========================================================================
+   5. PAGE TYPES
+   =========================================================================== */
+.cover-title{
+  font-family:var(--font-display); font-weight:700; font-size:var(--t-cover);
+  line-height:1.05; letter-spacing:-.02em; margin:0 0 var(--s5); max-width:20ch;
+}
+.cover-meta{
+  display:flex; gap:var(--s8); font-size:var(--t-label); font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--stone-400);
+}
+
+.divider-num{
+  font-family:var(--font-display); font-weight:700; font-size:180px;
+  line-height:.85; color:var(--red-600); letter-spacing:-.04em; margin:0 0 var(--s5);
+}
+.divider-title{
+  font-family:var(--font-display); font-weight:500; font-size:var(--t-section);
+  line-height:1.08; letter-spacing:-.02em; margin:0 0 var(--s4); max-width:22ch;
+}
+.divider-owner{font-size:var(--t-lead); color:var(--stone-400)}
+
+.statement{
+  font-family:var(--font-display); font-weight:500; font-size:var(--t-title);
+  line-height:1.25; letter-spacing:-.02em; max-width:26ch; margin:0;
+}
+
+.metric{
+  font-family:var(--font-display); font-weight:700; font-size:var(--t-metric);
+  line-height:1; letter-spacing:-.03em; font-variant-numeric:tabular-nums;
+  margin:0 0 var(--s3);
+}
+.metric.is-deficit{color:var(--deficit)}
+.metric.is-surplus{color:var(--surplus)}
+
+blockquote{
+  margin:0; padding-left:var(--s5); border-left:3px solid var(--red-600);
+  font-family:var(--font-display); font-style:italic; font-weight:400;
+  font-size:var(--t-lead); line-height:1.45; max-width:56ch;
+}
+blockquote cite{
+  display:block; margin-top:var(--s5); font:600 var(--t-label)/1.2 var(--font-sans);
+  letter-spacing:.14em; text-transform:uppercase; font-style:normal; color:var(--stone-600);
+}
+
+.grid{display:grid; gap:var(--s5); align-items:start}
+.g-6-6{grid-template-columns:1fr 1fr}
+.g-8-4{grid-template-columns:2fr 1fr}
+.g-4-4-4{grid-template-columns:1fr 1fr 1fr}
+
+/* ===========================================================================
+   6. COMPONENTS
+   =========================================================================== */
+ul.bullets{margin:0; padding:0; list-style:none; max-width:62ch}
+ul.bullets li{
+  position:relative; padding-left:var(--s5); margin-bottom:var(--s3); line-height:1.45;
+}
+ul.bullets li::before{
+  content:""; position:absolute; left:0; top:.62em;
+  width:7px; height:7px; background:var(--red-600);
+}
+.page.ink ul.bullets li::before{background:var(--red-400)}
+
+.callout{
+  background:var(--red-100); border-left:3px solid var(--red-600);
+  padding:var(--s5); border-radius:2px; color:var(--red-700); max-width:62ch;
+}
+.callout p:last-child{margin-bottom:0}
+
+table{border-collapse:collapse; width:100%; font-size:var(--t-body)}
+caption{caption-side:bottom; text-align:left; padding-top:var(--s3);
+  font-size:var(--t-small); color:var(--stone-600)}
+thead th{
+  font:600 var(--t-label)/1.2 var(--font-sans); letter-spacing:.14em;
+  text-transform:uppercase; text-align:left; color:var(--stone-600);
+  background:var(--paper-alt); padding:var(--s3) var(--s4);
+}
+tbody td{padding:var(--s3) var(--s4); border-bottom:1px solid var(--paper-rule); vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right; font-variant-numeric:tabular-nums}
+tr.is-key td{background:var(--red-100); color:var(--red-700); font-weight:600}
+
+code,pre,.mono{font-family:var(--font-mono); font-variant-ligatures:none}
+pre{
+  background:var(--paper-alt); padding:var(--s5); border-radius:2px;
+  font-size:18px; line-height:1.6; margin:0; overflow:hidden;
+}
+code{font-size:.95em}
+
+/* [ASK] / [DECIDE] — an unconfirmed decision is never presented as agreed. */
+.tag{
+  display:inline-block; font:600 var(--t-label)/1 var(--font-sans);
+  letter-spacing:.14em; text-transform:uppercase; color:var(--red-600);
+  border:1px solid var(--red-600); padding:5px 8px; border-radius:2px;
+}
+/* SS2.2 rule 1: red text on an Ink surface must be --red-400, never --red-600.
+   No tag currently sits on an Ink page; this keeps it true if one ever does. */
+.page.ink .tag{color:var(--red-400); border-color:var(--red-400)}
+
+.ask{margin-top:var(--s5); max-width:62ch}
+.ask .tag{margin-right:var(--s3)}
+
+/* ===========================================================================
+   7. FURNITURE — quiet, consistent, never on cover or closing.
+      Page numbers, section indicators and progress segments are generated.
+   =========================================================================== */
+.furniture{
+  position:absolute; left:var(--pad-x); right:var(--pad-x);
+  font:600 var(--t-label)/1.2 var(--font-sans); letter-spacing:.14em;
+  text-transform:uppercase; color:var(--stone-600); pointer-events:none;
+}
+.furniture.top{top:24px; display:flex; justify-content:space-between}
+.furniture.bottom{bottom:22px; display:flex; justify-content:flex-end}
+.page.ink .furniture{color:var(--stone-400)}
+.page.no-furniture .furniture{display:none}
+
+#progress{
+  position:absolute; left:0; right:0; bottom:0; height:3px;
+  display:grid; gap:2px; z-index:5;
+}
+#progress span{background:var(--paper-rule); transition:background 180ms var(--ease)}
+#progress span.on{background:var(--red-600)}
+#progress.on-ink span{background:var(--ink-500)}
+#progress.on-ink span.on{background:var(--red-400)}
+
+#hint{
+  position:fixed; bottom:14px; left:50%; transform:translateX(-50%);
+  font:500 12px/1 var(--font-sans); letter-spacing:.1em; text-transform:uppercase;
+  color:var(--stone-400); opacity:.55; transition:opacity 400ms var(--ease);
+}
+#hint.hide{opacity:0}
+
+/* ===========================================================================
+   8. ACCESSIBILITY & PRINT
+   =========================================================================== */
+@media (prefers-reduced-motion:reduce){
+  .page{transition:none !important}
+  #progress span{transition:none !important}
+}
+
+@page{size:1280px 720px; margin:0}
+@media print{
+  body{display:block; background:#fff; overflow:visible}
+  #stage{transform:none !important; box-shadow:none; width:1280px; height:auto}
+  #hint{display:none}
+  .page{
+    position:relative !important; display:flex !important; opacity:1 !important;
+    transform:none !important; width:1280px; height:720px; break-after:page; page-break-after:always;
+  }
+  #progress{display:none}
+}
+
+/* ===========================================================================
+   9. DECK-SPECIFIC COMPONENTS — client meeting, 22 September 2026.
+      Tokens only; no hex below :root. Radius 0-2px, no shadows (SS5).
+   =========================================================================== */
+
+/* A flex column shrinks its children when a page overflows, and a 3px rule
+   shrinks to nothing first. Keep it; overflow is caught by the page check instead. */
+.page > .rule{flex-shrink:0}
+
+/* Unassigned presenter — deliberately loud, copied from template.html.
+   It must be replaced with a name before the deck is shown (SS4.2). */
+.todo{
+  font-family:var(--font-mono); font-size:.9em; font-style:normal; font-weight:500;
+  letter-spacing:0; text-transform:none;
+  color:var(--red-700); background:var(--red-100);
+  padding:1px 6px; border-radius:2px;
+}
+.page.ink .todo{color:var(--red-400); background:var(--ink-700)}
+
+.g-8-4{grid-template-columns:2fr 1fr}
+
+/* --- Layer diagram: who owns which part of the tool --- */
+.layers{
+  display:grid; grid-template-columns:1fr 32px 1fr 32px 1fr 32px 1fr;
+  row-gap:var(--s4); align-items:stretch; margin-top:var(--s2);
+}
+.layer{
+  background:var(--paper-alt); border:1px solid var(--paper-rule); border-radius:2px;
+  padding:var(--s4) var(--s4) var(--s5); display:flex; flex-direction:column;
+}
+.layer .k{
+  font:600 var(--t-label)/1.2 var(--font-sans); letter-spacing:.14em;
+  text-transform:uppercase; color:var(--stone-600); margin:0 0 var(--s3);
+}
+.layer .who{font-size:var(--t-body); font-weight:600; line-height:1.3; margin:0 0 var(--s2)}
+.layer .what{font-size:var(--t-body); line-height:1.4; color:var(--stone-600); margin:0}
+.layer.base{
+  grid-column:1 / -1; flex-direction:row; align-items:baseline; gap:var(--s5);
+  padding:var(--s4) var(--s5); background:var(--paper); border-color:var(--ink-900);
+}
+.layer.base .k,.layer.base .who{margin:0; white-space:nowrap}
+.arrow{display:flex; align-items:center; justify-content:center; color:var(--stone-400)}
+.arrow svg{width:20px; height:20px}
+.layers-axis{
+  display:flex; justify-content:space-between; margin-top:var(--s3);
+  font:600 var(--t-label)/1.2 var(--font-sans); letter-spacing:.14em;
+  text-transform:uppercase; color:var(--stone-600);
+}
+
+/* --- The path, end to end --- */
+ol.path{
+  list-style:none; margin:0 0 var(--s6); padding:0;
+  display:grid; grid-template-columns:repeat(5,1fr); gap:var(--s3);
+}
+ol.path li{
+  background:var(--paper-alt); border-top:1px solid var(--ink-900);
+  padding:var(--s4) var(--s4) var(--s5); min-height:132px;
+  display:flex; flex-direction:column; gap:var(--s3);
+}
+ol.path .step{
+  display:flex; align-items:center; gap:var(--s2);
+  font:600 var(--t-label)/1.2 var(--font-sans); letter-spacing:.14em;
+  text-transform:uppercase; color:var(--stone-600);
+}
+ol.path .step svg{width:18px; height:18px; color:var(--ink-900)}
+ol.path b{font-size:var(--t-body); font-weight:600; line-height:1.3}
+
+.metric-block .metric{margin-bottom:var(--s2)}
+.metric-block .lead{margin:0 0 var(--s3)}
+.metric.is-ink{color:var(--ink-900)}
+
+/* --- Rates-screen illustration --- */
+.mock{
+  border:1px solid var(--paper-rule); border-radius:2px; background:var(--paper);
+  padding:var(--s4) var(--s5) var(--s5);
+}
+.mock-head{
+  display:flex; justify-content:space-between; align-items:baseline;
+  border-bottom:1px solid var(--paper-rule); padding-bottom:var(--s3); margin-bottom:var(--s4);
+}
+.mock-head b{font-size:var(--t-body); font-weight:600}
+.mock-head span{font-size:var(--t-small); color:var(--stone-600)}
+.mock-cols{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s3)}
+.mock-col{background:var(--paper-alt); padding:var(--s3) var(--s4) var(--s4); display:flex; flex-direction:column}
+.mock-col .cat{
+  font:600 var(--t-label)/1.2 var(--font-sans); letter-spacing:.14em;
+  text-transform:uppercase; color:var(--stone-600); margin:0 0 var(--s2);
+}
+.mock-col .rate{
+  font-family:var(--font-display); font-weight:700; font-size:var(--t-sub);
+  font-variant-numeric:tabular-nums; line-height:1.1; margin:0 0 var(--s2);
+}
+.mock-col .field-label{font-size:var(--t-small); color:var(--stone-600); margin:0 0 var(--s1)}
+.mock-col .input{
+  font:500 18px/1.2 var(--font-mono); font-variant-numeric:tabular-nums;
+  background:var(--paper); border:1px solid var(--stone-400); border-radius:2px;
+  padding:var(--s2) var(--s3); margin:0 0 var(--s2);
+}
+.mock-col .var{font-size:var(--t-small); line-height:1.35; margin:0; color:var(--ink-900)}
+.mock .callout{margin-top:var(--s4); padding:var(--s3) var(--s4); max-width:none; font-size:var(--t-small); line-height:1.4}
+.mock .callout b{font-weight:600}
+.mock-foot{
+  margin-top:var(--s3); font-size:var(--t-small); color:var(--stone-600);
+  display:flex; justify-content:space-between;
+}
+.mock-foot .btn{
+  font-weight:600; color:var(--ink-900); border:1px solid var(--ink-900);
+  border-radius:2px; padding:2px var(--s3);
+}
+
+/* --- Principle pairs (authentication) --- */
+.principles{display:grid; grid-template-columns:1fr 1fr; column-gap:var(--s7); row-gap:var(--s5)}
+.principles h3{margin:0 0 var(--s2)}
+.principles p{margin:0; line-height:1.4}
+
+/* --- Numbered question list --- */
+ol.qs{margin:0; padding:0; list-style:none; counter-reset:q; max-width:none}
+ol.qs li{
+  counter-increment:q; position:relative; padding-left:var(--s7);
+  margin-bottom:var(--s4); line-height:1.45; max-width:66ch;
+}
+ol.qs li::before{
+  content:counter(q); position:absolute; left:0; top:0;
+  font:700 var(--t-sub)/1 var(--font-display); color:var(--stone-600);
+}
+
+pre.small-mono{font-size:var(--t-small); line-height:1.7; padding:var(--s4) var(--s5)}
+td.nowrap{white-space:nowrap}
+</style>
+</head>
+
+<body>
+<div id="stage">
+
+<!-- ==========================================================================
+     COVER
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="0">
+  <p class="eyebrow">CITS5206 Professional Computing &middot; <span class="accent">Client meeting</span></p>
+  <h2 class="cover-title">From Sign-in to Sealed Record</h2>
+  <hr class="rule">
+  <p class="lead" style="color:var(--stone-400);max-width:56ch">
+    The whole path now runs end to end. Here is who owns each part of it &mdash; and the few
+    decisions we need from you to put it on a server.
+  </p>
+  <div class="spacer"></div>
+  <div class="cover-meta">
+    <span>UWA Research Infrastructure</span>
+    <span>22 September 2026</span>
+  </div>
+</section>
+
+
+<!-- ==========================================================================
+     SECTION 1 — General Backend, and Who Owns What
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="1">
+  <p class="divider-num"></p>
+  <h2 class="divider-title">General Backend, and Who Owns What</h2>
+  <p class="divider-owner">Chenxu You</p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0" data-section-label></p>
+</section>
+
+<section class="page" data-section="1">
+  <div class="furniture top"><span data-section-indicator></span><span>Chenxu You</span></div>
+  <p class="eyebrow">How the work is divided &middot; agreed 15 September</p>
+  <h1>Five layers, one owner each</h1>
+  <hr class="rule">
+  <p class="lead" style="margin-bottom:var(--s5)">Every part of the tool has one person accountable for it, and nobody approves a change to their own layer.</p>
+  <div class="layers" role="img" aria-label="Front end, then authentication, then general backend, then calculation, all running on the deployment layer">
+    <div class="layer"><p class="k">Front end</p><p class="who">Yichen Zhao</p><p class="what">Every screen you see, and how it answers as you type</p></div>
+    <div class="arrow"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 10h13M11 5l5 5-5 5"/></svg></div>
+    <div class="layer"><p class="k">Authentication</p><p class="who">Jaswanth Vericherla</p><p class="what">Who can sign in, and what each role may open</p></div>
+    <div class="arrow"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 10h13M11 5l5 5-5 5"/></svg></div>
+    <div class="layer"><p class="k">General backend</p><p class="who">Chenxu You</p><p class="what">Saves, checks and seals every record</p></div>
+    <div class="arrow"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 10h13M11 5l5 5-5 5"/></svg></div>
+    <div class="layer"><p class="k">Calculation</p><p class="who">Wenmin Luo</p><p class="what">Your guide&rsquo;s method, reproduced to the cent</p></div>
+    <div class="layer base"><p class="k">Deployment</p><p class="who">Dai Lam La La</p><p class="what">The server all of it runs on &mdash; address, HTTPS, backups, releases and rollback</p></div>
+  </div>
+  <div class="layers-axis"><span>What you touch</span><span>The method underneath</span></div>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="1">
+  <div class="furniture top"><span data-section-indicator></span><span>Chenxu You</span></div>
+  <p class="eyebrow">Where the build stands &middot; 22 September</p>
+  <h1>The whole path runs today, end to end</h1>
+  <hr class="rule">
+  <ol class="path">
+    <li><span class="step"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8"/></svg>Built</span><b>Sign in, by role</b></li>
+    <li><span class="step"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8"/></svg>Built</span><b>Platform, costs and funding</b></li>
+    <li><span class="step"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8"/></svg>Built</span><b>Capacity and forecast use</b></li>
+    <li><span class="step"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8"/></svg>Built</span><b>Rates, proposals and balance</b></li>
+    <li><span class="step"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8"/></svg>Built</span><b>Review, approve, seal and export the PDF</b></li>
+  </ol>
+  <div class="grid g-8-4">
+    <div>
+      <h3>Left before the vertical slice closes on Friday 25 September</h3>
+      <ul class="bullets">
+        <li>Link a new cycle to the sealed record it replaces.</li>
+        <li>Give the approver the sealed PDF from the record they approved.</li>
+        <li>Print that PDF on A4 and read it before anyone files one in Content Manager.</li>
+      </ul>
+    </div>
+    <div class="metric-block">
+      <p class="metric hi">163</p>
+      <p class="lead">automated tests run on every change</p>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <p class="small">M1 met 2 September &middot; M2 met 11 September &middot; M3, rates and balance, met 22 September. Test count from <span class="mono">tests/</span>, including the work in review today.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="1">
+  <div class="furniture top"><span data-section-indicator></span><span>Chenxu You</span></div>
+  <p class="eyebrow">Underneath every screen</p>
+  <h1>What the general backend guarantees</h1>
+  <hr class="rule">
+  <div class="grid g-8-4">
+    <ul class="bullets">
+      <li><strong>Sealed means sealed.</strong> Approval writes inputs, results, workings and every explanation into one snapshot, with a SHA-256 fingerprint.</li>
+      <li><strong>Old records keep opening.</strong> The record format is versioned; earlier records still open exactly as sealed.</li>
+      <li><strong>One door to every record.</strong> Every step loads its cycle through one class that applies the ownership check.</li>
+      <li><strong>Mistypes stop at the server.</strong> Text for a number, a percentage over 100 or an extra zero needs attention first.</li>
+      <li><strong>Explanations are enforced.</strong> A varied rate, a deficit or missing utilisation assumptions block submission.</li>
+    </ul>
+    <div class="ask" style="margin-top:0">
+      <p><span class="tag">[ASK]</span> The extra-zero check asks for a tick when one line passes a set amount a year: $250,000 for salaries, $100,000&ndash;$250,000 for other costs, $1,000,000 for funding. Are those the right levels?</p>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+
+<!-- ==========================================================================
+     SECTION 2 — Front End
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="2">
+  <p class="divider-num"></p>
+  <h2 class="divider-title">Front End: Screens That Explain Themselves</h2>
+  <p class="divider-owner">Yichen Zhao</p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0" data-section-label></p>
+</section>
+
+<section class="page" data-section="2">
+  <div class="furniture top"><span data-section-indicator></span><span>Yichen Zhao</span></div>
+  <p class="eyebrow">The rates screen &middot; step 5 of 6</p>
+  <h1>The screen answers back as you type</h1>
+  <hr class="rule">
+  <div class="grid g-8-4">
+    <figure class="mock" style="margin:0" aria-label="Illustration of the rates screen">
+      <div class="mock-head"><b>Worked example</b><span>Operating cost $150,000.00 &middot; less funding $50,000.00 &middot; 1,000.0 hours</span></div>
+      <div class="mock-cols">
+        <div class="mock-col">
+          <p class="cat">UWA Researcher</p>
+          <p class="rate">$100.00</p>
+          <p class="field-label">Proposed rate</p>
+          <p class="input">110.00</p>
+          <p class="var">$10.00 (10.0%) above the calculated rate.</p>
+        </div>
+        <div class="mock-col">
+          <p class="cat">APFR</p>
+          <p class="rate">$162.00</p>
+          <p class="field-label">Proposed rate</p>
+          <p class="input">162.00</p>
+          <p class="var">Matches the calculated rate.</p>
+        </div>
+        <div class="mock-col">
+          <p class="cat">Commercial</p>
+          <p class="rate">$202.50</p>
+          <p class="field-label">Proposed rate</p>
+          <p class="input">220.00</p>
+          <p class="var">$17.50 (8.6%) above the calculated rate.</p>
+        </div>
+      </div>
+      <div class="callout"><b>Competitive neutrality.</b> The University&rsquo;s competitive neutrality obligations apply &hellip; Record why this rate is appropriate.</div>
+      <div class="mock-foot"><span>&#9656; The figures behind these rates</span><span class="btn">Update balance</span></div>
+    </figure>
+    <div>
+      <ul class="bullets">
+        <li>Variance in dollars and per cent, live as you type &mdash; no formula ever reaches the browser.</li>
+        <li><strong>Update balance</strong> re-runs the calculation on the server, and saves nothing.</li>
+        <li>Move the commercial rate and the guide&rsquo;s neutrality prompt appears.</li>
+        <li>The workings open in place, under every rate.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <p class="small">Illustration of <span class="mono">Pages/Ric/Rates.cshtml</span> with the guide&rsquo;s worked example; the wording is the screen&rsquo;s own.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="2">
+  <div class="furniture top"><span data-section-indicator></span><span>Yichen Zhao</span></div>
+  <p class="eyebrow">Low frequency, high stakes</p>
+  <h1>Made for a job done once every three to five years</h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li><strong>The step bar is navigation.</strong> Every finished step is a link back; nothing links forward to figures that are not yet saved.</li>
+    <li><strong>Nothing typed is lost.</strong> Going back saves first, and leaving a half-typed entry asks before throwing it away.</li>
+    <li><strong>Messages in a custodian&rsquo;s words.</strong> &ldquo;Enter a number, such as 20000.00&rdquo; &mdash; and a refusal sits where the number would be, never a plausible $0.00.</li>
+    <li><strong>Meaning never rests on colour.</strong> A deficit is written as a word and in brackets; a variance says &ldquo;above&rdquo; or &ldquo;below&rdquo;.</li>
+    <li><strong>Accessible on any width.</strong> The current step is announced to screen readers; on a narrow screen the step names fold away but stay readable to them.</li>
+  </ul>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="2">
+  <div class="furniture top"><span data-section-indicator></span><span>Yichen Zhao</span></div>
+  <p class="eyebrow">Before handover on 13 October</p>
+  <h1>What changes on screen next</h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li><strong>This week.</strong> The approver&rsquo;s side reaches the sealed PDF from the record it approved.</li>
+    <li><strong>A visual pass across the flow,</strong> so costs, capacity and rates read as one tool rather than six forms.</li>
+    <li><strong>A paper check.</strong> The PDF printed on A4 and read before anyone files it in Content Manager.</li>
+    <li><strong>Staging, 2 October.</strong> You click through it yourselves, unaccompanied.</li>
+  </ul>
+  <div class="ask">
+    <p><span class="tag">[ASK]</span> Could you nominate one platform custodian to try the flow on staging, and tell us which screen is the least clear?</p>
+  </div>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+
+<!-- ==========================================================================
+     SECTION 3 — Backend: the Calculation
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="3">
+  <p class="divider-num"></p>
+  <h2 class="divider-title">Backend: the Calculation</h2>
+  <p class="divider-owner">Wenmin Luo</p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0" data-section-label></p>
+</section>
+
+<section class="page" data-section="3">
+  <div class="furniture top"><span data-section-indicator></span><span>Wenmin Luo</span></div>
+  <p class="eyebrow">The golden file &middot; your guide&rsquo;s worked example, Step 3</p>
+  <h1>Your arithmetic and ours, to the cent</h1>
+  <hr class="rule">
+  <p class="lead">$150,000 operating costs &middot; $20,000 UWA in-kind &middot; $30,000 WA Government support &middot; 1,000 forecast hours.</p>
+  <div class="grid g-6-6" style="margin-top:var(--s3)">
+    <pre>R_uwa        = (C &minus; I_total)  / U
+R_apfr       = (C &minus; I_nonuwa) / U &times; k
+R_commercial =  C            / U &times; k
+
+k = 1.35   method version 2026.1</pre>
+    <table>
+      <thead>
+        <tr><th>Rate</th><th class="n">Your guide</th><th class="n">Our engine</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>UWA researcher</td><td class="n">$100.00</td><td class="n">$100.00</td></tr>
+        <tr><td>APFR</td><td class="n">$162.00</td><td class="n">$162.00</td></tr>
+        <tr><td>Commercial</td><td class="n">$202.50</td><td class="n">$202.50</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="spacer"></div>
+  <p class="small">If any of these three figures drifts by one cent, the build fails and nothing merges &mdash; a rule since 2 September. Source: <span class="mono">tests/CostingTool.Engine.Tests</span>.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="3">
+  <div class="furniture top"><span data-section-indicator></span><span>Wenmin Luo</span></div>
+  <p class="eyebrow">Why the numbers can be trusted in 2030</p>
+  <h1>An engine that follows your guide</h1>
+  <hr class="rule">
+  <ul class="bullets">
+    <li><strong>The guide governs.</strong> The commercial rate deducts no income, as you confirmed in writing on 20 August.</li>
+    <li><strong>Exact decimal arithmetic,</strong> rounded once on the way to the screen or the PDF, so a total never drifts from its parts.</li>
+    <li><strong>It refuses rather than guesses.</strong> With no forecast use it says what is missing &mdash; it never shows $0.00.</li>
+    <li><strong>The method is versioned.</strong> A record sealed today still recalculates under version 2026.1 in 2030, whatever the factor is by then.</li>
+    <li><strong>Capacity is built, not typed:</strong> the machine (1,882.5 h) or staff (1,725 h) baseline, less deductions, each with a note.</li>
+    <li><strong>The balance two ways</strong> &mdash; against cost less income, and against full economic cost &mdash; with overheads on their own line.</li>
+  </ul>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="3">
+  <div class="furniture top"><span data-section-indicator></span><span>Wenmin Luo</span></div>
+  <p class="eyebrow">Where the guide is silent, we chose &mdash; and labelled it</p>
+  <h1>The arithmetic holds; four defaults need your yes</h1>
+  <hr class="rule">
+  <table>
+    <thead>
+      <tr><th style="width:34%">Question</th><th>What the tool does now</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>A cost that differs from year to year</td><td>Averages the years of the pricing period into one annual figure</td></tr>
+      <tr><td>The 35% uplift on APFR and commercial rates</td><td>Counts it as the University&rsquo;s, not as platform revenue, in the balance</td></tr>
+      <tr><td>Administration and the platform leader&rsquo;s salary</td><td>Splits them evenly across every capability. Your calculator splits these two one column more ways</td></tr>
+      <tr><td>An exact half cent</td><td>Rounds away from zero: $162.005 becomes $162.01</td></tr>
+    </tbody>
+  </table>
+  <div class="ask">
+    <p><span class="tag">[ASK]</span> Confirm these four, or tell us which to change &mdash; today, or in writing by Friday 25 September, so the first sealed records carry your defaults rather than ours.</p>
+  </div>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+
+<!-- ==========================================================================
+     SECTION 4 — Backend: Deployment
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="4">
+  <p class="divider-num"></p>
+  <h2 class="divider-title">Backend: Deployment</h2>
+  <p class="divider-owner">Dai Lam La La</p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0" data-section-label></p>
+</section>
+
+<section class="page" data-section="4">
+  <div class="furniture top"><span data-section-indicator></span><span>Dai Lam La La</span></div>
+  <p class="eyebrow">From laptop to server</p>
+  <h1>Staging is due 2 October, and waits on one answer</h1>
+  <hr class="rule">
+  <div class="grid g-6-6">
+    <div>
+      <h3>What the tool needs from a host</h3>
+      <ul class="bullets">
+        <li>One .NET 10 web application and one database &mdash; no link into any other UWA system.</li>
+        <li>Linux or Windows, behind a standard web server, over HTTPS only.</li>
+        <li>SQLite today; SQL Server or PostgreSQL if UWA prefers a managed database.</li>
+        <li>An address, a certificate, and backups: sealed records must open for 3&ndash;5 years.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Once hosting is agreed</h3>
+      <table>
+        <thead><tr><th>Step</th><th class="n">By</th></tr></thead>
+        <tbody>
+          <tr><td>Server provisioned, team access</td><td class="n nowrap">On your answer</td></tr>
+          <tr><td>Automated deploys, with rollback</td><td class="n nowrap">25 Sep</td></tr>
+          <tr><td>Address, reverse proxy, HTTPS</td><td class="n nowrap">30 Sep</td></tr>
+          <tr class="is-key"><td>Staging live, you use it</td><td class="n nowrap">2 Oct</td></tr>
+          <tr><td>Tagged release, handover notes</td><td class="n nowrap">13 Oct</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <p class="small">Plan of record: <span class="mono">docs/project/plan.md</span> &sect;5. Provisioning was scheduled for 18 September and is held on this decision.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="4">
+  <div class="furniture top"><span data-section-indicator></span><span>Dai Lam La La</span></div>
+  <p class="eyebrow">Three ways to host it</p>
+  <h1>Start on ours, finish on yours</h1>
+  <hr class="rule">
+  <table>
+    <thead>
+      <tr><th style="width:38%">Option</th><th>Real records inside UWA</th><th>Ready for 2 October</th><th>Runs it after 13 October</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>A &middot; UWA infrastructure</strong> &mdash; a virtual machine from UWA IT, or UWA&rsquo;s own cloud</td><td>Yes</td><td>Only if provisioned this week</td><td>UWA IT or Research Infrastructure</td></tr>
+      <tr><td><strong>B &middot; A server we provision</strong> in an Australian cloud region</td><td>No &mdash; test figures only</td><td>Yes, within days</td><td>Nobody, unless an owner is found</td></tr>
+      <tr class="is-key"><td><strong>C &middot; Both:</strong> B for staging now, moved to A for production at handover</td><td>Yes</td><td>Yes</td><td>UWA, from our handover notes</td></tr>
+    </tbody>
+  </table>
+  <div class="spacer"></div>
+  <p class="small">We recommend C: you test on staging from 2 October whatever UWA IT&rsquo;s lead time, and no real record ever lives outside UWA.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="4">
+  <div class="furniture top"><span data-section-indicator></span><span>Dai Lam La La</span></div>
+  <p class="eyebrow">Five questions for today</p>
+  <h1>What we need to know about hosting</h1>
+  <hr class="rule">
+  <p class="ask" style="margin:0 0 var(--s5)"><span class="tag">[ASK]</span> Five answers, and provisioning can start this week.</p>
+  <ol class="qs">
+    <li><strong>Where.</strong> Option A, B or C &mdash; and who at UWA IT should we speak to?</li>
+    <li><strong>Who, afterwards.</strong> From 13 October, who applies updates, keeps the backups and looks after accounts?</li>
+    <li><strong>Which data.</strong> May real platform figures go on staging, or test figures only until it moves to UWA?</li>
+    <li><strong>What address.</strong> A uwa.edu.au name, or a temporary one for staging?</li>
+    <li><strong>Which database.</strong> Does UWA IT require a managed database, or is one database file on the server acceptable?</li>
+  </ol>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+
+<!-- ==========================================================================
+     SECTION 5 — Authentication and Access
+     Owner: Jaswanth Vericherla, absent on 22 September. Presented by Chenxu You
+     for this delivery; the swap is recorded in the commit message (SS4.2).
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="5">
+  <p class="divider-num"></p>
+  <h2 class="divider-title">Authentication and Access</h2>
+  <p class="divider-owner">Chenxu You</p>
+  <div class="spacer"></div>
+  <p class="eyebrow" style="margin:0" data-section-label></p>
+</section>
+
+<section class="page" data-section="5">
+  <div class="furniture top"><span data-section-indicator></span>Chenxu You</div>
+  <p class="eyebrow">Who can do what</p>
+  <h1>Three roles, and what each one cannot do</h1>
+  <hr class="rule">
+  <table>
+    <thead>
+      <tr><th style="width:22%">Role</th><th style="width:36%">Can</th><th>Cannot</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Platform custodian</strong></td><td>Start, edit and submit their own costing cycles</td><td>Open anyone else&rsquo;s &mdash; it answers &ldquo;not found&rdquo;, exactly as a record that does not exist</td></tr>
+      <tr><td><strong>Delegated approver</strong></td><td>Read every submitted record with its workings; approve and seal it, or return it with reasons</td><td>Change a custodian&rsquo;s figures</td></tr>
+      <tr><td><strong>Administrator</strong></td><td>See every cycle, read-only; create, deactivate and reset accounts</td><td>Edit, submit or seal another person&rsquo;s cycle &mdash; the name on a record must be whoever did the work</td></tr>
+    </tbody>
+  </table>
+  <div class="spacer"></div>
+  <p class="small">Enforced on the server for every request: <span class="mono">Program.cs</span> authorisation policies and the ownership check in <span class="mono">Pages/Ric/RicPageModel.cs</span>.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="5">
+  <div class="furniture top"><span data-section-indicator></span>Chenxu You</div>
+  <p class="eyebrow">What the layer is built on</p>
+  <h1>Six principles behind every sign-in</h1>
+  <hr class="rule">
+  <div class="principles">
+    <div><h3>Deny by default</h3><p>Every page needs sign-in and every area its role, checked on the server at each request &mdash; not hidden in a menu.</p></div>
+    <div><h3>Nothing to guess with</h3><p>Five failed attempts lock an account for 15 minutes. A wrong username and a wrong password get the same reply.</p></div>
+    <div><h3>Least privilege</h3><p>Each role sees only what its work needs. An administrator can look at any record, but never act in someone else&rsquo;s name.</p></div>
+    <div><h3>Sessions that can be ended</h3><p>A two-hour, HTTP-only session. A password change, reset or deactivation ends every other session at once.</p></div>
+    <div><h3>No home-made cryptography</h3><p>Passwords are salted and hashed by the framework &mdash; PBKDF2 at 210,000 iterations &mdash; and re-hashed as the standard rises.</p></div>
+    <div><h3>Safe on a real server</h3><p>No demo account exists outside development. Accounts are deactivated, never deleted, so names on sealed records stay true.</p></div>
+  </div>
+  <div class="spacer"></div>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+<section class="page" data-section="5">
+  <div class="furniture top"><span data-section-indicator></span>Chenxu You</div>
+  <p class="eyebrow">Proven, and ready to grow</p>
+  <h1>Tested today, ready for UWA sign-on</h1>
+  <hr class="rule">
+  <div class="grid g-6-6">
+    <div>
+      <p class="metric is-ink">32</p>
+      <p class="lead" style="margin-bottom:var(--s4)">automated sign-in and access tests, including</p>
+      <pre class="small-mono">ACustodianCannotOpenAnotherCustodiansCycle
+AMissingCycleAndSomeoneElsesCycleAnswerTheSameWay
+FiveFailedAttemptsLockTheAccount
+DeactivatingAnAccountRotatesItsSecurityStamp</pre>
+    </div>
+    <div>
+      <ul class="bullets">
+        <li>A new server starts with <strong>no accounts at all</strong>; the first administrator comes from the server&rsquo;s own settings, never from the code.</li>
+        <li>Sign-in is local today, behind a seam that <strong>UWA single sign-on</strong> can replace without changing the pages it protects.</li>
+      </ul>
+      <div class="ask">
+        <p><span class="tag">[ASK]</span> At go-live, are administrator-created accounts acceptable, or must staff sign in with their UWA login? And who should hold the first administrator account?</p>
+      </div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <p class="small">Source: <span class="mono">tests/CostingTool.Web.Tests</span>, SignInTests and IdentityTests.</p>
+  <div class="furniture bottom"><span class="num" data-pagenum></span></div>
+</section>
+
+
+<!-- ==========================================================================
+     CLOSING
+     ========================================================================== -->
+<section class="page ink no-furniture center" data-section="0">
+  <p class="eyebrow">Thank you &mdash; <span class="accent">questions</span></p>
+  <h2 class="cover-title" style="font-size:var(--t-section)">Research Infrastructure Costing &amp; Pricing Tool</h2>
+  <hr class="rule">
+  <p class="lead" style="color:var(--paper);max-width:56ch">
+    What we hope to leave with: where it will live and who runs it &middot; UWA sign-on or local
+    accounts &middot; your yes on four calculation defaults &middot; a custodian to try staging.
+  </p>
+  <p class="lead" style="color:var(--stone-400);max-width:60ch">
+    Chenxu You &middot; Yichen Zhao &middot; Wenmin Luo &middot; Dai Lam La La &middot; Jaswanth Vericherla
+  </p>
+  <div class="spacer"></div>
+  <p class="mono" style="font-size:var(--t-small);color:var(--stone-400)">github.com/ChenxuYou/uwa-cits5206-project</p>
+</section>
+
+<!-- Section progress bar — segments generated by the engine -->
+<div id="progress" aria-hidden="true"></div>
+</div>
+
+<p id="hint">&larr; &rarr; to navigate &middot; number keys for sections &middot; F fullscreen</p>
+
+
+<script>
+/* ===========================================================================
+   DECK ENGINE — keyboard, click, swipe, hash, fullscreen, canvas scaling.
+   Self-contained; works with no network.
+
+   Nothing here is hard-coded to a section count. Sections, number-key
+   shortcuts, page numbers, divider numerals, section indicators and progress
+   segments are all derived from data-section in the markup.
+   =========================================================================== */
+(function () {
+  var stage    = document.getElementById('stage');
+  var progress = document.getElementById('progress');
+  var hint     = document.getElementById('hint');
+  var pages    = Array.prototype.slice.call(document.querySelectorAll('.page'));
+  var deckName = document.title;
+  var current  = 0;
+
+  /* --- Scale the fixed 1280x720 canvas to fit the viewport --- */
+  function fit() {
+    var s = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    stage.style.transform = 'scale(' + s + ')';
+  }
+
+  /* --- Derive the section map, and generate page numbers --- */
+  var sectionStart = {};   /* section number -> index of its first page */
+  var sectionTitle = {};   /* section number -> title, for the indicators */
+  var sectionCount = 0;
+
+  pages.forEach(function (p, i) {
+    var s = p.dataset.section;
+    if (s !== '0') {
+      if (sectionStart[s] === undefined) sectionStart[s] = i;
+      sectionCount = Math.max(sectionCount, parseInt(s, 10));
+    }
+    /* A divider carries the section's title; remember it for the indicators. */
+    var dt = p.querySelector('.divider-title');
+    if (dt) sectionTitle[s] = dt.textContent.trim();
+    /* Page numbers are generated, never typed. */
+    var n = p.querySelector('[data-pagenum]');
+    if (n) n.textContent = i + 1;
+    /* So is the big divider numeral: move a section, it renumbers itself. */
+    var dnum = p.querySelector('.divider-num');
+    if (dnum) dnum.textContent = s;
+    /* Divider labels: "SECTION n OF m" without anyone typing m. */
+    var label = p.querySelector('[data-section-label]');
+    if (label) label.dataset.n = s;
+  });
+
+  /* --- Section indicators, top-left, generated from the divider titles --- */
+  pages.forEach(function (p) {
+    var ind = p.querySelector('[data-section-indicator]');
+    if (!ind) return;
+    var s = p.dataset.section;
+    ind.textContent = s + ' · ' + (sectionTitle[s] || '');
+  });
+
+  /* --- Build the progress bar to match the section count --- */
+  var segments = [];
+  progress.style.gridTemplateColumns = 'repeat(' + Math.max(sectionCount, 1) + ',1fr)';
+  for (var k = 0; k < sectionCount; k++) {
+    var seg = document.createElement('span');
+    progress.appendChild(seg);
+    segments.push(seg);
+  }
+
+  /* --- Finish the "SECTION n OF m" labels now that m is known --- */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-section-label]'), function (el) {
+    el.textContent = 'Section ' + el.dataset.n + ' of ' + sectionCount;
+  });
+
+  function show(i, push) {
+    i = Math.max(0, Math.min(pages.length - 1, i));
+    pages.forEach(function (p) {
+      p.classList.remove('is-active');
+      p.setAttribute('aria-hidden', 'true');
+    });
+
+    var page = pages[i];
+    page.classList.add('is-active', 'is-enter');
+    page.setAttribute('aria-hidden', 'false');
+    /* force reflow so the enter transition actually runs */
+    void page.offsetWidth;
+    page.classList.remove('is-enter');
+
+    current = i;
+
+    var sec = parseInt(page.dataset.section, 10);
+    segments.forEach(function (s, n) { s.classList.toggle('on', n < sec); });
+    progress.classList.toggle('on-ink', page.classList.contains('ink'));
+
+    /* A deck is usually opened over file://, where some browsers refuse
+       history writes. Losing the linkable hash must never stop the deck. */
+    if (push !== false) {
+      try { history.replaceState(null, '', '#' + (i + 1)); } catch (err) {}
+    }
+    document.title = 'Slide ' + (i + 1) + ' / ' + pages.length + ' — ' + deckName;
+  }
+
+  var next = function () { show(current + 1); };
+  var prev = function () { show(current - 1); };
+
+  /* --- Keyboard --- */
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { e.preventDefault(); next(); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp')             { e.preventDefault(); prev(); }
+    else if (k === 'Home')  { e.preventDefault(); show(0); }
+    else if (k === 'End')   { e.preventDefault(); show(pages.length - 1); }
+    else if (k === 'f' || k === 'F') {
+      e.preventDefault();
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen();
+    }
+    else if (/^[0-9]$/.test(k) && sectionStart[k] !== undefined) { e.preventDefault(); show(sectionStart[k]); }
+    hideHint();
+  });
+
+  /* --- Click: right half forward, left half back. --- */
+  document.addEventListener('click', function (e) {
+    if (window.getSelection && String(window.getSelection())) return;
+    if (e.target.closest && e.target.closest('a,button,input,select,textarea')) return;
+    (e.clientX > window.innerWidth / 2 ? next : prev)();
+    hideHint();
+  });
+
+  /* --- Swipe --- */
+  var x0 = null;
+  document.addEventListener('touchstart', function (e) { x0 = e.changedTouches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 45) { (dx < 0 ? next : prev)(); hideHint(); }
+    x0 = null;
+  }, { passive: true });
+
+  var hintTimer = setTimeout(hideHint, 6000);
+  function hideHint() { clearTimeout(hintTimer); hint.classList.add('hide'); }
+
+  window.addEventListener('resize', fit);
+  document.addEventListener('fullscreenchange', fit);
+  window.addEventListener('hashchange', function () {
+    var n = parseInt(location.hash.slice(1), 10);
+    if (n && n - 1 !== current) show(n - 1, false);
+  });
+
+  fit();
+  var start = parseInt(location.hash.slice(1), 10);
+  show(start ? start - 1 : 0);
+
+  /* --- Owner check. SS4.2 requires every divider to name one person; this
+         deck ships with them deliberately blank so the meeting can fill them
+         in. The warning stops once they are real names. --- */
+  var unowned = Array.prototype.filter.call(
+    document.querySelectorAll('.divider-owner'),
+    function (el) { return /to be assigned/i.test(el.textContent); }
+  ).length;
+  if (unowned) {
+    console.warn('[deck] ' + unowned + ' of ' + sectionCount + ' section owner(s) still unassigned. ' +
+                 'Fill them in before the meeting and commit — do not show this deck to the ' +
+                 'facilitator or the client until the warning stops.');
+  }
+})();
+</script>
+</body>
+</html>
