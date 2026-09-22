@@ -1,0 +1,37 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: ric-costing:local
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__CostingDb: Data Source=/app/data/ric-costing-v7.db
+    expose:
+      - "8080"
+    volumes:
+      - ./data:/app/data
+    networks:
+      - ric-internal
+
+  nginx:
+    image: nginx:1.29-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    networks:
+      - ric-internal
+
+networks:
+  ric-internal:
+    driver: bridge
