@@ -1,13 +1,33 @@
 using CostingTool.Data;
 using CostingTool.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace CostingTool.Pages.Ric;
 
-public class StartModel(CostingDbContext db) : PageModel
+/// <summary>
+/// Step 1: the platform, its pricing period, its billable unit and its capabilities.
+///
+/// Opened without a cycle it creates one. Opened with a <c>cycleId</c> it edits that cycle's
+/// answers (US-10: return to any earlier section and change any value). Editing is careful
+/// about the three answers later steps are built on:
+/// <list type="bullet">
+/// <item><b>Removing a capability</b> removes the cost lines booked to it and its capacity,
+/// so it has to be confirmed when there is anything to lose.</item>
+/// <item><b>Changing the billable unit</b> makes every capacity, forecast and proposed rate
+/// a figure in the wrong unit, so those are cleared — after confirmation — rather than left
+/// to price in hours what was entered in days.</item>
+/// <item><b>Changing the length of the pricing period</b> is refused once cost or funding
+/// lines exist. Each line holds one amount per year and the engine prices from their mean,
+/// so adding a year would mean inventing its amount and removing one would silently change
+/// the mean. Moving the period without changing its length is allowed.</item>
+/// </list>
+/// </summary>
+public class StartModel(CostingDbContext db) : RicPageModel(db)
 {
-    private static readonly string[] BillableUnits = ["Hours", "Days", "Samples"];
+    public static readonly string[] BillableUnits = ["Hours", "Days", "Samples"];
+
+    /// <summary>Null while creating a cycle; the cycle being edited otherwise.</summary>
+    [BindProperty] public int? CycleId { get; set; }
 
     [BindProperty] public string PlatformName { get; set; } = string.Empty;
 
@@ -17,17 +37,131 @@ public class StartModel(CostingDbContext db) : PageModel
 
     [BindProperty] public string BillableUnit { get; set; } = "Hours";
 
-    [BindProperty] public string CapabilityNames { get; set; } = string.Empty;
+    /// <summary>Capabilities to add: all of them while creating, new ones while editing.</summary>
+    [BindProperty] public string? CapabilityNames { get; set; }
+
+    /// <summary>The cycle's capabilities as they stand, each renamable or removable. Editing only.</summary>
+    [BindProperty] public List<CapabilityEdit> Existing { get; set; } = [];
+
+    /// <summary>The custodian accepts that removing capabilities removes their costs and capacity.</summary>
+    [BindProperty] public bool ConfirmRemovals { get; set; }
+
+    /// <summary>The custodian accepts that changing the unit clears capacity, forecasts and proposed rates.</summary>
+    [BindProperty] public bool ConfirmUnitChange { get; set; }
+
+    public bool IsEditing => CycleId is not null;
+
+    /// <summary>True when the form should offer the "remove them anyway" tick.</summary>
+    public bool NeedsRemovalConfirmation { get; private set; }
+
+    /// <summary>True when the form should offer the "change the unit anyway" tick.</summary>
+    public bool NeedsUnitChangeConfirmation { get; private set; }
+
+    /// <summary>
+    /// A blank form for a new cycle, or — given a <paramref name="cycleId"/> — an existing
+    /// cycle's first step with its answers filled in.
+    /// </summary>
+    public async Task<IActionResult> OnGetAsync(int? cycleId)
+    {
+        if (cycleId is null)
+        {
+            return Page();
+        }
+
+        if (!await LoadCycleAsync(cycleId.Value))
+        {
+            return NotFound();
+        }
+
+        if (!Cycle.IsEditable)
+        {
+            return RedirectToPage("/Ric/Review", new { cycleId });
+        }
+
+        CycleId = cycleId;
+        PlatformName = Cycle.PlatformName;
+        StartYear = Cycle.StartYear;
+        EndYear = Cycle.EndYear;
+        BillableUnit = Cycle.BillableUnit;
+        Existing = Cycle.Capabilities
+            .OrderBy(x => x.Id)
+            .Select(x => new CapabilityEdit { Id = x.Id, Name = x.Name })
+            .ToList();
+
+        return Page();
+    }
 
     public async Task<IActionResult> OnPostAsync()
     {
-        var names = (CapabilityNames ?? string.Empty)
-            .Split(
-                ['\n', ','],
-                StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        if (CycleId is { } cycleId)
+        {
+            if (!await LoadCycleAsync(cycleId))
+            {
+                return NotFound();
+            }
+
+            if (!Cycle.IsEditable)
+            {
+                return RedirectToPage("/Ric/Review", new { cycleId });
+            }
+        }
+
+        var added = NamesToAdd();
+        ValidateCommon();
+
+        if (IsEditing)
+        {
+            ValidateEdit(added);
+        }
+        else if (added.Count == 0)
+        {
+            ModelState.AddModelError(nameof(CapabilityNames), "Add at least one capability.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return Page();
+        }
+
+        if (!IsEditing)
+        {
+            return await CreateAsync(added);
+        }
+
+        ApplyEdit(added);
+        Cycle.UpdatedAtUtc = DateTime.UtcNow;
+        await Db.SaveChangesAsync();
+
+        return RedirectToPage("/Ric/Costs", new { cycleId = Cycle.Id });
+    }
+
+    private async Task<IActionResult> CreateAsync(List<string> names)
+    {
+        var cycle = new RicCycle
+        {
+            PlatformName = PlatformName.Trim(),
+            StartYear = StartYear,
+            EndYear = EndYear,
+            BillableUnit = BillableUnit,
+            CreatedBy = User.UserName(),
+            CreatedByDisplay = User.DisplayName(),
+            Capabilities = names.Select(x => new RicCapability { Name = x }).ToList()
+        };
+
+        Db.RicCycles.Add(cycle);
+        await Db.SaveChangesAsync();
+
+        return RedirectToPage("/Ric/Costs", new { cycleId = cycle.Id });
+    }
+
+    private List<string> NamesToAdd() =>
+        (CapabilityNames ?? string.Empty)
+            .Split(['\n', ','], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
+    private void ValidateCommon()
+    {
         if (string.IsNullOrWhiteSpace(PlatformName))
         {
             ModelState.AddModelError(nameof(PlatformName), "Platform name is required.");
@@ -42,31 +176,163 @@ public class StartModel(CostingDbContext db) : PageModel
         {
             ModelState.AddModelError(nameof(BillableUnit), "Select a valid billable unit.");
         }
+    }
 
-        if (names.Count == 0)
+    private void ValidateEdit(List<string> added)
+    {
+        // The rows are rendered from this cycle, so an id that is not in it — or a
+        // capability missing from the post — arrived from somewhere other than the form.
+        var ids = Cycle.Capabilities.Select(x => x.Id).ToHashSet();
+        if (Existing.Count != ids.Count || Existing.Any(x => !ids.Contains(x.Id)) || Existing.Select(x => x.Id).Distinct().Count() != Existing.Count)
         {
-            ModelState.AddModelError(nameof(CapabilityNames), "Add at least one capability.");
+            ModelState.AddModelError(string.Empty, "The capability list has changed since this page was opened. Reload it and try again.");
+            return;
         }
 
+        var kept = Existing.Where(x => !x.Remove).ToList();
+
+        foreach (var row in kept.Where(x => string.IsNullOrWhiteSpace(x.Name)))
+        {
+            var was = Cycle.Capabilities.First(x => x.Id == row.Id).Name;
+            ModelState.AddModelError(string.Empty, $"Give \"{was}\" a name, or tick it to be removed.");
+        }
+
+        var names = kept.Select(x => x.Name?.Trim() ?? string.Empty).Where(x => x.Length > 0).Concat(added).ToList();
+        foreach (var duplicate in names.GroupBy(x => x, StringComparer.OrdinalIgnoreCase).Where(x => x.Count() > 1))
+        {
+            ModelState.AddModelError(string.Empty, $"\"{duplicate.Key}\" appears more than once. Each capability needs its own name.");
+        }
+
+        if (kept.Count + added.Count == 0)
+        {
+            ModelState.AddModelError(nameof(CapabilityNames), "Keep or add at least one capability.");
+        }
+
+        var lines = Cycle.Costs.Count;
+        var years = EndYear - StartYear + 1;
+        var yearsNow = Cycle.EndYear - Cycle.StartYear + 1;
+        if (lines > 0 && EndYear >= StartYear && years != yearsNow)
+        {
+            ModelState.AddModelError(
+                nameof(EndYear),
+                $"The pricing period is {yearsNow} {Plural(yearsNow, "year")} long, and {lines} cost or funding "
+                + $"{Plural(lines, "line")} already hold an amount for each of those years. Keep it {yearsNow} "
+                + $"{Plural(yearsNow, "year")} long — it can start in a different year — or delete those lines first.");
+        }
+
+        // Ask about what would be lost only once everything else is right, so the tick is
+        // the last thing between the custodian and the change rather than one error among many.
         if (!ModelState.IsValid)
         {
-            return Page();
+            return;
         }
 
-        var cycle = new RicCycle
+        var losing = Existing
+            .Where(x => x.Remove)
+            .Select(x => Cycle.Capabilities.First(c => c.Id == x.Id))
+            .Where(HasWork)
+            .ToList();
+
+        if (losing.Count > 0 && !ConfirmRemovals)
         {
-            PlatformName = PlatformName.Trim(),
-            StartYear = StartYear,
-            EndYear = EndYear,
-            BillableUnit = BillableUnit,
-            CreatedBy = User.UserName(),
-            CreatedByDisplay = User.DisplayName(),
-            Capabilities = names.Select(x => new RicCapability { Name = x }).ToList()
-        };
+            foreach (var capability in losing)
+            {
+                var costs = Cycle.Costs.Count(x => x.RicCapabilityId == capability.Id);
+                ModelState.AddModelError(
+                    string.Empty,
+                    $"Removing \"{capability.Name}\" also removes its {costs} cost {Plural(costs, "line")}, its capacity "
+                    + "and its proposed rates, and every platform-level cost is then split one way fewer.");
+            }
 
-        db.RicCycles.Add(cycle);
-        await db.SaveChangesAsync();
+            NeedsRemovalConfirmation = true;
+        }
 
-        return RedirectToPage("/Ric/Costs", new { cycleId = cycle.Id });
+        if (BillableUnit != Cycle.BillableUnit && Cycle.Capabilities.Any(HasCapacityOrRates) && !ConfirmUnitChange)
+        {
+            ModelState.AddModelError(
+                nameof(BillableUnit),
+                $"Capacity, forecast use and proposed rates have been entered in {Cycle.BillableUnit.ToLowerInvariant()}. "
+                + $"Changing to {BillableUnit.ToLowerInvariant()} clears them, to be entered again in the new unit.");
+            NeedsUnitChangeConfirmation = true;
+        }
+    }
+
+    private void ApplyEdit(List<string> added)
+    {
+        var unitChanged = BillableUnit != Cycle.BillableUnit;
+
+        Cycle.PlatformName = PlatformName.Trim();
+        Cycle.StartYear = StartYear;
+        Cycle.EndYear = EndYear;
+        Cycle.BillableUnit = BillableUnit;
+
+        foreach (var row in Existing)
+        {
+            var capability = Cycle.Capabilities.First(x => x.Id == row.Id);
+
+            if (row.Remove)
+            {
+                // The cost lines booked to it and its deductions go with it (cascade in
+                // CostingDbContext), so none is left behind to be counted as platform-level.
+                Db.RicCostEntries.RemoveRange(Cycle.Costs.Where(x => x.RicCapabilityId == capability.Id));
+                Db.RicCapabilities.Remove(capability);
+                continue;
+            }
+
+            capability.Name = row.Name!.Trim();
+
+            if (unitChanged)
+            {
+                ClearUnitFigures(capability);
+            }
+        }
+
+        foreach (var name in added)
+        {
+            Cycle.Capabilities.Add(new RicCapability { Name = name });
+        }
+    }
+
+    /// <summary>
+    /// Every figure held in the billable unit. The staff FTE is not one of them — it is a
+    /// share of a person — so it stays.
+    /// </summary>
+    private void ClearUnitFigures(RicCapability capability)
+    {
+        capability.CapacityBaseline = string.Empty;
+        capability.StatedBaseline = 0m;
+        capability.StatedBaselineNote = null;
+        capability.MaximumCapacity = 0m;
+        capability.ForecastUwaUse = 0m;
+        capability.ForecastApfrUse = 0m;
+        capability.ForecastCommercialUse = 0m;
+        capability.AboveCapacityReason = null;
+        capability.ProposedUwaRate = 0m;
+        capability.ProposedApfrRate = 0m;
+        capability.ProposedCommercialRate = 0m;
+        Db.RicCapacityDeductions.RemoveRange(capability.CapacityDeductions);
+        capability.CapacityDeductions.Clear();
+    }
+
+    private bool HasWork(RicCapability capability) =>
+        Cycle.Costs.Any(x => x.RicCapabilityId == capability.Id) || HasCapacityOrRates(capability);
+
+    private static bool HasCapacityOrRates(RicCapability capability) =>
+        !string.IsNullOrEmpty(capability.CapacityBaseline)
+        || capability.MaximumCapacity > 0
+        || capability.ForecastUtilisation > 0
+        || capability.ProposedUwaRate > 0
+        || capability.ProposedApfrRate > 0
+        || capability.ProposedCommercialRate > 0;
+
+    private static string Plural(int count, string word) => count == 1 ? word : word + "s";
+
+    public class CapabilityEdit
+    {
+        public int Id { get; set; }
+
+        public string? Name { get; set; }
+
+        public bool Remove { get; set; }
     }
 }

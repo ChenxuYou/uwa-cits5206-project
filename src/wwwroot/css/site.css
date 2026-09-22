@@ -763,3 +763,36 @@ a.ric-step-link:focus-visible {
    failed 4.5:1 on the pages checked now use --muted, and --green and --amber were
    darkened until their tinted pills passed.
    --------------------------------------------------------------------------- */
+
+/* Step 1 opened on an existing cycle: one row per capability, renamable or removable (US-10). */
+.capability-edit {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+.capability-edit legend {
+    color: #48566a;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0 0 6px;
+    padding: 0;
+}
+.capability-edit legend b { color: #d14b53; }
+.capability-edit > small { margin: 0 0 10px; }
+.capability-edit-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+.capability-edit-row > input { flex: 1; min-width: 0; }
+.capability-edit-row label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #536176;
+    white-space: nowrap;
+}
+.capability-edit-row label input { width: auto; }
