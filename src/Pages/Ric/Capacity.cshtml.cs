@@ -44,7 +44,20 @@ public class CapacityModel(CostingDbContext db, MethodConfigProvider methods) : 
         return Page();
     }
 
-    public async Task<IActionResult> OnPostAsync()
+    public Task<IActionResult> OnPostAsync() => SaveAsync("/Ric/Rates");
+
+    /// <summary>
+    /// Going back a step saves first, as the rates step does.
+    ///
+    /// US-10 asks that nothing be lost by navigating backwards. The link that used to sit
+    /// here threw away every baseline, deduction, forecast and note typed on this screen,
+    /// so a custodian who went back to check one funding line came back to an empty step.
+    /// It is held to the same checks as continuing: what is saved is always a capacity the
+    /// later steps can price from.
+    /// </summary>
+    public Task<IActionResult> OnPostBackAsync() => SaveAsync("/Ric/Funding");
+
+    private async Task<IActionResult> SaveAsync(string nextPage)
     {
         if (!await LoadCycleAsync(CycleId))
         {
@@ -124,7 +137,7 @@ public class CapacityModel(CostingDbContext db, MethodConfigProvider methods) : 
         Cycle.UpdatedAtUtc = DateTime.UtcNow;
         await Db.SaveChangesAsync();
 
-        return RedirectToPage("/Ric/Rates", new { cycleId = CycleId });
+        return RedirectToPage(nextPage, new { cycleId = CycleId });
     }
 
     /// <summary>
