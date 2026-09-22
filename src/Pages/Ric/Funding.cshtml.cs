@@ -9,6 +9,9 @@ public class FundingModel(CostingDbContext db) : RicPageModel(db)
 {
     [BindProperty] public int CycleId { get; set; }
 
+    /// <summary>The funding line being changed, or null while adding one (US-10: change any value).</summary>
+    [BindProperty] public int? EditId { get; set; }
+
     [BindProperty] public string Category { get; set; } = CostEntry.IncomeCategories.UwaGpInKind;
 
     [BindProperty] public string? Description { get; set; }
@@ -27,7 +30,8 @@ public class FundingModel(CostingDbContext db) : RicPageModel(db)
 
     public int YearCount => Cycle.EndYear - Cycle.StartYear + 1;
 
-    public async Task<IActionResult> OnGetAsync(int cycleId)
+    /// <param name="edit">A funding line of this cycle to open in the form for changing.</param>
+    public async Task<IActionResult> OnGetAsync(int cycleId, int? edit = null)
     {
         if (!await Load(cycleId))
         {
@@ -35,10 +39,37 @@ public class FundingModel(CostingDbContext db) : RicPageModel(db)
         }
 
         YearAmounts = Enumerable.Repeat(0m, YearCount).ToList();
+
+        if (edit is not null)
+        {
+            if (!Cycle.IsEditable)
+            {
+                return RedirectToPage("/Ric/Review", new { cycleId });
+            }
+
+            if (Editable(edit.Value) is not { } item)
+            {
+                return NotFound();
+            }
+
+            EditId = item.Id;
+            Category = item.Category;
+            Description = item.Description;
+            FundingBody = item.Supplier;
+            Justification = item.Notes;
+            var saved = item.YearAmounts.OrderBy(x => x.ProjectYear).Select(x => x.Amount).ToList();
+            YearAmounts = Enumerable.Range(0, YearCount).Select(i => i < saved.Count ? saved[i] : 0m).ToList();
+        }
+
         return Page();
     }
 
-    public async Task<IActionResult> OnPostAddAsync()
+    public Task<IActionResult> OnPostAddAsync() => SaveAsync();
+
+    /// <summary>Save changes to the line in <see cref="EditId"/>, held to the same checks as a new one.</summary>
+    public Task<IActionResult> OnPostUpdateAsync() => SaveAsync();
+
+    private async Task<IActionResult> SaveAsync()
     {
         if (!await Load(CycleId))
         {
@@ -48,6 +79,12 @@ public class FundingModel(CostingDbContext db) : RicPageModel(db)
         if (!Cycle.IsEditable)
         {
             return RedirectToPage("/Ric/Review", new { cycleId = CycleId });
+        }
+
+        RicCostEntry? existing = null;
+        if (EditId is { } editId && (existing = Editable(editId)) is null)
+        {
+            return NotFound();
         }
 
         EntryChecks.ExplainUnreadableNumbers(
@@ -64,21 +101,30 @@ public class FundingModel(CostingDbContext db) : RicPageModel(db)
             .Select(i => i < YearAmounts.Count ? YearAmounts[i] : 0m)
             .ToList();
 
-        Db.RicCostEntries.Add(new RicCostEntry
+        if (existing is null)
         {
-            RicCycleId = CycleId,
-            RicCapabilityId = null,
-            Scope = CostEntry.Scopes.Platform,
-            CostType = CostEntry.Types.Income,
-            Category = Category,
-            Description = Description?.Trim(),
-            Supplier = FundingBody?.Trim(),
-            Notes = Justification?.Trim(),
-            Amount = amounts.Average(),
-            YearAmounts = amounts
-                .Select((amount, i) => new RicCostYearAmount { ProjectYear = i + 1, Amount = amount })
-                .ToList()
-        });
+            existing = new RicCostEntry
+            {
+                RicCycleId = CycleId,
+                RicCapabilityId = null,
+                Scope = CostEntry.Scopes.Platform,
+                CostType = CostEntry.Types.Income
+            };
+            Db.RicCostEntries.Add(existing);
+        }
+        else
+        {
+            Db.RicCostYearAmounts.RemoveRange(existing.YearAmounts);
+        }
+
+        existing.Category = Category;
+        existing.Description = Description?.Trim();
+        existing.Supplier = FundingBody?.Trim();
+        existing.Notes = Justification?.Trim();
+        existing.Amount = amounts.Average();
+        existing.YearAmounts = amounts
+            .Select((amount, i) => new RicCostYearAmount { ProjectYear = i + 1, Amount = amount })
+            .ToList();
 
         Cycle.UpdatedAtUtc = DateTime.UtcNow;
         await Db.SaveChangesAsync();
@@ -109,6 +155,9 @@ public class FundingModel(CostingDbContext db) : RicPageModel(db)
 
         return RedirectToPage(new { cycleId = CycleId });
     }
+
+    /// <summary>A funding line of the loaded cycle — never a cost line, never another cycle's.</summary>
+    private RicCostEntry? Editable(int id) => Cycle.Costs.FirstOrDefault(x => x.Id == id && x.IsIncome);
 
     private void Validate()
     {

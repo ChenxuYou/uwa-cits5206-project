@@ -796,3 +796,27 @@ a.ric-step-link:focus-visible {
     white-space: nowrap;
 }
 .capability-edit-row label input { width: auto; }
+
+/* Recorded cost and funding lines can be opened for changing (US-10). */
+.cost-row.editable-row { grid-template-columns: 1fr auto auto 22px; }
+.row-edit {
+    color: var(--blue);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+}
+.row-edit:hover, .row-edit:focus-visible { text-decoration: underline; }
+.cost-row.is-editing {
+    background: #f4f8ff;
+    box-shadow: inset 3px 0 0 var(--blue);
+    padding-left: 10px;
+}
+.editing-card { border-color: #9dc0f2; }
+.edit-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+}
+.edit-actions .add-detail-button { margin-top: 0; }

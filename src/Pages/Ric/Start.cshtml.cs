@@ -61,7 +61,7 @@ public class StartModel(CostingDbContext db) : RicPageModel(db)
     /// A blank form for a new cycle, or — given a <paramref name="cycleId"/> — an existing
     /// cycle's first step with its answers filled in.
     /// </summary>
-    public async Task<IActionResult> OnGetAsync(int? cycleId)
+    public async Task<IActionResult> OnGetAsync(int? cycleId = null)
     {
         if (cycleId is null)
         {
