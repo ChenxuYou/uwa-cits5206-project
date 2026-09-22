@@ -154,12 +154,13 @@ a page can render.
 
 ### The workflow
 
-1. **Start** — platform, pricing period, billable unit, capabilities.
+1. **Start** — platform, pricing period, billable unit, capabilities. Reopened from the step
+   bar to rename or add capabilities; the period and unit lock once figures are entered in them.
 2. **Costs** — operating costs by the client's workbook categories: directly incurred per
    capability, directly allocated and indirect (floor area × rate per m²) at platform level.
    A cost is booked either to one capability or to the platform, never both; platform costs
    are split evenly across the capabilities, and a running total per capability reconciles
-   to the platform total.
+   to the platform total. Costing assumptions record what the section as a whole rests on.
 3. **Funding** — the four non-variable funding lines, recorded separately from operating
    costs with their source, commitment period and effect on each rate.
 4. **Capacity** — usable capacity built from the machine or staff baseline in the method
@@ -168,9 +169,13 @@ a page can render.
    divisor behind every rate, and a forecast above capacity needs a reason.
 5. **Rates** — three minimum sustainable rates per capability, with the figures behind each,
    plus proposed rates and the resulting balance.
-6. **Review** — check and submit for delegated authority approval.
+6. **Review** — check against the guide's Step 5 checklist and submit for delegated authority
+   approval. The explanations the tool requires are checked again here.
 7. **Approvals** — the approver sees the workings, then approves and seals, or returns the
    cycle with required changes.
+
+Going back never loses work: the capacity and rates steps save before a step-bar link or
+"back" is followed, and the other steps warn before a half-typed entry is left.
 
 Submitted cycles are read-only while awaiting a decision; returned cycles can be edited and
 resubmitted. Approval writes an immutable JSON snapshot — inputs, results **and the
