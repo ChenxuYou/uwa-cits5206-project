@@ -30,7 +30,7 @@
     </div>
 
     <div class="ric-two-column detailed-cost-layout">
-        <form method="post" asp-page-handler="Add" class="ric-card">
+        <form method="post" asp-page-handler="Add" class="ric-card" data-warn-on-leave>
             <input type="hidden" asp-for="CycleId" />
             <div class="ric-card-title"><h2>Add cost item</h2><p>Amounts are GST exclusive. Detailed values are retained for audit.</p></div>
             <div asp-validation-summary="All" class="form-errors"></div>
@@ -245,6 +245,24 @@
         </section>
         </div>
     </div>
+
+    @* US-13: room to explain the costs section as a whole, not only line by line — and the
+       first item on the guide's Step 5 checklist. *@
+    <form method="post" asp-page="/Ric/Costs" asp-page-handler="Assumptions" asp-route-cycleId="@Model.Cycle.Id" class="ric-card costing-assumptions" data-warn-on-leave>
+        <input type="hidden" name="CycleId" value="@Model.Cycle.Id" />
+        <label class="field">
+            <span>Costing assumptions</span>
+            <small>What these figures rest on as a whole: which budget they come from, how salaries were estimated, what was treated as in-kind, and anything left out and why. The guide's Step 5 checklist asks for costing assumptions to be documented before approval. Each line above keeps its own note as well.</small>
+            <textarea asp-for="CostingAssumptions" rows="4" placeholder="e.g. 2026 budget as approved in March; salaries at the current EBA step plus 17% on-costs; the building is provided in kind and costed at the University's floor-area rate."></textarea>
+        </label>
+        <div class="assumptions-actions">
+            <button class="outline-button" type="submit">Save costing assumptions</button>
+            @if (TempData["CostsMessage"] is string saved)
+            {
+                <span class="rollup-check" role="status">✓ @saved</span>
+            }
+        </div>
+    </form>
 
     <div class="wizard-actions"><a href="/" class="secondary-action">Save &amp; exit</a><a class="primary-button" asp-page="/Ric/Funding" asp-route-cycleId="@Model.Cycle.Id">Continue to funding sources →</a></div>
 </div>

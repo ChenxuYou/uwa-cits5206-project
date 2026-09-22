@@ -22,8 +22,19 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
     [BindProperty] public DateTime? EffectiveDate { get; set; }
 
-    public async Task<IActionResult> OnGetAsync(int id) =>
-        await Load(id) ? Page() : NotFound();
+    /// <summary>What the last decision on this record did, shown once after the redirect.</summary>
+    public string? SuccessMessage { get; private set; }
+
+    public async Task<IActionResult> OnGetAsync(int id)
+    {
+        if (!await Load(id))
+        {
+            return NotFound();
+        }
+
+        SuccessMessage = TempData["Success"] as string;
+        return Page();
+    }
 
     public async Task<IActionResult> OnPostReturnAsync(int id)
     {
@@ -53,7 +64,10 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
         await db.SaveChangesAsync();
         TempData["Success"] = "The cycle was returned to the submitter for changes.";
-        return RedirectToPage("/Ric/Review", new { cycleId = id });
+
+        // Back to this record, not the custodian's review page: /Ric is the custodian's
+        // folder, so an approver sent there was shown "access denied" after every decision.
+        return RedirectToPage(new { id });
     }
 
     public async Task<IActionResult> OnPostApproveAsync(int id, bool confirmApproval)
@@ -117,7 +131,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
         await db.SaveChangesAsync();
         TempData["Success"] = "The costing cycle was approved and sealed.";
-        return RedirectToPage("/Ric/Review", new { cycleId = id });
+        return RedirectToPage(new { id });
     }
 
     private void Notify(string type, string title, string message) =>
@@ -145,7 +159,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
         var snapshot = new
         {
-            SchemaVersion = "1.2",
+            SchemaVersion = "1.3",
             SealedAtUtc = Cycle.SealedAtUtc,
             MethodVersion = method.Version,
             Method = new
@@ -155,6 +169,14 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
                 method.RateDecimals,
                 MidpointRule = method.MidpointRule.ToString(),
                 method.Source,
+
+                // Schema 1.3: the capacity baselines are method configuration (N7), so the
+                // record carries the ones it was built from.
+                method.MachineAvailableDays,
+                method.MachineAvailabilityBasis,
+                method.StaffAvailableDays,
+                method.StaffAvailabilityBasis,
+                method.HoursPerDay,
                 Formulas = new
                 {
                     UwaResearcher = "(C - I_total) / U",
@@ -171,6 +193,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
                 Cycle.BillableUnit,
                 Cycle.CreatedBy,
                 Cycle.CreatedByDisplay,
+                Cycle.CostingAssumptions,
                 Cycle.UtilisationAssumptions,
                 Cycle.BenchmarkNotes,
                 Cycle.PricingJustification,
@@ -197,6 +220,23 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
                 capability.Id,
                 capability.Name,
                 capability.MaximumCapacity,
+
+                // Schema 1.3: how the usable capacity was built, and every note that explains
+                // it, attached to the figures they explain (US-07, US-13).
+                capability.CapacityBaseline,
+                CapacityBaselineAmount = BaselineAmount(method, capability),
+                StaffCapacity = capability.IsStaffReliant
+                    ? capability.StaffFte * CapacityEngine.StaffAvailabilityPerFte(method, Cycle.BillableUnit)
+                    : null,
+                capability.StatedBaseline,
+                capability.StatedBaselineNote,
+                capability.IsStaffReliant,
+                capability.StaffFte,
+                CapacityDeductions = capability.CapacityDeductions
+                    .OrderBy(x => Array.IndexOf(RicCapacityDeduction.Kinds, x.Kind))
+                    .Select(x => new { x.Kind, x.Amount, x.Note }),
+                capability.AboveCapacityReason,
+
                 capability.ForecastUwaUse,
                 capability.ForecastApfrUse,
                 capability.ForecastCommercialUse,
@@ -230,12 +270,22 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
                 x.BaseSalary,
                 x.Description,
                 x.Supplier,
+                x.Position,
+                x.FloorArea,
+                x.FloorAreaRate,
                 YearAmounts = x.YearAmounts.OrderBy(y => y.ProjectYear).Select(y => new { y.ProjectYear, y.Amount })
             })
         };
 
         return JsonSerializer.Serialize(snapshot, new JsonSerializerOptions { WriteIndented = true });
     }
+
+    /// <summary>The baseline a capability's capacity was built from, in the billable unit.</summary>
+    private decimal? BaselineAmount(MethodConfig method, RicCapability capability) =>
+        capability.CapacityBaseline == CapacityBaseline.Stated
+            ? capability.StatedBaseline
+            : CapacityEngine.BaselinesFor(method, Cycle.BillableUnit)
+                .FirstOrDefault(x => x.Key == capability.CapacityBaseline)?.Amount;
 
     /// <summary>The arithmetic, written out with this capability's own numbers in it.</summary>
     private static object? Workings(CapabilityRateResult? r) => r is null ? null : new
@@ -262,7 +312,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
     private async Task<bool> Load(int id)
     {
         var cycle = await db.RicCycles
-            .Include(x => x.Capabilities)
+            .Include(x => x.Capabilities).ThenInclude(x => x.CapacityDeductions)
             .Include(x => x.Costs).ThenInclude(x => x.Capability)
             .Include(x => x.Costs).ThenInclude(x => x.YearAmounts)
             .FirstOrDefaultAsync(x => x.Id == id);

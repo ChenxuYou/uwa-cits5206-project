@@ -44,7 +44,18 @@ public class CapacityModel(CostingDbContext db, MethodConfigProvider methods) : 
         return Page();
     }
 
-    public async Task<IActionResult> OnPostAsync()
+    public Task<IActionResult> OnPostAsync() => SaveAsync("/Ric/Rates");
+
+    /// <summary>
+    /// Going back a step saves first (US-10). The link that used to sit here threw away every
+    /// figure typed on this screen.
+    /// </summary>
+    public Task<IActionResult> OnPostBackAsync() => SaveAsync("/Ric/Funding");
+
+    /// <summary>A step-bar link followed with unsaved changes: save, then go there.</summary>
+    public Task<IActionResult> OnPostLeaveAsync(string? to) => SaveAsync(EarlierStep(to, "/Ric/Capacity"));
+
+    private async Task<IActionResult> SaveAsync(string nextPage)
     {
         if (!await LoadCycleAsync(CycleId))
         {
@@ -124,7 +135,7 @@ public class CapacityModel(CostingDbContext db, MethodConfigProvider methods) : 
         Cycle.UpdatedAtUtc = DateTime.UtcNow;
         await Db.SaveChangesAsync();
 
-        return RedirectToPage("/Ric/Rates", new { cycleId = CycleId });
+        return RedirectToPage(nextPage, new { cycleId = CycleId });
     }
 
     /// <summary>

@@ -39,7 +39,7 @@
         <p>“@UtilisationGuidance.NotCapacity” Every rate is divided by the forecast, not by the capacity.</p>
     </section>
 
-    <form method="post" asp-page="/Ric/Capacity" asp-route-cycleId="@Model.Cycle.Id">
+    <form method="post" asp-page="/Ric/Capacity" asp-route-cycleId="@Model.Cycle.Id" data-save-on-leave>
         <input type="hidden" asp-for="CycleId" />
         <div asp-validation-summary="All" class="form-errors"></div>
 
@@ -175,9 +175,12 @@
             </label>
         </section>
 
+        @* The primary button comes first in the markup so that Enter in a figure saves and
+           continues, rather than saving and going back; CSS puts "back" on the left. *@
         <div class="wizard-actions">
-            <a class="secondary-action" asp-page="/Ric/Funding" asp-route-cycleId="@Model.Cycle.Id">← Back to funding</a>
             <button class="primary-button" type="submit">Calculate rates →</button>
+            @* A link here would have thrown away everything typed on this screen — US-10. *@
+            <button class="secondary-action wizard-back" type="submit" asp-page-handler="Back" asp-route-cycleId="@Model.Cycle.Id">← Save and go back to funding</button>
         </div>
     </form>
 </div>

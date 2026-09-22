@@ -16,6 +16,10 @@
     <div class="breadcrumb"><a asp-page="/Approvals/Index">Approvals</a><span>›</span><span>@Model.Cycle.PlatformName</span></div>
     <div class="review-heading"><div><span class="status-pill @Model.Cycle.Status.ToLowerInvariant()">@Model.Cycle.Status</span><h1>Delegated authority review</h1><p>@Model.Cycle.PlatformName · @Model.Cycle.StartYear–@Model.Cycle.EndYear · prepared by @Model.Cycle.CreatedByDisplay</p></div><a class="outline-action" asp-page="/Approvals/Index">← Approval queue</a></div>
 
+    @if (Model.SuccessMessage is not null)
+    {
+        <div class="submit-success" role="status"><span aria-hidden="true">✓</span><div><strong>@Model.SuccessMessage</strong></div></div>
+    }
     <div asp-validation-summary="All" class="form-errors approval-errors"></div>
     <div class="review-layout">
         <main>

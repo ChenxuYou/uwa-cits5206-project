@@ -1,5 +1,5 @@
 {
-  "SchemaVersion": "1.3",
+  "SchemaVersion": "1.2",
   "SealedAtUtc": "2026-09-16T02:15:00Z",
   "MethodVersion": "2026.1",
   "Method": {
@@ -8,11 +8,6 @@
     "RateDecimals": 2,
     "MidpointRule": "AwayFromZero",
     "Source": "UWA Costing & Pricing Guide, Step 3; University Indirect Cost Recovery Policy",
-    "MachineAvailableDays": 251,
-    "MachineAvailabilityBasis": "365 days less 104 weekend days and 10 WA public holidays",
-    "StaffAvailableDays": 230,
-    "StaffAvailabilityBasis": "working days per year under the enterprise agreement",
-    "HoursPerDay": 7.5,
     "Formulas": {
       "UwaResearcher": "(C - I_total) / U",
       "Apfr": "((C - I_nonuwa) / U) * k",
@@ -27,7 +22,6 @@
     "BillableUnit": "Hours",
     "CreatedBy": "entry",
     "CreatedByDisplay": "Priya Lal",
-    "CostingAssumptions": "2026 budget as approved by the School in March 2026; salaries at the current EBA step plus 17% on-costs; laboratory space at the University’s 2026 floor-area rate.",
     "BenchmarkNotes": "Compared against the published 2025 rates of two Group of Eight microscopy platforms; both sit within 8% of the commercial rate proposed here.",
     "PricingJustification": "The UWA researcher rate is held at the minimum sustainable figure. The confocal commercial rate is proposed at the calculated figure; the cryo-EM commercial rate is held below it for the first year of the cycle while a second instrument is commissioned.",
     "SubmittedBy": "Priya Lal",
@@ -53,26 +47,6 @@
       "Id": 11,
       "Name": "Confocal microscope",
       "MaximumCapacity": 1400,
-      "CapacityBaseline": "Machine",
-      "CapacityBaselineAmount": 1882.5,
-      "StaffCapacity": null,
-      "StatedBaseline": 0,
-      "StatedBaselineNote": null,
-      "IsStaffReliant": false,
-      "StaffFte": 0,
-      "CapacityDeductions": [
-        {
-          "Kind": "Maintenance",
-          "Amount": 262.5,
-          "Note": "Quarterly service by the vendor, 35 working days a year"
-        },
-        {
-          "Kind": "Planned outages",
-          "Amount": 220,
-          "Note": "Building shutdown over the summer break"
-        }
-      ],
-      "AboveCapacityReason": null,
       "ForecastUwaUse": 600,
       "ForecastApfrUse": 250,
       "ForecastCommercialUse": 150,
@@ -122,22 +96,7 @@
     {
       "Id": 12,
       "Name": "Cryo-electron microscope",
-      "MaximumCapacity": 345,
-      "CapacityBaseline": "Machine",
-      "CapacityBaselineAmount": 1882.5,
-      "StaffCapacity": 345,
-      "StatedBaseline": 0,
-      "StatedBaselineNote": null,
-      "IsStaffReliant": true,
-      "StaffFte": 0.2,
-      "CapacityDeductions": [
-        {
-          "Kind": "Downtime",
-          "Amount": 100,
-          "Note": "Autoloader repair window each year"
-        }
-      ],
-      "AboveCapacityReason": "A second operator is appointed from February 2027; 0.2 FTE is the current allocation.",
+      "MaximumCapacity": 700,
       "ForecastUwaUse": 300,
       "ForecastApfrUse": 100,
       "ForecastCommercialUse": 100,
@@ -183,134 +142,6 @@
         "Apfr": "((100000 - 20000) / 500) * 1.35 = 216.00",
         "Commercial": "(100000 / 500) * 1.35 = 270.00"
       }
-    }
-  ],
-  "Costs": [
-    {
-      "Id": 101,
-      "RicCapabilityId": 11,
-      "Scope": "Capability",
-      "CostType": "Detailed cost",
-      "Category": "Maintenance contracts",
-      "Amount": 60000,
-      "Notes": "Vendor service contract, 2026 quote attached to the file",
-      "PersonnelName": null,
-      "Description": "Confocal service contract",
-      "Position": null,
-      "FloorArea": null,
-      "FloorAreaRate": null
-    },
-    {
-      "Id": 102,
-      "RicCapabilityId": 11,
-      "Scope": "Capability",
-      "CostType": "Detailed cost",
-      "Category": "Employee salary and on-costs",
-      "Amount": 80000,
-      "Notes": "0.8 FTE at HEO7 step 3 plus 17% on-costs",
-      "PersonnelName": "Alex Tan",
-      "Description": "Alex Tan",
-      "Position": "Research officer",
-      "FloorArea": null,
-      "FloorAreaRate": null
-    },
-    {
-      "Id": 103,
-      "RicCapabilityId": 12,
-      "Scope": "Capability",
-      "CostType": "Detailed cost",
-      "Category": "Materials and supplies",
-      "Amount": 90000,
-      "Notes": "Cryogen, grids and consumables at 2025 usage",
-      "PersonnelName": null,
-      "Description": "Cryogen and grids",
-      "Position": null,
-      "FloorArea": null,
-      "FloorAreaRate": null
-    },
-    {
-      "Id": 104,
-      "RicCapabilityId": null,
-      "Scope": "Platform",
-      "CostType": "Detailed cost",
-      "Category": "IT costs",
-      "Amount": 8000,
-      "Notes": "Booking system licence and storage",
-      "PersonnelName": null,
-      "Description": "Booking system and IT",
-      "Position": null,
-      "FloorArea": null,
-      "FloorAreaRate": null
-    },
-    {
-      "Id": 105,
-      "RicCapabilityId": null,
-      "Scope": "Platform",
-      "CostType": "Detailed cost",
-      "Category": "Laboratory floor area",
-      "Amount": 12000,
-      "Notes": "Level 2 laboratory, Bayliss Building",
-      "PersonnelName": null,
-      "Description": "Level 2 laboratory",
-      "Position": null,
-      "FloorArea": 30,
-      "FloorAreaRate": 400
-    },
-    {
-      "Id": 106,
-      "RicCapabilityId": 11,
-      "Scope": "Capability",
-      "CostType": "Non-variable income",
-      "Category": "UWA GP / in-kind",
-      "Amount": 20000,
-      "Notes": "School support committed to the end of 2028",
-      "PersonnelName": null,
-      "Description": "School support",
-      "Position": null,
-      "FloorArea": null,
-      "FloorAreaRate": null
-    },
-    {
-      "Id": 107,
-      "RicCapabilityId": 11,
-      "Scope": "Capability",
-      "CostType": "Non-variable income",
-      "Category": "State",
-      "Amount": 20000,
-      "Notes": "Three-year state infrastructure grant",
-      "PersonnelName": null,
-      "Description": "State grant",
-      "Position": null,
-      "FloorArea": null,
-      "FloorAreaRate": null
-    },
-    {
-      "Id": 108,
-      "RicCapabilityId": 12,
-      "Scope": "Capability",
-      "CostType": "Non-variable income",
-      "Category": "Federal (incl. NCRIS)",
-      "Amount": 10000,
-      "Notes": "NCRIS operational funding for 2026",
-      "PersonnelName": null,
-      "Description": "NCRIS",
-      "Position": null,
-      "FloorArea": null,
-      "FloorAreaRate": null
-    },
-    {
-      "Id": 109,
-      "RicCapabilityId": null,
-      "Scope": "Platform",
-      "CostType": "Non-variable income",
-      "Category": "Other (e.g. philanthropic)",
-      "Amount": 20000,
-      "Notes": "Philanthropic gift, annual for five years",
-      "PersonnelName": null,
-      "Description": "Foundation gift",
-      "Position": null,
-      "FloorArea": null,
-      "FloorAreaRate": null
     }
   ]
 }

@@ -21,16 +21,19 @@ namespace CostingTool.Pdf;
 ///
 /// <b>Older snapshots keep rendering.</b> Schema 1.2 added the balance lines US-12 asks for;
 /// a record sealed under 1.1 does not carry them, so they are nullable here and the document
-/// leaves them out rather than printing a zero the approver never saw. A snapshot is never
+/// leaves them out rather than printing a zero the approver never saw. Schema 1.3 added the
+/// costing assumptions and how each capability's capacity was built, with the notes behind
+/// it (US-07, US-13); an older record simply has none to show. The cost and funding lines have
+/// been in every snapshot since 1.1 and are read from all of them. A snapshot is never
 /// rewritten — the renderer is what learns the older shape.
 /// </summary>
 public sealed class SealedRecord
 {
     /// <summary>The schema new snapshots are written in.</summary>
-    public const string CurrentSchemaVersion = "1.2";
+    public const string CurrentSchemaVersion = "1.3";
 
     /// <summary>Every schema this renderer can read, oldest first.</summary>
-    public static readonly string[] SupportedSchemaVersions = ["1.1", CurrentSchemaVersion];
+    public static readonly string[] SupportedSchemaVersions = ["1.1", "1.2", CurrentSchemaVersion];
 
     private static readonly JsonSerializerOptions ReadOptions = new()
     {
@@ -50,6 +53,9 @@ public sealed class SealedRecord
     public SealedPlatform? Platform { get; set; }
 
     public List<SealedCapability> Capabilities { get; set; } = [];
+
+    /// <summary>Every cost and funding line, with the note or justification entered against it.</summary>
+    public List<SealedCostLine> Costs { get; set; } = [];
 
     /// <summary>
     /// Parse a snapshot.
@@ -110,6 +116,18 @@ public sealed class SealedMethod
 
     public string? Source { get; set; }
 
+    // ---- Capacity baselines: schema 1.3 and later -----------------------------------------
+
+    public decimal? MachineAvailableDays { get; set; }
+
+    public string? MachineAvailabilityBasis { get; set; }
+
+    public decimal? StaffAvailableDays { get; set; }
+
+    public string? StaffAvailabilityBasis { get; set; }
+
+    public decimal? HoursPerDay { get; set; }
+
     public SealedFormulas? Formulas { get; set; }
 }
 
@@ -135,6 +153,9 @@ public sealed class SealedCycle
     public string? BillableUnit { get; set; }
 
     public string? CreatedByDisplay { get; set; }
+
+    /// <summary>Schema 1.3 and later.</summary>
+    public string? CostingAssumptions { get; set; }
 
     public string? UtilisationAssumptions { get; set; }
 
@@ -189,7 +210,31 @@ public sealed class SealedCapability
 
     public string? Name { get; set; }
 
+    /// <summary>Usable capacity, as built on the capacity step.</summary>
     public decimal MaximumCapacity { get; set; }
+
+    // ---- How the capacity was built: schema 1.3 and later, empty before -----------------
+
+    /// <summary>"Machine", "Staff" or "Stated"; null in a record sealed before schema 1.3.</summary>
+    public string? CapacityBaseline { get; set; }
+
+    /// <summary>The baseline in the billable unit, e.g. 1,882.5 hours for machine availability.</summary>
+    public decimal? CapacityBaselineAmount { get; set; }
+
+    /// <summary>FTE × staff availability, when the capability is staff-reliant.</summary>
+    public decimal? StaffCapacity { get; set; }
+
+    public decimal? StatedBaseline { get; set; }
+
+    public string? StatedBaselineNote { get; set; }
+
+    public bool? IsStaffReliant { get; set; }
+
+    public decimal? StaffFte { get; set; }
+
+    public List<SealedDeduction> CapacityDeductions { get; set; } = [];
+
+    public string? AboveCapacityReason { get; set; }
 
     public decimal ForecastUwaUse { get; set; }
 
@@ -207,6 +252,55 @@ public sealed class SealedCapability
 /// sealed. <c>Display*</c> are the rounded rates: the same values the custodian saw on
 /// screen, so the PDF cannot round differently from the page that was approved.
 /// </summary>
+/// <summary>One deduction from a capability's capacity baseline, with its note.</summary>
+public sealed class SealedDeduction
+{
+    public string? Kind { get; set; }
+
+    public decimal Amount { get; set; }
+
+    public string? Note { get; set; }
+}
+
+/// <summary>
+/// One cost or funding line as sealed. For a funding line, <see cref="Notes"/> holds the
+/// justification the funding step requires.
+/// </summary>
+public sealed class SealedCostLine
+{
+    public int Id { get; set; }
+
+    /// <summary>Null for a platform-level line.</summary>
+    public int? RicCapabilityId { get; set; }
+
+    public string? Scope { get; set; }
+
+    public string? CostType { get; set; }
+
+    public string? Category { get; set; }
+
+    /// <summary>The annual figure: the mean of the per-year amounts.</summary>
+    public decimal Amount { get; set; }
+
+    public string? Notes { get; set; }
+
+    public string? Description { get; set; }
+
+    public string? PersonnelName { get; set; }
+
+    /// <summary>Schema 1.3 and later.</summary>
+    public string? Position { get; set; }
+
+    /// <summary>Schema 1.3 and later: m², for a floor-area line.</summary>
+    public decimal? FloorArea { get; set; }
+
+    /// <summary>Schema 1.3 and later: dollars per m² per year.</summary>
+    public decimal? FloorAreaRate { get; set; }
+
+    /// <summary>Income rather than cost. Matches the web project's wording.</summary>
+    public bool IsIncome => CostType == "Non-variable income";
+}
+
 public sealed class SealedResult
 {
     public string? CapabilityName { get; set; }

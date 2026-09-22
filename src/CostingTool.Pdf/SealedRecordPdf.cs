@@ -89,6 +89,12 @@ public static class SealedRecordPdf
         AddTitleBlock(section, record, platformName, cycle);
         AddMethodBlock(section, record);
 
+        // US-13: every justification sits beside the figures it explains — the costing
+        // assumptions and each line's note with the costs, the utilisation assumptions and each
+        // deduction's note with the capacity, the pricing justification after the balance.
+        AddCostsAndIncome(section, record);
+        AddCapacity(section, record, cycle?.BillableUnit);
+
         foreach (var capability in record.Capabilities)
         {
             AddCapability(section, capability, cycle?.BillableUnit);
@@ -337,30 +343,197 @@ public static class SealedRecordPdf
         Space(section, 10);
     }
 
-    private static void AddJustification(Section section, SealedCycle? cycle)
+    // ----------------------------------------------------------------------------------
+    // The inputs, with what explains them (US-13)
+    // ----------------------------------------------------------------------------------
+
+    private static void AddCostsAndIncome(Section section, SealedRecord record)
     {
-        if (cycle is null ||
-            (string.IsNullOrWhiteSpace(cycle.PricingJustification)
-             && string.IsNullOrWhiteSpace(cycle.BenchmarkNotes)
-             && string.IsNullOrWhiteSpace(cycle.UtilisationAssumptions)))
+        var costingAssumptions = record.Cycle?.CostingAssumptions;
+        if (record.Costs.Count == 0 && string.IsNullOrWhiteSpace(costingAssumptions))
         {
             return;
         }
 
+        Heading(section, "Operating costs and non-variable income");
+        Lead(section, "Every line as sealed, with the note or justification entered against it. Amounts are the "
+                      + "annual average over the pricing period, GST exclusive.");
+
+        if (!string.IsNullOrWhiteSpace(costingAssumptions))
+        {
+            Label(section, "Costing assumptions");
+            Quote(section, costingAssumptions!);
+        }
+
+        foreach (var capability in record.Capabilities)
+        {
+            var lines = record.Costs.Where(x => x.RicCapabilityId == capability.Id).ToList();
+            if (lines.Count > 0)
+            {
+                Label(section, $"{capability.Name ?? "Capability"} — booked to this capability");
+                LineTable(section, lines);
+            }
+        }
+
+        var platform = record.Costs.Where(x => x.RicCapabilityId is null).ToList();
+        if (platform.Count > 0)
+        {
+            var ways = record.Capabilities.Count;
+            Label(section, $"Platform level — split evenly across the {ways} {(ways == 1 ? "capability" : "capabilities")}");
+            LineTable(section, platform);
+        }
+
+        Space(section, 8);
+    }
+
+    private static void LineTable(Section section, IEnumerable<SealedCostLine> lines)
+    {
+        var table = section.AddTable();
+        table.Borders.Width = 0;
+        table.AddColumn(Unit.FromCentimeter(6.8));
+        table.AddColumn(Unit.FromCentimeter(6.2));
+        table.AddColumn(Unit.FromCentimeter(3.4));
+
+        foreach (var line in lines.OrderBy(x => x.IsIncome).ThenBy(x => x.Id))
+        {
+            var row = table.AddRow();
+            row.TopPadding = Unit.FromPoint(2);
+
+            var name = line.Description ?? line.PersonnelName ?? line.Category ?? "Line";
+            var item = row.Cells[0].AddParagraph(line.Position is null ? name : $"{name} ({line.Position})");
+            item.Format.Font.Size = 9;
+
+            var kind = line.IsIncome ? $"Income · {line.Category}" : line.Category ?? "";
+            if (line.FloorArea is { } area && line.FloorAreaRate is { } rate)
+            {
+                kind += $" · {area:#,##0.##} m² × {RecordFormat.Money(rate)} per m²";
+            }
+
+            var category = row.Cells[1].AddParagraph(kind);
+            category.Format.Font.Size = 8.5;
+            category.Format.Font.Color = Muted;
+
+            var amount = row.Cells[2].AddParagraph(line.IsIncome ? $"−{RecordFormat.Money(line.Amount)}" : RecordFormat.Money(line.Amount));
+            amount.Format.Font.Size = 9;
+            amount.Format.Alignment = ParagraphAlignment.Right;
+
+            // The line's own explanation, directly beneath it.
+            var explanation = table.AddRow();
+            explanation.BottomPadding = Unit.FromPoint(3);
+            explanation.Borders.Bottom.Width = 0.25;
+            explanation.Borders.Bottom.Color = Rule;
+            explanation.Cells[0].MergeRight = 2;
+            var note = explanation.Cells[0].AddParagraph(
+                string.IsNullOrWhiteSpace(line.Notes)
+                    ? "No note recorded."
+                    : $"{(line.IsIncome ? "Justification" : "Note")}: {line.Notes}");
+            note.Format.Font.Size = 8.5;
+            note.Format.Font.Color = Muted;
+            note.Format.LeftIndent = Unit.FromPoint(6);
+        }
+
+        Space(section, 4);
+    }
+
+    private static void AddCapacity(Section section, SealedRecord record, string? billableUnit)
+    {
+        var assumptions = record.Cycle?.UtilisationAssumptions;
+        if (record.Capabilities.Count == 0)
+        {
+            return;
+        }
+
+        Heading(section, "Capacity and forecast use");
+        Lead(section, "Every rate is divided by forecast use, not by capacity. Capacity is the ceiling the forecast "
+                      + "is judged against.");
+
+        if (!string.IsNullOrWhiteSpace(assumptions))
+        {
+            Label(section, "Utilisation assumptions");
+            Quote(section, assumptions!);
+        }
+
+        var method = record.Method;
+
+        foreach (var capability in record.Capabilities)
+        {
+            Label(section, capability.Name ?? "Capability");
+            var facts = KeyValueTable(section);
+
+            // Schema 1.3 records how the capacity was built. An older record holds only the
+            // figure, and says so rather than inventing a derivation.
+            if (capability.CapacityBaseline is { } baseline && capability.CapacityBaselineAmount is { } amount)
+            {
+                var (label, basis) = baseline switch
+                {
+                    "Machine" => ("Machine availability", method?.MachineAvailableDays is { } days
+                        ? $"{days:#,##0.##} days ({method.MachineAvailabilityBasis})" : null),
+                    "Staff" => ("Staff availability", method?.StaffAvailableDays is { } days
+                        ? $"{days:#,##0.##} {method.StaffAvailabilityBasis}" : null),
+                    _ => ("Stated baseline", capability.StatedBaselineNote)
+                };
+
+                AddFact(facts, label, RecordFormat.Quantity(amount, billableUnit), note: basis);
+
+                foreach (var deduction in capability.CapacityDeductions)
+                {
+                    AddFact(
+                        facts,
+                        $"Less {deduction.Kind?.ToLowerInvariant()}",
+                        $"−{RecordFormat.Quantity(deduction.Amount, billableUnit)}",
+                        note: deduction.Note);
+                }
+
+                if (capability.IsStaffReliant == true && capability.StaffCapacity is { } cap)
+                {
+                    AddFact(
+                        facts,
+                        "Staff cap — a person must be present",
+                        $"{capability.StaffFte:0.###} FTE: {RecordFormat.Quantity(cap, billableUnit)}");
+                }
+            }
+
+            AddFact(facts, "Usable capacity", RecordFormat.Quantity(capability.MaximumCapacity, billableUnit), emphasis: true);
+
+            var forecast = capability.ForecastUwaUse + capability.ForecastApfrUse + capability.ForecastCommercialUse;
+            AddFact(
+                facts,
+                "Forecast use",
+                $"{RecordFormat.Quantity(forecast, billableUnit)} — UWA {capability.ForecastUwaUse:#,##0.##}, "
+                + $"APFR {capability.ForecastApfrUse:#,##0.##}, commercial {capability.ForecastCommercialUse:#,##0.##}");
+
+            if (capability.MaximumCapacity > 0)
+            {
+                AddFact(facts, "Forecast as a share of capacity", $"{forecast / capability.MaximumCapacity * 100m:0.#}%");
+            }
+
+            if (!string.IsNullOrWhiteSpace(capability.AboveCapacityReason))
+            {
+                AddFact(facts, "Why the forecast exceeds capacity", capability.AboveCapacityReason);
+            }
+
+            Space(section, 4);
+        }
+
+        Space(section, 6);
+    }
+
+    private static void AddJustification(Section section, SealedCycle? cycle)
+    {
+        if (cycle is null ||
+            (string.IsNullOrWhiteSpace(cycle.PricingJustification)
+             && string.IsNullOrWhiteSpace(cycle.BenchmarkNotes)))
+        {
+            return;
+        }
+
+        // The utilisation assumptions used to sit here as well. They now head the capacity
+        // section, beside the figures they explain.
         Heading(section, "Why these rates were proposed");
 
         if (!string.IsNullOrWhiteSpace(cycle.PricingJustification))
         {
             Quote(section, cycle.PricingJustification!);
-        }
-
-        if (!string.IsNullOrWhiteSpace(cycle.UtilisationAssumptions))
-        {
-            var utilisationLabel = section.AddParagraph("Utilisation assumptions");
-            utilisationLabel.Format.Font.Size = 9;
-            utilisationLabel.Format.Font.Bold = true;
-            utilisationLabel.Format.SpaceBefore = Unit.FromPoint(8);
-            Quote(section, cycle.UtilisationAssumptions!);
         }
 
         if (!string.IsNullOrWhiteSpace(cycle.BenchmarkNotes))
@@ -446,7 +619,25 @@ public static class SealedRecordPdf
         return table;
     }
 
-    private static void AddFact(Table table, string label, string? value, bool emphasis = false)
+    private static void Lead(Section section, string text)
+    {
+        var lead = section.AddParagraph(text);
+        lead.Format.Font.Size = 8.5;
+        lead.Format.Font.Color = Muted;
+        lead.Format.SpaceAfter = Unit.FromPoint(6);
+    }
+
+    private static void Label(Section section, string text)
+    {
+        var label = section.AddParagraph(text);
+        label.Format.Font.Size = 9;
+        label.Format.Font.Bold = true;
+        label.Format.SpaceBefore = Unit.FromPoint(6);
+        label.Format.SpaceAfter = Unit.FromPoint(3);
+        label.Format.KeepWithNext = true;
+    }
+
+    private static void AddFact(Table table, string label, string? value, bool emphasis = false, string? note = null)
     {
         var row = table.AddRow();
         row.TopPadding = Unit.FromPoint(1.5);
@@ -461,6 +652,13 @@ public static class SealedRecordPdf
         var text = row.Cells[1].AddParagraph(string.IsNullOrWhiteSpace(value) ? "—" : value);
         text.Format.Font.Size = 9;
         text.Format.Font.Bold = emphasis;
+
+        if (!string.IsNullOrWhiteSpace(note))
+        {
+            var why = row.Cells[1].AddParagraph(note);
+            why.Format.Font.Size = 8.5;
+            why.Format.Font.Color = Muted;
+        }
     }
 
     private static Table FormulaTable(Section section)
