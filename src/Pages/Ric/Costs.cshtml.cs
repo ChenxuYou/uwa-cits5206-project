@@ -67,6 +67,9 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
     [BindProperty] public List<decimal> YearAmounts { get; set; } = [];
 
+    /// <summary>What the costs as a whole rest on (US-13; the guide's Step 5 checklist).</summary>
+    [BindProperty] public string? CostingAssumptions { get; set; }
+
     /// <summary>The custodian has looked at an unusually large amount and says it is right (US-18).</summary>
     [BindProperty] public bool ConfirmLargeAmounts { get; set; }
 
@@ -90,8 +93,33 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
         }
 
         YearAmounts = Enumerable.Repeat(0m, YearCount).ToList();
+        CostingAssumptions = Cycle.CostingAssumptions;
 
         return Page();
+    }
+
+    /// <summary>
+    /// Save the costing assumptions on their own. They belong to the costs section as a whole,
+    /// so they have a form of their own rather than riding on "add a cost line".
+    /// </summary>
+    public async Task<IActionResult> OnPostAssumptionsAsync()
+    {
+        if (!await Load(CycleId))
+        {
+            return NotFound();
+        }
+
+        if (!Cycle.IsEditable)
+        {
+            return RedirectToPage("/Ric/Review", new { cycleId = CycleId });
+        }
+
+        Cycle.CostingAssumptions = string.IsNullOrWhiteSpace(CostingAssumptions) ? null : CostingAssumptions.Trim();
+        Cycle.UpdatedAtUtc = DateTime.UtcNow;
+        await Db.SaveChangesAsync();
+
+        TempData["CostsMessage"] = "Costing assumptions saved.";
+        return RedirectToPage(new { cycleId = CycleId });
     }
 
     public async Task<IActionResult> OnPostAddAsync()
@@ -111,6 +139,7 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
         if (!ModelState.IsValid)
         {
+            CostingAssumptions = Cycle.CostingAssumptions;
             return Page();
         }
 

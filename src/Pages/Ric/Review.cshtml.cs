@@ -76,6 +76,14 @@ public class ReviewModel(CostingDbContext db, RicCalculationService calculator) 
             ModelState.AddModelError(string.Empty, problem);
         }
 
+        // US-13: the explanations the tool requires are checked again here, against the cycle
+        // as it now stands. A change made after the rates step — a new cost, say — can turn a
+        // surplus into a deficit that was never explained.
+        foreach (var missing in RequiredJustifications.Missing(Cycle, Rates))
+        {
+            ModelState.AddModelError(string.Empty, missing);
+        }
+
         if (!ModelState.IsValid)
         {
             return Page();

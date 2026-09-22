@@ -135,6 +135,7 @@
             <article class="review-card">
                 <div class="review-card-heading"><h2>Assumptions and evidence</h2></div>
                 <div class="review-notes">
+                    <div><span>Costing assumptions</span><p>@(Model.Cycle.CostingAssumptions ?? "Not recorded")</p></div>
                     <div><span>Utilisation assumptions</span><p>@(Model.Cycle.UtilisationAssumptions ?? "Not recorded")</p></div>
                     @foreach (var above in Model.Cycle.Capabilities.Where(x => !string.IsNullOrWhiteSpace(x.AboveCapacityReason)))
                     {
@@ -177,6 +178,30 @@
             {
                 <h2>Ready to submit?</h2>
                 <p>Submission locks the figures and sends the cycle to the delegated authority.</p>
+
+                @* US-13: the guide's Step 5 documentation checklist, read from what has been written. *@
+                <section class="step5-checklist" aria-labelledby="step5-heading">
+                    <h3 id="step5-heading">The guide's Step 5 checklist</h3>
+                    <ul>
+                        @foreach (var item in Step5Checklist.For(Model.Cycle))
+                        {
+                            <li class="@(item.Done ? "done" : "outstanding")">
+                                <span aria-hidden="true">@(item.Done ? "✓" : "○")</span>
+                                <span>
+                                    @item.Label
+                                    @if (!item.Done)
+                                    {
+                                        <small>Not yet. <a asp-page="@item.Page" asp-route-cycleId="@Model.Cycle.Id">Add it</a></small>
+                                    }
+                                    else
+                                    {
+                                        <small class="visually-hidden">(done)</small>
+                                    }
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                </section>
                 <form method="post" asp-page-handler="Submit" asp-route-cycleId="@Model.Cycle.Id">
                     <div asp-validation-summary="All" class="form-errors submit-errors"></div>
                     <label class="confirmation">

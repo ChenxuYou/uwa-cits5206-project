@@ -16,7 +16,9 @@ namespace CostingTool.Pdf.Tests;
 /// asserted again here, on the way out.
 ///
 /// The fixture is a sealed snapshot in the shape <c>Approvals/Details.cshtml.cs</c>
-/// writes, schema 1.2, built around that worked example.
+/// writes, schema 1.3, built around that worked example. Its cost and funding lines add up to
+/// the figures the capabilities were priced on. The schema 1.2 copy beside it is the same
+/// record as sealed before 1.3, and must go on rendering.
 /// </summary>
 public class SealedRecordPdfTests
 {
@@ -24,6 +26,9 @@ public class SealedRecordPdfTests
         Path.Combine(AppContext.BaseDirectory, "Fixtures", "sealed-record-2026.1.json");
 
     private static string Snapshot() => File.ReadAllText(FixturePath);
+
+    private static string SnapshotUnderSchema12() =>
+        File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Fixtures", "sealed-record-2026.1-schema-1.2.json"));
 
     private const string Hash = "9F2C4A1E8B7D6053E1AA0C7F2B4D8E6190C3A5B7D9E1F3058A2C4E6081B3D5F7";
 
@@ -146,7 +151,8 @@ public class SealedRecordPdfTests
     [Fact]
     public void A_schema_version_this_renderer_does_not_know_is_refused()
     {
-        var future = Snapshot().Replace("\"SchemaVersion\": \"1.2\"", "\"SchemaVersion\": \"2.0\"", StringComparison.Ordinal);
+        var future = Snapshot().Replace(
+            $"\"SchemaVersion\": \"{SealedRecord.CurrentSchemaVersion}\"", "\"SchemaVersion\": \"2.0\"", StringComparison.Ordinal);
 
         var error = Assert.Throws<SealedRecordFormatException>(() => SealedRecord.Parse(future));
 
@@ -169,6 +175,65 @@ public class SealedRecordPdfTests
         Assert.Contains("Forecast revenue at the proposed rates", text, StringComparison.Ordinal);
         Assert.DoesNotContain("Cost to recover from usage", text, StringComparison.Ordinal);
         Assert.DoesNotContain("Against full economic cost", text, StringComparison.Ordinal);
+    }
+
+    // ----------------------------------------------------------------------------------
+    // US-13: every justification beside the figures it explains
+    // ----------------------------------------------------------------------------------
+
+    [Fact]
+    public void Every_cost_and_funding_line_is_printed_with_its_note_or_justification()
+    {
+        var text = AllText(SealedRecordPdf.Build(SealedRecord.Parse(Snapshot()), Hash));
+
+        Assert.Contains("Operating costs and non-variable income", text, StringComparison.Ordinal);
+        Assert.Contains("Costing assumptions", text, StringComparison.Ordinal);
+        Assert.Contains("salaries at the current EBA step plus 17% on-costs", text, StringComparison.Ordinal);
+        Assert.Contains("Alex Tan (Research officer)", text, StringComparison.Ordinal);
+        Assert.Contains("Note: Vendor service contract, 2026 quote attached to the file", text, StringComparison.Ordinal);
+        Assert.Contains("Justification: NCRIS operational funding for 2026", text, StringComparison.Ordinal);
+        Assert.Contains("30 m² × $400.00 per m²", text, StringComparison.Ordinal);
+        Assert.Contains("Platform level — split evenly across the 2 capabilities", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Capacity_is_itemised_with_the_note_behind_each_deduction()
+    {
+        var text = AllText(SealedRecordPdf.Build(SealedRecord.Parse(Snapshot()), Hash));
+
+        Assert.Contains("Capacity and forecast use", text, StringComparison.Ordinal);
+        Assert.Contains("Machine availability", text, StringComparison.Ordinal);
+        Assert.Contains("1,882.5 hours", text, StringComparison.Ordinal);
+        Assert.Contains("251 days (365 days less 104 weekend days and 10 WA public holidays)", text, StringComparison.Ordinal);
+        Assert.Contains("Less maintenance", text, StringComparison.Ordinal);
+        Assert.Contains("Quarterly service by the vendor, 35 working days a year", text, StringComparison.Ordinal);
+        Assert.Contains("0.2 FTE: 345 hours", text, StringComparison.Ordinal);
+        Assert.Contains("Forecast from the 2025 booking system export", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_forecast_above_capacity_is_printed_with_its_reason()
+    {
+        var text = AllText(SealedRecordPdf.Build(SealedRecord.Parse(Snapshot()), Hash));
+
+        Assert.Contains("Why the forecast exceeds capacity", text, StringComparison.Ordinal);
+        Assert.Contains("A second operator is appointed from February 2027", text, StringComparison.Ordinal);
+        Assert.Contains("144.9%", text, StringComparison.Ordinal); // 500 of 345 hours
+    }
+
+    [Fact]
+    public void A_record_sealed_under_schema_1_2_renders_its_lines_but_invents_no_capacity_workings()
+    {
+        var text = AllText(SealedRecordPdf.Build(SealedRecord.Parse(SnapshotUnderSchema12()), Hash));
+
+        // What it held is still shown: the usable capacity and the utilisation assumptions.
+        Assert.Contains("Usable capacity", text, StringComparison.Ordinal);
+        Assert.Contains("Forecast from the 2025 booking system export", text, StringComparison.Ordinal);
+        Assert.Contains("$100.00 per hour", text, StringComparison.Ordinal);
+
+        // What it never held is not made up.
+        Assert.DoesNotContain("Machine availability", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("Costing assumptions", text, StringComparison.Ordinal);
     }
 
     private const string SealedUnderSchema11 = """

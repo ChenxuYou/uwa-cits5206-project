@@ -167,37 +167,15 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
     }
 
     /// <summary>
-    /// The two places the tool insists on an explanation: a proposed rate that differs from
-    /// the calculated one (US-11, F9) and a forecast deficit (US-12). Neither is refused —
-    /// both are normal — but neither reaches the approver unexplained.
+    /// A varied rate or a forecast deficit needs a pricing justification. Neither is refused —
+    /// both are normal — but neither reaches the approver unexplained. The rule itself lives
+    /// in <see cref="RequiredJustifications"/>, so submission applies the same one.
     /// </summary>
     private void RequireJustification()
     {
-        if (!string.IsNullOrWhiteSpace(PricingJustification))
+        if (RequiredJustifications.PricingProblem(Cycle, Rates, PricingJustification) is { } problem)
         {
-            return;
-        }
-
-        var varied = Cycle.Capabilities
-            .Where(x => Rates.For(x.Id)?.VariesFromCalculated == true)
-            .Select(x => x.Name)
-            .ToList();
-
-        if (varied.Count > 0)
-        {
-            ModelState.AddModelError(
-                nameof(PricingJustification),
-                $"A pricing justification is required because the proposed rates differ from the "
-                + $"calculated ones for {string.Join(", ", varied)}.");
-            return;
-        }
-
-        if (Rates.IsComplete && Rates.ForecastBalance < 0)
-        {
-            ModelState.AddModelError(
-                nameof(PricingJustification),
-                "A pricing justification is required because these rates forecast a deficit. "
-                + "A deficit does not stop the record being submitted; it has to be explained.");
+            ModelState.AddModelError(nameof(PricingJustification), problem);
         }
     }
 
