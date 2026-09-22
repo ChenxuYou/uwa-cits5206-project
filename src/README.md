@@ -172,6 +172,13 @@ a page can render.
 7. **Approvals** — the approver sees the workings, then approves and seals, or returns the
    cycle with required changes.
 
+Every completed step is a link in the step bar, and any answer can be changed on the way back
+(US-10): step 1 reopens on the cycle to rename, add or remove capabilities, recorded cost and
+funding lines open for editing in place, and the capacity and rates steps save before going
+back. Removing a capability or changing the billable unit asks first, because it clears what
+later steps hold; the pricing period can move but not change length once lines exist. A step
+with typed but unsaved changes warns before it is left by a link.
+
 Submitted cycles are read-only while awaiting a decision; returned cycles can be edited and
 resubmitted. Approval writes an immutable JSON snapshot — inputs, results **and the
 workings** — with a SHA-256 integrity hash.
