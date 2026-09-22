@@ -44,6 +44,22 @@ public abstract class RicPageModel(CostingDbContext db) : PageModel
         return true;
     }
 
+    /// <summary>The guided steps, in order.</summary>
+    protected static readonly string[] Steps =
+        ["/Ric/Start", "/Ric/Costs", "/Ric/Funding", "/Ric/Capacity", "/Ric/Rates", "/Ric/Review"];
+
+    /// <summary>
+    /// Where a "save and leave" from <paramref name="current"/> may go (US-10): an earlier
+    /// step, and only an earlier step. Anything else — a later step, a page outside the flow,
+    /// a URL from somewhere other than the step bar — goes to the step just before this one.
+    /// </summary>
+    protected static string EarlierStep(string? to, string current)
+    {
+        var here = Array.IndexOf(Steps, current);
+        var there = to is null ? -1 : Array.IndexOf(Steps, to);
+        return there >= 0 && there < here ? Steps[there] : Steps[Math.Max(0, here - 1)];
+    }
+
     /// <summary>
     /// "Inputs[1].UwaUse" → "Cryo-EM: UWA forecast use", for a page that binds one row per
     /// capability. Null for any key it does not recognise.

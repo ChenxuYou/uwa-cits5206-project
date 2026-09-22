@@ -22,7 +22,7 @@
     </div>
 
     <div class="ric-two-column detailed-cost-layout">
-        <form method="post" asp-page-handler="Add" class="ric-card">
+        <form method="post" asp-page-handler="Add" class="ric-card" data-warn-on-leave>
             <input type="hidden" asp-for="CycleId" />
             <div class="ric-card-title"><h2>Add funding source</h2><p>User fees are not funding sources and must not be entered here.</p></div>
             <div asp-validation-summary="All" class="form-errors"></div>

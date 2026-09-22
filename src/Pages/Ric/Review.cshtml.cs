@@ -53,14 +53,20 @@ public class ReviewModel(CostingDbContext db, RicCalculationService calculator) 
             ModelState.AddModelError(string.Empty, "The cycle must contain capabilities and operating costs.");
         }
 
-        if (Cycle.Capabilities.Any(x => x.MaximumCapacity <= 0 || x.ForecastUtilisation <= 0))
+        // Name the capabilities, so the custodian knows which screen to go back to (US-10).
+        var noCapacity = Cycle.Capabilities.Where(x => x.MaximumCapacity <= 0 || x.ForecastUtilisation <= 0).Select(x => x.Name).ToList();
+        if (noCapacity.Count > 0)
         {
-            ModelState.AddModelError(string.Empty, "Every capability requires capacity and forecast utilisation.");
+            ModelState.AddModelError(string.Empty, $"Every capability requires capacity and forecast utilisation. Missing for: {string.Join(", ", noCapacity)}.");
         }
 
-        if (Cycle.Capabilities.Any(x => x.ProposedUwaRate <= 0 || x.ProposedApfrRate <= 0 || x.ProposedCommercialRate <= 0))
+        var noRates = Cycle.Capabilities
+            .Where(x => x.ProposedUwaRate <= 0 || x.ProposedApfrRate <= 0 || x.ProposedCommercialRate <= 0)
+            .Select(x => x.Name)
+            .ToList();
+        if (noRates.Count > 0)
         {
-            ModelState.AddModelError(string.Empty, "Every capability requires three proposed rates.");
+            ModelState.AddModelError(string.Empty, $"Every capability requires three proposed rates above zero. Missing for: {string.Join(", ", noRates)}.");
         }
 
         // Nothing is submitted for approval while a capability still has no rates. The

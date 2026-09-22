@@ -30,7 +30,7 @@
     </div>
 
     <div class="ric-two-column detailed-cost-layout">
-        <form method="post" asp-page-handler="Add" class="ric-card">
+        <form method="post" asp-page-handler="Add" class="ric-card" data-warn-on-leave>
             <input type="hidden" asp-for="CycleId" />
             <div class="ric-card-title"><h2>Add cost item</h2><p>Amounts are GST exclusive. Detailed values are retained for audit.</p></div>
             <div asp-validation-summary="All" class="form-errors"></div>

@@ -1,19 +1,76 @@
 @page
 @model CostingTool.Pages.Ric.StartModel
-@{ ViewData["Title"] = "Start RIC cycle"; }
+@{
+    ViewData["Title"] = Model.IsEditing ? "Platform and capabilities" : "Start RIC cycle";
+    int? cycleId = Model.IsEditing ? Model.CycleId : null;
+}
 <div class="page-wrap ric-page">
-    <nav class="breadcrumb"><a href="/">Overview</a><span>›</span><span>New RIC costing cycle</span></nav>
-    <partial name="_RicSteps" model='new CostingTool.Pages.Ric.RicStepViewModel(1, null)' />
-    <form method="post" class="ric-card narrow-card">
+    <nav class="breadcrumb"><a href="/">Overview</a><span>›</span><span>@(Model.IsEditing ? Model.PlatformName : "New RIC costing cycle")</span></nav>
+    <partial name="_RicSteps" model='new CostingTool.Pages.Ric.RicStepViewModel(1, cycleId)' />
+    <form method="post" asp-page="/Ric/Start" class="ric-card narrow-card" data-warn-on-leave>
+        <input type="hidden" asp-for="CycleId" />
         <div class="ric-heading"><span>01</span><div><h1>Platform and capabilities</h1><p>Define the infrastructure being costed and the unit users are charged in.</p></div></div>
         <div asp-validation-summary="All" class="form-errors"></div>
         <div class="form-grid two-columns">
             <label class="field full-span"><span>Platform name <b>*</b></span><input asp-for="PlatformName" placeholder="e.g. Cytometry"></label>
-            <label class="field"><span>Pricing period starts <b>*</b></span><input asp-for="StartYear" type="number" min="2020" max="2200"></label>
-            <label class="field"><span>Pricing period ends <b>*</b></span><input asp-for="EndYear" type="number" min="2020" max="2200"></label>
-            <label class="field full-span"><span>Billable unit <b>*</b></span><select asp-for="BillableUnit"><option>Hours</option><option>Days</option><option>Samples</option></select><small>This unit must stay consistent across capacity, utilisation and rates.</small></label>
-            <label class="field full-span"><span>Capabilities <b>*</b></span><textarea asp-for="CapabilityNames" rows="5" placeholder="Enter one capability per line, e.g.&#10;Flow Cytometry&#10;Cell Sorting&#10;Analysis / Consulting"></textarea><small>You can also separate names with commas.</small></label>
+            <label class="field"><span>Pricing period starts <b>*</b></span><input asp-for="StartYear" type="number" min="2020" max="2200" readonly="@(Model.PeriodIsFixed ? "readonly" : null)"></label>
+            <label class="field"><span>Pricing period ends <b>*</b></span><input asp-for="EndYear" type="number" min="2020" max="2200" readonly="@(Model.PeriodIsFixed ? "readonly" : null)"></label>
+            @if (Model.PeriodIsFixed)
+            {
+                <p class="field-note full-span">The period is fixed now that cost or funding lines hold an amount for each of its years. Remove those lines to change it, or start a new cycle.</p>
+            }
+            <label class="field full-span">
+                <span>Billable unit <b>*</b></span>
+                @if (Model.UnitIsFixed)
+                {
+                    <input type="hidden" asp-for="BillableUnit" />
+                    <input value="@Model.BillableUnit" readonly aria-describedby="unit-fixed" />
+                    <small id="unit-fixed">Fixed: capacity and forecast use are already entered in @Model.BillableUnit.ToLowerInvariant(). Start a new cycle to price in a different unit.</small>
+                }
+                else
+                {
+                    <select asp-for="BillableUnit">
+                        @foreach (var unit in CostingTool.Pages.Ric.StartModel.BillableUnits)
+                        {
+                            <option>@unit</option>
+                        }
+                    </select>
+                    <small>This unit must stay consistent across capacity, utilisation and rates.</small>
+                }
+            </label>
+
+            @if (Model.IsEditing)
+            {
+                <fieldset class="field full-span capability-edit">
+                    <legend>Capabilities</legend>
+                    @for (var i = 0; i < Model.Existing.Count; i++)
+                    {
+                        <div class="capability-edit-row">
+                            <input type="hidden" asp-for="Existing[i].Id" />
+                            <label class="field"><span class="visually-hidden">Capability @(i + 1) name</span><input asp-for="Existing[i].Name" /></label>
+                            <label class="confirmation"><input type="checkbox" asp-for="Existing[i].Remove" /><span>Remove</span></label>
+                        </div>
+                    }
+                    <small>Renaming keeps a capability's costs and capacity. Removing is only possible once no cost or funding line is booked to it.</small>
+                </fieldset>
+                <label class="field full-span"><span>Add capabilities</span><textarea asp-for="CapabilityNames" rows="3" placeholder="One per line"></textarea></label>
+            }
+            else
+            {
+                <label class="field full-span"><span>Capabilities <b>*</b></span><textarea asp-for="CapabilityNames" rows="5" placeholder="Enter one capability per line, e.g.&#10;Flow Cytometry&#10;Cell Sorting&#10;Analysis / Consulting"></textarea><small>You can also separate names with commas.</small></label>
+            }
         </div>
-        <div class="wizard-actions"><a href="/" class="secondary-action">Cancel</a><button class="primary-button" type="submit">Continue to costs →</button></div>
+        <div class="wizard-actions">
+            @if (Model.IsEditing)
+            {
+                <a class="secondary-action" asp-page="/Ric/Costs" asp-route-cycleId="@Model.CycleId">Back to costs without saving</a>
+                <button class="primary-button" type="submit">Save and continue to costs →</button>
+            }
+            else
+            {
+                <a href="/" class="secondary-action">Cancel</a>
+                <button class="primary-button" type="submit">Continue to costs →</button>
+            }
+        </div>
     </form>
 </div>

@@ -49,6 +49,13 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
     /// </summary>
     public Task<IActionResult> OnPostBackAsync() => SaveAsync("/Ric/Capacity");
 
+    /// <summary>
+    /// A step-bar link followed with unsaved changes on this screen: save, then go there
+    /// (US-10, "nothing is lost by navigating backwards"). If the save is refused — an
+    /// unexplained variance, say — the custodian stays here with the reason, as with Back.
+    /// </summary>
+    public Task<IActionResult> OnPostLeaveAsync(string? to) => SaveAsync(EarlierStep(to, "/Ric/Rates"));
+
     private async Task<IActionResult> SaveAsync(string nextPage)
     {
         if (!await Load(CycleId))

@@ -704,6 +704,53 @@ a.ric-step-link:focus-visible {
 }
 
 /* ---------------------------------------------------------------------------
+   Going back (US-10)
+   --------------------------------------------------------------------------- */
+
+/* "Back" is second in the markup, so Enter submits the primary action, and first on screen. */
+.wizard-actions .wizard-back {
+    order: -1;
+}
+
+.capability-edit {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.capability-edit legend {
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #48566a;
+}
+
+.capability-edit-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.capability-edit-row .confirmation {
+    margin: 0;
+    padding: 8px 10px;
+}
+
+.field-note {
+    margin: 0;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+/* A locked field should look locked, not merely refuse to change. */
+.field input[readonly] {
+    background: #f0f3f7;
+    color: #5c6879;
+}
+
+/* ---------------------------------------------------------------------------
    Administration (US-19)
    ---------------------------------------------------------------------------
    The filter bar on the all-cycles list, and the inline password reset in the

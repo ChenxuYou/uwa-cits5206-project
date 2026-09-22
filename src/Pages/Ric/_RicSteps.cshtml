@@ -4,8 +4,12 @@
     value, come back to the rates). A completed step is a link to that screen; the current step
     is marked with aria-current; steps still to come are plain text.
 
-    Step 1 creates the cycle, so there is nothing to return to and it is never a link. Nothing
-    links forward: a later screen may depend on figures this one has not saved yet.
+    Step 1 creates the cycle and, once it exists, reopens it to change the platform, period,
+    unit or capabilities. Nothing links forward: a later screen may depend on figures this one
+    has not saved yet.
+
+    Where a page could lose what was typed, steps.js intercepts these links: the rates and
+    capacity steps save first (their Leave handler), and the others warn before leaving.
 
     Step names are hidden visually on narrow screens (site.css) but stay in the accessibility
     tree, because a link whose only content is a tick has no name.
@@ -13,7 +17,7 @@
 @{
     var steps = new (int Number, string Name, string? Page)[]
     {
-        (1, "Platform", null),
+        (1, "Platform", "/Ric/Start"),
         (2, "Costs", "/Ric/Costs"),
         (3, "Funding", "/Ric/Funding"),
         (4, "Capacity", "/Ric/Capacity"),
