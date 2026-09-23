@@ -15,7 +15,7 @@ namespace CostingTool.Pdf;
 /// (architecture.md §4, requirements §9 Q5).
 ///
 /// The shape below mirrors <c>Pages/Approvals/Details.cshtml.cs</c> — <c>BuildSnapshot()</c>,
-/// schema 1.3. The two must move together: adding a field to the snapshot without adding
+/// schema 1.4. The two must move together: adding a field to the snapshot without adding
 /// it here means the PDF silently stops showing it, so <see cref="SupportedSchemaVersions"/>
 /// is checked on the way in rather than trusted.
 ///
@@ -23,16 +23,19 @@ namespace CostingTool.Pdf;
 /// a record sealed under 1.1 does not carry them, so they are nullable here and the document
 /// leaves them out rather than printing a zero the approver never saw. Schema 1.3 added
 /// <see cref="SealedCycle.Supersedes"/>, the record a cycle replaces (F22), null before it and
-/// on a record that replaces nothing. A snapshot is never rewritten — the renderer is what
+/// on a record that replaces nothing. Schema 1.4 added who sealed the record
+/// (<see cref="SealedCycle.SealedBy"/>, US-15 and US-16) and the capacity inputs behind each
+/// capability's forecast (US-16, "every input"); both are absent, and left out rather than
+/// invented, on an older record. A snapshot is never rewritten — the renderer is what
 /// learns the older shape.
 /// </summary>
 public sealed class SealedRecord
 {
     /// <summary>The schema new snapshots are written in.</summary>
-    public const string CurrentSchemaVersion = "1.3";
+    public const string CurrentSchemaVersion = "1.4";
 
     /// <summary>Every schema this renderer can read, oldest first.</summary>
-    public static readonly string[] SupportedSchemaVersions = ["1.1", "1.2", CurrentSchemaVersion];
+    public static readonly string[] SupportedSchemaVersions = ["1.1", "1.2", "1.3", CurrentSchemaVersion];
 
     private static readonly JsonSerializerOptions ReadOptions = new()
     {
@@ -163,6 +166,12 @@ public sealed class SealedCycle
 
     public DateTime? EffectiveDateUtc { get; set; }
 
+    /// <summary>
+    /// Who sealed the record, from their signed-in identity (US-15, F15). Schema 1.4 onwards.
+    /// Sealing is the approver's act of approval, so before 1.4 it is the approver.
+    /// </summary>
+    public string? SealedBy { get; set; }
+
     /// <summary>The sealed record this one replaces (F22). Schema 1.3 onwards; null when it replaces none.</summary>
     public SealedReference? Supersedes { get; set; }
 }
@@ -225,9 +234,36 @@ public sealed class SealedCapability
 
     public decimal ForecastCommercialUse { get; set; }
 
+    /// <summary>Machine, Staff or Stated; schema 1.4 onwards, null before.</summary>
+    public string? CapacityBaseline { get; set; }
+
+    /// <summary>The baseline the deductions came off, in the billable unit. 1.4 onwards.</summary>
+    public decimal? BaselineCapacity { get; set; }
+
+    public string? StatedBaselineNote { get; set; }
+
+    public bool? IsStaffReliant { get; set; }
+
+    public decimal? StaffFte { get; set; }
+
+    /// <summary>Why a forecast above usable capacity can be met (US-08). 1.4 onwards.</summary>
+    public string? AboveCapacityReason { get; set; }
+
+    public List<SealedDeduction> CapacityDeductions { get; set; } = [];
+
     public SealedResult? Result { get; set; }
 
     public SealedWorkings? Workings { get; set; }
+}
+
+/// <summary>One reason a capability is unavailable for part of its baseline (US-07).</summary>
+public sealed class SealedDeduction
+{
+    public string? Kind { get; set; }
+
+    public decimal Amount { get; set; }
+
+    public string? Note { get; set; }
 }
 
 /// <summary>One cost or income line, in the words the custodian entered it.</summary>
@@ -252,6 +288,20 @@ public sealed class SealedCost
     public string? PersonnelName { get; set; }
 
     public string? Notes { get; set; }
+
+    public string? Supplier { get; set; }
+
+    public string? FundingType { get; set; }
+
+    public decimal? FloorArea { get; set; }
+
+    public decimal? FloorAreaRate { get; set; }
+
+    /// <summary>
+    /// Worded as <c>CostEntry.Types.Income</c> in the web project, which this assembly does not
+    /// reference. A snapshot stores the words, so the words are what is compared.
+    /// </summary>
+    public bool IsIncome => CostType == "Non-variable income";
 }
 
 /// <summary>
@@ -276,6 +326,13 @@ public sealed class SealedResult
     public decimal TotalIncome { get; set; }
 
     public decimal ForecastUtilisation { get; set; }
+
+    /// <summary>The unrounded rates the engine returned, kept beside the displayed ones.</summary>
+    public decimal? UwaRate { get; set; }
+
+    public decimal? ApfrRate { get; set; }
+
+    public decimal? CommercialRate { get; set; }
 
     public decimal DisplayUwaRate { get; set; }
 

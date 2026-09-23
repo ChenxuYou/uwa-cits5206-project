@@ -223,8 +223,9 @@ public class SealedRecordsTests
         await using var db = CreateDb();
         var id = await Sealed(db);
 
-        // Years later: a new method with a different k becomes current, and a stored row is
-        // edited. Neither may reach a record that was sealed before them [N6, N7].
+        // Years later: a new method with a different k becomes current. It may not reach a
+        // record that was sealed before it [N6, N7]. (The rows themselves cannot be edited
+        // once sealed — see SealTests.)
         db.MethodConfigs.Add(new MethodConfig
         {
             Version = "2029.1",
@@ -233,8 +234,6 @@ public class SealedRecordsTests
             RateDecimals = 2,
             IsCurrent = true
         });
-        var cost = await db.RicCostEntries.SingleAsync();
-        cost.Amount = 300_000m;
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
 
@@ -271,12 +270,23 @@ public class SealedRecordsTests
     public async Task ADamagedSnapshotIsReportedRatherThanRendered()
     {
         await using var db = CreateDb();
-        var id = await Sealed(db);
-
-        var cycle = await db.RicCycles.SingleAsync(x => x.Id == id);
-        cycle.SnapshotJson = "{ not json";
+        // Damage happens beneath the application, which refuses to write to a sealed record,
+        // so the damaged record is stored as such rather than edited into that state.
+        var damaged = new RicCycle
+        {
+            PlatformName = "Microscopy",
+            StartYear = 2026,
+            EndYear = 2027,
+            Status = "Sealed",
+            CreatedBy = "entry",
+            SealedAtUtc = DateTime.UtcNow,
+            SnapshotJson = "{ not json",
+            SnapshotHash = "0000"
+        };
+        db.RicCycles.Add(damaged);
         await db.SaveChangesAsync();
         db.ChangeTracker.Clear();
+        var id = damaged.Id;
 
         var page = RecordPage(db, Custodian());
         Assert.IsType<PageResult>(await page.OnGetAsync(id));

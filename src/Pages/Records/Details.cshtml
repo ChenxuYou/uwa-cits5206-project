@@ -64,7 +64,7 @@
                         <tr><th scope="row">Submitted for approval</th><td>@(sealedCycle?.SubmittedBy ?? "—"), @RecordFormat.Timestamp(sealedCycle?.SubmittedAtUtc)</td></tr>
                         <tr><th scope="row">Approved by delegated authority</th><td>@(sealedCycle?.ApprovedBy ?? "—"), @RecordFormat.Timestamp(sealedCycle?.ApprovedAtUtc)</td></tr>
                         <tr><th scope="row">Rates effective from</th><td>@RecordFormat.Date(sealedCycle?.EffectiveDateUtc)</td></tr>
-                        <tr><th scope="row">Sealed</th><td>@RecordFormat.Timestamp(record.SealedAtUtc)</td></tr>
+                        <tr><th scope="row">Sealed by</th><td>@(sealedCycle?.SealedBy ?? sealedCycle?.ApprovedBy ?? "—"), @RecordFormat.Timestamp(record.SealedAtUtc)</td></tr>
                         @if (sealedCycle?.Supersedes is { } replaced)
                         {
                             <tr>
@@ -176,19 +176,19 @@
                                 <tr>
                                     <th scope="row">UWA researcher</th>
                                     <td>@RecordFormat.Rate(result.DisplayUwaRate, unit)</td>
-                                    <td><strong>@RecordFormat.Rate(result.ProposedUwaRate, unit)</strong></td>
+                                    <td><strong>@RecordFormat.Rate(result.ProposedUwaRate, unit)</strong><small>@RecordFormat.Variance(result.DisplayUwaRate, result.ProposedUwaRate)</small></td>
                                     <td><code>@(capability.Workings?.UwaResearcher ?? "—")</code></td>
                                 </tr>
                                 <tr>
                                     <th scope="row">APFR</th>
                                     <td>@RecordFormat.Rate(result.DisplayApfrRate, unit)</td>
-                                    <td><strong>@RecordFormat.Rate(result.ProposedApfrRate, unit)</strong></td>
+                                    <td><strong>@RecordFormat.Rate(result.ProposedApfrRate, unit)</strong><small>@RecordFormat.Variance(result.DisplayApfrRate, result.ProposedApfrRate)</small></td>
                                     <td><code>@(capability.Workings?.Apfr ?? "—")</code></td>
                                 </tr>
                                 <tr>
                                     <th scope="row">Commercial</th>
                                     <td>@RecordFormat.Rate(result.DisplayCommercialRate, unit)</td>
-                                    <td><strong>@RecordFormat.Rate(result.ProposedCommercialRate, unit)</strong></td>
+                                    <td><strong>@RecordFormat.Rate(result.ProposedCommercialRate, unit)</strong><small>@RecordFormat.Variance(result.DisplayCommercialRate, result.ProposedCommercialRate)</small></td>
                                     <td><code>@(capability.Workings?.Commercial ?? "—")</code></td>
                                 </tr>
                             </tbody>

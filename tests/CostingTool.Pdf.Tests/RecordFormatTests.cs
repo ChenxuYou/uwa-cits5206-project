@@ -64,4 +64,14 @@ public class RecordFormatTests
         Assert.Equal("16 September 2026", RecordFormat.Date(new DateTime(2026, 9, 16, 0, 0, 0, DateTimeKind.Utc)));
         Assert.Equal("—", RecordFormat.Date(null));
     }
+
+    [Theory]
+    [InlineData(100, 100, "matches")]
+    [InlineData(270, 240, "$30.00 below (11.1%)")]
+    [InlineData(162, 170, "$8.00 above (4.9%)")]
+    [InlineData(0, 5, "$5.00 above")]
+    public void Variance_is_said_in_words_with_its_direction(decimal calculated, decimal proposed, string expected)
+    {
+        Assert.Equal(expected, RecordFormat.Variance(calculated, proposed));
+    }
 }

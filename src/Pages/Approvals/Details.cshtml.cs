@@ -74,7 +74,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
         if (!confirmApproval)
         {
-            ModelState.AddModelError(string.Empty, "Confirm delegated authority approval before sealing the record.");
+            ModelState.AddModelError(string.Empty, "Confirm that you approve these rates and understand that, once sealed, the record cannot be edited or deleted.");
             return Page();
         }
 
@@ -156,7 +156,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
         var snapshot = new
         {
-            SchemaVersion = "1.3",
+            SchemaVersion = "1.4",
             SealedAtUtc = Cycle.SealedAtUtc,
             MethodVersion = method.Version,
             Method = new
@@ -191,6 +191,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
                 Cycle.ApprovedAtUtc,
                 Cycle.ApprovalComment,
                 Cycle.EffectiveDateUtc,
+                Cycle.SealedBy,
                 Supersedes = replaced is null ? null : new
                 {
                     replaced.Id,
@@ -220,6 +221,13 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
                 capability.ForecastUwaUse,
                 capability.ForecastApfrUse,
                 capability.ForecastCommercialUse,
+                capability.CapacityBaseline,
+                BaselineCapacity = BaselineOf(capability),
+                capability.StatedBaselineNote,
+                capability.IsStaffReliant,
+                capability.StaffFte,
+                capability.AboveCapacityReason,
+                CapacityDeductions = capability.CapacityDeductions.OrderBy(x => x.Id).Select(x => new { x.Kind, x.Amount, x.Note }),
                 capability.ProposedUwaRate,
                 capability.ProposedApfrRate,
                 capability.ProposedCommercialRate,
@@ -250,12 +258,26 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
                 x.BaseSalary,
                 x.Description,
                 x.Supplier,
+                x.Position,
+                x.FloorArea,
+                x.FloorAreaRate,
                 YearAmounts = x.YearAmounts.OrderBy(y => y.ProjectYear).Select(y => new { y.ProjectYear, y.Amount })
             })
         };
 
         return JsonSerializer.Serialize(snapshot, new JsonSerializerOptions { WriteIndented = true });
     }
+
+    /// <summary>
+    /// The figure the capability's deductions came off, as the capacity step worked it out:
+    /// the custodian's own for a stated baseline, otherwise the method's working year in the
+    /// billable unit. Null when the capacity step was never saved.
+    /// </summary>
+    private decimal? BaselineOf(RicCapability capability) =>
+        capability.CapacityBaseline == CapacityBaseline.Stated
+            ? capability.StatedBaseline
+            : CapacityEngine.BaselinesFor(Rates.Method, Cycle.BillableUnit)
+                .FirstOrDefault(x => x.Key == capability.CapacityBaseline)?.Amount;
 
     /// <summary>The arithmetic, written out with this capability's own numbers in it.</summary>
     private static object? Workings(CapabilityRateResult? r) => r is null ? null : new
@@ -282,7 +304,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
     private async Task<bool> Load(int id)
     {
         var cycle = await db.RicCycles
-            .Include(x => x.Capabilities)
+            .Include(x => x.Capabilities).ThenInclude(x => x.CapacityDeductions)
             .Include(x => x.Costs).ThenInclude(x => x.Capability)
             .Include(x => x.Costs).ThenInclude(x => x.YearAmounts)
             .FirstOrDefaultAsync(x => x.Id == id);
@@ -294,7 +316,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
         Cycle = cycle;
         Rates = Cycle.Status == "Sealed"
-            ? calculator.CalculateAsAt(Cycle, Cycle.MethodVersion)
+            ? SealedRates.Of(Cycle)
             : calculator.Calculate(Cycle);
 
         EffectiveDate ??= DateTime.Today;

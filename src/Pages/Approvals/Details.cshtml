@@ -121,17 +121,17 @@
             </tbody><tfoot><tr><td colspan="4">Average annual total entered</td><td colspan="2">@Model.Cycle.Costs.Sum(x=>x.Amount).ToString("C")</td></tr></tfoot></table></div></article>
             <article class="review-card"><div class="review-card-heading"><h2>Evidence</h2></div><div class="review-notes"><div><span>Benchmarking</span><p>@(Model.Cycle.BenchmarkNotes ?? "Not recorded")</p></div><div><span>Pricing justification</span><p>@(Model.Cycle.PricingJustification ?? "Not recorded")</p></div></div></article>
             @if (Model.Cycle.Status == "Returned") { <div class="return-banner"><strong>Returned by @Model.Cycle.ReturnedBy</strong><p>@Model.Cycle.ReturnReason</p></div> }
-            @if (Model.Cycle.Status == "Sealed") { <article class="integrity-card"><span>◆</span><div><strong>Approved and sealed by @Model.Cycle.ApprovedBy</strong><p>Effective @Model.Cycle.EffectiveDateUtc?.ToString("dd MMM yyyy") · @Model.Cycle.ApprovalComment</p><code>@Model.Cycle.SnapshotHash</code></div></article> }
+            @if (Model.Cycle.Status == "Sealed") { <article class="integrity-card"><span>◆</span><div><strong>Approved and sealed by @(Model.Cycle.SealedBy ?? Model.Cycle.ApprovedBy)</strong><p>Sealed @Model.Cycle.SealedAtUtc?.ToLocalTime().ToString("dd MMM yyyy, h:mm tt") under method @Model.Cycle.MethodVersion · effective @Model.Cycle.EffectiveDateUtc?.ToString("dd MMM yyyy") · @Model.Cycle.ApprovalComment</p><code>@Model.Cycle.SnapshotHash</code></div></article> }
         </main>
 
         <aside class="submit-panel approval-actions">
         @if (Model.Cycle.Status == "Submitted")
         {
-            <span class="submit-icon">✓</span><h2>Record a decision</h2><p>Approval creates an immutable snapshot. Return the cycle if any figure or evidence needs correction.</p>
+            <span class="submit-icon">✓</span><h2>Record a decision</h2><p>Approving seals the record: the figures, workings and reasons are stored as they are now and can no longer be edited or deleted by anyone. Return the cycle if any figure or evidence needs correction.</p>
             <form method="post" asp-page-handler="Approve" asp-route-id="@Model.Cycle.Id">
                 <label class="field"><span>Effective date</span><input asp-for="EffectiveDate" type="date"></label>
                 <label class="field"><span>Approval comment</span><textarea asp-for="ApprovalComment" rows="3" placeholder="Optional decision note"></textarea></label>
-                <label class="confirmation"><input type="checkbox" name="confirmApproval" value="true"><span>I have reviewed the costing basis, capacity assumptions, proposed rates and supporting evidence.</span></label>
+                <label class="confirmation"><input type="checkbox" name="confirmApproval" value="true"><span>I have reviewed the costing basis, capacity assumptions, proposed rates and supporting evidence, and I understand that once sealed this record cannot be edited or deleted — a later change needs a new cycle that replaces it.</span></label>
                 <button type="submit" class="submit-button">Approve &amp; seal <span>✓</span></button>
             </form>
             <details class="return-form"><summary>Return for changes</summary><form method="post" asp-page-handler="Return" asp-route-id="@Model.Cycle.Id"><label class="field"><span>Required changes <b>*</b></span><textarea asp-for="ReturnReason" rows="4" placeholder="Tell the submitter exactly what to update"></textarea></label><button type="submit" class="return-button">Return to submitter</button></form></details>

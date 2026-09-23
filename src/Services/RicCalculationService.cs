@@ -17,15 +17,6 @@ public class MethodConfigProvider(CostingDbContext db)
         .Where(x => x.IsCurrent)
         .OrderByDescending(x => x.EffectiveFromUtc)
         .FirstOrDefault() ?? MethodConfig.Fallback;
-
-    /// <summary>
-    /// The version a sealed record was calculated under, so an old record reproduces its
-    /// own figures rather than today's.
-    /// </summary>
-    public MethodConfig ForVersion(string? version) =>
-        string.IsNullOrWhiteSpace(version)
-            ? Current
-            : db.MethodConfigs.FirstOrDefault(x => x.Version == version) ?? Current;
 }
 
 /// <summary>
@@ -51,13 +42,6 @@ public class RicCalculationService(MethodConfigProvider methods)
     /// throws rather than quietly pricing an unloaded collection at zero.
     /// </remarks>
     public CycleRates Calculate(RicCycle cycle) => Calculate(cycle, methods.Current);
-
-    /// <summary>
-    /// Price every capability under a named method version — used when reopening a sealed
-    /// record, so it reproduces its own figures rather than today's (rule R6).
-    /// </summary>
-    public CycleRates CalculateAsAt(RicCycle cycle, string? methodVersion) =>
-        Calculate(cycle, methods.ForVersion(methodVersion));
 
     /// <summary>
     /// Where every operating cost in the cycle sits: against which capability, or at platform
