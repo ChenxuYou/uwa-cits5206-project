@@ -1,0 +1,88 @@
+@page
+@model CostingTool.Pages.Records.IndexModel
+@{
+    ViewData["Title"] = "Sealed records";
+}
+<div class="page-wrap approval-page">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">SEALED RECORDS · READ ONLY</p>
+            <h1>Sealed records</h1>
+            <p>
+                @(Model.SeesEveryRecord ? "Every approved costing record, for every platform." : "Your approved costing records.")
+                Open one to see the rates, the workings behind them, the reasons given and the method they were calculated under, exactly as they were sealed.
+            </p>
+        </div>
+    </div>
+
+    @if (Model.PlatformNames.Count > 1 || Model.Platform is not null)
+    {
+        <form method="get" class="admin-filters">
+            <label class="field">
+                <span>Platform</span>
+                <select name="platform">
+                    <option value="">All platforms</option>
+                    @foreach (var name in Model.PlatformNames)
+                    {
+                        <option value="@name" selected="@(string.Equals(Model.Platform, name, StringComparison.OrdinalIgnoreCase))">@name</option>
+                    }
+                </select>
+            </label>
+            <button class="secondary-action" type="submit">Apply</button>
+            <a class="secondary-action" asp-page="/Records/Index">Clear</a>
+        </form>
+    }
+
+    @if (Model.Count == 0)
+    {
+        <article class="panel approval-list">
+            <div class="empty-state">
+                @(Model.Platform is null ? "No record has been sealed yet. A record appears here once the delegated authority approves it." : "No sealed records for this platform.")
+            </div>
+        </article>
+    }
+
+    @foreach (var platform in Model.Platforms)
+    {
+        <article class="review-card">
+            <div class="review-card-heading">
+                <h2>@platform.Name</h2>
+                <span>@platform.Records.Count sealed record@(platform.Records.Count == 1 ? "" : "s")</span>
+            </div>
+            <div class="review-table-wrap" role="region" aria-label="Sealed records for @platform.Name" tabindex="0">
+                <table class="review-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Pricing period</th>
+                            <th scope="col">Sealed</th>
+                            <th scope="col">State</th>
+                            <th scope="col">Method</th>
+                            <th scope="col">Prepared by</th>
+                            <th scope="col">Approved by</th>
+                            <th scope="col"><span class="visually-hidden">Open</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var record in platform.Records)
+                        {
+                            <tr>
+                                <td><strong>@record.StartYear–@record.EndYear</strong></td>
+                                <td>@(record.SealedAtUtc?.ToLocalTime().ToString("dd MMM yyyy") ?? "—")</td>
+                                <td>
+                                    <span class="status-pill @(record.IsSuperseded ? "superseded" : "sealed")">@(record.IsSuperseded ? "Superseded" : "Current")</span>
+                                </td>
+                                <td>@(string.IsNullOrEmpty(record.MethodVersion) ? "—" : record.MethodVersion)</td>
+                                <td>@record.PreparedBy</td>
+                                <td>@(record.ApprovedBy ?? "—")</td>
+                                <td>
+                                    <a class="text-link" asp-page="/Records/Details" asp-route-id="@record.Id"
+                                       aria-label="Open the @platform.Name @record.StartYear–@record.EndYear record">Open →</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    }
+</div>

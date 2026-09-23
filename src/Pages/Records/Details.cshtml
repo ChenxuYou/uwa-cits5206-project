@@ -1,0 +1,275 @@
+@page
+@model CostingTool.Pages.Records.DetailsModel
+@using CostingTool.Pdf
+@{
+    ViewData["Title"] = $"{Model.Cycle.PlatformName} {Model.Cycle.StartYear}–{Model.Cycle.EndYear}";
+
+    // Everything below is read from the snapshot, not from Model.Cycle's rows — see DetailsModel.
+    var record = Model.Record;
+    var sealedCycle = record?.Cycle;
+    var method = record?.Method;
+    var unit = sealedCycle?.BillableUnit ?? Model.Cycle.BillableUnit;
+    var capabilityNames = record?.Capabilities.ToDictionary(x => x.Id, x => x.Name ?? x.Result?.CapabilityName ?? "Capability") ?? [];
+}
+<div class="page-wrap ric-page sealed-record-page">
+    <nav class="breadcrumb"><a asp-page="/Records/Index">Sealed records</a><span>›</span><span>@Model.Cycle.PlatformName @Model.Cycle.StartYear–@Model.Cycle.EndYear</span></nav>
+
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">SEALED RECORD · READ ONLY</p>
+            <h1>@(sealedCycle?.PlatformName ?? Model.Cycle.PlatformName)</h1>
+            <p>
+                Pricing period @(sealedCycle?.StartYear ?? Model.Cycle.StartYear)–@(sealedCycle?.EndYear ?? Model.Cycle.EndYear)
+                · billed in @unit.ToLowerInvariant()
+                · sealed @RecordFormat.Date(record?.SealedAtUtc ?? Model.Cycle.SealedAtUtc)
+                · method @(record?.MethodVersion ?? Model.Cycle.MethodVersion)
+            </p>
+        </div>
+        <span class="status-pill @(Model.IsSuperseded ? "superseded" : "sealed")">@(Model.IsSuperseded ? "Superseded" : "Current")</span>
+    </div>
+
+    @if (Model.ReadError is not null)
+    {
+        <div class="return-banner">
+            <strong>This record could not be read</strong>
+            <p>@Model.ReadError</p>
+            <small>Snapshot @(Model.Cycle.SnapshotHash ?? "hash not recorded")</small>
+        </div>
+    }
+    else if (record is not null)
+    {
+        @if (Model.ReplacedBy is { } successor)
+        {
+            <div class="replace-note">
+                <p>
+                    <strong>Superseded.</strong> The @successor.StartYear–@successor.EndYear record, sealed on
+                    @RecordFormat.Date(successor.SealedAtUtc), replaced this one. This record stays exactly as it was approved.
+                    <a class="text-link" asp-page="/Records/Details" asp-route-id="@successor.Id">Open the record that replaced it</a>
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="replace-note">
+                <p><strong>Current.</strong> These are the rates in force for this platform until a later record replaces them.</p>
+            </div>
+        }
+
+        <article class="review-card">
+            <div class="review-card-heading"><h2>The record</h2></div>
+            <div class="review-table-wrap">
+                <table class="review-table record-facts">
+                    <tbody>
+                        <tr><th scope="row">Prepared by</th><td>@(sealedCycle?.CreatedByDisplay ?? "—")</td></tr>
+                        <tr><th scope="row">Submitted for approval</th><td>@(sealedCycle?.SubmittedBy ?? "—"), @RecordFormat.Timestamp(sealedCycle?.SubmittedAtUtc)</td></tr>
+                        <tr><th scope="row">Approved by delegated authority</th><td>@(sealedCycle?.ApprovedBy ?? "—"), @RecordFormat.Timestamp(sealedCycle?.ApprovedAtUtc)</td></tr>
+                        <tr><th scope="row">Rates effective from</th><td>@RecordFormat.Date(sealedCycle?.EffectiveDateUtc)</td></tr>
+                        <tr><th scope="row">Sealed</th><td>@RecordFormat.Timestamp(record.SealedAtUtc)</td></tr>
+                        @if (sealedCycle?.Supersedes is { } replaced)
+                        {
+                            <tr>
+                                <th scope="row">Replaces</th>
+                                <td>
+                                    @(replaced.PlatformName ?? "—") @replaced.StartYear–@replaced.EndYear, sealed @RecordFormat.Date(replaced.SealedAtUtc)
+                                    @if (Model.ReplacesId is { } replacesId)
+                                    {
+                                        <a class="text-link" asp-page="/Records/Details" asp-route-id="@replacesId">Open it</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(sealedCycle?.ApprovalComment))
+                        {
+                            <tr><th scope="row">Approver's comment</th><td class="notes-cell">@sealedCycle.ApprovalComment</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="review-card">
+            <div class="review-card-heading">
+                <h2>How these rates were calculated</h2>
+                <span>Method @(method?.Version ?? record.MethodVersion ?? "—")</span>
+            </div>
+            <div class="replace-note">
+                <p>
+                    The University's costing method as it stood when this record was sealed. A later change to the
+                    method or to <i>k</i> does not change this record: every figure on this page is the one that was approved.
+                </p>
+            </div>
+            <div class="review-table-wrap">
+                <table class="review-table record-facts">
+                    <tbody>
+                        <tr>
+                            <th scope="row">Indirect cost recovery (<i>k</i>)</th>
+                            <td>@(method is null ? "—" : $"{method.IndirectCostRecovery.ToString("0.00", RecordFormat.Culture)} — a {((method.IndirectCostRecovery - 1m) * 100m).ToString("0.#", RecordFormat.Culture)}% uplift")</td>
+                        </tr>
+                        <tr><th scope="row">Rounding</th><td>@(method is null ? "—" : CostingTool.Pages.Records.DetailsModel.Rounding(method))</td></tr>
+                        <tr><th scope="row">Source of the method</th><td>@(method?.Source ?? "—")</td></tr>
+                        @if (method?.Formulas is { } formulas)
+                        {
+                            <tr><th scope="row">UWA researcher</th><td><code>@formulas.UwaResearcher</code></td></tr>
+                            <tr><th scope="row">APFR</th><td><code>@formulas.Apfr</code></td></tr>
+                            <tr><th scope="row">Commercial</th><td><code>@formulas.Commercial</code></td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        @if (record.Platform is { } platform)
+        {
+            <section class="review-kpis" aria-label="The platform, at the proposed rates">
+                <div><span>Total operating cost</span><strong>@RecordFormat.Money(platform.TotalOperatingCost)</strong></div>
+                @if (platform.NetCostToRecover is { } netCost)
+                {
+                    <div><span>Cost to recover from usage<small>after non-variable income</small></span><strong>@RecordFormat.Money(netCost)</strong></div>
+                }
+                <div>
+                    <span>
+                        @(platform.NetCostToRecover is null ? "Forecast revenue at the proposed rates" : "Retained at the proposed rates")
+                        @if (platform.OverheadsRecovered is not null)
+                        {
+                            <small>University overheads recovered: @RecordFormat.Money(platform.OverheadsRecovered ?? 0m)</small>
+                        }
+                    </span>
+                    <strong>@RecordFormat.Money(platform.ForecastRevenue)</strong>
+                </div>
+                <div class="@(platform.ForecastBalance >= 0 ? "positive-kpi" : "negative-kpi")">
+                    <span>
+                        Forecast balance
+                        @if (platform.FullEconomicCostBalance is not null)
+                        {
+                            <small>against full economic cost: @RecordFormat.Balance(platform.FullEconomicCostBalance ?? 0m)</small>
+                        }
+                    </span>
+                    <strong>@RecordFormat.Balance(platform.ForecastBalance)</strong>
+                </div>
+            </section>
+        }
+
+        @foreach (var capability in record.Capabilities)
+        {
+            var result = capability.Result;
+            var name = capability.Name ?? result?.CapabilityName ?? "Capability";
+            <article class="review-card">
+                <div class="review-card-heading">
+                    <h2>@name</h2>
+                    <span>GST exclusive</span>
+                </div>
+                @if (result is null)
+                {
+                    <div class="callout">
+                        <span>!</span>
+                        <div><strong>No rates were stored for this capability</strong><p>A record is never sealed around a capability that could not be priced, so this means the stored record is damaged. Raise it rather than re-sealing.</p></div>
+                    </div>
+                }
+                else
+                {
+                    <div class="review-table-wrap" role="region" aria-label="@name rates" tabindex="0">
+                        <table class="review-table">
+                            <thead>
+                                <tr><th scope="col">Rate</th><th scope="col">Minimum sustainable</th><th scope="col">Proposed and charged</th><th scope="col">How the minimum was worked out</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">UWA researcher</th>
+                                    <td>@RecordFormat.Rate(result.DisplayUwaRate, unit)</td>
+                                    <td><strong>@RecordFormat.Rate(result.ProposedUwaRate, unit)</strong></td>
+                                    <td><code>@(capability.Workings?.UwaResearcher ?? "—")</code></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">APFR</th>
+                                    <td>@RecordFormat.Rate(result.DisplayApfrRate, unit)</td>
+                                    <td><strong>@RecordFormat.Rate(result.ProposedApfrRate, unit)</strong></td>
+                                    <td><code>@(capability.Workings?.Apfr ?? "—")</code></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Commercial</th>
+                                    <td>@RecordFormat.Rate(result.DisplayCommercialRate, unit)</td>
+                                    <td><strong>@RecordFormat.Rate(result.ProposedCommercialRate, unit)</strong></td>
+                                    <td><code>@(capability.Workings?.Commercial ?? "—")</code></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <dl class="previous-figures record-figures">
+                        <div><dt>Booked to this capability</dt><dd>@RecordFormat.Money(result.CapabilityOperatingCost)</dd></div>
+                        <div><dt>Share of platform-level cost</dt><dd>@RecordFormat.Money(result.AllocatedPlatformCost)</dd></div>
+                        <div><dt>Total operating cost (C)</dt><dd>@RecordFormat.Money(result.TotalOperatingCost)</dd></div>
+                        <div><dt>UWA non-variable income</dt><dd>@RecordFormat.Money(result.UwaIncome)</dd></div>
+                        <div><dt>Non-UWA non-variable income</dt><dd>@RecordFormat.Money(result.NonUwaIncome)</dd></div>
+                        <div><dt>Forecast utilisation (U)</dt><dd>@RecordFormat.Quantity(result.ForecastUtilisation, unit)</dd></div>
+                    </dl>
+                }
+            </article>
+        }
+
+        @if (record.Costs.Count > 0)
+        {
+            <article class="review-card">
+                <div class="review-card-heading"><h2>The costs and income behind the totals</h2><span>@record.Costs.Count line@(record.Costs.Count == 1 ? "" : "s") · annual figures</span></div>
+                <div class="review-table-wrap" role="region" aria-label="Costs and income" tabindex="0">
+                    <table class="review-table">
+                        <thead>
+                            <tr><th scope="col">Item</th><th scope="col">Category</th><th scope="col">Booked to</th><th scope="col">Annual amount</th><th scope="col">Notes</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var line in record.Costs.OrderBy(x => x.CostType == CostEntry.Types.Income).ThenBy(x => x.Category))
+                            {
+                                var income = line.CostType == CostEntry.Types.Income;
+                                <tr>
+                                    <td><strong>@(line.Description ?? line.PersonnelName ?? line.Category)</strong></td>
+                                    <td><span class="category-chip">@line.Category</span><small>@(income ? "Non-variable income" : "Operating cost")</small></td>
+                                    <td>@(line.RicCapabilityId is { } capabilityId && capabilityNames.TryGetValue(capabilityId, out var bookedTo) ? bookedTo : "Platform")</td>
+                                    <td><strong>@(income ? "−" : "")@RecordFormat.Money(line.Amount)</strong></td>
+                                    <td class="notes-cell">@(line.Notes ?? "—")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        }
+
+        <article class="review-card">
+            <div class="review-card-heading"><h2>Why these rates were proposed</h2></div>
+            <div class="review-notes">
+                <div><span>Pricing justification</span><p>@(sealedCycle?.PricingJustification ?? "Not recorded")</p></div>
+                <div><span>Utilisation assumptions</span><p>@(sealedCycle?.UtilisationAssumptions ?? "Not recorded")</p></div>
+                <div><span>Benchmarking</span><p>@(sealedCycle?.BenchmarkNotes ?? "Not recorded")</p></div>
+            </div>
+        </article>
+    }
+
+    <article class="integrity-card">
+        <span>◆</span>
+        <div>
+            <strong>@(Model.HashMatches ? "Integrity checked" : "Integrity check failed")</strong>
+            <p>
+                @if (!Model.HashMatches)
+                {
+                    <text>The stored snapshot no longer produces the hash recorded when it was sealed. Do not re-seal it; raise it, because the hash is the evidence of what it used to say.</text>
+                }
+                else if (record is null)
+                {
+                    <text>The stored snapshot still produces the SHA-256 hash recorded when it was sealed, so it has not changed since; it is the snapshot itself that cannot be read.</text>
+                }
+                else
+                {
+                    <text>The stored snapshot still produces the SHA-256 hash recorded when it was sealed, so this page shows what was approved. Snapshot schema @record.SchemaVersion.</text>
+                }
+            </p>
+            <code>@(Model.Cycle.SnapshotHash ?? "(not recorded)")</code>
+            @if (Model.ReadError is null)
+            {
+                <p>
+                    <a class="outline-action" asp-page="/Records/Details" asp-page-handler="Pdf" asp-route-id="@Model.Cycle.Id">
+                        Download the sealed record (PDF)
+                    </a>
+                </p>
+            }
+        </div>
+    </article>
+</div>

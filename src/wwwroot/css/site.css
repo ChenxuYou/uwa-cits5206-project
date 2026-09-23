@@ -855,3 +855,34 @@ a.ric-step-link:focus-visible {
 .submit-panel .full-button + .full-button { margin-top: 9px; }
 .status-pill.superseded { background: #eef1f5; color: #5c6879; }
 .my-cycle-row > b { white-space: nowrap; }
+
+/* Sealed records register and record page (US-17). */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+.sealed-record-page > .replace-note { margin: 0 0 18px; }
+.record-facts th[scope="row"] {
+    width: 34%;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+}
+.sealed-record-page .review-table code {
+    font-size: 12px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+.record-figures { border-top: 1px solid var(--line); }
+@media (max-width: 640px) {
+    .record-facts th[scope="row"] { width: auto; }
+    .record-figures { grid-template-columns: 1fr; }
+}

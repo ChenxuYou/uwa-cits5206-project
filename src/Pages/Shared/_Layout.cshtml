@@ -53,6 +53,12 @@
                         }
                     </a>
                 }
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a class="@NavClass("/records")" asp-page="/Records/Index">
+                        <span class="nav-icon" aria-hidden="true">◆</span><span>Sealed records</span>
+                    </a>
+                }
                 @if (isApprover)
                 {
                     <a class="@NavClass("/approvals")" asp-page="/Approvals/Index">

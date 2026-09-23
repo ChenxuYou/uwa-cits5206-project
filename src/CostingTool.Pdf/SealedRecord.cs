@@ -54,6 +54,13 @@ public sealed class SealedRecord
     public List<SealedCapability> Capabilities { get; set; } = [];
 
     /// <summary>
+    /// The cost and income lines behind the totals, as they stood when sealed. The PDF prints
+    /// the totals only; the record page (US-17) lists the lines, so "why is C that much?" is
+    /// answered from the record too.
+    /// </summary>
+    public List<SealedCost> Costs { get; set; } = [];
+
+    /// <summary>
     /// Parse a snapshot.
     /// </summary>
     /// <exception cref="SealedRecordFormatException">
@@ -221,6 +228,30 @@ public sealed class SealedCapability
     public SealedResult? Result { get; set; }
 
     public SealedWorkings? Workings { get; set; }
+}
+
+/// <summary>One cost or income line, in the words the custodian entered it.</summary>
+public sealed class SealedCost
+{
+    public int Id { get; set; }
+
+    /// <summary>The capability it is booked to; null for a platform-level line.</summary>
+    public int? RicCapabilityId { get; set; }
+
+    public string? Scope { get; set; }
+
+    public string? CostType { get; set; }
+
+    public string? Category { get; set; }
+
+    /// <summary>The annual figure the engine used — the mean of the per-year amounts.</summary>
+    public decimal Amount { get; set; }
+
+    public string? Description { get; set; }
+
+    public string? PersonnelName { get; set; }
+
+    public string? Notes { get; set; }
 }
 
 /// <summary>
