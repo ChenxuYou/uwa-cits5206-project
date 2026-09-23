@@ -20,6 +20,12 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
     [BindProperty] public int? CapabilityId { get; set; }
 
+    /// <summary>
+    /// The cost line being changed, or null while adding one (US-10: change any value). The
+    /// form is the same either way; saving replaces the line's figures instead of adding a line.
+    /// </summary>
+    [BindProperty] public int? EditId { get; set; }
+
     [BindProperty] public string Scope { get; set; } = CostEntry.Scopes.Capability;
 
     [BindProperty] public string Category { get; set; } = CostEntry.CostCategories.EmployeeSalaryAndOnCosts;
@@ -82,7 +88,8 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
     /// </summary>
     public CycleCosts Costs => RicCalculationService.CostsOf(Cycle);
 
-    public async Task<IActionResult> OnGetAsync(int cycleId)
+    /// <param name="edit">A cost line of this cycle to open in the form for changing.</param>
+    public async Task<IActionResult> OnGetAsync(int cycleId, int? edit = null)
     {
         if (!await Load(cycleId))
         {
@@ -91,10 +98,30 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
         YearAmounts = Enumerable.Repeat(0m, YearCount).ToList();
 
+        if (edit is not null)
+        {
+            if (!Cycle.IsEditable)
+            {
+                return RedirectToPage("/Ric/Review", new { cycleId });
+            }
+
+            if (Editable(edit.Value) is not { } item)
+            {
+                return NotFound();
+            }
+
+            FillFormFrom(item);
+        }
+
         return Page();
     }
 
-    public async Task<IActionResult> OnPostAddAsync()
+    public Task<IActionResult> OnPostAddAsync() => SaveAsync();
+
+    /// <summary>Save changes to the line in <see cref="EditId"/>, held to the same checks as a new one.</summary>
+    public Task<IActionResult> OnPostUpdateAsync() => SaveAsync();
+
+    private async Task<IActionResult> SaveAsync()
     {
         if (!await Load(CycleId))
         {
@@ -106,6 +133,12 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
             return RedirectToPage("/Ric/Review", new { cycleId = CycleId });
         }
 
+        RicCostEntry? existing = null;
+        if (EditId is { } editId && (existing = Editable(editId)) is null)
+        {
+            return NotFound();
+        }
+
         ExplainUnreadableNumbers();
         Validate();
 
@@ -114,56 +147,102 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
             return Page();
         }
 
-        var amounts = AmountsByYear();
-        var isPersonnel = CostEntry.CostCategories.IsPersonnel(Category);
-        var isFloorArea = CostEntry.CostCategories.IsFloorArea(Category);
-
-        Db.RicCostEntries.Add(new RicCostEntry
+        if (existing is null)
         {
-            RicCycleId = CycleId,
+            existing = new RicCostEntry { RicCycleId = CycleId, CostType = CostEntry.Types.Cost };
+            Db.RicCostEntries.Add(existing);
+        }
+        else
+        {
+            Db.RicCostYearAmounts.RemoveRange(existing.YearAmounts);
+        }
 
-            // A line is booked either to one capability or to the platform, never to both.
-            // The engine's four aggregates rely on this being exclusive — see the note on
-            // RicCalculationService.InputsFor.
-            RicCapabilityId = Scope == CostEntry.Scopes.Capability ? CapabilityId : null,
-            Scope = Scope,
-            CostType = CostEntry.Types.Cost,
-            Category = Category,
-            Amount = amounts.Average(),
-            Notes = Notes,
-            Description = isPersonnel ? PersonnelName
-                : isFloorArea && string.IsNullOrWhiteSpace(Description) ? Category
-                : Description,
-            Supplier = Supplier,
-            Position = Category == CostEntry.CostCategories.PlatformLeaderSalary
-                ? CostEntry.Positions.PlatformLeader
-                : isPersonnel ? Position : null,
-            FloorArea = isFloorArea ? FloorArea : null,
-            FloorAreaRate = isFloorArea ? FloorAreaRate : null,
-
-            PersonnelName = isPersonnel ? PersonnelName : null,
-            FundingType = isPersonnel ? FundingType : null,
-            FellowshipType = isPersonnel && FundingType == "ARC Fellow" ? FellowshipType : null,
-            StepOption = isPersonnel ? StepOption : null,
-            WorkYears = isPersonnel ? WorkYears : null,
-            EmploymentType = isPersonnel ? EmploymentType : null,
-            PercentWorked = isPersonnel ? PercentWorked : null,
-            SuperannuationPercent = isPersonnel ? SuperannuationPercent : null,
-            StaffType = isPersonnel ? StaffType : null,
-            SalaryScale = isPersonnel ? SalaryScale : null,
-            SalaryStep = isPersonnel ? SalaryStep : null,
-            SchoolType = isPersonnel ? SchoolType : null,
-            BaseSalary = isPersonnel ? BaseSalary : null,
-
-            YearAmounts = amounts
-                .Select((amount, i) => new RicCostYearAmount { ProjectYear = i + 1, Amount = amount })
-                .ToList()
-        });
+        FillEntry(existing);
 
         Cycle.UpdatedAtUtc = DateTime.UtcNow;
         await Db.SaveChangesAsync();
 
         return RedirectToPage(new { cycleId = CycleId });
+    }
+
+    /// <summary>A cost line of the loaded cycle — never an income line, never another cycle's.</summary>
+    private RicCostEntry? Editable(int id) => Cycle.Costs.FirstOrDefault(x => x.Id == id && !x.IsIncome);
+
+    /// <summary>Write what the form holds onto a line, new or existing.</summary>
+    private void FillEntry(RicCostEntry entry)
+    {
+        var amounts = AmountsByYear();
+        var isPersonnel = CostEntry.CostCategories.IsPersonnel(Category);
+        var isFloorArea = CostEntry.CostCategories.IsFloorArea(Category);
+
+        // A line is booked either to one capability or to the platform, never to both.
+        // The engine's four aggregates rely on this being exclusive — see the note on
+        // RicCalculationService.InputsFor.
+        entry.RicCapabilityId = Scope == CostEntry.Scopes.Capability ? CapabilityId : null;
+        entry.Capability = Scope == CostEntry.Scopes.Capability ? Cycle.Capabilities.First(x => x.Id == CapabilityId) : null;
+        entry.Scope = Scope;
+        entry.Category = Category;
+        entry.Amount = amounts.Average();
+        entry.Notes = Notes;
+        entry.Description = isPersonnel ? PersonnelName
+            : isFloorArea && string.IsNullOrWhiteSpace(Description) ? Category
+            : Description;
+        entry.Supplier = Supplier;
+        entry.Position = Category == CostEntry.CostCategories.PlatformLeaderSalary
+            ? CostEntry.Positions.PlatformLeader
+            : isPersonnel ? Position : null;
+        entry.FloorArea = isFloorArea ? FloorArea : null;
+        entry.FloorAreaRate = isFloorArea ? FloorAreaRate : null;
+
+        entry.PersonnelName = isPersonnel ? PersonnelName : null;
+        entry.FundingType = isPersonnel ? FundingType : null;
+        entry.FellowshipType = isPersonnel && FundingType == "ARC Fellow" ? FellowshipType : null;
+        entry.StepOption = isPersonnel ? StepOption : null;
+        entry.WorkYears = isPersonnel ? WorkYears : null;
+        entry.EmploymentType = isPersonnel ? EmploymentType : null;
+        entry.PercentWorked = isPersonnel ? PercentWorked : null;
+        entry.SuperannuationPercent = isPersonnel ? SuperannuationPercent : null;
+        entry.StaffType = isPersonnel ? StaffType : null;
+        entry.SalaryScale = isPersonnel ? SalaryScale : null;
+        entry.SalaryStep = isPersonnel ? SalaryStep : null;
+        entry.SchoolType = isPersonnel ? SchoolType : null;
+        entry.BaseSalary = isPersonnel ? BaseSalary : null;
+
+        entry.YearAmounts = amounts
+            .Select((amount, i) => new RicCostYearAmount { ProjectYear = i + 1, Amount = amount })
+            .ToList();
+    }
+
+    /// <summary>Put a saved line back into the form, as it was entered.</summary>
+    private void FillFormFrom(RicCostEntry item)
+    {
+        EditId = item.Id;
+        Scope = item.Scope;
+        CapabilityId = item.RicCapabilityId;
+        Category = item.Category;
+        Position = item.Position;
+        FloorArea = item.FloorArea ?? 0m;
+        FloorAreaRate = item.FloorAreaRate ?? 0m;
+        Description = CostEntry.CostCategories.IsPersonnel(item.Category) ? null : item.Description;
+        Supplier = item.Supplier;
+        Notes = item.Notes;
+
+        PersonnelName = item.PersonnelName;
+        FundingType = item.FundingType;
+        FellowshipType = item.FellowshipType;
+        StepOption = item.StepOption;
+        WorkYears = item.WorkYears ?? WorkYears;
+        EmploymentType = item.EmploymentType;
+        PercentWorked = item.PercentWorked ?? PercentWorked;
+        SuperannuationPercent = item.SuperannuationPercent ?? SuperannuationPercent;
+        StaffType = item.StaffType;
+        SalaryScale = item.SalaryScale;
+        SalaryStep = item.SalaryStep;
+        SchoolType = item.SchoolType;
+        BaseSalary = item.BaseSalary ?? BaseSalary;
+
+        var saved = item.YearAmounts.OrderBy(x => x.ProjectYear).Select(x => x.Amount).ToList();
+        YearAmounts = Enumerable.Range(0, YearCount).Select(i => i < saved.Count ? saved[i] : 0m).ToList();
     }
 
     public async Task<IActionResult> OnPostDeleteAsync(int id)

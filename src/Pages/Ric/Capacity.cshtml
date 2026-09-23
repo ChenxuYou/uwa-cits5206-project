@@ -39,7 +39,7 @@
         <p>“@UtilisationGuidance.NotCapacity” Every rate is divided by the forecast, not by the capacity.</p>
     </section>
 
-    <form method="post" asp-page="/Ric/Capacity" asp-route-cycleId="@Model.Cycle.Id">
+    <form method="post" asp-page="/Ric/Capacity" asp-route-cycleId="@Model.Cycle.Id" data-unsaved-warning>
         <input type="hidden" asp-for="CycleId" />
         <div asp-validation-summary="All" class="form-errors"></div>
 
@@ -176,7 +176,8 @@
         </section>
 
         <div class="wizard-actions">
-            <a class="secondary-action" asp-page="/Ric/Funding" asp-route-cycleId="@Model.Cycle.Id">← Back to funding</a>
+            @* A link here would have thrown away everything typed on this screen — US-10. *@
+            <button class="secondary-action" type="submit" asp-page-handler="Back">← Save and go back to funding</button>
             <button class="primary-button" type="submit">Calculate rates →</button>
         </div>
     </form>

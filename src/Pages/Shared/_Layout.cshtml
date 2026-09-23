@@ -127,6 +127,26 @@
             const open = document.getElementById('sidebar')?.classList.toggle('open');
             menuButton.setAttribute('aria-expanded', String(!!open));
         });
+
+        // US-10: nothing is lost by navigating away without meaning to. A form marked
+        // data-unsaved-warning asks before the page is left by a link — the step bar, the
+        // breadcrumb, the sidebar — while it holds typed changes that no button has saved.
+        // A page rendered in answer to a post holds unsaved figures from the start: a save
+        // that succeeds redirects, so a post that comes back as a page was refused or was
+        // only a preview.
+        const postedBack = @(Microsoft.AspNetCore.Http.HttpMethods.IsPost(Context.Request.Method) ? "true" : "false");
+        document.querySelectorAll('form[data-unsaved-warning]').forEach(form => {
+            let dirty = postedBack;
+            form.addEventListener('input', () => { dirty = true; });
+            form.addEventListener('change', () => { dirty = true; });
+            form.addEventListener('submit', () => { dirty = false; });
+            window.addEventListener('beforeunload', event => {
+                if (dirty) {
+                    event.preventDefault();
+                    event.returnValue = '';
+                }
+            });
+        });
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

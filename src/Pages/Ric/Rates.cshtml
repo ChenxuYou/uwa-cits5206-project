@@ -45,7 +45,7 @@
        rendered at, and after "Update balance" (or a refused "Save and go back") that address
        carries ?handler=Preview or ?handler=Back — so "Review costing cycle" would run that
        handler again instead of saving. The two other buttons set their own formaction. *@
-    <form method="post" asp-page="/Ric/Rates" asp-route-cycleId="@Model.Cycle.Id">
+    <form method="post" asp-page="/Ric/Rates" asp-route-cycleId="@Model.Cycle.Id" data-unsaved-warning>
         <input type="hidden" asp-for="CycleId" />
         <div asp-validation-summary="All" class="form-errors"></div>
 
