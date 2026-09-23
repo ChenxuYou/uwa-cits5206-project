@@ -53,7 +53,11 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
         await db.SaveChangesAsync();
         TempData["Success"] = "The cycle was returned to the submitter for changes.";
-        return RedirectToPage("/Ric/Review", new { cycleId = id });
+
+        // Back to this page, not the custodian's review: /Ric is restricted to data entry, so
+        // an approver sent there lands on Access Denied after the decision has already been
+        // saved, and reads it as a failure (#80).
+        return RedirectToPage(new { id });
     }
 
     public async Task<IActionResult> OnPostApproveAsync(int id, bool confirmApproval)
@@ -117,7 +121,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
         await db.SaveChangesAsync();
         TempData["Success"] = "The costing cycle was approved and sealed.";
-        return RedirectToPage("/Ric/Review", new { cycleId = id });
+        return RedirectToPage(new { id });
     }
 
     private void Notify(string type, string title, string message) =>
