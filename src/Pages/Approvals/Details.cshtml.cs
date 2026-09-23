@@ -109,7 +109,14 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
         Cycle.Status = "Sealed";
         Cycle.UpdatedAtUtc = now;
 
-        Cycle.SnapshotJson = BuildSnapshot();
+        // The record this one replaces is named in the snapshot, with its own hash, so the
+        // chain from one approved rate to the next can be followed from the documents alone
+        // (F22). The older record is read, never written.
+        var replaced = Cycle.SupersedesCycleId is { } replacedId
+            ? await db.RicCycles.AsNoTracking().FirstOrDefaultAsync(x => x.Id == replacedId)
+            : null;
+
+        Cycle.SnapshotJson = BuildSnapshot(replaced);
         Cycle.SnapshotHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(Cycle.SnapshotJson)));
 
         Notify(
@@ -143,13 +150,13 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
     /// 2026 that the record show them "for transparency and traceability" — a rate that
     /// cannot be re-derived from the document is not a defensible rate.
     /// </summary>
-    private string BuildSnapshot()
+    private string BuildSnapshot(RicCycle? replaced)
     {
         var method = Rates.Method;
 
         var snapshot = new
         {
-            SchemaVersion = "1.2",
+            SchemaVersion = "1.3",
             SealedAtUtc = Cycle.SealedAtUtc,
             MethodVersion = method.Version,
             Method = new
@@ -183,7 +190,16 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
                 Cycle.ApprovedBy,
                 Cycle.ApprovedAtUtc,
                 Cycle.ApprovalComment,
-                Cycle.EffectiveDateUtc
+                Cycle.EffectiveDateUtc,
+                Supersedes = replaced is null ? null : new
+                {
+                    replaced.Id,
+                    replaced.PlatformName,
+                    replaced.StartYear,
+                    replaced.EndYear,
+                    replaced.SealedAtUtc,
+                    replaced.SnapshotHash
+                }
             },
             Platform = new
             {

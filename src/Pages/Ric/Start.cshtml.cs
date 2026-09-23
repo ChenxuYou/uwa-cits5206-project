@@ -1,6 +1,8 @@
 using CostingTool.Data;
 using CostingTool.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace CostingTool.Pages.Ric;
 
@@ -21,6 +23,13 @@ namespace CostingTool.Pages.Ric;
 /// so adding a year would mean inventing its amount and removing one would silently change
 /// the mean. Moving the period without changing its length is allowed.</item>
 /// </list>
+///
+/// <b>Replacing a sealed record</b> (US-01, F22). Opened with <c>?supersedes=</c> it starts
+/// the cycle that replaces one of the custodian's sealed records: the platform, unit and
+/// capabilities are carried over, the period starts where the old one ended, the old
+/// record's key figures sit alongside, and the new cycle keeps a reference to it. The old
+/// record itself is not touched. A new cycle for a platform that already has a sealed
+/// record is asked whether it replaces it, rather than being left to start unconnected.
 /// </summary>
 public class StartModel(CostingDbContext db) : RicPageModel(db)
 {
@@ -49,7 +58,31 @@ public class StartModel(CostingDbContext db) : RicPageModel(db)
     /// <summary>The custodian accepts that changing the unit clears capacity, forecasts and proposed rates.</summary>
     [BindProperty] public bool ConfirmUnitChange { get; set; }
 
+    /// <summary>The sealed record a new cycle replaces. Creating only; a cycle's reference is fixed once made.</summary>
+    [BindProperty(SupportsGet = true)] public int? Supersedes { get; set; }
+
+    /// <summary>The custodian says a new cycle for a platform with a sealed record does not replace it.</summary>
+    [BindProperty] public bool ConfirmNotReplacing { get; set; }
+
     public bool IsEditing => CycleId is not null;
+
+    /// <summary>
+    /// The sealed record whose figures sit alongside the form: the one being replaced, or
+    /// the one the platform name matched.
+    /// </summary>
+    public PreviousRecord? Previous { get; private set; }
+
+    /// <summary>The custodian's sealed records that nothing has replaced yet, offered on a new cycle.</summary>
+    public List<RicCycle> Replaceable { get; private set; } = [];
+
+    /// <summary>
+    /// A cycle already under way that replaces the record asked for, when there is one — so
+    /// the page can send the custodian to it rather than start a second.
+    /// </summary>
+    public int? ReplacementUnderWayId { get; private set; }
+
+    /// <summary>True when the form should ask whether the new cycle replaces the matching sealed record.</summary>
+    public bool NeedsReplacementDecision { get; private set; }
 
     /// <summary>True when the form should offer the "remove them anyway" tick.</summary>
     public bool NeedsRemovalConfirmation { get; private set; }
@@ -58,13 +91,21 @@ public class StartModel(CostingDbContext db) : RicPageModel(db)
     public bool NeedsUnitChangeConfirmation { get; private set; }
 
     /// <summary>
-    /// A blank form for a new cycle, or — given a <paramref name="cycleId"/> — an existing
-    /// cycle's first step with its answers filled in.
+    /// A blank form for a new cycle — or one carried over from the sealed record in
+    /// <see cref="Supersedes"/> — or, given a <paramref name="cycleId"/>, an existing cycle's
+    /// first step with its answers filled in.
     /// </summary>
     public async Task<IActionResult> OnGetAsync(int? cycleId = null)
     {
         if (cycleId is null)
         {
+            await LoadReplaceableAsync();
+
+            if (Supersedes is { } replacing && await ReplacedAsync(replacing) is { } replaced)
+            {
+                CarryOver(replaced);
+            }
+
             return Page();
         }
 
@@ -78,6 +119,8 @@ public class StartModel(CostingDbContext db) : RicPageModel(db)
             return RedirectToPage("/Ric/Review", new { cycleId });
         }
 
+        await RememberStepAsync(1);
+        Previous = await LoadReplacedRecordAsync();
         CycleId = cycleId;
         PlatformName = Cycle.PlatformName;
         StartYear = Cycle.StartYear;
@@ -104,6 +147,12 @@ public class StartModel(CostingDbContext db) : RicPageModel(db)
             {
                 return RedirectToPage("/Ric/Review", new { cycleId });
             }
+
+            Previous = await LoadReplacedRecordAsync();
+        }
+        else
+        {
+            await LoadReplaceableAsync();
         }
 
         var added = NamesToAdd();
@@ -113,9 +162,14 @@ public class StartModel(CostingDbContext db) : RicPageModel(db)
         {
             ValidateEdit(added);
         }
-        else if (added.Count == 0)
+        else
         {
-            ModelState.AddModelError(nameof(CapabilityNames), "Add at least one capability.");
+            if (added.Count == 0)
+            {
+                ModelState.AddModelError(nameof(CapabilityNames), "Add at least one capability.");
+            }
+
+            await ValidateReplacementAsync();
         }
 
         if (!ModelState.IsValid)
@@ -129,7 +183,7 @@ public class StartModel(CostingDbContext db) : RicPageModel(db)
         }
 
         ApplyEdit(added);
-        Cycle.UpdatedAtUtc = DateTime.UtcNow;
+        RecordEdit();
         await Db.SaveChangesAsync();
 
         return RedirectToPage("/Ric/Costs", new { cycleId = Cycle.Id });
@@ -145,6 +199,9 @@ public class StartModel(CostingDbContext db) : RicPageModel(db)
             BillableUnit = BillableUnit,
             CreatedBy = User.UserName(),
             CreatedByDisplay = User.DisplayName(),
+            LastEditedBy = User.UserName(),
+            LastEditedByDisplay = User.DisplayName(),
+            SupersedesCycleId = Supersedes,
             Capabilities = names.Select(x => new RicCapability { Name = x }).ToList()
         };
 
@@ -152,6 +209,124 @@ public class StartModel(CostingDbContext db) : RicPageModel(db)
         await Db.SaveChangesAsync();
 
         return RedirectToPage("/Ric/Costs", new { cycleId = cycle.Id });
+    }
+
+    /// <summary>The custodian's sealed records that no cycle refers to yet.</summary>
+    private async Task LoadReplaceableAsync()
+    {
+        var owner = User.UserName();
+
+        var referenced = await Db.RicCycles
+            .Where(x => x.CreatedBy == owner && x.SupersedesCycleId != null)
+            .Select(x => x.SupersedesCycleId!.Value)
+            .ToListAsync();
+
+        Replaceable = await Db.RicCycles.AsNoTracking()
+            .Where(x => x.CreatedBy == owner && x.Status == "Sealed" && !referenced.Contains(x.Id))
+            .OrderByDescending(x => x.SealedAtUtc)
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// The sealed record <paramref name="id"/>, if this custodian may start a cycle that
+    /// replaces it; otherwise null, with the reason in <see cref="PageModel.ModelState"/>.
+    ///
+    /// A record is replaced once. A second cycle pointing at the same record would leave two
+    /// candidates for "the current rates" when both were sealed, which is the ambiguity the
+    /// reference exists to remove — so a custodian who has already started the replacement
+    /// is sent back to it.
+    /// </summary>
+    private async Task<RicCycle?> ReplacedAsync(int id)
+    {
+        var owner = User.UserName();
+
+        var replaced = await Db.RicCycles.AsNoTracking()
+            .Include(x => x.Capabilities)
+            .FirstOrDefaultAsync(x => x.Id == id && x.CreatedBy == owner && x.Status == "Sealed");
+
+        if (replaced is null)
+        {
+            ModelState.AddModelError(nameof(Supersedes), "A new cycle can only replace one of your own sealed records.");
+            return null;
+        }
+
+        var successor = await Db.RicCycles.AsNoTracking()
+            .Where(x => x.SupersedesCycleId == id)
+            .Select(x => new { x.Id, x.Status, x.StartYear, x.EndYear })
+            .FirstOrDefaultAsync();
+
+        if (successor is not null)
+        {
+            if (successor.Status == "Sealed")
+            {
+                ModelState.AddModelError(
+                    nameof(Supersedes),
+                    $"The {replaced.StartYear}–{replaced.EndYear} {replaced.PlatformName} record has already been replaced, "
+                    + $"by the {successor.StartYear}–{successor.EndYear} record. Replace that one instead.");
+            }
+            else
+            {
+                ReplacementUnderWayId = successor.Id;
+                ModelState.AddModelError(
+                    nameof(Supersedes),
+                    $"A cycle replacing the {replaced.StartYear}–{replaced.EndYear} {replaced.PlatformName} record is already "
+                    + "under way. Carry on with that one rather than starting a second.");
+            }
+
+            return null;
+        }
+
+        Previous = PreviousRecord.From(replaced);
+        return replaced;
+    }
+
+    /// <summary>
+    /// Start the replacement from the record it replaces: the same platform, unit and
+    /// capabilities, and a period of the same length beginning the year after it ended.
+    /// Every one of these can be changed before continuing.
+    /// </summary>
+    private void CarryOver(RicCycle replaced)
+    {
+        PlatformName = replaced.PlatformName;
+        BillableUnit = replaced.BillableUnit;
+        StartYear = replaced.EndYear + 1;
+        EndYear = StartYear + (replaced.EndYear - replaced.StartYear);
+        CapabilityNames = string.Join('\n', replaced.Capabilities.OrderBy(x => x.Id).Select(x => x.Name));
+    }
+
+    /// <summary>
+    /// A new cycle either names the record it replaces, which must be replaceable, or — when
+    /// its platform already has a sealed record — says that it does not replace it. Asked
+    /// last, like the other confirmations, so the tick is not one error among many.
+    /// </summary>
+    private async Task ValidateReplacementAsync()
+    {
+        if (Supersedes is { } id)
+        {
+            await ReplacedAsync(id);
+            return;
+        }
+
+        if (!ModelState.IsValid || ConfirmNotReplacing)
+        {
+            return;
+        }
+
+        var match = Replaceable.FirstOrDefault(x =>
+            string.Equals(x.PlatformName.Trim(), PlatformName.Trim(), StringComparison.OrdinalIgnoreCase));
+
+        if (match is null)
+        {
+            return;
+        }
+
+        Previous = PreviousRecord.From(match);
+        NeedsReplacementDecision = true;
+        ModelState.AddModelError(
+            string.Empty,
+            $"{match.PlatformName} already has a sealed record for {match.StartYear}–{match.EndYear}, shown below. "
+            + "If this cycle replaces it, start from that record so the new cycle refers to it. "
+            + "If it is a separate cycle, say so.");
     }
 
     private List<string> NamesToAdd() =>

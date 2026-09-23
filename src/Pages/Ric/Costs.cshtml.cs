@@ -1,7 +1,6 @@
 using CostingTool.Data;
 using CostingTool.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CostingTool.Pages.Ric;
 
@@ -96,6 +95,7 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
             return NotFound();
         }
 
+        await RememberStepAsync(2);
         YearAmounts = Enumerable.Repeat(0m, YearCount).ToList();
 
         if (edit is not null)
@@ -159,7 +159,7 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
         FillEntry(existing);
 
-        Cycle.UpdatedAtUtc = DateTime.UtcNow;
+        RecordEdit();
         await Db.SaveChangesAsync();
 
         return RedirectToPage(new { cycleId = CycleId });
@@ -247,24 +247,15 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
     public async Task<IActionResult> OnPostDeleteAsync(int id)
     {
-        var owner = User.UserName();
-
-        var item = await Db.RicCostEntries
-            .Include(x => x.RicCycle)
-            .FirstOrDefaultAsync(x =>
-                x.Id == id
-                && x.RicCycleId == CycleId
-                && x.CostType == CostEntry.Types.Cost
-                && x.RicCycle.CreatedBy == owner);
-
-        if (item is null)
+        if (!await Load(CycleId) || Editable(id) is not { } item)
         {
             return NotFound();
         }
 
-        if (item.RicCycle.IsEditable)
+        if (Cycle.IsEditable)
         {
             Db.Remove(item);
+            RecordEdit();
             await Db.SaveChangesAsync();
         }
 

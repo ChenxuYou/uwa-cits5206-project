@@ -204,6 +204,38 @@ public class RicCycle
     public DateTime? EffectiveDateUtc { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// The sealed cycle this one replaces, when it replaces one (US-01, F22).
+    ///
+    /// <b>The reference is the whole of supersession.</b> The older record is never written
+    /// to: it stays sealed, readable and byte-for-byte what was approved. Whether it is
+    /// superseded is worked out from this column — it is, once a cycle pointing at it has
+    /// itself been sealed — so there is no second copy of the fact to fall out of step.
+    /// </summary>
+    public int? SupersedesCycleId { get; set; }
+
+    public RicCycle? Supersedes { get; set; }
+
+    /// <summary>
+    /// When the custodian last changed a figure or an answer (US-02). Kept apart from
+    /// <see cref="UpdatedAtUtc"/>, which the approver's decisions also move, so "last edited"
+    /// never names an approver who edited nothing.
+    /// </summary>
+    public DateTime LastEditedAtUtc { get; set; } = DateTime.UtcNow;
+
+    /// <summary>Who made that change, as a <b>username</b> — see the note on <see cref="CreatedBy"/>.</summary>
+    public string LastEditedBy { get; set; } = string.Empty;
+
+    /// <summary>Who made that change, as it should appear on screen.</summary>
+    public string LastEditedByDisplay { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The step the custodian last had open, 1 to 6, so reopening a draft returns them to it
+    /// (US-02). See <c>RicSteps</c> for the pages the numbers stand for.
+    /// </summary>
+    public int LastStep { get; set; } = 1;
+
     public List<RicCapability> Capabilities { get; set; } = [];
     public List<RicCostEntry> Costs { get; set; } = [];
 

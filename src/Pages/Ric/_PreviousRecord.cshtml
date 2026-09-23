@@ -1,0 +1,61 @@
+@model CostingTool.Pages.Ric.PreviousRecord
+@using CostingTool.Pdf
+@*
+    The sealed record a cycle is set against (US-01, F13): its key figures, read from its
+    snapshot, beside the new cycle's. Shown on step 1 while the replacement is being started,
+    and on the rates and review steps, where the new rates are decided and checked.
+*@
+@{
+    var unit = Model.BillableUnit.ToLowerInvariant();
+}
+<article class="review-card previous-record" aria-labelledby="previous-record-@Model.Id">
+    <div class="review-card-heading">
+        <h2 id="previous-record-@Model.Id">Last sealed record: @Model.PlatformName, @Model.StartYear–@Model.EndYear</h2>
+        <span>
+            Sealed @(Model.SealedAtUtc?.ToLocalTime().ToString("dd MMM yyyy") ?? "—")
+            @if (Model.EffectiveDateUtc is { } effective)
+            {
+                <text>· effective @effective.ToString("dd MMM yyyy")</text>
+            }
+            · per @Model.BillableUnit.TrimEnd('s').ToLowerInvariant()
+        </span>
+    </div>
+
+    @if (Model.Problem is not null)
+    {
+        <p class="replace-note">The sealed record's figures could not be read, so they are not shown. @Model.Problem</p>
+    }
+    else
+    {
+        <dl class="previous-figures">
+            <div><dt>Total operating cost</dt><dd>@(Model.TotalOperatingCost?.ToString("C") ?? "—")</dd></div>
+            <div><dt>Non-variable income</dt><dd>@(Model.TotalIncome?.ToString("C") ?? "Not recorded")</dd></div>
+            <div><dt>Forecast balance</dt><dd>@(Model.ForecastBalance is { } balance ? RecordFormat.Balance(balance) : "—")</dd></div>
+        </dl>
+        <div class="review-table-wrap" role="region" aria-label="Rates in the last sealed record" tabindex="0">
+            <table class="review-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Capability</th>
+                        <th scope="col">Forecast use</th>
+                        <th scope="col">UWA</th>
+                        <th scope="col">APFR</th>
+                        <th scope="col">Commercial</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var capability in Model.Capabilities)
+                    {
+                        <tr>
+                            <td><strong>@capability.Name</strong></td>
+                            <td>@capability.ForecastUtilisation.ToString("N1") @unit</td>
+                            <td>@(capability.Uwa?.ToString("C") ?? "—")</td>
+                            <td>@(capability.Apfr?.ToString("C") ?? "—")</td>
+                            <td>@(capability.Commercial?.ToString("C") ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</article>

@@ -22,6 +22,13 @@ public class CapacityModel(CostingDbContext db, MethodConfigProvider methods) : 
 
     [BindProperty] public string? UtilisationAssumptions { get; set; }
 
+    /// <summary>
+    /// The address of a link followed while this page held unsaved figures — the step bar,
+    /// the breadcrumb, the sidebar. The page saves on the way out and then goes there (US-02:
+    /// every entered value persists on navigation, without an explicit save).
+    /// </summary>
+    [BindProperty] public string? LeavingFor { get; set; }
+
     /// <summary>The method's baselines in this cycle's billable unit; empty for samples.</summary>
     public IReadOnlyList<CapacityBaseline> Baselines => CapacityEngine.BaselinesFor(Method, Cycle.BillableUnit);
 
@@ -37,6 +44,7 @@ public class CapacityModel(CostingDbContext db, MethodConfigProvider methods) : 
             return NotFound();
         }
 
+        await RememberStepAsync(4);
         CycleId = cycleId;
         Inputs = Cycle.Capabilities.Select(CapacityInput.From).ToList();
         UtilisationAssumptions = Cycle.UtilisationAssumptions;
@@ -134,10 +142,10 @@ public class CapacityModel(CostingDbContext db, MethodConfigProvider methods) : 
                 .ToList();
         }
 
-        Cycle.UpdatedAtUtc = DateTime.UtcNow;
+        RecordEdit();
         await Db.SaveChangesAsync();
 
-        return RedirectToPage(nextPage, new { cycleId = CycleId });
+        return Continue(LeavingFor, nextPage);
     }
 
     /// <summary>

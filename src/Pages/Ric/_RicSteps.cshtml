@@ -12,15 +12,7 @@
     tree, because a link whose only content is a tick has no name.
 *@
 @{
-    var steps = new (int Number, string Name, string? Page)[]
-    {
-        (1, "Platform", "/Ric/Start"),
-        (2, "Costs", "/Ric/Costs"),
-        (3, "Funding", "/Ric/Funding"),
-        (4, "Capacity", "/Ric/Capacity"),
-        (5, "Rates", "/Ric/Rates"),
-        (6, "Review", "/Ric/Review")
-    };
+    var steps = CostingTool.Pages.Ric.RicSteps.All;
 }
 <nav aria-label="Costing steps">
     <ol class="ric-steps">
@@ -29,7 +21,7 @@
             var isCurrent = step.Number == Model.Current;
             var isComplete = step.Number < Model.Current;
             var state = isCurrent ? "active" : isComplete ? "complete" : "";
-            var isLink = isComplete && Model.CanNavigate && step.Page is not null && Model.CycleId is not null;
+            var isLink = isComplete && Model.CanNavigate && Model.CycleId is not null;
 
             <li class="ric-step @state">
                 @if (isLink)

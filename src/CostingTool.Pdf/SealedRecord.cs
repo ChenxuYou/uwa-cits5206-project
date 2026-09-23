@@ -15,22 +15,24 @@ namespace CostingTool.Pdf;
 /// (architecture.md §4, requirements §9 Q5).
 ///
 /// The shape below mirrors <c>Pages/Approvals/Details.cshtml.cs</c> — <c>BuildSnapshot()</c>,
-/// schema 1.2. The two must move together: adding a field to the snapshot without adding
+/// schema 1.3. The two must move together: adding a field to the snapshot without adding
 /// it here means the PDF silently stops showing it, so <see cref="SupportedSchemaVersions"/>
 /// is checked on the way in rather than trusted.
 ///
 /// <b>Older snapshots keep rendering.</b> Schema 1.2 added the balance lines US-12 asks for;
 /// a record sealed under 1.1 does not carry them, so they are nullable here and the document
-/// leaves them out rather than printing a zero the approver never saw. A snapshot is never
-/// rewritten — the renderer is what learns the older shape.
+/// leaves them out rather than printing a zero the approver never saw. Schema 1.3 added
+/// <see cref="SealedCycle.Supersedes"/>, the record a cycle replaces (F22), null before it and
+/// on a record that replaces nothing. A snapshot is never rewritten — the renderer is what
+/// learns the older shape.
 /// </summary>
 public sealed class SealedRecord
 {
     /// <summary>The schema new snapshots are written in.</summary>
-    public const string CurrentSchemaVersion = "1.2";
+    public const string CurrentSchemaVersion = "1.3";
 
     /// <summary>Every schema this renderer can read, oldest first.</summary>
-    public static readonly string[] SupportedSchemaVersions = ["1.1", CurrentSchemaVersion];
+    public static readonly string[] SupportedSchemaVersions = ["1.1", "1.2", CurrentSchemaVersion];
 
     private static readonly JsonSerializerOptions ReadOptions = new()
     {
@@ -153,6 +155,25 @@ public sealed class SealedCycle
     public string? ApprovalComment { get; set; }
 
     public DateTime? EffectiveDateUtc { get; set; }
+
+    /// <summary>The sealed record this one replaces (F22). Schema 1.3 onwards; null when it replaces none.</summary>
+    public SealedReference? Supersedes { get; set; }
+}
+
+/// <summary>Another sealed record, named by what identifies it — including its own hash.</summary>
+public sealed class SealedReference
+{
+    public int Id { get; set; }
+
+    public string? PlatformName { get; set; }
+
+    public int StartYear { get; set; }
+
+    public int EndYear { get; set; }
+
+    public DateTime? SealedAtUtc { get; set; }
+
+    public string? SnapshotHash { get; set; }
 }
 
 public sealed class SealedPlatform

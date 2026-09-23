@@ -820,3 +820,38 @@ a.ric-step-link:focus-visible {
     margin-top: 16px;
 }
 .edit-actions .add-detail-button { margin-top: 0; }
+
+/* A cycle set against the sealed record it replaces (US-01), and where a draft was left (US-02). */
+.replace-note {
+    margin: 14px 28px 0;
+    padding: 11px 14px;
+    border: 1px solid #cfe0f7;
+    background: #f4f8ff;
+    color: #2c4466;
+    border-radius: 7px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.replace-note p { margin: 0; }
+.replace-note ul { margin: 6px 0 0; padding-left: 16px; }
+.review-card .replace-note { margin: 16px 20px; }
+.ric-card .replace-note { margin: 14px 0 18px; }
+.narrow-card + .previous-record { max-width: 850px; margin: 18px auto 0; }
+.previous-figures {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 0;
+    padding: 16px 20px;
+}
+.previous-figures dt { font-size: 12px; color: var(--muted); }
+.previous-figures dd { margin: 3px 0 0; font: 700 16px Manrope; }
+.last-edited { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
+@media (max-width: 640px) {
+    .previous-figures { grid-template-columns: 1fr; }
+    .previous-record .review-card-heading { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .replace-note { margin-left: 16px; margin-right: 16px; }
+}
+.submit-panel .full-button + .full-button { margin-top: 9px; }
+.status-pill.superseded { background: #eef1f5; color: #5c6879; }
+.my-cycle-row > b { white-space: nowrap; }

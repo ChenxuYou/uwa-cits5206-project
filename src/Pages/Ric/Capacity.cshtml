@@ -39,8 +39,16 @@
         <p>“@UtilisationGuidance.NotCapacity” Every rate is divided by the forecast, not by the capacity.</p>
     </section>
 
-    <form method="post" asp-page="/Ric/Capacity" asp-route-cycleId="@Model.Cycle.Id" data-unsaved-warning>
+    @* data-save-on-leave: a link followed with unsaved figures saves them first (US-02). If
+       that save was refused, the page says why and the next link falls back to the warning,
+       so a custodian who wants to leave is never held here. *@
+    <form method="post" asp-page="/Ric/Capacity" asp-route-cycleId="@Model.Cycle.Id" data-unsaved-warning data-save-on-leave="@(string.IsNullOrEmpty(Model.LeavingFor) ? "true" : "false")">
         <input type="hidden" asp-for="CycleId" />
+        <input type="hidden" name="LeavingFor" value="" />
+        @if (!string.IsNullOrEmpty(Model.LeavingFor))
+        {
+            <p class="form-errors">Your changes could not be saved on the way out, so this page is still open. Correct the problems below, or follow the link again to leave without saving them.</p>
+        }
         <div asp-validation-summary="All" class="form-errors"></div>
 
         <div class="capacity-list">

@@ -1,5 +1,7 @@
 using CostingTool.Data;
+using CostingTool.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CostingTool.Pages.Ric;
 
@@ -15,6 +17,17 @@ public class ReviewModel(CostingDbContext db, RicCalculationService calculator) 
 
     public string? SuccessMessage { get; private set; }
 
+    /// <summary>The sealed record this cycle replaces, if it replaces one (US-01).</summary>
+    public PreviousRecord? Previous { get; private set; }
+
+    /// <summary>
+    /// The cycle that replaces this one, once one has been started. This record is
+    /// superseded when that cycle is sealed; until then it holds the current rates (F22).
+    /// </summary>
+    public RicCycle? Successor { get; private set; }
+
+    public bool IsSuperseded => Successor?.Status == "Sealed";
+
     /// <summary>Why an export was refused, when one was. See <c>Export.cshtml.cs</c>.</summary>
     public string? ErrorMessage { get; private set; }
 
@@ -25,6 +38,7 @@ public class ReviewModel(CostingDbContext db, RicCalculationService calculator) 
             return NotFound();
         }
 
+        await RememberStepAsync(RicSteps.Review);
         SuccessMessage = TempData["Success"] as string;
         ErrorMessage = TempData["Error"] as string;
         return Page();
@@ -100,6 +114,15 @@ public class ReviewModel(CostingDbContext db, RicCalculationService calculator) 
         Rates = IsSealed
             ? calculator.CalculateAsAt(Cycle, Cycle.MethodVersion)
             : calculator.Calculate(Cycle);
+
+        Previous = await LoadReplacedRecordAsync();
+
+        if (IsSealed)
+        {
+            var owner = User.UserName();
+            Successor = await Db.RicCycles.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.SupersedesCycleId == Cycle.Id && x.CreatedBy == owner);
+        }
 
         return true;
     }
