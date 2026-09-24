@@ -9,7 +9,7 @@
 work five ways.
 
 > **About this record.** These minutes are written from the meeting recording. The recording and
-> its raw transcript are **not committed** — see [`.gitignore`](../../.gitignore) §3 — so this
+> its raw transcript are **not committed** — see [`.gitignore`](../../../.gitignore) §3 — so this
 > file is the project's record of the meeting. Members are named because the transcript carries
 > speaker labels.
 
@@ -23,7 +23,7 @@ Chenxu walked the team through the repository so that everyone can find things w
   administration. `docs/decisions/` is deliberately empty — no architecture decision has been
   taken yet.
 - `docs/spec/architecture.md` records the candidate solutions for the client's requirements;
-  [`docs/project/team.md`](../project/team.md) is the only home of the roster.
+  [`docs/project/team.md`](../../project/team.md) is the only home of the roster.
 - `presentations/` holds every deck. Decks are **HTML, not PowerPoint**, so that each change
   diffs in GitHub like any other artefact.
 - `reference/` holds the client's own material and the unit's material.
@@ -36,7 +36,7 @@ about convenience for the team, and is **not** a licence to feed client material
 
 Chenxu raised the licence as unfinished business. An MIT licence lets anyone modify the software
 and **sell** it, which sits badly against the client's position that the costing logic is UWA's
-and the overarching IP is joint ([`NOTICE`](../../NOTICE) §2). A `NOTICE` file has been added as
+and the overarching IP is joint ([`NOTICE`](../../../NOTICE) §2). A `NOTICE` file has been added as
 an interim answer.
 
 Dai Lam pointed out the countervailing interest: members want to show this work to recruiters
@@ -68,7 +68,7 @@ Agreed sequence:
 1. Draft complete by **Sunday night 16 August**.
 2. Sent to the client **Monday 17 August**, so they have time to read it before any meeting.
 3. Meeting booked by **Tuesday 18 August**, for **Wednesday or Thursday** — the client's stated
-   preference ([kickoff §10](2026-07-29-client-kickoff.md)) — with a backup plan if they are busy.
+   preference ([kickoff §10](../client/2026-07-29-client-meeting.md)) — with a backup plan if they are busy.
 
 On what the MVP should be, Dai Lam argued for a working prototype built from what the team
 already understands of the spreadsheet, so there is something concrete to show and agree on. The
@@ -151,7 +151,7 @@ accountability form is due **Sunday**, including the backlog from previous weeks
 | D12 | Work split as recorded in §8; each member's tasks documented for the Assignment 1 accountability record |
 | D13 | The repository licence is put to the lab facilitator before it is settled |
 
-Decision numbering continues from the [client kickoff](2026-07-29-client-kickoff.md), which ended
+Decision numbering continues from the [client kickoff](../client/2026-07-29-client-meeting.md), which ended
 at D6.
 
 ## Actions

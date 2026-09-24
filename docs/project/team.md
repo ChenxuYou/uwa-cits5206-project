@@ -11,7 +11,7 @@
 This table is the roster's only home. Presentations derive one section per member,
 in this order, from it — see [`presentations/STYLE-GUIDE.md`](../../presentations/STYLE-GUIDE.md) §4.2.
 
-**Technical layers** were agreed at the [team meeting of 15 September 2026](../meetings/2026-09-15-team-meeting.md).
+**Technical layers** were agreed at the [team meeting of 15 September 2026](../meetings/team/2026-09-15-team-meeting.md).
 The column above is the short label only; what each layer builds, and the standing
 responsibilities beside it, live in [`plan.md` §3](plan.md).
 
@@ -36,4 +36,4 @@ he is not counted for any deliverable, presentation section, or peer review.
 
 **The team has had five members since 27 July 2026.** The client walkthrough of 29 July was
 attended by three of them; the other two were briefed from the
-[minutes](../meetings/2026-07-29-client-kickoff.md).
+[minutes](../meetings/client/2026-07-29-client-meeting.md).
