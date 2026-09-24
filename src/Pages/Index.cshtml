@@ -1,5 +1,6 @@
 @page
 @model CostingTool.Pages.IndexModel
+@using CostingTool.Pages.Ric
 @{
     ViewData["Title"] = "My costing cycles";
     string Label(string status) => status switch { "Sealed" => "Approved", "Returned" => "Returned · changes required", "Submitted" => "Submitted for approval", _ => "Draft" };
@@ -15,7 +16,36 @@
     <div class="my-work-grid">
         <article class="panel cycle-list-panel"><div class="panel-heading compact"><div><h2>My costing cycles</h2><p>Drafts, submitted records and decisions.</p></div></div>
         @if(Model.Cycles.Count==0){<div class="empty-state">You have not created a costing cycle yet.</div>}
-        @foreach(var cycle in Model.Cycles){<a class="my-cycle-row" asp-page="/Ric/Review" asp-route-cycleId="@cycle.Id"><span class="record-icon @(cycle.Status=="Sealed"?"sealed":"")">◫</span><div><strong>@cycle.PlatformName</strong><small>@cycle.StartYear–@cycle.EndYear · @cycle.Capabilities.Count capabilities · updated @cycle.UpdatedAtUtc.ToLocalTime().ToString("dd MMM yyyy")</small></div><span class="status-pill @cycle.Status.ToLowerInvariant()">@Label(cycle.Status)</span><b>Open →</b></a>}
+        @foreach(var cycle in Model.Cycles)
+        {
+            @* US-02: a draft reopens at the step it was left on; anything else opens at its review. *@
+            var step = RicSteps.Get(cycle.IsEditable ? cycle.LastStep : RicSteps.Review);
+            var superseded = Model.Superseded.Contains(cycle.Id);
+            var replaces = cycle.SupersedesCycleId is { } replacedId ? Model.Cycles.FirstOrDefault(x => x.Id == replacedId) : null;
+            <a id="cycle-@cycle.Id" class="my-cycle-row" asp-page="@step.Page" asp-route-cycleId="@cycle.Id">
+                <span class="record-icon @(cycle.Status=="Sealed"?"sealed":"")">◫</span>
+                <div>
+                    <strong>@cycle.PlatformName</strong>
+                    <small>@cycle.StartYear–@cycle.EndYear · @cycle.Capabilities.Count capabilities@(replaces is null ? "" : $" · replaces the {replaces.StartYear}–{replaces.EndYear} record")</small>
+                    <small>
+                        @if (string.IsNullOrEmpty(cycle.LastEditedByDisplay))
+                        {
+                            <text>Updated @cycle.UpdatedAtUtc.ToLocalTime().ToString("dd MMM yyyy")</text>
+                        }
+                        else
+                        {
+                            <text>Last edited @cycle.LastEditedAtUtc.ToLocalTime().ToString("dd MMM yyyy, h:mm tt") by @cycle.LastEditedByDisplay</text>
+                        }
+                        @if (cycle.IsEditable)
+                        {
+                            <text> · left at @step.Name</text>
+                        }
+                    </small>
+                </div>
+                <span class="status-pill @(superseded ? "superseded" : cycle.Status.ToLowerInvariant())">@(superseded ? "Superseded" : Label(cycle.Status))</span>
+                <b>@(cycle.IsEditable ? "Resume →" : "Open →")</b>
+            </a>
+        }
         </article>
         <aside class="panel notification-preview"><div class="panel-heading compact"><div><h2>Notifications</h2><p>Approval activity</p></div><a class="text-link" asp-page="/Notifications/Index">View all</a></div>
         @if(Model.RecentNotifications.Count==0){<div class="empty-state">No notifications yet.</div>}

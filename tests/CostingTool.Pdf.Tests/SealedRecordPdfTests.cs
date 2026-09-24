@@ -101,6 +101,37 @@ public class SealedRecordPdfTests
     }
 
     // ----------------------------------------------------------------------------------
+    // Supersession (F22)
+    // ----------------------------------------------------------------------------------
+
+    [Fact]
+    public void A_record_that_replaces_another_names_it_with_its_hash()
+    {
+        const string oldHash = "0A1B2C3D4E5F60718293A4B5C6D7E8F90A1B2C3D4E5F60718293A4B5C6D7E8F9";
+        var snapshot = Snapshot()
+            .Replace("\"SchemaVersion\": \"1.2\"", "\"SchemaVersion\": \"1.3\"", StringComparison.Ordinal)
+            .Replace(
+                "\"EffectiveDateUtc\": \"2027-01-01T00:00:00Z\",",
+                "\"EffectiveDateUtc\": \"2027-01-01T00:00:00Z\", \"Supersedes\": { \"Id\": 3, \"PlatformName\": \"Microscopy & Characterisation Platform\", "
+                + "\"StartYear\": 2023, \"EndYear\": 2025, \"SealedAtUtc\": \"2022-11-30T03:00:00Z\", \"SnapshotHash\": \"" + oldHash + "\" },",
+                StringComparison.Ordinal);
+
+        var text = AllText(SealedRecordPdf.Build(SealedRecord.Parse(snapshot), Hash));
+
+        Assert.Contains("Supersedes", text, StringComparison.Ordinal);
+        Assert.Contains("2023–2025", text, StringComparison.Ordinal);
+        Assert.Contains(oldHash, text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_record_sealed_before_supersession_was_recorded_says_nothing_about_it()
+    {
+        var text = AllText(SealedRecordPdf.Build(SealedRecord.Parse(Snapshot()), Hash));
+
+        Assert.DoesNotContain("Supersedes", text, StringComparison.Ordinal);
+    }
+
+    // ----------------------------------------------------------------------------------
     // It is a real PDF
     // ----------------------------------------------------------------------------------
 

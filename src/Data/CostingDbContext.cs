@@ -49,8 +49,17 @@ public class CostingDbContext(DbContextOptions<CostingDbContext> options) : DbCo
         modelBuilder.Entity<RicCycle>().Property(x => x.MethodVersion).HasMaxLength(20);
         modelBuilder.Entity<RicCycle>().Property(x => x.Status).HasMaxLength(30);
         modelBuilder.Entity<RicCycle>().Property(x => x.CreatedBy).HasMaxLength(80);
+        modelBuilder.Entity<RicCycle>().Property(x => x.LastEditedBy).HasMaxLength(80);
         // Ownership is filtered on this column on nearly every request.
         modelBuilder.Entity<RicCycle>().HasIndex(x => x.CreatedBy);
+
+        // A new cycle refers to the sealed one it replaces (F22). Restrict, not cascade: a
+        // sealed record is never deleted, and nothing may take one with it.
+        modelBuilder.Entity<RicCycle>()
+            .HasOne(x => x.Supersedes)
+            .WithMany()
+            .HasForeignKey(x => x.SupersedesCycleId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<AppUser>().HasIndex(x => x.UserName).IsUnique();
         modelBuilder.Entity<AppUser>().Property(x => x.UserName).HasMaxLength(80);

@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = Model.IsEditing ? "Platform and capabilities" : "Start RIC cycle";
     var hasCostLines = Model.IsEditing && Model.Cycle.Costs.Count > 0;
+    var replacing = !Model.IsEditing && Model.Supersedes is not null && Model.Previous is not null;
 }
 <div class="page-wrap ric-page">
     @if (Model.IsEditing)
@@ -16,8 +17,41 @@
     <partial name="_RicSteps" model='new CostingTool.Pages.Ric.RicStepViewModel(1, Model.CycleId)' />
     <form method="post" asp-page="/Ric/Start" asp-route-cycleId="@Model.CycleId" class="ric-card narrow-card" data-unsaved-warning>
         <input type="hidden" asp-for="CycleId" />
+        @if (replacing)
+        {
+            <input type="hidden" asp-for="Supersedes" />
+        }
         <div class="ric-heading"><span>01</span><div><h1>Platform and capabilities</h1><p>Define the infrastructure being costed and the unit users are charged in.</p></div></div>
         <div asp-validation-summary="All" class="form-errors"></div>
+        @if (Model.ReplacementUnderWayId is { } underWay)
+        {
+            <p class="replace-note"><a class="text-link" asp-page="/Index" asp-fragment="cycle-@underWay">Find the cycle already under way →</a></p>
+        }
+
+        @if (replacing)
+        {
+            <p class="replace-note">
+                This cycle <strong>replaces the @Model.Previous!.StartYear–@Model.Previous.EndYear @Model.Previous.PlatformName record</strong>.
+                The platform, unit and capabilities are carried over from it; change any of them below. The sealed record itself stays exactly as it was approved.
+                <a class="text-link" asp-page="/Ric/Start">Start an unconnected cycle instead</a>
+            </p>
+        }
+        else if (!Model.IsEditing && !Model.NeedsReplacementDecision && Model.Replaceable.Count > 0)
+        {
+            <div class="replace-note">
+                <p>Setting new rates for a platform that already has a sealed record? Start from that record, so the new cycle refers to it and its figures sit alongside:</p>
+                <ul>
+                    @foreach (var record in Model.Replaceable)
+                    {
+                        <li><a class="text-link" asp-page="/Ric/Start" asp-route-supersedes="@record.Id">Replace @record.PlatformName, @record.StartYear–@record.EndYear →</a></li>
+                    }
+                </ul>
+            </div>
+        }
+        else if (Model.IsEditing && Model.Previous is not null)
+        {
+            <p class="replace-note">This cycle replaces the @Model.Previous.StartYear–@Model.Previous.EndYear @Model.Previous.PlatformName record.</p>
+        }
         <div class="form-grid two-columns">
             <label class="field full-span"><span>Platform name <b>*</b></span><input asp-for="PlatformName" placeholder="e.g. Cytometry"></label>
             <label class="field"><span>Pricing period starts <b>*</b></span><input asp-for="StartYear" type="number" min="2020" max="2200"></label>
@@ -65,6 +99,11 @@
         {
             <label class="confirmation"><input type="checkbox" name="ConfirmRemovals" value="true"><span>Remove these capabilities and everything entered against them.</span></label>
         }
+        @if (Model.NeedsReplacementDecision)
+        {
+            <p class="replace-note"><a class="text-link" asp-page="/Ric/Start" asp-route-supersedes="@Model.Previous!.Id">Replace the @Model.Previous.StartYear–@Model.Previous.EndYear record instead →</a></p>
+            <label class="confirmation"><input type="checkbox" name="ConfirmNotReplacing" value="true"><span>This is a separate cycle. It does not replace the sealed @Model.Previous.PlatformName record.</span></label>
+        }
         @if (Model.NeedsUnitChangeConfirmation)
         {
             <label class="confirmation"><input type="checkbox" name="ConfirmUnitChange" value="true"><span>Change the unit and clear capacity, forecast use and proposed rates.</span></label>
@@ -79,4 +118,9 @@
             <div class="wizard-actions"><a href="/" class="secondary-action">Cancel</a><button class="primary-button" type="submit">Continue to costs →</button></div>
         }
     </form>
+
+    @if (Model.Previous is not null)
+    {
+        <partial name="_PreviousRecord" model="Model.Previous" />
+    }
 </div>

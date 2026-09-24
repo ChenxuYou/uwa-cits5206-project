@@ -175,6 +175,15 @@ public static class SealedRecordPdf
         AddFact(facts, "Rates effective from", RecordFormat.Date(cycle?.EffectiveDateUtc));
         AddFact(facts, "Sealed", RecordFormat.Timestamp(record.SealedAtUtc));
 
+        if (cycle?.Supersedes is { } replaced)
+        {
+            AddFact(
+                facts,
+                "Supersedes",
+                $"{replaced.PlatformName ?? "—"} {replaced.StartYear}–{replaced.EndYear}, sealed {RecordFormat.Timestamp(replaced.SealedAtUtc)}"
+                + (string.IsNullOrEmpty(replaced.SnapshotHash) ? string.Empty : $"  ·  snapshot {replaced.SnapshotHash}"));
+        }
+
         if (!string.IsNullOrWhiteSpace(cycle?.ApprovalComment))
         {
             AddFact(facts, "Approver's comment", cycle!.ApprovalComment);

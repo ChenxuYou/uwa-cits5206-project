@@ -140,6 +140,34 @@
             form.addEventListener('input', () => { dirty = true; });
             form.addEventListener('change', () => { dirty = true; });
             form.addEventListener('submit', () => { dirty = false; });
+
+            // US-02: on a form marked data-save-on-leave="true", following a link on this site
+            // saves first and then goes there, so nothing typed is lost by moving between
+            // sections. The page model redirects to LeavingFor only after the save succeeds; a
+            // refused save comes back marked "false", and the warning below takes over. (A
+            // value rather than a present-or-absent attribute: on a tag-helper form a null
+            // attribute still renders, as an empty one.)
+            if (form.dataset.saveOnLeave === 'true') {
+                document.addEventListener('click', event => {
+                    const link = event.target.closest('a[href]');
+                    if (!dirty || !link || link.target || link.hasAttribute('download')
+                        || event.defaultPrevented || event.button !== 0
+                        || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) {
+                        return;
+                    }
+
+                    const url = new URL(link.href, location.href);
+                    if (url.origin !== location.origin) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    form.elements.namedItem('LeavingFor').value = url.pathname + url.search + url.hash;
+                    dirty = false;
+                    form.submit();
+                });
+            }
+
             window.addEventListener('beforeunload', event => {
                 if (dirty) {
                     event.preventDefault();

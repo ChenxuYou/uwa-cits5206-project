@@ -53,6 +53,10 @@
             <span class="status-pill @Model.Cycle.Status.ToLowerInvariant()">@Model.Cycle.Status</span>
             <h1>Review costing cycle</h1>
             <p>@Model.Cycle.PlatformName · @Model.Cycle.StartYear–@Model.Cycle.EndYear · per @Model.Cycle.BillableUnit.TrimEnd('s').ToLower()</p>
+            @if (!string.IsNullOrEmpty(Model.Cycle.LastEditedByDisplay))
+            {
+                <small class="last-edited">Last edited @Model.Cycle.LastEditedAtUtc.ToLocalTime().ToString("dd MMM yyyy, h:mm tt") by @Model.Cycle.LastEditedByDisplay</small>
+            }
         </div>
         @if (Model.IsEditable)
         {
@@ -132,6 +136,11 @@
                 </div>
             </article>
 
+            @if (Model.Previous is not null)
+            {
+                <partial name="_PreviousRecord" model="Model.Previous" />
+            }
+
             <article class="review-card">
                 <div class="review-card-heading"><h2>Assumptions and evidence</h2></div>
                 <div class="review-notes">
@@ -195,10 +204,28 @@
                     The delegated approver has been given access to this record.
                 </p>
             }
+            else if (Model.IsSuperseded)
+            {
+                <h2>Superseded</h2>
+                <p>
+                    This record was replaced by the @Model.Successor!.StartYear–@Model.Successor.EndYear record, sealed on
+                    @Model.Successor.SealedAtUtc?.ToLocalTime().ToString("dd MMM yyyy"). It stays readable exactly as it was approved.
+                </p>
+                <a class="secondary-action full-button" asp-page="/Ric/Review" asp-route-cycleId="@Model.Successor.Id">Open the record that replaced it</a>
+            }
             else
             {
                 <h2>Approved and sealed</h2>
-                <p>This record is immutable. Create a new costing cycle if rates need to change.</p>
+                <p>This record is immutable. Rates change by starting a new cycle that replaces it; this record stays as it is.</p>
+                @if (Model.Successor is not null)
+                {
+                    <p>The cycle replacing it, for @Model.Successor.StartYear–@Model.Successor.EndYear, is under way (@Model.Successor.Status.ToLowerInvariant()).</p>
+                    <a class="secondary-action full-button" asp-page="@CostingTool.Pages.Ric.RicSteps.Get(Model.Successor.IsEditable ? Model.Successor.LastStep : CostingTool.Pages.Ric.RicSteps.Review).Page" asp-route-cycleId="@Model.Successor.Id">Open the replacement</a>
+                }
+                else
+                {
+                    <a class="primary-button full-button" asp-page="/Ric/Start" asp-route-supersedes="@Model.Cycle.Id">Start the cycle that replaces this one</a>
+                }
                 <a href="/" class="secondary-action full-button">Return to dashboard</a>
             }
         </aside>

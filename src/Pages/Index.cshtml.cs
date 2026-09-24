@@ -14,6 +14,12 @@ public class IndexModel(CostingDbContext db) : PageModel
 
     public int UnreadCount { get; private set; }
 
+    /// <summary>
+    /// Sealed cycles that a later sealed cycle has replaced (F22). Worked out from the
+    /// reference the newer cycle holds, because the older record is never written to.
+    /// </summary>
+    public HashSet<int> Superseded { get; private set; } = [];
+
     public async Task<IActionResult> OnGetAsync()
     {
         if (User.IsInRole(AppUser.Roles.Approver))
@@ -35,6 +41,11 @@ public class IndexModel(CostingDbContext db) : PageModel
             .Where(x => x.CreatedBy == owner)
             .OrderByDescending(x => x.UpdatedAtUtc)
             .ToListAsync();
+
+        Superseded = Cycles
+            .Where(x => x.Status == "Sealed" && x.SupersedesCycleId is not null)
+            .Select(x => x.SupersedesCycleId!.Value)
+            .ToHashSet();
 
         RecentNotifications = await db.AppNotifications.AsNoTracking()
             .Where(x => x.RecipientUserName == owner)
