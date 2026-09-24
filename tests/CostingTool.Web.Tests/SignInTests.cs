@@ -273,6 +273,69 @@ public class SignInTests
         Assert.NotNull(stored.LastLoginAtUtc);
     }
 
+    // ---- The lockout's length ------------------------------------------------------------
+    //
+    // Asked for in review on #71: the existing tests pin the count — five failures lock, four
+    // do not — but nothing pinned the duration, so shortening it to fifteen seconds would
+    // have kept the suite green.
+
+    [Fact]
+    public async Task TheLockoutRunsForFifteenMinutes()
+    {
+        await using var db = CreateDb();
+        AddUser(db);
+        var before = DateTime.UtcNow;
+
+        for (var attempt = 0; attempt < 5; attempt++)
+        {
+            var (page, _) = CreateLoginPage(db);
+            await AttemptSignIn(page, "entry", "not-the-password");
+        }
+
+        var lockedUntil = (await db.AppUsers.SingleAsync()).LockoutEndUtc;
+
+        // A window rather than an instant: the clock moves between the attempt and the
+        // assertion. Wide enough not to be flaky, narrow enough that minutes vs. seconds,
+        // or fifteen vs. fifty, fails.
+        Assert.NotNull(lockedUntil);
+        Assert.InRange(
+            lockedUntil!.Value,
+            before.AddMinutes(15),
+            before.AddMinutes(15).AddSeconds(30));
+    }
+
+    [Fact]
+    public async Task ASecondBeforeItExpiresTheLockoutStillHolds()
+    {
+        await using var db = CreateDb();
+        var user = AddUser(db);
+        user.AccessFailedCount = 5;
+        user.LockoutEndUtc = DateTime.UtcNow.AddSeconds(1);
+        await db.SaveChangesAsync();
+
+        var (page, auth) = CreateLoginPage(db);
+        var result = await AttemptSignIn(page, "entry", GoodPassword);
+
+        Assert.IsType<PageResult>(result);
+        Assert.Null(auth.SignedInPrincipal);
+    }
+
+    [Fact]
+    public async Task ASecondAfterItExpiresTheRightPasswordIsAcceptedAgain()
+    {
+        await using var db = CreateDb();
+        var user = AddUser(db);
+        user.AccessFailedCount = 5;
+        user.LockoutEndUtc = DateTime.UtcNow.AddSeconds(-1);
+        await db.SaveChangesAsync();
+
+        var (page, auth) = CreateLoginPage(db);
+        var result = await AttemptSignIn(page, "entry", GoodPassword);
+
+        Assert.IsType<LocalRedirectResult>(result);
+        Assert.NotNull(auth.SignedInPrincipal);
+    }
+
     // ---- Ownership -----------------------------------------------------------------------
 
     private static RicCycle AddCycle(CostingDbContext db, string owner)
