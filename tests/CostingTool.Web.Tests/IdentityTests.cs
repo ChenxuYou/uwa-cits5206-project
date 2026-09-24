@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using CostingTool.Data;
 using CostingTool.Models;
+using CostingTool.Pages;
 using CostingTool.Pages.Account;
 using CostingTool.Pages.Admin;
 using Microsoft.AspNetCore.Http;
@@ -288,6 +289,55 @@ public class IdentityTests
         Assert.DoesNotContain(
             typeof(CycleDetailsModel).GetMethods(),
             method => method.Name.StartsWith("OnPost", StringComparison.Ordinal));
+    }
+
+    // ---- Where each role starts ----------------------------------------------------------
+    //
+    // Asked for in review on #71. The overview is a custodian's own workspace — their cycles,
+    // their notifications — so the other two roles are sent to theirs instead. If that
+    // redirect were dropped, an administrator would land on an empty page that looked like a
+    // bug rather than on the register they need.
+
+    [Fact]
+    public async Task AnAdministratorLandsOnTheAllCyclesRegister()
+    {
+        await using var db = CreateDb();
+        var admin = AddUser(db, "admin", "Costing&Pricing2026", AppUser.Roles.Administrator);
+
+        var model = new CostingTool.Pages.IndexModel(db);
+        SignIn(model, admin);
+
+        var result = await model.OnGetAsync();
+
+        Assert.Equal("/Admin/Cycles", Assert.IsType<RedirectToPageResult>(result).PageName);
+    }
+
+    [Fact]
+    public async Task AnApproverLandsOnTheApprovalQueue()
+    {
+        await using var db = CreateDb();
+        var approver = AddUser(db, "approver", "Costing&Pricing2026", AppUser.Roles.Approver);
+
+        var model = new CostingTool.Pages.IndexModel(db);
+        SignIn(model, approver);
+
+        var result = await model.OnGetAsync();
+
+        Assert.Equal("/Approvals/Index", Assert.IsType<RedirectToPageResult>(result).PageName);
+    }
+
+    [Fact]
+    public async Task ACustodianStaysOnTheirOwnOverview()
+    {
+        await using var db = CreateDb();
+        var custodian = AddUser(db, "entry", "Costing&Pricing2026");
+
+        var model = new CostingTool.Pages.IndexModel(db);
+        SignIn(model, custodian);
+
+        var result = await model.OnGetAsync();
+
+        Assert.IsType<PageResult>(result);
     }
 
     // ---- Changing a password -------------------------------------------------------------
