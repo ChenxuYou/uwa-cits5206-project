@@ -1,6 +1,7 @@
 using CostingTool.Engine;
 using CostingTool.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace CostingTool.Data;
 
@@ -119,4 +120,89 @@ public class CostingDbContext(DbContextOptions<CostingDbContext> options) : DbCo
             .HasForeignKey(x => x.RicCapabilityId)
             .OnDelete(DeleteBehavior.Cascade);
     }
+    // ---- The seal (US-15) --------------------------------------------------------------
+    //
+    // "A sealed record cannot be edited or deleted through the application, by anyone."
+    // Every page that edits a cycle already refuses one that is not a draft or returned,
+    // but that is a check in each handler, and the next handler written could forget it.
+    // Here it is one check on the only way anything reaches the database, so a page that
+    // forgets cannot write to a sealed record: the save is refused as a whole.
+    //
+    // Sealing itself passes, because what counts is the status already stored: the approver
+    // turns a Submitted cycle into a Sealed one, and a Submitted cycle may be written.
+    // Inserting a cycle that is already sealed is not an edit to one, and is allowed.
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        RefuseChangesToSealedRecords();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        RefuseChangesToSealedRecords();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private void RefuseChangesToSealedRecords()
+    {
+        var cycleIds = new HashSet<int>();
+        var capabilityIds = new HashSet<int>();
+        var costEntryIds = new HashSet<int>();
+
+        foreach (var entry in ChangeTracker.Entries())
+        {
+            if (entry.State is not (EntityState.Added or EntityState.Modified or EntityState.Deleted))
+            {
+                continue;
+            }
+
+            switch (entry.Entity)
+            {
+                case RicCycle when entry.State != EntityState.Added:
+                    if (Original<string>(entry, nameof(RicCycle.Status)) == "Sealed")
+                    {
+                        throw new SealedRecordException();
+                    }
+                    break;
+                case RicCapability:
+                    cycleIds.Add(Original<int>(entry, nameof(RicCapability.RicCycleId)));
+                    break;
+                case RicCostEntry:
+                    cycleIds.Add(Original<int>(entry, nameof(RicCostEntry.RicCycleId)));
+                    break;
+                case RicCapacityDeduction:
+                    capabilityIds.Add(Original<int>(entry, nameof(RicCapacityDeduction.RicCapabilityId)));
+                    break;
+                case RicCostYearAmount:
+                    costEntryIds.Add(Original<int>(entry, nameof(RicCostYearAmount.RicCostEntryId)));
+                    break;
+            }
+        }
+
+        // A key of zero or less belongs to a row not yet saved, whose parent is new as well.
+        cycleIds.UnionWith(RicCapabilities.AsNoTracking()
+            .Where(x => capabilityIds.Contains(x.Id) && x.Id > 0)
+            .Select(x => x.RicCycleId));
+        cycleIds.UnionWith(RicCostEntries.AsNoTracking()
+            .Where(x => costEntryIds.Contains(x.Id) && x.Id > 0)
+            .Select(x => x.RicCycleId));
+        cycleIds.RemoveWhere(x => x <= 0);
+
+        if (cycleIds.Count > 0 && RicCycles.AsNoTracking().Any(x => cycleIds.Contains(x.Id) && x.Status == "Sealed"))
+        {
+            throw new SealedRecordException();
+        }
+    }
+
+    /// <summary>The value as stored — or, for a new row, as it will be.</summary>
+    private static T Original<T>(EntityEntry entry, string property) =>
+        entry.State == EntityState.Added
+            ? (T)entry.CurrentValues[property]!
+            : (T)entry.OriginalValues[property]!;
 }
+
+/// <summary>An attempt to change or delete a sealed record, refused at the database (US-15).</summary>
+public sealed class SealedRecordException()
+    : InvalidOperationException(
+        "This record is sealed and cannot be changed or deleted. To change its rates, start a new cycle that replaces it.");

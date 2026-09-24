@@ -177,31 +177,14 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
     /// </summary>
     private void RequireJustification()
     {
-        if (!string.IsNullOrWhiteSpace(PricingJustification))
-        {
-            return;
-        }
-
-        var varied = Cycle.Capabilities
-            .Where(x => Rates.For(x.Id)?.VariesFromCalculated == true)
-            .Select(x => x.Name)
-            .ToList();
-
-        if (varied.Count > 0)
+        // The same rule the review page lists and the submission refuses on — SubmissionChecks.
+        if (string.IsNullOrWhiteSpace(PricingJustification)
+            && SubmissionChecks.JustificationRequiredBecause(Cycle, Rates) is { } reason)
         {
             ModelState.AddModelError(
                 nameof(PricingJustification),
-                $"A pricing justification is required because the proposed rates differ from the "
-                + $"calculated ones for {string.Join(", ", varied)}.");
-            return;
-        }
-
-        if (Rates.IsComplete && Rates.ForecastBalance < 0)
-        {
-            ModelState.AddModelError(
-                nameof(PricingJustification),
-                "A pricing justification is required because these rates forecast a deficit. "
-                + "A deficit does not stop the record being submitted; it has to be explained.");
+                $"A pricing justification is required because {reason}. That does not stop the "
+                + "record being submitted; it has to be explained.");
         }
     }
 

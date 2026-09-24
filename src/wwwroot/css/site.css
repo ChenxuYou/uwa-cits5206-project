@@ -855,3 +855,59 @@ a.ric-step-link:focus-visible {
 .submit-panel .full-button + .full-button { margin-top: 9px; }
 .status-pill.superseded { background: #eef1f5; color: #5c6879; }
 .my-cycle-row > b { white-space: nowrap; }
+
+/* Sealed records register and record page (US-17). */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+.sealed-record-page > .replace-note { margin: 0 0 18px; }
+.record-facts th[scope="row"] {
+    width: 34%;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+}
+.sealed-record-page .review-table code {
+    font-size: 12px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+.record-figures { border-top: 1px solid var(--line); }
+@media (max-width: 640px) {
+    .record-facts th[scope="row"] { width: auto; }
+    .record-figures { grid-template-columns: 1fr; }
+}
+
+/* Review before submitting (US-14): what is still missing, and each section's way back. */
+.submission-checks { border-color: #f0c98f; }
+.submission-checks.is-ready { border-color: #b8dfc6; }
+.missing-list { list-style: none; margin: 0; padding: 6px 20px 14px; }
+.missing-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    padding: 9px 0;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+}
+.missing-list li:first-child { border-top: 0; }
+.missing-list .row-edit { white-space: nowrap; }
+.review-edit { margin: 0; padding: 12px 20px; font-size: 13px; color: var(--muted); }
+.review-notes .row-edit { display: inline-block; margin-top: 6px; }
+.review-section-title { font: 700 16px Manrope; margin: 28px 0 12px; }
+.review-table .group-row th, .review-table .group-row td { background: #f7f9fc; font-weight: 700; }
+.review-table tbody th[scope="row"] { text-align: left; font-weight: 500; }
+.submit-button:disabled { opacity: .55; cursor: not-allowed; }
+@media (max-width: 640px) {
+    .missing-list li { flex-direction: column; gap: 4px; }
+}

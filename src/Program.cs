@@ -62,6 +62,8 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AuthorizeFolder("/Notifications", AppUser.Roles.DataEntry);
     options.Conventions.AuthorizeFolder("/Approvals", AppUser.Roles.Approver);
     options.Conventions.AuthorizeFolder("/Admin", AppUser.Roles.Administrator);
+    // Every role reads sealed records (US-17); which ones is decided per user in RecordAccess.
+    options.Conventions.AuthorizeFolder("/Records");
     options.Conventions.AllowAnonymousToPage("/Account/Login");
     options.Conventions.AllowAnonymousToPage("/Account/AccessDenied");
     options.Conventions.AllowAnonymousToPage("/Error");

@@ -196,11 +196,21 @@ public class SupersessionTests
     public async Task OnlyTheCustodiansOwnSealedRecordCanBeReplaced(string owner, string status)
     {
         await using var db = CreateDb();
-        var id = await SealedCycle(db, owner);
-        var cycle = await db.RicCycles.SingleAsync(x => x.Id == id);
-        cycle.Status = status;
-        await db.SaveChangesAsync();
-        db.ChangeTracker.Clear();
+
+        // A sealed record cannot be turned back into a draft (US-15), so the draft is made as one.
+        int id;
+        if (status == "Sealed")
+        {
+            id = await SealedCycle(db, owner);
+        }
+        else
+        {
+            var draft = new RicCycle { PlatformName = "Microscopy", StartYear = 2026, EndYear = 2027, Status = status, CreatedBy = owner };
+            db.RicCycles.Add(draft);
+            await db.SaveChangesAsync();
+            db.ChangeTracker.Clear();
+            id = draft.Id;
+        }
 
         var page = StartPage(db);
         page.Supersedes = id;
@@ -249,7 +259,7 @@ public class SupersessionTests
 
         var sealedNew = await db.RicCycles.AsNoTracking().SingleAsync(x => x.Id == newId);
         using var snapshot = JsonDocument.Parse(sealedNew.SnapshotJson!);
-        Assert.Equal("1.3", snapshot.RootElement.GetProperty("SchemaVersion").GetString());
+        Assert.Equal("1.4", snapshot.RootElement.GetProperty("SchemaVersion").GetString());
         var reference = snapshot.RootElement.GetProperty("Cycle").GetProperty("Supersedes");
         Assert.Equal(oldId, reference.GetProperty("Id").GetInt32());
         Assert.Equal(oldHash, reference.GetProperty("SnapshotHash").GetString());

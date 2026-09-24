@@ -16,6 +16,7 @@
     var balance = Model.Rates.Round(Model.Rates.ForecastBalance);
     var fullEconomicCostBalance = Model.Rates.Round(Model.Rates.FullEconomicCostBalance);
     var unit = Model.Cycle.BillableUnit.ToLowerInvariant();
+    var unitSingular = Model.Cycle.BillableUnit.TrimEnd('s').ToLowerInvariant();
 }
 
 <div class="page-wrap ric-page">
@@ -66,7 +67,31 @@
 
     <div class="review-layout">
         <main>
-            @if (!Model.Rates.IsComplete)
+            @if (Model.IsEditable)
+            {
+                @* US-14 and N3: everything still missing, before the custodian tries to submit,
+                   each linked to the step that supplies it. The submit handler refuses on the
+                   same list — SubmissionChecks. *@
+                <article class="review-card submission-checks @(Model.IsReady ? "is-ready" : "")" id="missing">
+                    <div class="review-card-heading">
+                        <h2>@(Model.IsReady ? "Ready to submit" : "Still needed before this can be submitted")</h2>
+                        <span>@(Model.IsReady ? "Every required answer is in place." : $"{Model.Missing.Count} item{(Model.Missing.Count == 1 ? "" : "s")}")</span>
+                    </div>
+                    @if (!Model.IsReady)
+                    {
+                        <ul class="missing-list">
+                            @foreach (var item in Model.Missing)
+                            {
+                                <li>
+                                    <span>@item.Message</span>
+                                    <a class="row-edit" href="@Url.Page(item.StepPage, new { cycleId = Model.Cycle.Id })">Fix on step @item.Step, @item.StepName →</a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </article>
+            }
+            else if (!Model.Rates.IsComplete)
             {
                 <div class="callout">
                     <span>!</span>
@@ -92,48 +117,61 @@
 
             <article class="review-card">
                 <div class="review-card-heading">
-                    <h2>Capability rates</h2>
-                    <span>GST exclusive · method @Model.Rates.Method.Version</span>
+                    <h2>Rates: calculated, proposed and the difference</h2>
+                    <span>GST exclusive · per @unitSingular · method @Model.Rates.Method.Version</span>
                 </div>
                 <div class="review-table-wrap" role="region" aria-label="Capability rates" tabindex="0">
                     <table class="review-table">
                         <thead>
                             <tr>
-                                <th scope="col">Capability</th>
-                                <th scope="col">Operating cost</th>
-                                <th scope="col">Forecast use</th>
-                                <th scope="col">UWA proposed</th>
-                                <th scope="col">APFR proposed</th>
-                                <th scope="col">Commercial proposed</th>
-                                <th scope="col">Balance</th>
+                                <th scope="col">Capability and rate</th>
+                                <th scope="col">Calculated</th>
+                                <th scope="col">Proposed</th>
+                                <th scope="col">Variance</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @foreach (var capability in Model.Cycle.Capabilities)
-                            {
-                                var rates = Model.Rates.For(capability.Id);
-                                <tr>
-                                    <td><strong>@capability.Name</strong></td>
-                                    @if (rates is null)
-                                    {
-                                        <td colspan="6">@Model.Rates.ProblemFor(capability.Id)</td>
-                                    }
-                                    else
-                                    {
-                                        <td>@rates.TotalOperatingCost.ToString("C")</td>
-                                        <td>@rates.ForecastUtilisation.ToString("N1") @unit</td>
-                                        <td>@capability.ProposedUwaRate.ToString("C")</td>
-                                        <td>@capability.ProposedApfrRate.ToString("C")</td>
-                                        <td>@capability.ProposedCommercialRate.ToString("C")</td>
-                                        <td class="@(rates.ForecastBalance >= 0 ? "positive-text" : "negative-text")">
-                                            @RecordFormat.Balance(rates.Round(rates.ForecastBalance))
-                                        </td>
-                                    }
+                        @foreach (var capability in Model.Cycle.Capabilities)
+                        {
+                            var rates = Model.Rates.For(capability.Id);
+                            <tbody>
+                                <tr class="group-row">
+                                    <th scope="rowgroup" colspan="3">@capability.Name</th>
+                                    <td>
+                                        @if (rates is not null)
+                                        {
+                                            <span class="@(rates.ForecastBalance >= 0 ? "positive-text" : "negative-text")">@RecordFormat.Balance(rates.Round(rates.ForecastBalance))</span>
+                                        }
+                                    </td>
                                 </tr>
-                            }
-                        </tbody>
+                                @if (rates is null)
+                                {
+                                    <tr><td colspan="4">@Model.Rates.ProblemFor(capability.Id)</td></tr>
+                                }
+                                else
+                                {
+                                    foreach (var (label, calculated, proposed) in new[]
+                                    {
+                                        ("UWA researcher", rates.DisplayUwaRate, capability.ProposedUwaRate),
+                                        ("APFR", rates.DisplayApfrRate, capability.ProposedApfrRate),
+                                        ("Commercial", rates.DisplayCommercialRate, capability.ProposedCommercialRate)
+                                    })
+                                    {
+                                        <tr>
+                                            <th scope="row">@label</th>
+                                            <td>@calculated.ToString("C")</td>
+                                            <td><strong>@(proposed > 0 ? proposed.ToString("C") : "Not entered")</strong></td>
+                                            <td>@RateVariance.Describe(calculated, proposed)</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        }
                     </table>
                 </div>
+                @if (Model.IsEditable)
+                {
+                    <p class="review-edit"><a class="row-edit" asp-page="/Ric/Rates" asp-route-cycleId="@Model.Cycle.Id">Change the proposed rates on step 5 →</a></p>
+                }
             </article>
 
             @if (Model.Previous is not null)
@@ -142,15 +180,174 @@
             }
 
             <article class="review-card">
-                <div class="review-card-heading"><h2>Assumptions and evidence</h2></div>
+                <div class="review-card-heading">
+                    <h2>Why these rates</h2>
+                    <span>The explanations the approver reads beside the figures</span>
+                </div>
                 <div class="review-notes">
-                    <div><span>Utilisation assumptions</span><p>@(Model.Cycle.UtilisationAssumptions ?? "Not recorded")</p></div>
+                    <div>
+                        <span>Pricing justification</span>
+                        <p>@(Model.Cycle.PricingJustification ?? "Not recorded")</p>
+                        @if (Model.IsEditable)
+                        {
+                            <a class="row-edit" asp-page="/Ric/Rates" asp-route-cycleId="@Model.Cycle.Id">Edit on step 5, Rates</a>
+                        }
+                    </div>
+                    <div>
+                        <span>Benchmarking</span>
+                        <p>@(Model.Cycle.BenchmarkNotes ?? "Not recorded")</p>
+                        @if (Model.IsEditable)
+                        {
+                            <a class="row-edit" asp-page="/Ric/Rates" asp-route-cycleId="@Model.Cycle.Id">Edit on step 5, Rates</a>
+                        }
+                    </div>
+                    <div>
+                        <span>Utilisation assumptions</span>
+                        <p>@(Model.Cycle.UtilisationAssumptions ?? "Not recorded")</p>
+                        @if (Model.IsEditable)
+                        {
+                            <a class="row-edit" asp-page="/Ric/Capacity" asp-route-cycleId="@Model.Cycle.Id">Edit on step 4, Capacity</a>
+                        }
+                    </div>
                     @foreach (var above in Model.Cycle.Capabilities.Where(x => !string.IsNullOrWhiteSpace(x.AboveCapacityReason)))
                     {
                         <div><span>@above.Name: forecast above usable capacity</span><p>@above.AboveCapacityReason</p></div>
                     }
-                    <div><span>Benchmarking</span><p>@(Model.Cycle.BenchmarkNotes ?? "Not recorded")</p></div>
-                    <div><span>Pricing justification</span><p>@(Model.Cycle.PricingJustification ?? "Not recorded")</p></div>
+                </div>
+            </article>
+
+            <h2 class="review-section-title">Everything entered</h2>
+
+            <article class="review-card">
+                <div class="review-card-heading">
+                    <h2>1 · Platform</h2>
+                    @if (Model.IsEditable)
+                    {
+                        <a class="row-edit" asp-page="/Ric/Start" asp-route-cycleId="@Model.Cycle.Id">Edit on step 1 →</a>
+                    }
+                </div>
+                <dl class="previous-figures">
+                    <div><dt>Platform</dt><dd>@Model.Cycle.PlatformName</dd></div>
+                    <div><dt>Pricing period</dt><dd>@Model.Cycle.StartYear–@Model.Cycle.EndYear</dd></div>
+                    <div><dt>Billed in</dt><dd>@unit</dd></div>
+                </dl>
+                <p class="review-edit">Capabilities: @(Model.Cycle.Capabilities.Count == 0 ? "none yet" : string.Join(", ", Model.Cycle.Capabilities.Select(x => x.Name)))</p>
+            </article>
+
+            <article class="review-card">
+                <div class="review-card-heading">
+                    <h2>2 · Operating costs</h2>
+                    @if (Model.IsEditable)
+                    {
+                        <a class="row-edit" asp-page="/Ric/Costs" asp-route-cycleId="@Model.Cycle.Id">Edit on step 2 →</a>
+                    }
+                </div>
+                <div class="review-table-wrap" role="region" aria-label="Operating costs" tabindex="0">
+                    <table class="review-table">
+                        <thead>
+                            <tr><th scope="col">Item</th><th scope="col">Category</th><th scope="col">Booked to</th><th scope="col">Annual amount</th></tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.Cycle.Costs.Any(x => !x.IsIncome))
+                            {
+                                <tr><td colspan="4">No operating costs have been recorded.</td></tr>
+                            }
+                            @foreach (var line in Model.Cycle.Costs.Where(x => !x.IsIncome).OrderBy(x => x.Capability?.Name ?? "~").ThenBy(x => x.Category))
+                            {
+                                <tr>
+                                    <td><strong>@(line.Description ?? line.PersonnelName ?? line.Category)</strong>@if (!string.IsNullOrWhiteSpace(line.Notes))
+                                    {
+                                        <small>@line.Notes</small>
+                                    }</td>
+                                    <td><span class="category-chip">@line.Category</span><small>@CostEntry.CostCategories.ClassOf(line.Scope, line.Category)</small></td>
+                                    <td>@(line.Capability?.Name ?? "Platform, split across capabilities")</td>
+                                    <td>@line.Amount.ToString("C")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr><td colspan="3">Booked to capabilities</td><td>@Model.Costs.DirectlyIncurred.ToString("C")</td></tr>
+                            <tr><td colspan="3">Platform-level, split evenly across @Model.Costs.Divisor capabilit@(Model.Costs.Divisor == 1 ? "y" : "ies")</td><td>@Model.Costs.PlatformLevel.ToString("C")</td></tr>
+                            <tr><td colspan="3"><strong>Total operating cost</strong></td><td><strong>@Model.Costs.Total.ToString("C")</strong></td></tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </article>
+
+            <article class="review-card">
+                <div class="review-card-heading">
+                    <h2>3 · Non-variable funding</h2>
+                    @if (Model.IsEditable)
+                    {
+                        <a class="row-edit" asp-page="/Ric/Funding" asp-route-cycleId="@Model.Cycle.Id">Edit on step 3 →</a>
+                    }
+                </div>
+                <div class="review-table-wrap" role="region" aria-label="Non-variable funding" tabindex="0">
+                    <table class="review-table">
+                        <thead>
+                            <tr><th scope="col">Source</th><th scope="col">Category</th><th scope="col">Booked to</th><th scope="col">Annual amount</th></tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.Cycle.Costs.Any(x => x.IsIncome))
+                            {
+                                <tr><td colspan="4">No non-variable funding has been recorded.</td></tr>
+                            }
+                            @foreach (var line in Model.Cycle.Costs.Where(x => x.IsIncome).OrderBy(x => x.Category))
+                            {
+                                <tr>
+                                    <td><strong>@(line.Description ?? line.Category)</strong>@if (!string.IsNullOrWhiteSpace(line.Notes))
+                                    {
+                                        <small>@line.Notes</small>
+                                    }</td>
+                                    <td><span class="category-chip">@line.Category</span><small>@CostEntry.IncomeCategories.RatesReduced(line.Category)</small></td>
+                                    <td>@(line.Capability?.Name ?? "Platform, split across capabilities")</td>
+                                    <td>@line.Amount.ToString("C")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+            <article class="review-card">
+                <div class="review-card-heading">
+                    <h2>4 · Capacity and forecast use</h2>
+                    @if (Model.IsEditable)
+                    {
+                        <a class="row-edit" asp-page="/Ric/Capacity" asp-route-cycleId="@Model.Cycle.Id">Edit on step 4 →</a>
+                    }
+                </div>
+                <div class="review-table-wrap" role="region" aria-label="Capacity and forecast use" tabindex="0">
+                    <table class="review-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Capability</th>
+                                <th scope="col">Usable capacity</th>
+                                <th scope="col">UWA use</th>
+                                <th scope="col">APFR use</th>
+                                <th scope="col">Commercial use</th>
+                                <th scope="col">Forecast (U)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var capability in Model.Cycle.Capabilities)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@capability.Name</strong>
+                                        <small>
+                                            @(string.IsNullOrEmpty(capability.CapacityBaseline) ? "Capacity not worked out yet" : $"{capability.CapacityBaseline} baseline")@(capability.CapacityDeductions.Count == 0 ? "" : $", less {string.Join(", ", capability.CapacityDeductions.Select(x => $"{x.Kind.ToLowerInvariant()} {x.Amount:N1}"))}")@(capability.IsStaffReliant ? $", capped at {capability.StaffFte:0.##} FTE" : "")
+                                        </small>
+                                    </td>
+                                    <td>@capability.MaximumCapacity.ToString("N1") @unit</td>
+                                    <td>@capability.ForecastUwaUse.ToString("N1")</td>
+                                    <td>@capability.ForecastApfrUse.ToString("N1")</td>
+                                    <td>@capability.ForecastCommercialUse.ToString("N1")</td>
+                                    <td><strong>@capability.ForecastUtilisation.ToString("N1") @unit</strong></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
             </article>
 
@@ -171,6 +368,11 @@
                                 Download the sealed record (PDF)
                             </a>
                         </p>
+                        <p>
+                            <a class="text-link" asp-page="/Records/Details" asp-route-id="@Model.Cycle.Id">
+                                Open the full sealed record, with the workings behind every rate
+                            </a>
+                        </p>
                         <small>
                             Built from this snapshot, not from the live figures, and it shows the workings
                             behind every rate. Attach it to the record in Content Manager.
@@ -184,15 +386,20 @@
             <span class="submit-icon">✓</span>
             @if (Model.IsEditable)
             {
-                <h2>Ready to submit?</h2>
-                <p>Submission locks the figures and sends the cycle to the delegated authority.</p>
+                <h2>@(Model.IsReady ? "Ready to submit?" : "Not ready to submit")</h2>
+                <p>Submission locks the figures and sends the cycle to the delegated authority. When they approve it, the record is sealed and can no longer be edited or deleted.</p>
+                @if (!Model.IsReady)
+                {
+                    <p id="not-ready"><a class="text-link" href="#missing">@Model.Missing.Count item@(Model.Missing.Count == 1 ? " is" : "s are") still needed</a>, listed at the top of the page with links to where each is entered.</p>
+                }
                 <form method="post" asp-page-handler="Submit" asp-route-cycleId="@Model.Cycle.Id">
                     <div asp-validation-summary="All" class="form-errors submit-errors"></div>
                     <label class="confirmation">
                         <input type="checkbox" name="confirmAccuracy" value="true" />
                         <span>I confirm the costs, utilisation assumptions, proposed rates and evidence are complete and accurate.</span>
                     </label>
-                    <button class="submit-button" type="submit">Submit for approval <span>→</span></button>
+                    @* Disabled here for the reader; refused by the handler regardless. *@
+                    <button class="submit-button" type="submit" disabled="@(!Model.IsReady)" aria-describedby="@(Model.IsReady ? null : "not-ready")">Submit for approval <span>→</span></button>
                 </form>
             }
             else if (Model.IsPending)

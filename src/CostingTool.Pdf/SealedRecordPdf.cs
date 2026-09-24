@@ -94,6 +94,7 @@ public static class SealedRecordPdf
             AddCapability(section, capability, cycle?.BillableUnit);
         }
 
+        AddCostLines(section, record);
         AddPlatformSummary(section, record, cycle?.BillableUnit);
         AddJustification(section, cycle);
         AddIntegrityBlock(section, record, snapshotHash);
@@ -173,7 +174,9 @@ public static class SealedRecordPdf
         AddFact(facts, "Submitted for approval", $"{cycle?.SubmittedBy ?? "—"}, {RecordFormat.Timestamp(cycle?.SubmittedAtUtc)}");
         AddFact(facts, "Approved by delegated authority", $"{cycle?.ApprovedBy ?? "—"}, {RecordFormat.Timestamp(cycle?.ApprovedAtUtc)}");
         AddFact(facts, "Rates effective from", RecordFormat.Date(cycle?.EffectiveDateUtc));
-        AddFact(facts, "Sealed", RecordFormat.Timestamp(record.SealedAtUtc));
+        // Sealing is the approver's act of approval, so a record sealed before schema 1.4,
+        // which did not name the sealer separately, was sealed by the approver it names.
+        AddFact(facts, "Sealed by", $"{cycle?.SealedBy ?? cycle?.ApprovedBy ?? "—"}, {RecordFormat.Timestamp(record.SealedAtUtc)}");
 
         if (cycle?.Supersedes is { } replaced)
         {
@@ -200,8 +203,8 @@ public static class SealedRecordPdf
 
         var lead = section.AddParagraph(
             $"Version {method?.Version ?? record.MethodVersion ?? "—"} of the University's costing method, as it stood when this " +
-            "record was sealed. A later change to the method does not change this record: it is " +
-            "recalculated under the version named here, not under today's.");
+            "record was sealed. Every figure below was stored as it was computed at the seal and is " +
+            "never recalculated, so a later change to the method does not change this record.");
         lead.Format.Font.Size = 9;
         lead.Format.Font.Color = Muted;
         lead.Format.SpaceAfter = Unit.FromPoint(6);
@@ -247,9 +250,10 @@ public static class SealedRecordPdf
         // ---- The three rates, and what was actually proposed --------------------------
         var rates = section.AddTable();
         rates.Borders.Width = 0;
-        rates.AddColumn(Unit.FromCentimeter(5.6));
-        rates.AddColumn(Unit.FromCentimeter(5.4));
-        rates.AddColumn(Unit.FromCentimeter(5.4));
+        rates.AddColumn(Unit.FromCentimeter(3.4));
+        rates.AddColumn(Unit.FromCentimeter(4.1));
+        rates.AddColumn(Unit.FromCentimeter(4.5));
+        rates.AddColumn(Unit.FromCentimeter(4.4));
 
         var header = rates.AddRow();
         header.Shading.Color = Panel;
@@ -258,6 +262,7 @@ public static class SealedRecordPdf
         HeaderCell(header.Cells[0], "Rate");
         HeaderCell(header.Cells[1], "Minimum sustainable", right: true);
         HeaderCell(header.Cells[2], "Proposed and charged", right: true);
+        HeaderCell(header.Cells[3], "Variance", right: true);
 
         AddRateRow(rates, "UWA researcher", result.DisplayUwaRate, result.ProposedUwaRate, billableUnit);
         AddRateRow(rates, "APFR", result.DisplayApfrRate, result.ProposedApfrRate, billableUnit);
@@ -278,6 +283,36 @@ public static class SealedRecordPdf
         AddFact(facts, "UWA non-variable income", RecordFormat.Money(result.UwaIncome));
         AddFact(facts, "Non-UWA non-variable income", RecordFormat.Money(result.NonUwaIncome));
         AddFact(facts, "Forecast utilisation (U)", RecordFormat.Quantity(result.ForecastUtilisation, billableUnit));
+        AddFact(
+            facts,
+            "Forecast use by user category",
+            $"UWA {RecordFormat.Quantity(capability.ForecastUwaUse, billableUnit)}  ·  APFR {RecordFormat.Quantity(capability.ForecastApfrUse, billableUnit)}  ·  commercial {RecordFormat.Quantity(capability.ForecastCommercialUse, billableUnit)}");
+
+        // Schema 1.4 onwards: how usable capacity was built. Left out, not guessed, before it.
+        if (capability.BaselineCapacity is { } baseline)
+        {
+            AddFact(facts, "Capacity baseline", $"{capability.CapacityBaseline}: {RecordFormat.Quantity(baseline, billableUnit)}"
+                + (string.IsNullOrWhiteSpace(capability.StatedBaselineNote) ? string.Empty : $" — {capability.StatedBaselineNote}"));
+        }
+
+        foreach (var deduction in capability.CapacityDeductions)
+        {
+            AddFact(facts, $"Less {deduction.Kind?.ToLower(RecordFormat.Culture) ?? "deduction"}",
+                RecordFormat.Quantity(deduction.Amount, billableUnit)
+                + (string.IsNullOrWhiteSpace(deduction.Note) ? string.Empty : $" — {deduction.Note}"));
+        }
+
+        if (capability.IsStaffReliant == true)
+        {
+            AddFact(facts, "Capped by staff", $"{capability.StaffFte?.ToString("0.##", RecordFormat.Culture) ?? "—"} FTE must be present to run it");
+        }
+
+        AddFact(facts, "Usable capacity", RecordFormat.Quantity(capability.MaximumCapacity, billableUnit));
+
+        if (!string.IsNullOrWhiteSpace(capability.AboveCapacityReason))
+        {
+            AddFact(facts, "Why the forecast exceeds usable capacity", capability.AboveCapacityReason);
+        }
 
         if (capability.Workings is { } workings)
         {
@@ -286,6 +321,77 @@ public static class SealedRecordPdf
             AddFormula(arithmetic, "UWA researcher", workings.UwaResearcher);
             AddFormula(arithmetic, "APFR", workings.Apfr);
             AddFormula(arithmetic, "Commercial", workings.Commercial);
+        }
+
+        Space(section, 10);
+    }
+
+    /// <summary>
+    /// Every cost and income line the totals were built from (US-16, "every input"). Lines
+    /// are in the snapshot of every schema; a record without any prints nothing here.
+    /// </summary>
+    private static void AddCostLines(Section section, SealedRecord record)
+    {
+        if (record.Costs.Count == 0)
+        {
+            return;
+        }
+
+        var names = record.Capabilities.ToDictionary(x => x.Id, x => x.Name ?? x.Result?.CapabilityName ?? "Capability");
+
+        Heading(section, "The costs and income entered");
+
+        var lead = section.AddParagraph(
+            "Annual figures — the mean of each line's per-year amounts. A platform-level line is split " +
+            "evenly across the capabilities, which is the share printed against each capability above.");
+        lead.Format.Font.Size = 8.5;
+        lead.Format.Font.Color = Muted;
+        lead.Format.SpaceAfter = Unit.FromPoint(4);
+
+        var table = section.AddTable();
+        table.Borders.Width = 0;
+        table.AddColumn(Unit.FromCentimeter(5.6));
+        table.AddColumn(Unit.FromCentimeter(4.6));
+        table.AddColumn(Unit.FromCentimeter(3.3));
+        table.AddColumn(Unit.FromCentimeter(2.9));
+
+        var header = table.AddRow();
+        header.HeadingFormat = true;
+        header.Shading.Color = Panel;
+        header.TopPadding = Unit.FromPoint(3);
+        header.BottomPadding = Unit.FromPoint(3);
+        HeaderCell(header.Cells[0], "Item");
+        HeaderCell(header.Cells[1], "Category");
+        HeaderCell(header.Cells[2], "Booked to");
+        HeaderCell(header.Cells[3], "Annual amount", right: true);
+
+        foreach (var line in record.Costs.OrderBy(x => x.IsIncome).ThenBy(x => x.Category, StringComparer.Ordinal))
+        {
+            var row = table.AddRow();
+            row.TopPadding = Unit.FromPoint(2);
+            row.BottomPadding = Unit.FromPoint(2);
+            row.Borders.Bottom.Width = 0.25;
+            row.Borders.Bottom.Color = Rule;
+
+            var item = row.Cells[0].AddParagraph(line.Description ?? line.PersonnelName ?? line.Category ?? "—");
+            item.Format.Font.Size = 8.5;
+            if (!string.IsNullOrWhiteSpace(line.Notes))
+            {
+                var note = row.Cells[0].AddParagraph(line.Notes);
+                note.Format.Font.Size = 7.5;
+                note.Format.Font.Color = Muted;
+            }
+
+            var category = row.Cells[1].AddParagraph($"{line.Category ?? "—"}{(line.IsIncome ? " (income)" : string.Empty)}");
+            category.Format.Font.Size = 8.5;
+
+            var bookedTo = row.Cells[2].AddParagraph(
+                line.RicCapabilityId is { } id && names.TryGetValue(id, out var name) ? name : "Platform");
+            bookedTo.Format.Font.Size = 8.5;
+
+            var amount = row.Cells[3].AddParagraph($"{(line.IsIncome ? "less " : string.Empty)}{RecordFormat.Money(line.Amount)}");
+            amount.Format.Font.Size = 8.5;
+            amount.Format.Alignment = ParagraphAlignment.Right;
         }
 
         Space(section, 10);
@@ -403,6 +509,11 @@ public static class SealedRecordPdf
             "database, so it says what was approved rather than what the system holds today. The " +
             "snapshot is stored with the SHA-256 hash below; recomputing the hash over the stored " +
             "snapshot reproduces it exactly if neither has been altered.");
+        paragraph.AddLineBreak();
+        paragraph.AddLineBreak();
+        paragraph.AddText(
+            "Retain this document with the record's supporting documentation for audit and review, " +
+            "as the UWA Costing & Pricing Guide requires (Step 5).");
         paragraph.AddLineBreak();
         paragraph.AddLineBreak();
         paragraph.AddText($"Snapshot schema {record.SchemaVersion ?? "—"}   ·   method version {record.MethodVersion ?? "—"}");
@@ -523,6 +634,10 @@ public static class SealedRecordPdf
             charged.AddText("  below cost");
             charged.Format.Font.Color = Accent;
         }
+
+        var variance = row.Cells[3].AddParagraph(RecordFormat.Variance(calculated, proposed));
+        variance.Format.Font.Size = 9;
+        variance.Format.Alignment = ParagraphAlignment.Right;
     }
 
     private static void HeaderCell(Cell cell, string text, bool right = false)

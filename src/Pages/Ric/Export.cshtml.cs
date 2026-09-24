@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using CostingTool.Data;
+using CostingTool.Models;
 using CostingTool.Pdf;
 using Microsoft.AspNetCore.Mvc;
 
@@ -48,17 +49,19 @@ public class ExportModel(CostingDbContext db) : RicPageModel(db)
             return RedirectToPage("/Ric/Review", new { cycleId });
         }
 
-        return File(pdf, "application/pdf", FileName());
+        return File(pdf, "application/pdf", FileName(Cycle));
     }
 
     /// <summary>
     /// A filename someone can find again in six months, and file in Content Manager
-    /// without renaming: platform, pricing period, and the date it was sealed.
+    /// without renaming: platform, pricing period, and the date it was sealed. Shared with
+    /// the records register (US-17), so the same record downloads under the same name
+    /// whoever downloads it.
     /// </summary>
-    private string FileName()
+    public static string FileName(RicCycle cycle)
     {
-        var sealedOn = (Cycle.SealedAtUtc ?? DateTime.UtcNow).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-        return $"costing-record-{Slug(Cycle.PlatformName)}-{Cycle.StartYear}-{Cycle.EndYear}-sealed-{sealedOn}.pdf";
+        var sealedOn = (cycle.SealedAtUtc ?? DateTime.UtcNow).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        return $"costing-record-{Slug(cycle.PlatformName)}-{cycle.StartYear}-{cycle.EndYear}-sealed-{sealedOn}.pdf";
     }
 
     private static string Slug(string? value)

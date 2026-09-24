@@ -115,7 +115,7 @@ CostingTool.sln
 │   │   ├── CapabilityRateInputs.cs What the engine needs to price one capability
 │   │   └── RateEngine.cs           The three formulas, and the workings behind them
 │   ├── CostingTool.Pdf/        The sealed-record PDF. MigraDoc, and nothing else
-│   │   ├── SealedRecord.cs         The snapshot, read back — schema 1.3
+│   │   ├── SealedRecord.cs         The snapshot, read back — schema 1.4
 │   │   ├── SealedRecordPdf.cs      Rates beside the arithmetic that produced them
 │   │   ├── EmbeddedFontResolver.cs Why the font travels with the assembly
 │   │   └── Fonts/                  DejaVu Sans, embedded. Licence beside it
@@ -171,6 +171,11 @@ a page can render.
 6. **Review** — check and submit for delegated authority approval.
 7. **Approvals** — the approver sees the workings, then approves and seals, or returns the
    cycle with required changes.
+8. **Sealed records** — every sealed record, by platform and pricing period, with its sealed
+   date and whether it is current or superseded (US-17). Opening one shows the rates, the
+   workings, the reasons and the method and `k` it was sealed under, read from the snapshot
+   rather than recalculated, so a later method change cannot alter it. Custodians see their
+   own; approvers and administrators see all of them.
 
 Every completed step is a link in the step bar, and any answer can be changed on the way back
 (US-10): step 1 reopens on the cycle to rename, add or remove capabilities, recorded cost and

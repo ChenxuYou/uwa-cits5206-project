@@ -16,6 +16,11 @@
         <span class="status-pill @Model.Cycle.Status.ToLowerInvariant()">@Model.Cycle.Status</span>
     </div>
 
+    @if (Model.Cycle.Status == "Sealed")
+    {
+        <p><a class="outline-action" asp-page="/Records/Details" asp-route-id="@Model.Cycle.Id">Open the sealed record, as it was approved →</a></p>
+    }
+
     <div class="callout">
         <span>!</span>
         <div>
