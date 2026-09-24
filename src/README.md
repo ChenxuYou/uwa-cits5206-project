@@ -125,7 +125,8 @@ CostingTool.sln
 │       ├── Services/               The seam: cycle → engine inputs → page results
 │       └── Pages/                  Razor Pages
 ├── tests/CostingTool.Engine.Tests/  References the engine and nothing else
-└── tests/CostingTool.Pdf.Tests/     References the renderer and nothing else
+├── tests/CostingTool.Pdf.Tests/     References the renderer and nothing else
+└── tests/CostingTool.Web.Tests/     References the web project — identity and the flow
 ```
 
 ### Who owns which part
@@ -238,6 +239,12 @@ cost, a change to `k`, rounding at the half-cent, very large amounts, and determ
 
 `tests/CostingTool.Pdf.Tests` then asserts the **same three figures on the way out** — a
 correct engine behind a document that prints something else is not worth much.
+`tests/CostingTool.Web.Tests` covers the parts of the application that are not arithmetic:
+identity and the guided flow. On the identity side — sign-in and the wrong password, username
+normalisation, a deactivated account, the lockout's count and its fifteen-minute duration,
+where each role lands, the password policy, account administration, and the two rules that
+would be quiet if they broke: another custodian's cycle answers exactly as a missing one, and
+an unknown username is refused in the same words, and the same time, as a wrong password.
 
 Figures come from the client's **guide**, never from the recorded walkthrough — see the
 withdrawn fixtures note in [`architecture.md` §3](../docs/spec/architecture.md).
