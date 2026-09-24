@@ -174,7 +174,10 @@ hard to tell apart in a single flat folder.
 │   │       ├── 2026-08-17-email-scope-and-questions/       The outbound email and its two attachments
 │   │       └── 2026-08-20-client-meeting/     The signed scope statement, the client's written
 │   │                               answers, and our notes from the room
-│   ├── meetings/           Minutes, one file per meeting
+│   ├── meetings/           Minutes, one file per meeting — index in its README
+│   │   ├── client/         With UWA Research Infrastructure
+│   │   ├── facilitator/    Lab facilitator checkpoints
+│   │   └── team/           Team meetings
 │   ├── decisions/          Architecture and process decision records
 │   │   └── adr-001-technology-stack.md   Why ASP.NET Core Razor Pages
 │   └── internal/           Our own review notes — not committed
