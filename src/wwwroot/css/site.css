@@ -911,3 +911,18 @@ a.ric-step-link:focus-visible {
 @media (max-width: 640px) {
     .missing-list li { flex-direction: column; gap: 4px; }
 }
+
+/* ---------------------------------------------------------------------------
+   Explaining the figures (US-13): costing assumptions, the Step 5 checklist
+   --------------------------------------------------------------------------- */
+.costing-assumptions { margin-top: 18px; }
+.costing-assumptions .field small { margin: 0 0 8px; font-size: 12px; line-height: 1.5; }
+.assumptions-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-top: 10px; }
+.assumptions-actions .rollup-check { margin: 0; }
+.step5-checklist { margin: 16px 0; padding: 12px; border: 1px solid var(--line); border-radius: 7px; }
+.step5-checklist h3 { margin: 0 0 8px; font: 700 13px Manrope; }
+.step5-checklist ul { margin: 0; padding: 0; list-style: none; }
+.step5-checklist li { display: flex; gap: 8px; padding: 4px 0; font-size: 13px; }
+.step5-checklist li.done > span:first-child { color: var(--green); font-weight: 700; }
+.step5-checklist li.outstanding > span:first-child { color: var(--amber); }
+.step5-checklist small { display: block; font-size: 12px; color: var(--muted); }

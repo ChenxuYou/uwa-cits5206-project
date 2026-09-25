@@ -72,6 +72,15 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
     [BindProperty] public List<decimal> YearAmounts { get; set; } = [];
 
+    /// <summary>What the costs as a whole rest on (US-13; the guide's Step 5 checklist).</summary>
+    [BindProperty] public string? CostingAssumptions { get; set; }
+
+    /// <summary>
+    /// The address of a link followed with unsaved costing assumptions: they are saved on the
+    /// way out and the custodian goes on there (<c>data-save-on-leave</c> in the layout).
+    /// </summary>
+    [BindProperty] public string? LeavingFor { get; set; }
+
     /// <summary>The custodian has looked at an unusually large amount and says it is right (US-18).</summary>
     [BindProperty] public bool ConfirmLargeAmounts { get; set; }
 
@@ -114,6 +123,43 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
         }
 
         return Page();
+    }
+
+    /// <summary>
+    /// Save the costing assumptions on their own. They belong to the costs section as a whole,
+    /// so they have a form of their own rather than riding on "add a cost line". Blank clears
+    /// them: they are optional, and the review's Step 5 checklist reports them as outstanding.
+    /// </summary>
+    public async Task<IActionResult> OnPostAssumptionsAsync()
+    {
+        // Load fills CostingAssumptions from the record when the form left it empty, so what
+        // was posted is kept first — otherwise clearing the field could never be saved.
+        var posted = CostingAssumptions;
+
+        if (!await Load(CycleId))
+        {
+            return NotFound();
+        }
+
+        if (!Cycle.IsEditable)
+        {
+            return RedirectToPage("/Ric/Review", new { cycleId = CycleId });
+        }
+
+        var assumptions = string.IsNullOrWhiteSpace(posted) ? null : posted.Trim();
+        if (assumptions != Cycle.CostingAssumptions)
+        {
+            Cycle.CostingAssumptions = assumptions;
+            RecordEdit();
+            await Db.SaveChangesAsync();
+        }
+
+        if (!IsLocalPath(LeavingFor))
+        {
+            TempData["CostsMessage"] = "Costing assumptions saved.";
+        }
+
+        return Continue(LeavingFor, "/Ric/Costs");
     }
 
     public Task<IActionResult> OnPostAddAsync() => SaveAsync();
@@ -408,6 +454,10 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
         }
 
         CycleId = cycleId;
+
+        // Every handler that shows the page again — a refused cost line, say — keeps what the
+        // record holds in the costing assumptions box rather than showing it empty.
+        CostingAssumptions ??= Cycle.CostingAssumptions;
         return true;
     }
 }

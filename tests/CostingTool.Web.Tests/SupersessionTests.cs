@@ -259,7 +259,7 @@ public class SupersessionTests
 
         var sealedNew = await db.RicCycles.AsNoTracking().SingleAsync(x => x.Id == newId);
         using var snapshot = JsonDocument.Parse(sealedNew.SnapshotJson!);
-        Assert.Equal("1.4", snapshot.RootElement.GetProperty("SchemaVersion").GetString());
+        Assert.Equal("1.5", snapshot.RootElement.GetProperty("SchemaVersion").GetString());
         var reference = snapshot.RootElement.GetProperty("Cycle").GetProperty("Supersedes");
         Assert.Equal(oldId, reference.GetProperty("Id").GetInt32());
         Assert.Equal(oldHash, reference.GetProperty("SnapshotHash").GetString());

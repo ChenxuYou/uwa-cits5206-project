@@ -156,7 +156,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
         var snapshot = new
         {
-            SchemaVersion = "1.4",
+            SchemaVersion = "1.5",
             SealedAtUtc = Cycle.SealedAtUtc,
             MethodVersion = method.Version,
             Method = new
@@ -183,6 +183,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
                 Cycle.CreatedBy,
                 Cycle.CreatedByDisplay,
                 Cycle.UtilisationAssumptions,
+                Cycle.CostingAssumptions,
                 Cycle.BenchmarkNotes,
                 Cycle.PricingJustification,
                 Cycle.SubmittedBy,

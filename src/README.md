@@ -115,7 +115,7 @@ CostingTool.sln
 │   │   ├── CapabilityRateInputs.cs What the engine needs to price one capability
 │   │   └── RateEngine.cs           The three formulas, and the workings behind them
 │   ├── CostingTool.Pdf/        The sealed-record PDF. MigraDoc, and nothing else
-│   │   ├── SealedRecord.cs         The snapshot, read back — schema 1.4
+│   │   ├── SealedRecord.cs         The snapshot, read back — schema 1.5
 │   │   ├── SealedRecordPdf.cs      Rates beside the arithmetic that produced them
 │   │   ├── EmbeddedFontResolver.cs Why the font travels with the assembly
 │   │   └── Fonts/                  DejaVu Sans, embedded. Licence beside it
