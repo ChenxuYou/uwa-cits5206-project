@@ -217,6 +217,17 @@ public class RicCycle
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 
     /// <summary>
+    /// Changes on every save of this row, and every save checks it is still the value that
+    /// was read. Two requests that both read a Submitted cycle — an approver's double click,
+    /// or two approvers deciding at once — can no longer both write: the second is refused
+    /// with a <c>DbUpdateConcurrencyException</c> instead of overwriting a seal that has
+    /// already happened, or returning a record that is already sealed (US-15).
+    ///
+    /// Rotated in <c>CostingDbContext.SaveChanges</c>, so no page has to remember to.
+    /// </summary>
+    public Guid ConcurrencyStamp { get; set; } = Guid.NewGuid();
+
+    /// <summary>
     /// The sealed cycle this one replaces, when it replaces one (US-01, F22).
     ///
     /// <b>The reference is the whole of supersession.</b> The older record is never written

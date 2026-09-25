@@ -71,6 +71,10 @@ builder.Services.AddRazorPages(options =>
 })
 .AddMvcOptions(options =>
 {
+    // C3: a save refused because the record changed underneath the request is a 409 page
+    // that says so, not an unhandled exception.
+    options.Filters.Add<SaveConflictFilter>();
+
     // US-18: text in a numeric field is refused with a message a custodian can act on.
     // These are the fallback wordings; the guided-workflow pages replace them with the
     // on-screen name of the field (EntryChecks.ExplainUnreadableNumbers).

@@ -140,6 +140,21 @@
         // A page rendered in answer to a post holds unsaved figures from the start: a save
         // that succeeds redirects, so a post that comes back as a page was refused or was
         // only a preview.
+        // C3: a form marked data-submit-once sends one request. A double click on "Approve &
+        // seal" used to send two; the server now refuses the second, but it is better never
+        // sent. The buttons come back if the browser restores the page from its cache.
+        document.querySelectorAll('form[data-submit-once]').forEach(form => {
+            form.addEventListener('submit', () => {
+                setTimeout(() => form.querySelectorAll('button[type=submit], button:not([type])')
+                    .forEach(button => { button.disabled = true; }), 0);
+            });
+        });
+        window.addEventListener('pageshow', event => {
+            if (event.persisted) {
+                document.querySelectorAll('form[data-submit-once] button').forEach(button => { button.disabled = false; });
+            }
+        });
+
         const postedBack = @(Microsoft.AspNetCore.Http.HttpMethods.IsPost(Context.Request.Method) ? "true" : "false");
         document.querySelectorAll('form[data-unsaved-warning]').forEach(form => {
             let dirty = postedBack;

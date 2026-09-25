@@ -51,6 +51,7 @@ public class CostingDbContext(DbContextOptions<CostingDbContext> options) : DbCo
         modelBuilder.Entity<RicCycle>().Property(x => x.Status).HasMaxLength(30);
         modelBuilder.Entity<RicCycle>().Property(x => x.CreatedBy).HasMaxLength(80);
         modelBuilder.Entity<RicCycle>().Property(x => x.LastEditedBy).HasMaxLength(80);
+        modelBuilder.Entity<RicCycle>().Property(x => x.ConcurrencyStamp).IsConcurrencyToken();
         // Ownership is filtered on this column on nearly every request.
         modelBuilder.Entity<RicCycle>().HasIndex(x => x.CreatedBy);
 
@@ -159,10 +160,20 @@ public class CostingDbContext(DbContextOptions<CostingDbContext> options) : DbCo
 
             switch (entry.Entity)
             {
-                case RicCycle when entry.State != EntityState.Added:
+                case RicCycle cycle when entry.State != EntityState.Added:
                     if (Original<string>(entry, nameof(RicCycle.Status)) == "Sealed")
                     {
                         throw new SealedRecordException();
+                    }
+
+                    // The status checked above is the one this request READ, which may no
+                    // longer be the one stored: another request can have sealed the cycle
+                    // since. The stamp closes that gap. The UPDATE only matches the row if the
+                    // stamp is still the one read, and a new stamp is written with it, so a
+                    // stale request's save fails with DbUpdateConcurrencyException (C3).
+                    if (entry.State == EntityState.Modified)
+                    {
+                        cycle.ConcurrencyStamp = Guid.NewGuid();
                     }
                     break;
                 case RicCapability:
