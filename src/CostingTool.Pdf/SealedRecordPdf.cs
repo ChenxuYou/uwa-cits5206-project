@@ -95,6 +95,7 @@ public static class SealedRecordPdf
         }
 
         AddCostLines(section, record);
+        AddCostingAssumptions(section, cycle);
         AddPlatformSummary(section, record, cycle?.BillableUnit);
         AddJustification(section, cycle);
         AddIntegrityBlock(section, record, snapshotHash);
@@ -393,6 +394,28 @@ public static class SealedRecordPdf
             amount.Format.Font.Size = 8.5;
             amount.Format.Alignment = ParagraphAlignment.Right;
         }
+
+        Space(section, 10);
+    }
+
+    /// <summary>
+    /// What the costs as a whole rest on (US-13), printed under the lines it explains rather
+    /// than with the pricing reasons at the end. Schema 1.5 onwards; a record that holds none
+    /// prints nothing here.
+    /// </summary>
+    private static void AddCostingAssumptions(Section section, SealedCycle? cycle)
+    {
+        if (string.IsNullOrWhiteSpace(cycle?.CostingAssumptions))
+        {
+            return;
+        }
+
+        var label = section.AddParagraph("Costing assumptions");
+        label.Format.Font.Size = 9;
+        label.Format.Font.Bold = true;
+        label.Format.SpaceAfter = Unit.FromPoint(2);
+        label.Format.KeepWithNext = true;
+        Quote(section, cycle.CostingAssumptions!);
 
         Space(section, 10);
     }

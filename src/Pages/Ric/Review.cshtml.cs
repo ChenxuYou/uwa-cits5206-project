@@ -36,6 +36,12 @@ public class ReviewModel(CostingDbContext db, RicCalculationService calculator) 
 
     public bool IsReady => Missing.Count == 0;
 
+    /// <summary>
+    /// The guide's Step 5 documentation checklist (US-13). Reported beside the submit button,
+    /// never a reason to refuse — see <see cref="Step5Checklist"/>. Empty once not editable.
+    /// </summary>
+    public IReadOnlyList<Step5Checklist.Item> Step5 { get; private set; } = [];
+
     /// <summary>Where each operating cost sits (US-03, US-04), for the inputs on the page.</summary>
     public CycleCosts Costs { get; private set; } = null!;
 
@@ -116,6 +122,7 @@ public class ReviewModel(CostingDbContext db, RicCalculationService calculator) 
 
         Costs = RicCalculationService.CostsOf(Cycle);
         Missing = IsEditable ? SubmissionChecks.For(Cycle, Rates) : [];
+        Step5 = IsEditable ? Step5Checklist.For(Cycle) : [];
 
         Previous = await LoadReplacedRecordAsync();
 

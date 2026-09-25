@@ -187,6 +187,17 @@ public class RicCycle
     /// </summary>
     public string? UtilisationAssumptions { get; set; }
 
+    /// <summary>
+    /// What the cost figures rest on, for the costs section as a whole: which budget, how
+    /// salaries were estimated, what was treated as in-kind, what was left out and why.
+    ///
+    /// The first item on the guide's Step 5 checklist is "costing assumptions documented"
+    /// [G, Step 5], and US-13 asks for room to explain in every section, not only at the end.
+    /// Each cost line has its own note as well; this is for what no single line says.
+    /// Optional: the review reports it as outstanding rather than refusing submission.
+    /// </summary>
+    public string? CostingAssumptions { get; set; }
+
     public string? BenchmarkNotes { get; set; }
     public string? PricingJustification { get; set; }
     public string? SubmittedBy { get; set; }

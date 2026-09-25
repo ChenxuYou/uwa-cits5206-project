@@ -209,6 +209,14 @@
                             <a class="row-edit" asp-page="/Ric/Capacity" asp-route-cycleId="@Model.Cycle.Id">Edit on step 4, Capacity</a>
                         }
                     </div>
+                    <div>
+                        <span>Costing assumptions</span>
+                        <p>@(Model.Cycle.CostingAssumptions ?? "Not recorded")</p>
+                        @if (Model.IsEditable)
+                        {
+                            <a class="row-edit" asp-page="/Ric/Costs" asp-route-cycleId="@Model.Cycle.Id">Edit on step 2, Costs</a>
+                        }
+                    </div>
                     @foreach (var above in Model.Cycle.Capabilities.Where(x => !string.IsNullOrWhiteSpace(x.AboveCapacityReason)))
                     {
                         <div><span>@above.Name: forecast above usable capacity</span><p>@above.AboveCapacityReason</p></div>
@@ -392,6 +400,31 @@
                 {
                     <p id="not-ready"><a class="text-link" href="#missing">@Model.Missing.Count item@(Model.Missing.Count == 1 ? " is" : "s are") still needed</a>, listed at the top of the page with links to where each is entered.</p>
                 }
+
+                @* US-13: the guide's Step 5 documentation checklist, read from what has been
+                   written. It reports; SubmissionChecks is what refuses. *@
+                <section class="step5-checklist" aria-labelledby="step5-heading">
+                    <h3 id="step5-heading">The guide's Step 5 checklist</h3>
+                    <ul>
+                        @foreach (var item in Model.Step5)
+                        {
+                            <li class="@(item.Done ? "done" : "outstanding")">
+                                <span aria-hidden="true">@(item.Done ? "✓" : "○")</span>
+                                <span>
+                                    @item.Label
+                                    @if (item.Done)
+                                    {
+                                        <small class="visually-hidden">(done)</small>
+                                    }
+                                    else
+                                    {
+                                        <small>Not yet. <a class="text-link" href="@Url.Page(item.StepPage, new { cycleId = Model.Cycle.Id })">Add it on step @item.Step, @item.StepName</a></small>
+                                    }
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                </section>
                 <form method="post" asp-page-handler="Submit" asp-route-cycleId="@Model.Cycle.Id">
                     <div asp-validation-summary="All" class="form-errors submit-errors"></div>
                     <label class="confirmation">

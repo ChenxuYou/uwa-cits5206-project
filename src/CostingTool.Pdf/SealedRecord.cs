@@ -15,7 +15,7 @@ namespace CostingTool.Pdf;
 /// (architecture.md §4, requirements §9 Q5).
 ///
 /// The shape below mirrors <c>Pages/Approvals/Details.cshtml.cs</c> — <c>BuildSnapshot()</c>,
-/// schema 1.4. The two must move together: adding a field to the snapshot without adding
+/// schema 1.5. The two must move together: adding a field to the snapshot without adding
 /// it here means the PDF silently stops showing it, so <see cref="SupportedSchemaVersions"/>
 /// is checked on the way in rather than trusted.
 ///
@@ -26,16 +26,18 @@ namespace CostingTool.Pdf;
 /// on a record that replaces nothing. Schema 1.4 added who sealed the record
 /// (<see cref="SealedCycle.SealedBy"/>, US-15 and US-16) and the capacity inputs behind each
 /// capability's forecast (US-16, "every input"); both are absent, and left out rather than
-/// invented, on an older record. A snapshot is never rewritten — the renderer is what
+/// invented, on an older record. Schema 1.5 added the costing assumptions
+/// (<see cref="SealedCycle.CostingAssumptions"/>, US-13), which a record sealed before it
+/// never held. A snapshot is never rewritten — the renderer is what
 /// learns the older shape.
 /// </summary>
 public sealed class SealedRecord
 {
     /// <summary>The schema new snapshots are written in.</summary>
-    public const string CurrentSchemaVersion = "1.4";
+    public const string CurrentSchemaVersion = "1.5";
 
     /// <summary>Every schema this renderer can read, oldest first.</summary>
-    public static readonly string[] SupportedSchemaVersions = ["1.1", "1.2", "1.3", CurrentSchemaVersion];
+    public static readonly string[] SupportedSchemaVersions = ["1.1", "1.2", "1.3", "1.4", CurrentSchemaVersion];
 
     private static readonly JsonSerializerOptions ReadOptions = new()
     {
@@ -149,6 +151,12 @@ public sealed class SealedCycle
     public string? CreatedByDisplay { get; set; }
 
     public string? UtilisationAssumptions { get; set; }
+
+    /// <summary>
+    /// What the cost figures rest on as a whole (US-13; the guide's Step 5 checklist).
+    /// Schema 1.5 onwards; null before it, and when none was written.
+    /// </summary>
+    public string? CostingAssumptions { get; set; }
 
     public string? BenchmarkNotes { get; set; }
 

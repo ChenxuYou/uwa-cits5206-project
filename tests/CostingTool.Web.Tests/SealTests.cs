@@ -208,7 +208,7 @@ public class SealTests
         Assert.Equal("2026.1", cycle.MethodVersion);
 
         using var snapshot = JsonDocument.Parse(cycle.SnapshotJson!);
-        Assert.Equal("1.4", snapshot.RootElement.GetProperty("SchemaVersion").GetString());
+        Assert.Equal("1.5", snapshot.RootElement.GetProperty("SchemaVersion").GetString());
         Assert.Equal("Dr Mei Chen", snapshot.RootElement.GetProperty("Cycle").GetProperty("SealedBy").GetString());
 
         var capability = snapshot.RootElement.GetProperty("Capabilities")[0];

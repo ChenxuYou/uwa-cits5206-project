@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Text;
+using System.Text.Json.Nodes;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
 using PdfSharp.Pdf.IO;
@@ -258,6 +259,54 @@ public class SealedRecordPdfTests
     public void A_schema_1_4_record_renders_to_a_pdf()
     {
         var bytes = SealedRecordPdf.Render(File.ReadAllText(Schema14Path), Hash);
+
+        Assert.True(bytes.Length > 1000);
+        Assert.Equal("%PDF", Encoding.ASCII.GetString(bytes, 0, 4));
+    }
+
+    // ----------------------------------------------------------------------------------
+    // Schema 1.5 — the costing assumptions (US-13)
+    // ----------------------------------------------------------------------------------
+
+    private const string CostingAssumptions =
+        "2026 budget as approved in March; salaries at the current EBA step plus 17% on-costs.";
+
+    /// <summary>The 1.4 fixture as 1.5 writes it: the same record, with its costing assumptions.</summary>
+    private static string Schema15Snapshot(string? costingAssumptions = CostingAssumptions)
+    {
+        var node = JsonNode.Parse(File.ReadAllText(Schema14Path))!;
+        node["SchemaVersion"] = "1.5";
+        node["Cycle"]!["CostingAssumptions"] = costingAssumptions;
+        return node.ToJsonString();
+    }
+
+    [Fact]
+    public void The_costing_assumptions_are_printed_under_the_lines_they_explain()
+    {
+        var text = AllText(SealedRecordPdf.Build(SealedRecord.Parse(Schema15Snapshot()), Hash));
+
+        var lines = text.IndexOf("The costs and income entered", StringComparison.Ordinal);
+        var assumptions = text.IndexOf("Costing assumptions", StringComparison.Ordinal);
+        var summary = text.IndexOf("The platform, at the proposed rates", StringComparison.Ordinal);
+
+        Assert.Contains(CostingAssumptions, text, StringComparison.Ordinal);
+        Assert.True(lines >= 0 && lines < assumptions && assumptions < summary,
+            "The costing assumptions belong between the cost lines and the platform summary.");
+    }
+
+    [Fact]
+    public void A_record_with_no_costing_assumptions_prints_no_empty_heading()
+    {
+        var sealedUnder15 = AllText(SealedRecordPdf.Build(SealedRecord.Parse(Schema15Snapshot(costingAssumptions: null)), Hash));
+
+        Assert.DoesNotContain("Costing assumptions", sealedUnder15, StringComparison.Ordinal);
+        Assert.DoesNotContain("Costing assumptions", Schema14Text(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_schema_1_5_record_renders_to_a_pdf()
+    {
+        var bytes = SealedRecordPdf.Render(Schema15Snapshot(), Hash);
 
         Assert.True(bytes.Length > 1000);
         Assert.Equal("%PDF", Encoding.ASCII.GetString(bytes, 0, 4));
