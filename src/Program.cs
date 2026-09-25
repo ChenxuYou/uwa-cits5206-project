@@ -6,6 +6,7 @@ using CostingTool.Engine;
 using CostingTool.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -68,6 +69,10 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AllowAnonymousToPage("/Account/AccessDenied");
     options.Conventions.AllowAnonymousToPage("/Error");
     options.Conventions.AuthorizePage("/Account/ChangePassword");
+
+    // M2: sign-in attempts are limited per address as well as per account.
+    options.Conventions.AddPageApplicationModelConvention("/Account/Login",
+        model => model.EndpointMetadata.Add(new EnableRateLimitingAttribute(Hosting.SignInPolicy)));
 })
 .AddMvcOptions(options =>
 {
@@ -90,9 +95,17 @@ builder.Services.AddRazorPages(options =>
         $"\"{value}\" is not a number. Enter a number, such as 20000.00.");
 });
 
-builder.Services.AddDbContext<CostingDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("CostingDb")
-                      ?? "Data Source=ric-costing.db"));
+// H2: outside Development the database must be named by an absolute path, so that it lives
+// outside the folder a deployment replaces. Checked before anything opens it.
+var connectionString = builder.Configuration.GetConnectionString("CostingDb") ?? "Data Source=ric-costing.db";
+var databasePath = Hosting.DatabasePath(connectionString, builder.Environment);
+
+builder.Services.AddDbContext<CostingDbContext>(options => options.UseSqlite(connectionString));
+
+// H1, M2, M3: keys that survive a restart, the sign-in rate limit, and the local reverse proxy.
+builder.Services.AddPersistentKeys(builder.Configuration, builder.Environment, databasePath);
+builder.Services.AddSignInRateLimit();
+builder.Services.AddLocalProxy();
 
 builder.Services.AddScoped<MethodConfigProvider>();
 builder.Services.AddScoped<RicCalculationService>();
@@ -104,6 +117,10 @@ builder.Services.Configure<PasswordHasherOptions>(options =>
 builder.Services.AddScoped<IPasswordHasher<AppUser>, PasswordHasher<AppUser>>();
 
 var app = builder.Build();
+
+// First, so that everything after it sees the client's address and scheme, not the proxy's (M3).
+app.UseForwardedHeaders();
+app.UseSecurityHeaders();
 
 // Every figure on screen is Australian currency, and every date is read by someone in
 // Perth. Without this the application formats money in whatever culture the host happens
@@ -132,6 +149,7 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapRazorPages();
