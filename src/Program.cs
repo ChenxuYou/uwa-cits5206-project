@@ -92,7 +92,7 @@ builder.Services.AddRazorPages(options =>
 
 builder.Services.AddDbContext<CostingDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("CostingDb")
-                      ?? "Data Source=ric-costing-v9.db"));
+                      ?? "Data Source=ric-costing.db"));
 
 builder.Services.AddScoped<MethodConfigProvider>();
 builder.Services.AddScoped<RicCalculationService>();
@@ -140,16 +140,54 @@ await SeedAsync(app);
 
 app.Run();
 
+static async Task RefuseDatabasesMadeBeforeMigrationsAsync(CostingDbContext db)
+{
+    if (!await db.Database.CanConnectAsync())
+    {
+        return;
+    }
+
+    var applied = await db.Database.GetAppliedMigrationsAsync();
+    if (applied.Any())
+    {
+        return;
+    }
+
+    var connection = db.Database.GetDbConnection();
+    await connection.OpenAsync();
+    try
+    {
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'RicCycles'";
+        var tables = Convert.ToInt32(await command.ExecuteScalarAsync(), CultureInfo.InvariantCulture);
+        if (tables > 0)
+        {
+            throw new InvalidOperationException(
+                $"The database at '{connection.DataSource}' was created before this application used migrations, " +
+                "so its schema cannot be brought up to date. It holds development data only (staging has never run " +
+                "on EnsureCreated): delete the file, or point ConnectionStrings:CostingDb at a new one, and start again.");
+        }
+    }
+    finally
+    {
+        await connection.CloseAsync();
+    }
+}
+
 static async Task SeedAsync(WebApplication app)
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<CostingDbContext>();
 
-    // EnsureCreated builds the schema from the model on first run. It cannot evolve an
-    // existing database, which is why the README says to delete the local file after a
-    // model change — and why moving to EF Core migrations is a gate on the staging
-    // deployment (plan.md M5), not an optional tidy-up.
-    await db.Database.EnsureCreatedAsync();
+    // The schema is built and evolved by EF Core migrations (src/Data/Migrations). This
+    // replaced EnsureCreated, which built a schema once and could never change it: every model
+    // change meant a new database file, which on staging would have meant the client's data
+    // disappearing at the next deployment (audit C1, plan.md M5).
+    //
+    // A database EnsureCreated made has the tables but no migration history, and migrating it
+    // would fail half way on "table already exists". It is refused with the reason instead.
+    await RefuseDatabasesMadeBeforeMigrationsAsync(db);
+    await db.Database.MigrateAsync();
 
     // The method configuration in force. k is configuration, not a constant: the client
     // expects the method and its factors to be reviewed within a 3–5 year cycle, and a
