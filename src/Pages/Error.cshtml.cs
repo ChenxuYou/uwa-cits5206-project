@@ -35,6 +35,10 @@ public class ErrorModel : PageModel
 
         (Heading, Detail) = code switch
         {
+            403 => ("You do not have access to that",
+                "Your account does not carry the role that page needs. Custodians and delegated " +
+                "approvers see different parts of the tool."),
+
             404 => ("Page not found",
                 "That address does not match anything in this application. It may have been mistyped, " +
                 "or it may point at a costing cycle that is not yours."),
@@ -44,13 +48,9 @@ public class ErrorModel : PageModel
                 "decision, or the same page open in a second tab. Nothing you just sent was saved. Go back, " +
                 "reload the page to see the cycle as it now stands, and make the change again if it still applies."),
 
-                        429 => ("Too many sign-in attempts",
+            429 => ("Too many sign-in attempts",
                 "Sign-in has been tried too many times from this network in the last minute. Wait a minute and " +
                 "try again. If you have forgotten your password, ask an administrator to reset it."),
-
-            403 => ("You do not have access to that",
-                "Your account does not carry the role that page needs. Custodians and delegated " +
-                "approvers see different parts of the tool."),
 
             _ => (Heading, Detail)
         };
