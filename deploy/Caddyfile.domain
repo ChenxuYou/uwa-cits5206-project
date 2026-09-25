@@ -1,0 +1,10 @@
+# Caddy in front of the costing tool, once the server has a domain name. Install as
+# /etc/caddy/Caddyfile with RIC_HOST set to that name (for example costing.example.uwa.edu.au).
+#
+# Caddy obtains and renews a Let's Encrypt certificate by itself. Ports 80 and 443 must be
+# reachable from the internet for that, and the name must already resolve to this server.
+
+{$RIC_HOST} {
+	encode gzip
+	reverse_proxy 127.0.0.1:5000
+}
