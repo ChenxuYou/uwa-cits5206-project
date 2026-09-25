@@ -278,6 +278,13 @@ public class AppUser
     public DateTime PasswordChangedAtUtc { get; set; } = DateTime.UtcNow;
     public string SecurityStamp { get; set; } = Guid.NewGuid().ToString("N");
 
+    /// <summary>
+    /// The password was set by someone else — an administrator creating the account or
+    /// resetting it, or the bootstrap administrator's value from configuration — so the
+    /// person must choose their own before doing anything else. Cleared when they do.
+    /// </summary>
+    public bool MustChangePassword { get; set; }
+
     public static class Roles
     {
         public const string DataEntry = "DataEntry";

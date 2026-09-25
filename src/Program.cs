@@ -75,6 +75,9 @@ builder.Services.AddRazorPages(options =>
     // that says so, not an unhandled exception.
     options.Filters.Add<SaveConflictFilter>();
 
+    // M4: a session whose password someone else chose reaches only the change-password page.
+    options.Filters.Add<MustChangePasswordFilter>();
+
     // US-18: text in a numeric field is refused with a message a custodian can act on.
     // These are the fallback wordings; the guided-workflow pages replace them with the
     // on-screen name of the field (EntryChecks.ExplainUnreadableNumbers).
@@ -209,7 +212,11 @@ static async Task SeedAsync(WebApplication app)
                 {
                     UserName = bootstrapName,
                     DisplayName = app.Configuration["Bootstrap:AdminDisplayName"] ?? "Administrator",
-                    Role = AppUser.Roles.Administrator
+                    Role = AppUser.Roles.Administrator,
+
+                    // The value sat in the server's environment, so it is replaced at the
+                    // first sign-in and the environment variable can then be removed (M4).
+                    MustChangePassword = true
                 };
                 bootstrap.PasswordHash = hasher.HashPassword(bootstrap, bootstrapPassword);
                 db.AppUsers.Add(bootstrap);
