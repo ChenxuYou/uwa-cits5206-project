@@ -9,7 +9,7 @@
 > **This is the client's own text, transcribed verbatim and not edited.** It arrived as a plain
 > text file; only the numbering and the question headings are ours, added so each answer sits
 > under the question it answers. Where our reading of an answer goes further than the words
-> themselves, that reading is recorded in the [minutes](../../../meetings/2026-08-20-client-meeting.md)
+> themselves, that reading is recorded in the [minutes](../../../meetings/client/2026-08-20-client-meeting.md)
 > or in [`requirements.md` §9](../../../spec/requirements.md#9-open-questions) — not here.
 
 ---
@@ -56,4 +56,4 @@
 **The one thing to notice.** Answer 3 asks for something our scope statement did not promise:
 the sealed PDF must show *the workings of the calculator*, not just the inputs and the three
 rates. That is a real addition, and it is tracked as such rather than absorbed quietly — see the
-[minutes](../../../meetings/2026-08-20-client-meeting.md) §5.
+[minutes](../../../meetings/client/2026-08-20-client-meeting.md) §5.

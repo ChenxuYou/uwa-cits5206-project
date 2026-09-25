@@ -121,12 +121,12 @@ August**; the client replied on **18 August** confirming a time; we met in perso
 August**; the signed document and written answers to all five questions came back the same day.
 Everything is filed in
 [`docs/client/communication-history/`](docs/client/communication-history/) and the meeting is
-[minuted](docs/meetings/2026-08-20-client-meeting.md).
+[minuted](docs/meetings/client/2026-08-20-client-meeting.md).
 
 The client's answers also changed one thing we had promised. The exported PDF must show **the
 calculator's workings**, not only the inputs and the three rates, and records are filed into
 UWA's Content Manager (TRIM). That is real additional work and it is tracked as such rather than
-absorbed quietly — [minutes §5](docs/meetings/2026-08-20-client-meeting.md).
+absorbed quietly — [minutes §5](docs/meetings/client/2026-08-20-client-meeting.md).
 
 ## Open questions
 
@@ -174,7 +174,10 @@ hard to tell apart in a single flat folder.
 │   │       ├── 2026-08-17-email-scope-and-questions/       The outbound email and its two attachments
 │   │       └── 2026-08-20-client-meeting/     The signed scope statement, the client's written
 │   │                               answers, and our notes from the room
-│   ├── meetings/           Minutes, one file per meeting
+│   ├── meetings/           Minutes, one file per meeting — index in its README
+│   │   ├── client/         With UWA Research Infrastructure
+│   │   ├── facilitator/    Lab facilitator checkpoints
+│   │   └── team/           Team meetings
 │   ├── decisions/          Architecture and process decision records
 │   │   └── adr-001-technology-stack.md   Why ASP.NET Core Razor Pages
 │   └── internal/           Our own review notes — not committed
@@ -365,7 +368,7 @@ a merge gate rather than a warning. **Next: M2, the guided flow validated server
 The client owns the costing logic. The team owns the code and may use the project in
 portfolios; the client raised no objection to us sharing what we build. Selling the tool
 onward would not be appropriate, as the overarching IP is joint. Agreed with the client on
-29 July 2026 — see the [kickoff minutes](docs/meetings/2026-07-29-client-kickoff.md) §9 — and
+29 July 2026 — see the [kickoff minutes](docs/meetings/client/2026-07-29-client-meeting.md) §9 — and
 **confirmed in writing on 20 August 2026**, signed, as confirmation 2 of the
 [scope statement](docs/client/communication-history/2026-08-20-client-meeting/project-scope-summary-signed.pdf).
 

@@ -8,7 +8,7 @@
 the existing Excel tool, and establish what they want built.
 
 > **About this record.** These minutes are written from the meeting recording. The recording
-> and its raw transcript are **not committed** — see [`.gitignore`](../../.gitignore) §3 — so
+> and its raw transcript are **not committed** — see [`.gitignore`](../../../.gitignore) §3 — so
 > this file is the project's record of the meeting. Figures and quotations below were checked
 > against the recording. Client representatives are referred to by role rather than by name;
 > their names are in the team's Teams area. Individual team attendance is not listed because
@@ -23,7 +23,7 @@ the existing Excel tool, and establish what they want built.
 > calculator; and **Mathew Hall**, Strategic Development Coordinator, who framed the record
 > requirement and later signed the scope statement on 20 August 2026.
 >
-> The body below is left as written. [`docs/client/contacts.md`](../client/contacts.md) is the
+> The body below is left as written. [`docs/client/contacts.md`](../../client/contacts.md) is the
 > single home for client names and roles.
 
 > ### ⚠ Annotation added 14 August 2026 — do not cite the figures in §2
@@ -36,13 +36,13 @@ the existing Excel tool, and establish what they want built.
 >
 > **The figures in §2 Step 2 and §2 Step 5 are withdrawn for all downstream use.** The
 > authoritative worked example is the client's costing guide, restated in
-> [`requirements.md` §4](../spec/requirements.md#4-the-calculation): $150,000 operating costs,
+> [`requirements.md` §4](../../spec/requirements.md#4-the-calculation): $150,000 operating costs,
 > $20,000 UWA in-kind, $30,000 WA Gov, 1,000 hours → **$100.00 / $162.00 / $202.50** per hour.
 >
 > Everything else in these minutes — the method, the three formulas, `k = 1.35`, the seven
 > capabilities, the design requirements, the IP position, ways of working — was confirmed
 > against the client's documents and stands. See
-> [`requirements.md`, *Source precedence*](../spec/requirements.md), which now ranks spoken minutes
+> [`requirements.md`, *Source precedence*](../../spec/requirements.md), which now ranks spoken minutes
 > below written client material for exactly this reason.
 
 ---
