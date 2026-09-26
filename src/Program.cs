@@ -104,6 +104,7 @@ builder.Services.AddDbContext<CostingDbContext>(options => options.UseSqlite(con
 
 // H1, M2, M3: keys that survive a restart, the sign-in rate limit, and the local reverse proxy.
 builder.Services.AddPersistentKeys(builder.Configuration, builder.Environment, databasePath);
+builder.Services.AddSecureFormTokens();
 builder.Services.AddSignInRateLimit();
 builder.Services.AddLocalProxy();
 
