@@ -54,12 +54,27 @@ healthy() {
   return 1
 }
 
+# Keep the newest $KEEP releases, and never the live one. Ordered by folder name, which is the
+# UTC time of the release: `cp -a` keeps the build folder's own timestamp, so modification time
+# says when the build was made, not when it went live. Sorting by it deleted the release that
+# had just gone live whenever an older build folder was deployed again.
+prune() {
+  local live name
+  live="$(readlink -f "$ROOT/current")"
+  find "$ROOT/releases" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort | head -n -"$KEEP" |
+    while read -r name; do
+      if [[ "$(readlink -f "$ROOT/releases/$name")" != "$live" ]]; then
+        rm -rf "${ROOT:?}/releases/$name"
+      fi
+    done
+}
+
 ln -sfn "$release" "$ROOT/current"
 $SYSTEMCTL restart "$SERVICE"
 
 if healthy; then
   echo "release: $release is live"
-  ls -1dt "$ROOT"/releases/* | tail -n +$((KEEP + 1)) | xargs -r rm -rf
+  prune
   exit 0
 fi
 
