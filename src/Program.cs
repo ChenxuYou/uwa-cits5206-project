@@ -6,6 +6,7 @@ using CostingTool.Engine;
 using CostingTool.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -68,9 +69,20 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AllowAnonymousToPage("/Account/AccessDenied");
     options.Conventions.AllowAnonymousToPage("/Error");
     options.Conventions.AuthorizePage("/Account/ChangePassword");
+
+    // M2: sign-in attempts are limited per address as well as per account.
+    options.Conventions.AddPageApplicationModelConvention("/Account/Login",
+        model => model.EndpointMetadata.Add(new EnableRateLimitingAttribute(Hosting.SignInPolicy)));
 })
 .AddMvcOptions(options =>
 {
+    // C3: a save refused because the record changed underneath the request is a 409 page
+    // that says so, not an unhandled exception.
+    options.Filters.Add<SaveConflictFilter>();
+
+    // M4: a session whose password someone else chose reaches only the change-password page.
+    options.Filters.Add<MustChangePasswordFilter>();
+
     // US-18: text in a numeric field is refused with a message a custodian can act on.
     // These are the fallback wordings; the guided-workflow pages replace them with the
     // on-screen name of the field (EntryChecks.ExplainUnreadableNumbers).
@@ -83,9 +95,17 @@ builder.Services.AddRazorPages(options =>
         $"\"{value}\" is not a number. Enter a number, such as 20000.00.");
 });
 
-builder.Services.AddDbContext<CostingDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("CostingDb")
-                      ?? "Data Source=ric-costing-v9.db"));
+// H2: outside Development the database must be named by an absolute path, so that it lives
+// outside the folder a deployment replaces. Checked before anything opens it.
+var connectionString = builder.Configuration.GetConnectionString("CostingDb") ?? "Data Source=ric-costing.db";
+var databasePath = Hosting.DatabasePath(connectionString, builder.Environment);
+
+builder.Services.AddDbContext<CostingDbContext>(options => options.UseSqlite(connectionString));
+
+// H1, M2, M3: keys that survive a restart, the sign-in rate limit, and the local reverse proxy.
+builder.Services.AddPersistentKeys(builder.Configuration, builder.Environment, databasePath);
+builder.Services.AddSignInRateLimit();
+builder.Services.AddLocalProxy();
 
 builder.Services.AddScoped<MethodConfigProvider>();
 builder.Services.AddScoped<RicCalculationService>();
@@ -97,6 +117,10 @@ builder.Services.Configure<PasswordHasherOptions>(options =>
 builder.Services.AddScoped<IPasswordHasher<AppUser>, PasswordHasher<AppUser>>();
 
 var app = builder.Build();
+
+// First, so that everything after it sees the client's address and scheme, not the proxy's (M3).
+app.UseForwardedHeaders();
+app.UseSecurityHeaders();
 
 // Every figure on screen is Australian currency, and every date is read by someone in
 // Perth. Without this the application formats money in whatever culture the host happens
@@ -125,6 +149,7 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapRazorPages();
@@ -133,16 +158,54 @@ await SeedAsync(app);
 
 app.Run();
 
+static async Task RefuseDatabasesMadeBeforeMigrationsAsync(CostingDbContext db)
+{
+    if (!await db.Database.CanConnectAsync())
+    {
+        return;
+    }
+
+    var applied = await db.Database.GetAppliedMigrationsAsync();
+    if (applied.Any())
+    {
+        return;
+    }
+
+    var connection = db.Database.GetDbConnection();
+    await connection.OpenAsync();
+    try
+    {
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'RicCycles'";
+        var tables = Convert.ToInt32(await command.ExecuteScalarAsync(), CultureInfo.InvariantCulture);
+        if (tables > 0)
+        {
+            throw new InvalidOperationException(
+                $"The database at '{connection.DataSource}' was created before this application used migrations, " +
+                "so its schema cannot be brought up to date. It holds development data only (staging has never run " +
+                "on EnsureCreated): delete the file, or point ConnectionStrings:CostingDb at a new one, and start again.");
+        }
+    }
+    finally
+    {
+        await connection.CloseAsync();
+    }
+}
+
 static async Task SeedAsync(WebApplication app)
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<CostingDbContext>();
 
-    // EnsureCreated builds the schema from the model on first run. It cannot evolve an
-    // existing database, which is why the README says to delete the local file after a
-    // model change — and why moving to EF Core migrations is a gate on the staging
-    // deployment (plan.md M5), not an optional tidy-up.
-    await db.Database.EnsureCreatedAsync();
+    // The schema is built and evolved by EF Core migrations (src/Data/Migrations). This
+    // replaced EnsureCreated, which built a schema once and could never change it: every model
+    // change meant a new database file, which on staging would have meant the client's data
+    // disappearing at the next deployment (audit C1, plan.md M5).
+    //
+    // A database EnsureCreated made has the tables but no migration history, and migrating it
+    // would fail half way on "table already exists". It is refused with the reason instead.
+    await RefuseDatabasesMadeBeforeMigrationsAsync(db);
+    await db.Database.MigrateAsync();
 
     // The method configuration in force. k is configuration, not a constant: the client
     // expects the method and its factors to be reviewed within a 3–5 year cycle, and a
@@ -205,7 +268,11 @@ static async Task SeedAsync(WebApplication app)
                 {
                     UserName = bootstrapName,
                     DisplayName = app.Configuration["Bootstrap:AdminDisplayName"] ?? "Administrator",
-                    Role = AppUser.Roles.Administrator
+                    Role = AppUser.Roles.Administrator,
+
+                    // The value sat in the server's environment, so it is replaced at the
+                    // first sign-in and the environment variable can then be removed (M4).
+                    MustChangePassword = true
                 };
                 bootstrap.PasswordHash = hasher.HashPassword(bootstrap, bootstrapPassword);
                 db.AppUsers.Add(bootstrap);

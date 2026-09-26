@@ -46,14 +46,15 @@ warning; `dotnet dev-certs https --trust` clears it for good.
 | **watch** | Runs the app and reloads it as you save — the fastest loop for UI work |
 | **test** | Runs the engine tests. Also `dotnet test` |
 | **format** | Applies the formatting CI checks, so a pull request does not fail on whitespace |
-| **reset local database** | Deletes the SQLite file; the schema rebuilds on the next run |
+| **reset local database** | Deletes the local SQLite file; the migrations rebuild it on the next run |
 
 ### When something does not work
 
 | Symptom | Cause and fix |
 | --- | --- |
 | The sign-in page rejects `entry` / `Entry123!` | The app is not in the Development environment, so no demo accounts were seeded. Start it with <kbd>F5</kbd> or `dotnet run`, both of which read [`Properties/launchSettings.json`](Properties/launchSettings.json) |
-| `SQLite Error 1: no such column` after pulling | The schema is built with `EnsureCreated()`, which cannot alter an existing database. Run the **reset local database** task and start again |
+| The app stops at start-up: *"was created before this application used migrations"* | Your local database was made by the old `EnsureCreated()` start-up (a `ric-costing-v*.db` file, or an older `ric-costing.db`). Run the **reset local database** task and start again. From now on a pull that changes the schema brings a migration, which is applied for you |
+| The app stops at start-up with `PendingModelChangesWarning` | The model was changed without a migration. Add one — see [Changing the data model](#changing-the-data-model) |
 | Money renders as `¤100.00` | Should not happen — the app pins `en-AU` in `Program.cs`. If it does, say so: it means the culture configuration is not being applied |
 | `dotnet` is not recognised after installing the SDK | Restart VS Code, or the terminal, so it picks up the new `PATH` |
 
@@ -77,7 +78,13 @@ database would lock out the administrator who is meant to create the accounts. S
 `Bootstrap__AdminDisplayName`) as environment variables at first start: one administrator is
 created, only while the table is empty, and only if the password meets the policy below.
 Everyone else is then created from **Accounts** inside the application. Never commit these
-values.
+values. The whole server set-up — HTTPS, the database path, backups, releases — is in
+[`deploy/README.md`](../deploy/README.md).
+
+**A password someone else chose is replaced at first sign-in.** Accounts an administrator
+creates or resets, and the bootstrap administrator, are marked `MustChangePassword`; until
+the person chooses their own password every page except *Change password* and *Sign out*
+redirects there (`Services/MustChangePasswordFilter.cs`).
 
 **What an administrator can and cannot do.** They see every cycle in the application and
 administer accounts — create, deactivate, reset a password. They cannot edit, submit or seal
@@ -97,7 +104,9 @@ page and the administrator's create-and-reset screens cannot come to disagree ab
 (The demo passwords above are shorter than the policy requires: they are development-only,
 typed constantly while building, and printed on the development sign-in page.)
 
-Five failed attempts lock an account for 15 minutes. Authentication cookies are HTTP-only,
+Five failed attempts lock an account for 15 minutes, and one address may try to sign in at
+most ten times a minute (`Services/Hosting.cs`), so a known username cannot be kept locked out
+cheaply. Authentication cookies are HTTP-only,
 use `SameSite=Lax`, expire after two hours and carry a security stamp checked against the
 database. Changing a password rotates that stamp, invalidating older sessions. Signed-in
 users can change their password from the user area; new passwords require at least 12
@@ -121,12 +130,14 @@ CostingTool.sln
 │   │   └── Fonts/                  DejaVu Sans, embedded. Licence beside it
 │   └── CostingTool.csproj      The web application
 │       ├── Models/                 Entities, and the vocabulary of a cost entry
-│       ├── Data/                   The DbContext
-│       ├── Services/               The seam: cycle → engine inputs → page results
+│       ├── Data/                   The DbContext, and Migrations/ — the schema's history
+│       ├── Services/               The seam: cycle → engine inputs → page results;
+│       │                           Hosting.cs — database path, keys, proxy, headers, rate limit
 │       └── Pages/                  Razor Pages
 ├── tests/CostingTool.Engine.Tests/  References the engine and nothing else
 ├── tests/CostingTool.Pdf.Tests/     References the renderer and nothing else
-└── tests/CostingTool.Web.Tests/     References the web project — identity and the flow
+├── tests/CostingTool.Web.Tests/     References the web project — identity and the flow
+└── deploy/                      The server: Caddy, systemd, backup, restore, release
 ```
 
 ### Who owns which part
@@ -251,13 +262,46 @@ withdrawn fixtures note in [`architecture.md` §3](../docs/spec/architecture.md)
 
 ---
 
+## Changing the data model
+
+The schema is built and evolved by EF Core migrations in `Data/Migrations/`, applied when the
+application starts. A change to an entity or to `CostingDbContext` needs a migration in the
+same pull request; `MigrationTests.EveryModelChangeHasAMigration` fails in CI when one is
+missing, and the application refuses to start rather than run against a schema that does not
+match.
+
+The tools are not in the repository yet, so the first person to add a migration installs them
+once and commits the `packages.lock.json` change that follows:
+
+```bash
+dotnet tool install --global dotnet-ef --version 10.0.10
+dotnet add src/CostingTool.csproj package Microsoft.EntityFrameworkCore.Design --version 10.0.10
+```
+
+Then, for each change:
+
+```bash
+dotnet ef migrations add <WhatChanged> --project src/CostingTool.csproj --output-dir Data/Migrations
+```
+
+Read the generated `Up()` before committing it. On staging it runs against the client's data:
+a renamed property comes out as a drop and an add unless the migration is edited to rename,
+and a new required column on a table with rows needs a default.
+
+**Why the baseline looks hand-made.** `Baseline` and the model snapshot were generated from
+the model at runtime on 25 September 2026, in an environment where the EF tools could not be
+installed; `MigrationTests` proves they match the model (no pending changes) and that
+migrating an empty database gives exactly the schema `EnsureCreated` used to. Later migrations
+come from `dotnet ef` as usual.
+
+---
+
 ## Known gaps
 
 Recorded here rather than discovered later.
 
 | Gap | Where it is tracked |
 | --- | --- |
-| **`EnsureCreated()`, not migrations.** The schema cannot evolve, so a model change means deleting the local database. That is fine locally and unacceptable once the client has entered data — moving to EF Core migrations is a gate on the staging deployment | [`plan.md` M5](../docs/project/plan.md) |
 | **The PDF export is a spike, not finished work.** `src/CostingTool.Pdf` renders a sealed record and the custodian can download it from the review page; it has not been reviewed by a second member, the approver has no link to it yet, and nobody has printed one on A4. US-16 closes in S5 | [ADR-002](../docs/decisions/adr-002-pdf-generation.md), follow-on actions |
 | **Pay scales, capacity baselines and category lists are not in `MethodConfig` yet.** `k` and the rounding rule are; the rest of rule R5 is not, so the salary field carries a placeholder rather than a looked-up figure | [ADR-001 action 7](../docs/decisions/adr-001-technology-stack.md) |
 | **`Amount` is the mean of the per-year figures.** Averaging a multi-year profile into one annual number is our decision, not the client's; it is commented where it happens and needs confirming | `Models/RicCycle.cs` |

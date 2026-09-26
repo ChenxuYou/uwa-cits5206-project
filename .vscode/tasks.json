@@ -40,11 +40,11 @@
     },
     {
       "label": "reset local database",
-      "detail": "Delete the SQLite file so the schema is rebuilt on the next run",
+      "detail": "Delete the local SQLite files, old and current, so the migrations rebuild the database on the next run",
       "type": "shell",
-      "command": "rm -f ric-costing-v*.db*",
+      "command": "rm -f ric-costing*.db*",
       "windows": {
-        "command": "Remove-Item -Path ric-costing-v*.db* -Force -ErrorAction SilentlyContinue"
+        "command": "Remove-Item -Path ric-costing*.db* -Force -ErrorAction SilentlyContinue"
       },
       "options": { "cwd": "${workspaceFolder}/src" },
       "problemMatcher": []

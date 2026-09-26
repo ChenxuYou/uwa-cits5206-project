@@ -22,8 +22,17 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
     [BindProperty] public DateTime? EffectiveDate { get; set; }
 
-    public async Task<IActionResult> OnGetAsync(int id) =>
-        await Load(id) ? Page() : NotFound();
+    /// <summary>What the last decision on this page did, or why it was not saved.</summary>
+    public string? SuccessMessage { get; private set; }
+
+    public string? ErrorMessage { get; private set; }
+
+    public async Task<IActionResult> OnGetAsync(int id)
+    {
+        SuccessMessage = TempData["Success"] as string;
+        ErrorMessage = TempData["Error"] as string;
+        return await Load(id) ? Page() : NotFound();
+    }
 
     public async Task<IActionResult> OnPostReturnAsync(int id)
     {
@@ -51,7 +60,11 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
         Notify("Returned", $"{Cycle.PlatformName} was returned for changes", Cycle.ReturnReason);
 
-        await db.SaveChangesAsync();
+        if (!await SaveDecisionAsync())
+        {
+            return RedirectToPage(new { id });
+        }
+
         TempData["Success"] = "The cycle was returned to the submitter for changes.";
 
         // Back to this page, not the custodian's review: /Ric is restricted to data entry, so
@@ -126,9 +139,37 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
                 ? $"The costing cycle was approved and sealed, effective {Cycle.EffectiveDateUtc:dd MMM yyyy}."
                 : Cycle.ApprovalComment);
 
-        await db.SaveChangesAsync();
+        if (!await SaveDecisionAsync())
+        {
+            return RedirectToPage(new { id });
+        }
+
         TempData["Success"] = "The costing cycle was approved and sealed.";
         return RedirectToPage(new { id });
+    }
+
+    /// <summary>
+    /// Save a decision, or report that someone else's got there first.
+    ///
+    /// Both handlers check the cycle is still Submitted, but that is the status this request
+    /// read. If another approver — or this one, double-clicking — decided in between, the
+    /// cycle's concurrency stamp no longer matches and nothing is written (C3). The seal that
+    /// already happened stands, and the approver is told so rather than shown an error.
+    /// </summary>
+    private async Task<bool> SaveDecisionAsync()
+    {
+        try
+        {
+            await db.SaveChangesAsync();
+            return true;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            TempData["Error"] =
+                "A decision was recorded on this cycle while you were reviewing it, so yours was not saved. " +
+                "The page now shows the cycle as it stands.";
+            return false;
+        }
     }
 
     private void Notify(string type, string title, string message) =>

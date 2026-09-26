@@ -16,6 +16,14 @@
     <div class="breadcrumb"><a asp-page="/Approvals/Index">Approvals</a><span>›</span><span>@Model.Cycle.PlatformName</span></div>
     <div class="review-heading"><div><span class="status-pill @Model.Cycle.Status.ToLowerInvariant()">@Model.Cycle.Status</span><h1>Delegated authority review</h1><p>@Model.Cycle.PlatformName · @Model.Cycle.StartYear–@Model.Cycle.EndYear · prepared by @Model.Cycle.CreatedByDisplay</p></div><a class="outline-action" asp-page="/Approvals/Index">← Approval queue</a></div>
 
+    @if (Model.SuccessMessage is not null)
+    {
+        <div class="submit-success" role="status"><span>✓</span><div><strong>Decision recorded</strong><p>@Model.SuccessMessage</p></div></div>
+    }
+    @if (Model.ErrorMessage is not null)
+    {
+        <div class="return-banner" role="alert"><strong>Your decision was not saved</strong><p>@Model.ErrorMessage</p></div>
+    }
     <div asp-validation-summary="All" class="form-errors approval-errors"></div>
     <div class="review-layout">
         <main>
@@ -128,13 +136,13 @@
         @if (Model.Cycle.Status == "Submitted")
         {
             <span class="submit-icon">✓</span><h2>Record a decision</h2><p>Approving seals the record: the figures, workings and reasons are stored as they are now and can no longer be edited or deleted by anyone. Return the cycle if any figure or evidence needs correction.</p>
-            <form method="post" asp-page-handler="Approve" asp-route-id="@Model.Cycle.Id">
+            <form method="post" asp-page-handler="Approve" asp-route-id="@Model.Cycle.Id" data-submit-once>
                 <label class="field"><span>Effective date</span><input asp-for="EffectiveDate" type="date"></label>
                 <label class="field"><span>Approval comment</span><textarea asp-for="ApprovalComment" rows="3" placeholder="Optional decision note"></textarea></label>
                 <label class="confirmation"><input type="checkbox" name="confirmApproval" value="true"><span>I have reviewed the costing basis, capacity assumptions, proposed rates and supporting evidence, and I understand that once sealed this record cannot be edited or deleted — a later change needs a new cycle that replaces it.</span></label>
                 <button type="submit" class="submit-button">Approve &amp; seal <span>✓</span></button>
             </form>
-            <details class="return-form"><summary>Return for changes</summary><form method="post" asp-page-handler="Return" asp-route-id="@Model.Cycle.Id"><label class="field"><span>Required changes <b>*</b></span><textarea asp-for="ReturnReason" rows="4" placeholder="Tell the submitter exactly what to update"></textarea></label><button type="submit" class="return-button">Return to submitter</button></form></details>
+            <details class="return-form"><summary>Return for changes</summary><form method="post" asp-page-handler="Return" asp-route-id="@Model.Cycle.Id" data-submit-once><label class="field"><span>Required changes <b>*</b></span><textarea asp-for="ReturnReason" rows="4" placeholder="Tell the submitter exactly what to update"></textarea></label><button type="submit" class="return-button">Return to submitter</button></form></details>
         }
         else { <span class="submit-icon">✓</span><h2>Decision complete</h2><p>This cycle is @Model.Cycle.Status.ToLowerInvariant(). No further approval action is available.</p><a class="secondary-action full-button" asp-page="/Approvals/Index">Back to approvals</a> }
         </aside>

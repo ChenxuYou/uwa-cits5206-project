@@ -425,7 +425,7 @@
                         }
                     </ul>
                 </section>
-                <form method="post" asp-page-handler="Submit" asp-route-cycleId="@Model.Cycle.Id">
+                <form method="post" asp-page-handler="Submit" asp-route-cycleId="@Model.Cycle.Id" data-submit-once>
                     <div asp-validation-summary="All" class="form-errors submit-errors"></div>
                     <label class="confirmation">
                         <input type="checkbox" name="confirmAccuracy" value="true" />
