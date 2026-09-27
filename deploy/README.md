@@ -49,7 +49,7 @@ sudo cp deploy/*.sh /opt/ric-costing/deploy/ && sudo chmod 755 /opt/ric-costing/
 ConnectionStrings__CostingDb=Data Source=/var/lib/ric-costing/ric-costing.db
 
 # First start only. Creates one administrator while the user table is empty; that person is
-# made to choose a new password at first sign-in. Delete these two lines afterwards.
+# made to choose a new password at first sign-in. Delete these three lines afterwards.
 Bootstrap__AdminUserName=admin
 Bootstrap__AdminPassword=<at least 12 characters, not reused anywhere>
 Bootstrap__AdminDisplayName=<the administrator's name as it should appear on records>
@@ -69,16 +69,26 @@ sudo systemctl start ric-costing-backup.timer
 
 ### Caddy
 
+Both Caddyfiles read the address from `RIC_HOST`, which has to reach Caddy through its systemd
+unit. `/etc/default/caddy` does not work: the `caddy.service` that Ubuntu's package installs
+reads no environment file, so `{$RIC_HOST}` comes out empty. `Caddyfile.domain` then fails to
+parse (`unrecognized global option: encode`) and `Caddyfile.ip` serves no certificate.
+
 By IP address, before there is a domain name:
 
 ```bash
 sudo cp deploy/Caddyfile.ip /etc/caddy/Caddyfile
-echo 'RIC_HOST=<server IP address>' | sudo tee -a /etc/default/caddy
-sudo systemctl restart caddy
+sudo mkdir -p /etc/systemd/system/caddy.service.d
+printf '[Service]\nEnvironment=RIC_HOST=%s\n' '<server IP address>' \
+  | sudo tee /etc/systemd/system/caddy.service.d/ric-host.conf
+sudo systemctl daemon-reload && sudo systemctl restart caddy
 ```
 
-Once a name resolves to the server, switch to `Caddyfile.domain` with `RIC_HOST=<name>`;
-Caddy fetches and renews a Let's Encrypt certificate itself. Open ports 80 and 443, and
+Once a name resolves to the server, switch to `Caddyfile.domain` and put the name in
+`ric-host.conf` in place of the address, then `daemon-reload` and restart as above; Caddy
+fetches and renews a Let's Encrypt certificate itself. `sudo caddy validate --config
+/etc/caddy/Caddyfile` does not see the unit's environment, so prefix it with
+`RIC_HOST=<name>` to check the file by hand. Open ports 80 and 443, and
 nothing else: port 5000 is loopback only.
 
 #### Trusting the test certificate
@@ -97,7 +107,17 @@ On a machine with the .NET 10 SDK:
 ```bash
 dotnet publish src/CostingTool.csproj -c Release -o out
 rsync -a --delete out/ <server>:/tmp/ric-costing-out/
-ssh <server> sudo /opt/ric-costing/deploy/release.sh /tmp/ric-costing-out
+ssh -t <server> sudo /opt/ric-costing/deploy/release.sh /tmp/ric-costing-out
+```
+
+Windows has no `rsync`, but PowerShell has `tar`, `scp` and `ssh`. Clearing the upload folder
+first does what `--delete` does, so no file from an older build is carried into the release:
+
+```powershell
+dotnet publish src/CostingTool.csproj -c Release -o out
+tar -czf ric-costing.tgz -C out .
+scp ric-costing.tgz <server>:/tmp/
+ssh -t <server> "rm -rf /tmp/ric-costing-out && mkdir /tmp/ric-costing-out && tar -xzf /tmp/ric-costing.tgz -C /tmp/ric-costing-out && sudo /opt/ric-costing/deploy/release.sh /tmp/ric-costing-out"
 ```
 
 `release.sh` copies the build into `releases/`, backs the database up, switches `current`,
@@ -108,7 +128,7 @@ migrations and are applied when the new build starts, which is why the backup co
 The first release creates the database and the bootstrap administrator. Sign in as that
 administrator, choose a new password when asked, create the other accounts under
 *Admin → Users* (each person chooses their own password at first sign-in), then delete the
-two `Bootstrap__` lines from the environment file.
+three `Bootstrap__` lines from the environment file.
 
 ## Rolling back
 

@@ -1,14 +1,19 @@
 using System.Net;
 using System.Threading.RateLimiting;
 using CostingTool.Data;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Xunit;
 
 namespace CostingTool.Web.Tests;
 
-/// <summary>H2 and M2 in the audit: where the database may live, and how fast sign-in can be tried.</summary>
+/// <summary>
+/// H2 and M2 in the audit: where the database may live, and how fast sign-in can be tried; and
+/// whether the form-token cookie is kept off plain HTTP.
+/// </summary>
 public class HostingTests
 {
     private sealed class Environment(string name) : IHostEnvironment
@@ -84,5 +89,36 @@ public class HostingTests
         {
             Assert.True(Allowed(Request("GET", "203.0.113.7")));
         }
+    }
+
+    private static string FormTokenCookie(string scheme)
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSecureFormTokens();
+        using var provider = services.BuildServiceProvider();
+
+        var context = new DefaultHttpContext { RequestServices = provider };
+        context.Request.Scheme = scheme;
+        context.Request.Host = new HostString("costing.example.org");
+
+        provider.GetRequiredService<IAntiforgery>().GetAndStoreTokens(context);
+        return context.Response.Headers.SetCookie.ToString();
+    }
+
+    [Fact]
+    public void OverHttpsTheFormTokenCookieIsSecure()
+    {
+        Assert.Contains("secure", FormTokenCookie("https"), StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void OverPlainHttpAFormStillRenders()
+    {
+        // release.sh checks the sign-in page, which holds a form, on http://127.0.0.1:5000.
+        var cookie = FormTokenCookie("http");
+
+        Assert.StartsWith(".AspNetCore.Antiforgery.", cookie, StringComparison.Ordinal);
+        Assert.DoesNotContain("secure", cookie, StringComparison.OrdinalIgnoreCase);
     }
 }

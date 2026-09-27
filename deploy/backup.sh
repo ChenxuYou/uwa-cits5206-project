@@ -19,6 +19,14 @@ fi
 mkdir -p "$DEST"
 chmod 700 "$DEST"
 
+# release.sh runs this as root; the daily timer runs it as the service account. Whatever root
+# creates here is handed to the account that owns the database. Otherwise a folder made by the
+# first root run is closed to the timer, and every daily backup after it fails unnoticed.
+owner="$(stat -c '%u:%g' "$DB")"
+if [[ $EUID -eq 0 ]]; then
+  chown "$owner" "$DEST"
+fi
+
 stamp="$(date -u +%Y%m%dT%H%M%SZ)"
 out="$DEST/ric-costing-$stamp.db"
 
@@ -33,6 +41,9 @@ fi
 
 gzip "$out"
 chmod 600 "$out.gz"
+if [[ $EUID -eq 0 ]]; then
+  chown "$owner" "$out.gz"
+fi
 find "$DEST" -name 'ric-costing-*.db.gz' -mtime +"$KEEP_DAYS" -delete
 
 echo "$out.gz"

@@ -84,6 +84,20 @@ public static class Hosting
         dataProtection.PersistKeysToFileSystem(new DirectoryInfo(directory));
     }
 
+    // ---- The form-token cookie -----------------------------------------------------------------
+
+    /// <summary>
+    /// Mark the anti-forgery cookie Secure whenever the page was served over HTTPS.
+    ///
+    /// Its default never marks it Secure, even over HTTPS, so the cookie behind every form's token
+    /// could travel over plain HTTP. <c>Always</c> is not used, unlike the sign-in cookie: the
+    /// antiforgery system then refuses to render any form over plain HTTP, and release.sh checks
+    /// the sign-in page on http://127.0.0.1:5000, behind Caddy, so every release would roll back.
+    /// Behind Caddy the request is HTTPS once the forwarded headers are applied (M3).
+    /// </summary>
+    public static void AddSecureFormTokens(this IServiceCollection services) =>
+        services.AddAntiforgery(options => options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest);
+
     // ---- M3: the reverse proxy ---------------------------------------------------------------
 
     /// <summary>

@@ -91,6 +91,18 @@ summary:focus-visible {
     outline-offset: 2px;
 }
 
+/* #79: a money field is an input inside a bordered box that also holds the "$". The ring
+   above was drawn round the input alone and clipped by the box, so it showed as a smaller
+   rectangle inside the field. The box carries the ring instead, the same size as the field. */
+.money-field input:focus-visible {
+    outline: none;
+}
+
+.money-field > div:focus-within {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+}
+
 /* The one place a rate is explained on screen needs room to breathe. */
 .review-table td small {
     line-height: 1.5;
