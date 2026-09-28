@@ -23,7 +23,9 @@ ENV ASPNETCORE_ENVIRONMENT=Production \
     DOTNET_EnableDiagnostics=0
 
 COPY --from=build /app/publish .
-RUN mkdir -p /app/data \
+RUN apt-get update \
+    && apt-get install --no-install-recommends --yes libgssapi-krb5-2 \
+    && rm -rf /var/lib/apt/lists/* \
     && chown -R $APP_UID:$APP_UID /app
 
 USER $APP_UID

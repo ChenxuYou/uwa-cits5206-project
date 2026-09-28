@@ -90,8 +90,8 @@ builder.Services.AddRazorPages(options =>
 });
 
 builder.Services.AddDbContext<CostingDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("CostingDb")
-                      ?? "Data Source=ric-costing-v7.db"));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("CostingDb")
+                      ?? "Host=localhost;Port=5432;Database=ric_costing;Username=ric_costing;Password=change-me"));
 
 builder.Services.AddScoped<MethodConfigProvider>();
 builder.Services.AddScoped<RicCalculationService>();
@@ -145,11 +145,7 @@ static async Task SeedAsync(WebApplication app)
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<CostingDbContext>();
 
-    // EnsureCreated builds the schema from the model on first run. It cannot evolve an
-    // existing database, which is why the README says to delete the local file after a
-    // model change — and why moving to EF Core migrations is a gate on the staging
-    // deployment (plan.md M5), not an optional tidy-up.
-    await db.Database.EnsureCreatedAsync();
+    await db.Database.MigrateAsync();
 
     // The method configuration in force. k is configuration, not a constant: the client
     // expects the method and its factors to be reviewed within a 3–5 year cycle, and a
