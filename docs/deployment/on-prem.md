@@ -1,8 +1,8 @@
 # On-Premises Deployment Plan
 
-This plan deploys the ASP.NET Core application and its SQLite database on a Linux server
-managed by the client. Nginx is the only public service and terminates HTTPS. The application
-container listens on the private Docker network only.
+This plan deploys the ASP.NET Core application and its SQLite database in Docker on a Linux
+server managed by the client. Host-installed Nginx is the only public service and terminates
+HTTPS. The application container is bound to `127.0.0.1:8080` and is not exposed to the network.
 
 ## 1. Deployment decisions
 
@@ -11,7 +11,7 @@ container listens on the private Docker network only.
 | Host | Client-managed Linux VM or physical server with Docker Engine and Compose v2 |
 | Application | `ric-costing` container from the repository `Dockerfile` |
 | Database | SQLite at `/srv/ric-costing/data/ric-costing-v7.db`, bind-mounted into the container |
-| Proxy | Nginx container; ports 80 and 443 are the only application ports on the host |
+| Proxy | Host-installed Nginx; ports 80 and 443 are the only public application ports |
 | TLS | Certificate issued by the UWA/internal CA, or an approved public CA if the hostname is public |
 | DNS | The chosen costing hostname resolves to the on-prem host's firewall address |
 | Secrets | A host-local `.env.production` file with mode `600`; never in Git or the image |
@@ -33,8 +33,8 @@ sudo ufw allow 443/tcp
 sudo ufw --force enable
 ```
 
-Do not expose port `8080`. The Compose file publishes only Nginx's ports, and the application is
-reachable from Nginx through the private `ric-internal` Docker network.
+Port `8080` is bound to loopback only. It is reachable by host Nginx and local diagnostics, but
+not by other machines on the network.
 
 Copy the repository or a reviewed release bundle to `/srv/ric-costing/app`. Keep the deployment
 directory separate from the database and certificate directories so an image update cannot
@@ -77,19 +77,19 @@ Build and start the reviewed release from `/srv/ric-costing/app`:
 
 ```sh
 cd /srv/ric-costing/app/deploy
-mkdir -p data certs backups
+mkdir -p data backups
 docker compose build --pull app
-docker compose up -d
+docker compose up -d app
 docker compose ps
 docker compose logs --tail=100 app
 ```
 
-The expected application listener is `http://app:8080` inside the Compose network. Confirm that
+The expected application listener is `http://127.0.0.1:8080` on the host. Confirm that
 the first startup log reports schema creation and, when configured, bootstrap administrator
 creation. Do not publish the app container directly to the host.
 
-Before DNS cutover, verify the application through Nginx with a temporary hosts-file entry and
-complete these checks:
+Before DNS cutover, verify the application through host Nginx with a temporary hosts-file entry
+and complete these checks:
 
 1. Login, logout, password change, and account deactivation.
 2. A complete costing cycle, approval, and PDF export.
@@ -99,12 +99,13 @@ complete these checks:
 
 ## 5. Nginx and HTTPS
 
-Replace `costing.example.uwa.edu.au` in `deploy/nginx/default.conf` with the approved hostname.
-Place the certificate chain and private key on the host with restrictive permissions:
+Install Nginx on the host and copy `deploy/nginx/default.conf` to its site configuration.
+Replace `costing.example.uwa.edu.au` with the approved hostname. Place the certificate chain and
+private key on the host with restrictive permissions:
 
 ```sh
-sudo install -m 644 fullchain.pem /srv/ric-costing/certs/fullchain.pem
-sudo install -m 600 privkey.pem /srv/ric-costing/certs/privkey.pem
+sudo install -m 644 fullchain.pem /etc/nginx/certs/fullchain.pem
+sudo install -m 600 privkey.pem /etc/nginx/certs/privkey.pem
 ```
 
 The certificate must contain the exact DNS name users will enter. The included Nginx config:
@@ -114,11 +115,12 @@ The certificate must contain the exact DNS name users will enter. The included N
 - forwards the original HTTPS scheme to ASP.NET Core;
 - passes the original host and client address to the application.
 
-Reload after certificate renewal without stopping the application:
+Validate and reload host Nginx after configuration or certificate renewal without stopping the
+application:
 
 ```sh
-docker compose exec nginx nginx -t
-docker compose exec nginx nginx -s reload
+sudo nginx -t
+sudo systemctl reload nginx
 ```
 
 The external firewall should allow TCP 80 and 443, and SSH only from the administration
@@ -142,9 +144,9 @@ If the new application fails validation and no database schema has changed, rest
 image tag and start the app again. If a schema change is introduced, the release must include a
 tested EF Core migration and a documented rollback or restore procedure before deployment.
 
-Monitor container status, disk space under `/srv/ric-costing/data`, Nginx error logs, application
-logs, certificate expiry, and backup freshness. Do not treat a running container as proof that
-backups or HTTPS are working.
+Monitor container status, disk space under `/srv/ric-costing/data`, host Nginx error logs,
+application logs, certificate expiry, and backup freshness. Do not treat a running container as
+proof that backups or HTTPS are working.
 
 ## 7. Completion gates
 
