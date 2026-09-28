@@ -1,6 +1,6 @@
 # On-Premises Deployment Plan
 
-This plan deploys the ASP.NET Core application and its SQLite database in Docker on a Linux
+This plan deploys the ASP.NET Core application and its PostgreSQL database in Docker on a Linux
 server managed by the client. Host-installed Nginx is the only public service and terminates
 HTTPS. The application container is bound to `127.0.0.1:8080` and is not exposed to the network.
 
@@ -10,15 +10,14 @@ HTTPS. The application container is bound to `127.0.0.1:8080` and is not exposed
 | --- | --- |
 | Host | Client-managed Linux VM or physical server with Docker Engine and Compose v2 |
 | Application | `ric-costing` container from the repository `Dockerfile` |
-| Database | SQLite at `/srv/ric-costing/data/ric-costing-v7.db`, bind-mounted into the container |
+| Database | PostgreSQL 17 in the private `postgres-data` Docker volume |
 | Proxy | Host-installed Nginx; ports 80 and 443 are the only public application ports |
 | TLS | Certificate issued by the UWA/internal CA, or an approved public CA if the hostname is public |
 | DNS | The chosen costing hostname resolves to the on-prem host's firewall address |
 | Secrets | A host-local `.env.production` file with mode `600`; never in Git or the image |
 
-The current application creates the schema with EF Core `EnsureCreatedAsync()`. That is suitable
-for first boot of an empty database, but it does not safely upgrade an existing database. EF Core
-migrations remain a release gate before the first schema-changing production upgrade.
+The application applies committed EF Core migrations at startup. PostgreSQL credentials are
+provided through the host-local `.env.production` file and are never committed.
 
 ## 2. Host preparation
 
@@ -26,7 +25,7 @@ On the deployment host, install a supported Linux distribution, Docker Engine, a
 Compose plugin. Create a restricted deployment account and the application directories:
 
 ```sh
-sudo install -d -m 750 -o deploy -g deploy /srv/ric-costing/{data,certs,nginx}
+sudo install -d -m 750 -o deploy -g deploy /srv/ric-costing/{certs,nginx,backups}
 sudo ufw allow from <approved-admin-network> to any port 22 proto tcp
 sudo ufw allow 80/tcp
 sudo ufw allow 443/tcp
@@ -57,19 +56,17 @@ administrator if the user table is empty. After signing in, create the required 
 custodian accounts in the application, then remove the bootstrap credentials from the file and
 restart the stack. Never use the development demo accounts in production.
 
-The database directory must be included in host backups. A consistent SQLite backup should use
-SQLite's backup command while the application is stopped, or the SQLite online backup API. A
-simple maintenance window procedure is:
+Back up PostgreSQL with `pg_dump` from the database container. Store encrypted copies outside the
+Docker volume and test restores before handover. A simple maintenance procedure is:
 
 ```sh
-docker compose stop app
-cp -a data/ric-costing-v7.db "backups/ric-costing-$(date +%Y%m%d-%H%M%S).db"
-docker compose start app
+mkdir -p backups
+docker compose exec -T postgres sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" --format=custom' \
+	> "backups/ric-costing-$(date +%Y%m%d-%H%M%S).dump"
 ```
 
 Retain encrypted, off-host copies according to UWA's retention policy. Test a restore before
-handover: restore a copy to a separate directory, start a temporary stack against it, and sign
-in with a test account.
+handover using `pg_restore` into a separate PostgreSQL database, then sign in with a test account.
 
 ## 4. Application deployment
 
@@ -77,16 +74,17 @@ Build and start the reviewed release from `/srv/ric-costing/app`:
 
 ```sh
 cd /srv/ric-costing/app/deploy
-mkdir -p data backups
+mkdir -p backups
 docker compose build --pull app
-docker compose up -d app
+docker compose up -d postgres app
 docker compose ps
 docker compose logs --tail=100 app
 ```
 
-The expected application listener is `http://127.0.0.1:8080` on the host. Confirm that
-the first startup log reports schema creation and, when configured, bootstrap administrator
-creation. Do not publish the app container directly to the host.
+The expected application listener is `http://127.0.0.1:8080` on the host. Compose waits for
+PostgreSQL to pass its health check before starting the application. Confirm that
+the first startup log reports successful migration application and, when configured, bootstrap
+administrator creation. Do not publish the app container directly to the host.
 
 Before DNS cutover, verify the application through host Nginx with a temporary hosts-file entry
 and complete these checks:
@@ -95,7 +93,7 @@ and complete these checks:
 2. A complete costing cycle, approval, and PDF export.
 3. Access control between two test users and the administrator view.
 4. Restart persistence: the database and accounts remain after `docker compose down` followed by `docker compose up -d`.
-5. A backup and restore test.
+5. A PostgreSQL dump and restore test.
 
 ## 5. Nginx and HTTPS
 
@@ -134,7 +132,8 @@ run the staging checks, then deploy:
 
 ```sh
 docker compose stop app
-cp -a data/ric-costing-v7.db "backups/pre-release-$(date +%Y%m%d-%H%M%S).db"
+docker compose exec -T postgres sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" --format=custom' \
+  > "backups/pre-release-$(date +%Y%m%d-%H%M%S).dump"
 docker compose build --pull app
 docker compose up -d app
 docker compose logs --tail=100 app
@@ -144,9 +143,9 @@ If the new application fails validation and no database schema has changed, rest
 image tag and start the app again. If a schema change is introduced, the release must include a
 tested EF Core migration and a documented rollback or restore procedure before deployment.
 
-Monitor container status, disk space under `/srv/ric-costing/data`, host Nginx error logs,
-application logs, certificate expiry, and backup freshness. Do not treat a running container as
-proof that backups or HTTPS are working.
+Monitor container status, PostgreSQL volume disk usage, host Nginx error logs, application logs,
+certificate expiry, and backup freshness. Do not treat a running container as proof that backups
+or HTTPS are working.
 
 ## 7. Completion gates
 
@@ -158,4 +157,4 @@ Deployment is ready for client handover when all of the following are recorded:
 - HTTPS, secure cookies, redirects, and PDF export pass acceptance checks;
 - an encrypted backup has been restored successfully;
 - the current image tag, database backup location, and rollback steps are in the handover pack;
-- EF Core migrations replace `EnsureCreatedAsync()` before any release that changes the model.
+- The committed EF Core migration has been applied successfully to the production database.
