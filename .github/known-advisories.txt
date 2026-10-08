@@ -26,10 +26,14 @@
 #      (docs/project/risks.md R11.)
 #   3. The database is not network-reachable. It is a local file read only by
 #      the application process.
-#   4. It disappears entirely if the production store becomes PostgreSQL, which
-#      is decided with hosting on 9 September 2026 (ADR-001, AQ2).
+#   4. SQLite is the production store (docs/spec/architecture.md §9, the
+#      single-server deployment in deploy/README.md), so this applies to the
+#      deployed service as well as to development. It is accepted on 1 to 3,
+#      not on the hope of a different database.
 #
-# Review: 9 September 2026, with the hosting decision — or sooner if a patched
-# SQLitePCLRaw is released. Owner: Wenmin Luo.
+# Review: at each risk review and at handover on 13 October 2026 — or sooner if
+# a patched SQLitePCLRaw is released. The first review date, 9 September 2026,
+# passed with hosting undecided.
+# Owner: Dai Lam La La (docs/project/risks.md R17a).
 # ---------------------------------------------------------------------------
 GHSA-2m69-gcr7-jv3q
