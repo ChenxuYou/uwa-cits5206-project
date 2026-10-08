@@ -5,8 +5,7 @@
 - **Covers:** the whole project, from the team's first rules on 5 August 2026 to the final
   release on 13 October 2026 — code, tests, documents, presentations and the individual
   deliverables that draw on them.
-- **Status, 8 October 2026:** complete, with every member's account in §6. The one gap is the
-  tools each member other than Chenxu You used, marked _to confirm_ in §3 and §6.
+- **Status, 8 October 2026:** complete, with every member's account in §6.
 - **How this document was written:** drafted with Claude from the repository record — commits,
   pull requests, issues, minutes and decks — and from each member's own account, collected by
   Chenxu You. Each account was then checked against the code and the record, and corrected where
@@ -88,23 +87,24 @@ coding assistants write into the tree (§3c, added on 18 September — see §6.1
 
 ## 3. Tools, and what they were used for
 
-| Tool | Used by | Used for |
+**Every member used Claude** (Anthropic — Claude Code and the Claude app) **and ChatGPT**
+(OpenAI). One member also used GitHub Copilot.
+
+| Member | Tools | Used for |
 | --- | --- | --- |
-| **Claude** — Claude Code and the Claude app | Chenxu You | Drafting and refactoring backend code and tests; pull-request reviews; repository maintenance; drafting and checking documents, decks and this statement |
-| **ChatGPT** | Chenxu You | Questions, explanations and first drafts, alongside Claude |
-| **GitHub Copilot** | Chenxu You | Line and block completion in VS Code |
-| _To confirm_ | Yichen Zhao | Generating views and layouts; summarising client feedback; polishing emails to the client |
-| _To confirm_ | Wenmin Luo | Refactoring the engine; explaining `decimal` arithmetic and rounding |
-| _To confirm_ | Dai Lam La La | Generating deployment configuration; listing failure modes to rehearse |
-| _To confirm_ | Jaswanth Vericherla | Drafting access checks; playing the attacker to find cases to test |
+| Chenxu You | Claude, ChatGPT, GitHub Copilot | Drafting and refactoring backend code and tests; pull-request reviews; repository maintenance; drafting and checking documents, decks and this statement; line and block completion in VS Code (Copilot) |
+| Yichen Zhao | Claude, ChatGPT | Generating views and trying layouts; summarising client feedback; polishing emails to the client |
+| Wenmin Luo | Claude, ChatGPT | Refactoring the engine; explaining `decimal` arithmetic and rounding; checking the glossary against the calculation |
+| Dai Lam La La | Claude, ChatGPT | Generating deployment configuration; listing failure modes to rehearse |
+| Jaswanth Vericherla | Claude, ChatGPT | Drafting access checks; playing the attacker to find cases to test |
+| The whole team | Claude, ChatGPT | Drafting minutes from members' notes; the shared glossary; pull-request summaries — §7 |
 
 **What AI was not used for, by anyone:**
 
 - **Decisions.** The stack (ADR-001), the scope signed by the client, the five technical layers,
   and what to cut were decided by the team, in meetings that are minuted.
-- **The client's data.** No client spreadsheet, guide or figure was pasted into a public AI tool;
-  each member confirms this in their account in §6. The test fixtures are our own rewrite of the
-  worked example in the client's guide.
+- **The client's data.** No client spreadsheet, guide or figure was pasted into a public AI tool.
+  The test fixtures are our own rewrite of the worked example in the client's guide.
 - **Our faces and voices.** The pitch-video brief forbids AI voices and faces
   ([brief](../../reference/unit/assignment-4-pitch-video.md) §2).
 - **Our individual accounts.** Each member's account in §6 is their own. AI was used, at most,
@@ -144,7 +144,7 @@ Each requirement, what we did, and where the evidence is.
 | AI must not replace your own critical thinking and analysis | AI drafted; people decided. Every decision of consequence is in a minuted meeting or a decision record | [ADR-001](../decisions/adr-001-technology-stack.md); [`docs/meetings/`](../meetings/README.md) |
 | The student is responsible for checking the accuracy of AI output | Every output passed the checks in §4. §6 gives cases, from every member, where the check caught the AI | §4; §6.1 |
 | Cite and acknowledge AI use: the tool, the dates, what it helped with, and where | This document, and the statement in §9 for the report's title page | §3; §9 |
-| Keep records of prompts and outputs, which the unit coordinator may ask for | AI sessions are kept in the members' own accounts with each tool and can be produced if asked — each member confirms theirs in §6. The repository records what each session produced: the commit, the pull request and its review | §2, rule 2; §6 |
+| Keep records of prompts and outputs, which the unit coordinator may ask for | AI sessions are kept in the members' own accounts with each tool and can be produced if asked. The repository records what each session produced: the commit, the pull request and its review | §2, rule 2; §7, practice 5 |
 | UWA Code of Conduct — honesty and integrity, care and diligence | We do not overstate what AI did, or what we did: §6 records failures as well as successes | §6; §7 |
 
 ### ACS Code of Professional Ethics (2023)
@@ -289,7 +289,7 @@ AI made me faster at writing and slower at believing, and I think that is the ri
 
 > *"AI can draw the screen. It doesn't stand on the user's side for you."*
 
-**Tools:** _to confirm_.
+**Tools:** Claude and ChatGPT.
 
 **1 · A clean form with a hole in it.** Yichen asked AI to generate the Razor form for entering
 costs. The result looked clean, but it echoed the description a user typed back onto the page
@@ -322,7 +322,7 @@ me constraints, and the trade-off is mine."*
 
 > *"Money has to be right to the cent. AI's 'close enough' doesn't count."*
 
-**Tools:** _to confirm_.
+**Tools:** Claude and ChatGPT.
 
 **1 · One cent.** Wenmin asked AI to refactor `RateEngine`. It moved `decimal` rounding forward
 into intermediate steps. Each function still looked right on its own; the chain as a whole came
@@ -347,7 +347,7 @@ rounding rule as `MidpointRounding.AwayFromZero`. She can now explain both witho
 
 > *"A command that runs isn't a command that's safe to run."*
 
-**Tools:** _to confirm_.
+**Tools:** Claude and ChatGPT.
 
 **1 · The defaults in `docker-compose.yml`.** The Compose file AI generated for staging put a
 default database password in plain text and published the PostgreSQL port to the outside. He
@@ -373,7 +373,7 @@ me hours of reading documentation. But 'is this safe?' is a question only I can 
 
 > *"In security, what's dangerous is AI that looks right."*
 
-**Tools:** _to confirm_.
+**Tools:** Claude and ChatGPT.
 
 **1 · 403 for yours, 404 for nobody's.** AI's first version of the access checks answered a
 request for another custodian's cycle with *403 Forbidden* and a request for one that did not
@@ -407,8 +407,9 @@ he had not thought of; whether the system resisted them was for the tests to say
 Beyond the code, AI changed how the five of us communicated. Each practice below came with a
 rule, because each had a way of going wrong.
 
-**1 · Minutes: from "who writes them" to "everyone checks them".** AI drafts the minutes, and the
-meeting's chair checks the draft against what was actually said before it is merged. Writing up a
+**1 · Minutes: from "who writes them" to "everyone checks them".** AI drafts the minutes from
+members' own notes — not from recordings or transcripts of the meeting — and the meeting's chair
+checks the draft against what was actually said before it is merged. Writing up a
 meeting fell from about thirty minutes to about ten, action items came out clearer, and arguments
 about who had agreed to do what became rare. Not every record met the 24-hour rule: several were
 written up weeks later, and each says so in its own *About this record* note. *The rule:* AI
@@ -473,11 +474,11 @@ From the cases in §6 and §7:
 ## 9. Acknowledgement statement for the report
 
 For the title page of the final report, as UWA Library guidance asks: the tool, the dates, the
-kind of assistance, and where. **Complete the tool list once each member has confirmed theirs in §3.**
+kind of assistance, and where.
 
 > **Acknowledgement of generative AI use.** In preparing this project and report, the team used
-> Claude (Anthropic; Claude Code and the Claude app), ChatGPT (OpenAI) and GitHub Copilot
-> *[and the tools named in each member's account]*, between August and October 2026. They were
+> Claude (Anthropic; Claude Code and the Claude app) and ChatGPT (OpenAI) — every member used
+> both — and GitHub Copilot, used by one member, between August and October 2026. They were
 > used to draft and review code and tests, to explain unfamiliar framework behaviour, to review
 > pull requests, and to draft and edit documentation, including parts of this report. No client
 > data, personal data or third-party intellectual property was entered into a public AI tool.
