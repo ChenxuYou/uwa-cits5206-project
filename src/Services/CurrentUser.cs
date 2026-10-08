@@ -22,6 +22,16 @@ public static class CurrentUser
     /// </summary>
     public const string SecurityStampClaim = "security_stamp";
 
+    /// <summary>
+    /// Present, as "true", on a session whose password was set by someone else. Until it is
+    /// changed the session can reach only the change-password page (M4).
+    /// </summary>
+    public const string MustChangePasswordClaim = "must_change_password";
+
+    /// <summary>Whether this session has to choose its own password before anything else.</summary>
+    public static bool MustChangePassword(this ClaimsPrincipal principal) =>
+        principal.HasClaim(MustChangePasswordClaim, "true");
+
     /// <summary>The signed-in user's username, or empty for an anonymous request.</summary>
     public static string UserName(this ClaimsPrincipal principal) =>
         principal.FindFirstValue(UserNameClaim) ?? string.Empty;

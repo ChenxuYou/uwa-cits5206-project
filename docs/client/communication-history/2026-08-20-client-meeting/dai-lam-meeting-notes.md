@@ -35,7 +35,7 @@ sign-on is needed"*.
 2. **Identity from HR.** Pulling staff roles from a UWA HR system is *new*, and it is exactly
    the class of work our scope statement defers (`integration with UWA finance, HR or booking
    systems`). It is recorded as raised, not accepted — see the
-   [minutes](../../../meetings/2026-08-20-client-meeting.md) §5.
+   [minutes](../../../meetings/client/2026-08-20-client-meeting.md) §5.
 
 ## Question 2 — multi-year cycles
 

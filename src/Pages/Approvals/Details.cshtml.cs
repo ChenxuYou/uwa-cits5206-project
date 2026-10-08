@@ -22,8 +22,17 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
     [BindProperty] public DateTime? EffectiveDate { get; set; }
 
-    public async Task<IActionResult> OnGetAsync(int id) =>
-        await Load(id) ? Page() : NotFound();
+    /// <summary>What the last decision on this page did, or why it was not saved.</summary>
+    public string? SuccessMessage { get; private set; }
+
+    public string? ErrorMessage { get; private set; }
+
+    public async Task<IActionResult> OnGetAsync(int id)
+    {
+        SuccessMessage = TempData["Success"] as string;
+        ErrorMessage = TempData["Error"] as string;
+        return await Load(id) ? Page() : NotFound();
+    }
 
     public async Task<IActionResult> OnPostReturnAsync(int id)
     {
@@ -51,9 +60,17 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
         Notify("Returned", $"{Cycle.PlatformName} was returned for changes", Cycle.ReturnReason);
 
-        await db.SaveChangesAsync();
+        if (!await SaveDecisionAsync())
+        {
+            return RedirectToPage(new { id });
+        }
+
         TempData["Success"] = "The cycle was returned to the submitter for changes.";
-        return RedirectToPage("/Ric/Review", new { cycleId = id });
+
+        // Back to this page, not the custodian's review: /Ric is restricted to data entry, so
+        // an approver sent there lands on Access Denied after the decision has already been
+        // saved, and reads it as a failure (#80).
+        return RedirectToPage(new { id });
     }
 
     public async Task<IActionResult> OnPostApproveAsync(int id, bool confirmApproval)
@@ -70,7 +87,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
         if (!confirmApproval)
         {
-            ModelState.AddModelError(string.Empty, "Confirm delegated authority approval before sealing the record.");
+            ModelState.AddModelError(string.Empty, "Confirm that you approve these rates and understand that, once sealed, the record cannot be edited or deleted.");
             return Page();
         }
 
@@ -105,7 +122,14 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
         Cycle.Status = "Sealed";
         Cycle.UpdatedAtUtc = now;
 
-        Cycle.SnapshotJson = BuildSnapshot();
+        // The record this one replaces is named in the snapshot, with its own hash, so the
+        // chain from one approved rate to the next can be followed from the documents alone
+        // (F22). The older record is read, never written.
+        var replaced = Cycle.SupersedesCycleId is { } replacedId
+            ? await db.RicCycles.AsNoTracking().FirstOrDefaultAsync(x => x.Id == replacedId)
+            : null;
+
+        Cycle.SnapshotJson = BuildSnapshot(replaced);
         Cycle.SnapshotHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(Cycle.SnapshotJson)));
 
         Notify(
@@ -115,9 +139,37 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
                 ? $"The costing cycle was approved and sealed, effective {Cycle.EffectiveDateUtc:dd MMM yyyy}."
                 : Cycle.ApprovalComment);
 
-        await db.SaveChangesAsync();
+        if (!await SaveDecisionAsync())
+        {
+            return RedirectToPage(new { id });
+        }
+
         TempData["Success"] = "The costing cycle was approved and sealed.";
-        return RedirectToPage("/Ric/Review", new { cycleId = id });
+        return RedirectToPage(new { id });
+    }
+
+    /// <summary>
+    /// Save a decision, or report that someone else's got there first.
+    ///
+    /// Both handlers check the cycle is still Submitted, but that is the status this request
+    /// read. If another approver — or this one, double-clicking — decided in between, the
+    /// cycle's concurrency stamp no longer matches and nothing is written (C3). The seal that
+    /// already happened stands, and the approver is told so rather than shown an error.
+    /// </summary>
+    private async Task<bool> SaveDecisionAsync()
+    {
+        try
+        {
+            await db.SaveChangesAsync();
+            return true;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            TempData["Error"] =
+                "A decision was recorded on this cycle while you were reviewing it, so yours was not saved. " +
+                "The page now shows the cycle as it stands.";
+            return false;
+        }
     }
 
     private void Notify(string type, string title, string message) =>
@@ -139,13 +191,13 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
     /// 2026 that the record show them "for transparency and traceability" — a rate that
     /// cannot be re-derived from the document is not a defensible rate.
     /// </summary>
-    private string BuildSnapshot()
+    private string BuildSnapshot(RicCycle? replaced)
     {
         var method = Rates.Method;
 
         var snapshot = new
         {
-            SchemaVersion = "1.2",
+            SchemaVersion = "1.5",
             SealedAtUtc = Cycle.SealedAtUtc,
             MethodVersion = method.Version,
             Method = new
@@ -172,6 +224,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
                 Cycle.CreatedBy,
                 Cycle.CreatedByDisplay,
                 Cycle.UtilisationAssumptions,
+                Cycle.CostingAssumptions,
                 Cycle.BenchmarkNotes,
                 Cycle.PricingJustification,
                 Cycle.SubmittedBy,
@@ -179,7 +232,17 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
                 Cycle.ApprovedBy,
                 Cycle.ApprovedAtUtc,
                 Cycle.ApprovalComment,
-                Cycle.EffectiveDateUtc
+                Cycle.EffectiveDateUtc,
+                Cycle.SealedBy,
+                Supersedes = replaced is null ? null : new
+                {
+                    replaced.Id,
+                    replaced.PlatformName,
+                    replaced.StartYear,
+                    replaced.EndYear,
+                    replaced.SealedAtUtc,
+                    replaced.SnapshotHash
+                }
             },
             Platform = new
             {
@@ -200,6 +263,13 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
                 capability.ForecastUwaUse,
                 capability.ForecastApfrUse,
                 capability.ForecastCommercialUse,
+                capability.CapacityBaseline,
+                BaselineCapacity = BaselineOf(capability),
+                capability.StatedBaselineNote,
+                capability.IsStaffReliant,
+                capability.StaffFte,
+                capability.AboveCapacityReason,
+                CapacityDeductions = capability.CapacityDeductions.OrderBy(x => x.Id).Select(x => new { x.Kind, x.Amount, x.Note }),
                 capability.ProposedUwaRate,
                 capability.ProposedApfrRate,
                 capability.ProposedCommercialRate,
@@ -230,12 +300,26 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
                 x.BaseSalary,
                 x.Description,
                 x.Supplier,
+                x.Position,
+                x.FloorArea,
+                x.FloorAreaRate,
                 YearAmounts = x.YearAmounts.OrderBy(y => y.ProjectYear).Select(y => new { y.ProjectYear, y.Amount })
             })
         };
 
         return JsonSerializer.Serialize(snapshot, new JsonSerializerOptions { WriteIndented = true });
     }
+
+    /// <summary>
+    /// The figure the capability's deductions came off, as the capacity step worked it out:
+    /// the custodian's own for a stated baseline, otherwise the method's working year in the
+    /// billable unit. Null when the capacity step was never saved.
+    /// </summary>
+    private decimal? BaselineOf(RicCapability capability) =>
+        capability.CapacityBaseline == CapacityBaseline.Stated
+            ? capability.StatedBaseline
+            : CapacityEngine.BaselinesFor(Rates.Method, Cycle.BillableUnit)
+                .FirstOrDefault(x => x.Key == capability.CapacityBaseline)?.Amount;
 
     /// <summary>The arithmetic, written out with this capability's own numbers in it.</summary>
     private static object? Workings(CapabilityRateResult? r) => r is null ? null : new
@@ -262,7 +346,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
     private async Task<bool> Load(int id)
     {
         var cycle = await db.RicCycles
-            .Include(x => x.Capabilities)
+            .Include(x => x.Capabilities).ThenInclude(x => x.CapacityDeductions)
             .Include(x => x.Costs).ThenInclude(x => x.Capability)
             .Include(x => x.Costs).ThenInclude(x => x.YearAmounts)
             .FirstOrDefaultAsync(x => x.Id == id);
@@ -274,7 +358,7 @@ public class DetailsModel(CostingDbContext db, RicCalculationService calculator)
 
         Cycle = cycle;
         Rates = Cycle.Status == "Sealed"
-            ? calculator.CalculateAsAt(Cycle, Cycle.MethodVersion)
+            ? SealedRates.Of(Cycle)
             : calculator.Calculate(Cycle);
 
         EffectiveDate ??= DateTime.Today;

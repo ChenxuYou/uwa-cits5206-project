@@ -46,6 +46,7 @@ public class ChangePasswordModel(CostingDbContext db, IPasswordHasher<AppUser> h
         }
 
         user.PasswordHash = hasher.HashPassword(user, NewPassword!);
+        user.MustChangePassword = false;
         user.PasswordChangedAtUtc = DateTime.UtcNow;
         user.SecurityStamp = Guid.NewGuid().ToString("N");
         user.AccessFailedCount = 0;

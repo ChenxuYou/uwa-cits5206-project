@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Text;
+using System.Text.Json.Nodes;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
 using PdfSharp.Pdf.IO;
@@ -101,6 +102,37 @@ public class SealedRecordPdfTests
     }
 
     // ----------------------------------------------------------------------------------
+    // Supersession (F22)
+    // ----------------------------------------------------------------------------------
+
+    [Fact]
+    public void A_record_that_replaces_another_names_it_with_its_hash()
+    {
+        const string oldHash = "0A1B2C3D4E5F60718293A4B5C6D7E8F90A1B2C3D4E5F60718293A4B5C6D7E8F9";
+        var snapshot = Snapshot()
+            .Replace("\"SchemaVersion\": \"1.2\"", "\"SchemaVersion\": \"1.3\"", StringComparison.Ordinal)
+            .Replace(
+                "\"EffectiveDateUtc\": \"2027-01-01T00:00:00Z\",",
+                "\"EffectiveDateUtc\": \"2027-01-01T00:00:00Z\", \"Supersedes\": { \"Id\": 3, \"PlatformName\": \"Microscopy & Characterisation Platform\", "
+                + "\"StartYear\": 2023, \"EndYear\": 2025, \"SealedAtUtc\": \"2022-11-30T03:00:00Z\", \"SnapshotHash\": \"" + oldHash + "\" },",
+                StringComparison.Ordinal);
+
+        var text = AllText(SealedRecordPdf.Build(SealedRecord.Parse(snapshot), Hash));
+
+        Assert.Contains("Supersedes", text, StringComparison.Ordinal);
+        Assert.Contains("2023–2025", text, StringComparison.Ordinal);
+        Assert.Contains(oldHash, text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_record_sealed_before_supersession_was_recorded_says_nothing_about_it()
+    {
+        var text = AllText(SealedRecordPdf.Build(SealedRecord.Parse(Snapshot()), Hash));
+
+        Assert.DoesNotContain("Supersedes", text, StringComparison.Ordinal);
+    }
+
+    // ----------------------------------------------------------------------------------
     // It is a real PDF
     // ----------------------------------------------------------------------------------
 
@@ -151,6 +183,133 @@ public class SealedRecordPdfTests
         var error = Assert.Throws<SealedRecordFormatException>(() => SealedRecord.Parse(future));
 
         Assert.Contains("2.0", error.Message, StringComparison.Ordinal);
+    }
+
+    // ----------------------------------------------------------------------------------
+    // Schema 1.4 — who sealed it, and every input (US-15, US-16)
+    // ----------------------------------------------------------------------------------
+
+    private static readonly string Schema14Path =
+        Path.Combine(AppContext.BaseDirectory, "Fixtures", "sealed-record-2026.1-schema-1.4.json");
+
+    private static string Schema14Text() =>
+        AllText(SealedRecordPdf.Build(SealedRecord.Parse(File.ReadAllText(Schema14Path)), Hash));
+
+    [Fact]
+    public void The_document_names_who_sealed_the_record_and_when()
+    {
+        var text = Schema14Text();
+
+        Assert.Contains("Sealed by", text, StringComparison.Ordinal);
+        Assert.Contains("Dr Mei Chen, 16 September 2026, 02:15 UTC", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_record_sealed_before_1_4_names_the_approver_as_the_sealer()
+    {
+        // Sealing has always been the approver's act; 1.4 only started naming it separately.
+        var text = AllText(SealedRecordPdf.Build(SealedRecord.Parse(Snapshot()), Hash));
+
+        Assert.Contains("Sealed by", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("Capacity baseline", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Each_proposed_rate_is_printed_with_its_variance_from_the_calculated_one()
+    {
+        var text = Schema14Text();
+
+        Assert.Contains("Variance", text, StringComparison.Ordinal);
+        Assert.Contains("matches", text, StringComparison.Ordinal);
+        // Cryo-EM commercial: calculated $270.00, proposed $240.00.
+        Assert.Contains("$30.00 below (11.1%)", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Every_cost_and_income_line_is_printed()
+    {
+        var text = Schema14Text();
+
+        Assert.Contains("The costs and income entered", text, StringComparison.Ordinal);
+        Assert.Contains("Cryo-EM service contract", text, StringComparison.Ordinal);
+        Assert.Contains("Platform administration", text, StringComparison.Ordinal);
+        Assert.Contains("less $40,000.00", text, StringComparison.Ordinal);
+        Assert.Contains("From the 2025 ledger", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_capacity_behind_each_forecast_is_printed()
+    {
+        var text = Schema14Text();
+
+        Assert.Contains("Machine: 1,882.5 hours", text, StringComparison.Ordinal);
+        Assert.Contains("Less maintenance", text, StringComparison.Ordinal);
+        Assert.Contains("112.5 hours — 15 days planned service", text, StringComparison.Ordinal);
+        Assert.Contains("0.5 FTE must be present", text, StringComparison.Ordinal);
+        Assert.Contains("Usable capacity", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_document_says_it_is_to_be_retained_for_audit()
+    {
+        Assert.Contains("for audit and review", Schema14Text(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_schema_1_4_record_renders_to_a_pdf()
+    {
+        var bytes = SealedRecordPdf.Render(File.ReadAllText(Schema14Path), Hash);
+
+        Assert.True(bytes.Length > 1000);
+        Assert.Equal("%PDF", Encoding.ASCII.GetString(bytes, 0, 4));
+    }
+
+    // ----------------------------------------------------------------------------------
+    // Schema 1.5 — the costing assumptions (US-13)
+    // ----------------------------------------------------------------------------------
+
+    private const string CostingAssumptions =
+        "2026 budget as approved in March; salaries at the current EBA step plus 17% on-costs.";
+
+    /// <summary>The 1.4 fixture as 1.5 writes it: the same record, with its costing assumptions.</summary>
+    private static string Schema15Snapshot(string? costingAssumptions = CostingAssumptions)
+    {
+        var node = JsonNode.Parse(File.ReadAllText(Schema14Path))!;
+        node["SchemaVersion"] = "1.5";
+        node["Cycle"]!["CostingAssumptions"] = costingAssumptions;
+        return node.ToJsonString();
+    }
+
+    [Fact]
+    public void The_costing_assumptions_are_printed_under_the_lines_they_explain()
+    {
+        var text = AllText(SealedRecordPdf.Build(SealedRecord.Parse(Schema15Snapshot()), Hash));
+
+        var lines = text.IndexOf("The costs and income entered", StringComparison.Ordinal);
+        var assumptions = text.IndexOf("Costing assumptions", StringComparison.Ordinal);
+        var summary = text.IndexOf("The platform, at the proposed rates", StringComparison.Ordinal);
+
+        Assert.Contains(CostingAssumptions, text, StringComparison.Ordinal);
+        Assert.True(lines >= 0 && lines < assumptions && assumptions < summary,
+            "The costing assumptions belong between the cost lines and the platform summary.");
+    }
+
+    [Fact]
+    public void A_record_with_no_costing_assumptions_prints_no_empty_heading()
+    {
+        var sealedUnder15 = AllText(SealedRecordPdf.Build(SealedRecord.Parse(Schema15Snapshot(costingAssumptions: null)), Hash));
+
+        Assert.DoesNotContain("Costing assumptions", sealedUnder15, StringComparison.Ordinal);
+        Assert.DoesNotContain("Costing assumptions", Schema14Text(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_schema_1_5_record_renders_to_a_pdf()
+    {
+        var bytes = SealedRecordPdf.Render(Schema15Snapshot(), Hash);
+
+        Assert.True(bytes.Length > 1000);
+        Assert.Equal("%PDF", Encoding.ASCII.GetString(bytes, 0, 4));
     }
 
     /// <summary>

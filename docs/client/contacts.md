@@ -14,14 +14,14 @@ under two spellings or two job titles.
 
 ## How we contact them
 
-- **One voice.** Yichen Zhao owns client contact ([15 August minutes §8](../meetings/2026-08-15-team-weekly-meeting.md)), so the client is never chased twice about the same thing by two of us.
+- **One voice.** Yichen Zhao owns client contact ([15 August minutes §8](../meetings/team/2026-08-15-team-meeting.md)), so the client is never chased twice about the same thing by two of us.
 - **Wednesdays** are generally good for meetings; both are on campus most days, so in person or Teams both work **[K §10]**.
 - **Teams group chat** for asynchronous questions, including both representatives — *Client & Group 13*. The join link is deliberately not recorded here: it is a private chat with the client, and a link in a public repository is an open door. Ask Yichen Zhao to be added. The client asked us to manage expectations on response time; replies are not always immediate **[K §10]**.
 - **Batched questions, not a fixed weekly slot.** The client proposed we digest, then schedule a meeting once we have questions, with support heavier up front and easing off later **[K §10]**.
 
 ## A note on naming
 
-Earlier records — the [kickoff minutes of 29 July 2026](../meetings/2026-07-29-client-kickoff.md)
+Earlier records — the [kickoff minutes of 29 July 2026](../meetings/client/2026-07-29-client-meeting.md)
 — refer to "two client representatives" by role rather than by name, because at the time the
 names sat only in the team's Teams area. They are named here from **25 August 2026** onwards;
 the minutes keep their original wording, with an annotation pointing at this file, because a

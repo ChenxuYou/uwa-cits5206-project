@@ -1,5 +1,7 @@
 using CostingTool.Data;
+using CostingTool.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CostingTool.Pages.Ric;
 
@@ -15,6 +17,34 @@ public class ReviewModel(CostingDbContext db, RicCalculationService calculator) 
 
     public string? SuccessMessage { get; private set; }
 
+    /// <summary>The sealed record this cycle replaces, if it replaces one (US-01).</summary>
+    public PreviousRecord? Previous { get; private set; }
+
+    /// <summary>
+    /// The cycle that replaces this one, once one has been started. This record is
+    /// superseded when that cycle is sealed; until then it holds the current rates (F22).
+    /// </summary>
+    public RicCycle? Successor { get; private set; }
+
+    public bool IsSuperseded => Successor?.Status == "Sealed";
+
+    /// <summary>
+    /// What the cycle still needs before it can be submitted, each with the step that
+    /// supplies it (US-14). Empty once it is complete, and for a cycle no longer editable.
+    /// </summary>
+    public IReadOnlyList<MissingItem> Missing { get; private set; } = [];
+
+    public bool IsReady => Missing.Count == 0;
+
+    /// <summary>
+    /// The guide's Step 5 documentation checklist (US-13). Reported beside the submit button,
+    /// never a reason to refuse — see <see cref="Step5Checklist"/>. Empty once not editable.
+    /// </summary>
+    public IReadOnlyList<Step5Checklist.Item> Step5 { get; private set; } = [];
+
+    /// <summary>Where each operating cost sits (US-03, US-04), for the inputs on the page.</summary>
+    public CycleCosts Costs { get; private set; } = null!;
+
     /// <summary>Why an export was refused, when one was. See <c>Export.cshtml.cs</c>.</summary>
     public string? ErrorMessage { get; private set; }
 
@@ -25,6 +55,7 @@ public class ReviewModel(CostingDbContext db, RicCalculationService calculator) 
             return NotFound();
         }
 
+        await RememberStepAsync(RicSteps.Review);
         SuccessMessage = TempData["Success"] as string;
         ErrorMessage = TempData["Error"] as string;
         return Page();
@@ -43,31 +74,19 @@ public class ReviewModel(CostingDbContext db, RicCalculationService calculator) 
             return Page();
         }
 
+        // Nothing goes for approval with a hole in it: the list the page already shows, with
+        // its links, is the list the submission refuses on (US-14, N3). The page lists the
+        // items themselves, so the summary only says why the button did nothing.
+        if (!IsReady)
+        {
+            ModelState.AddModelError(
+                string.Empty,
+                $"The cycle cannot be submitted yet: {Missing.Count} item{(Missing.Count == 1 ? " is" : "s are")} missing. Each is listed above with a link to where it is entered.");
+        }
+
         if (!confirmAccuracy)
         {
             ModelState.AddModelError(string.Empty, "Confirm that the assumptions and figures are complete and accurate.");
-        }
-
-        if (Cycle.Capabilities.Count == 0 || !Cycle.Costs.Any(x => !x.IsIncome))
-        {
-            ModelState.AddModelError(string.Empty, "The cycle must contain capabilities and operating costs.");
-        }
-
-        if (Cycle.Capabilities.Any(x => x.MaximumCapacity <= 0 || x.ForecastUtilisation <= 0))
-        {
-            ModelState.AddModelError(string.Empty, "Every capability requires capacity and forecast utilisation.");
-        }
-
-        if (Cycle.Capabilities.Any(x => x.ProposedUwaRate <= 0 || x.ProposedApfrRate <= 0 || x.ProposedCommercialRate <= 0))
-        {
-            ModelState.AddModelError(string.Empty, "Every capability requires three proposed rates.");
-        }
-
-        // Nothing is submitted for approval while a capability still has no rates. The
-        // approver would otherwise be asked to seal a record with a hole in it.
-        foreach (var problem in Rates.Problems)
-        {
-            ModelState.AddModelError(string.Empty, problem);
         }
 
         if (!ModelState.IsValid)
@@ -95,11 +114,24 @@ public class ReviewModel(CostingDbContext db, RicCalculationService calculator) 
             return false;
         }
 
-        // A sealed record reproduces its own figures under the method version it was sealed
-        // with, not today's — architecture.md §3 rule R6.
+        // A sealed record shows the figures it was sealed with, read from its snapshot and
+        // never recalculated — US-15, N6. See SealedRates.
         Rates = IsSealed
-            ? calculator.CalculateAsAt(Cycle, Cycle.MethodVersion)
+            ? SealedRates.Of(Cycle)
             : calculator.Calculate(Cycle);
+
+        Costs = RicCalculationService.CostsOf(Cycle);
+        Missing = IsEditable ? SubmissionChecks.For(Cycle, Rates) : [];
+        Step5 = IsEditable ? Step5Checklist.For(Cycle) : [];
+
+        Previous = await LoadReplacedRecordAsync();
+
+        if (IsSealed)
+        {
+            var owner = User.UserName();
+            Successor = await Db.RicCycles.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.SupersedesCycleId == Cycle.Id && x.CreatedBy == owner);
+        }
 
         return true;
     }

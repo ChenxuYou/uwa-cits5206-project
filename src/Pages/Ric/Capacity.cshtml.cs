@@ -22,6 +22,13 @@ public class CapacityModel(CostingDbContext db, MethodConfigProvider methods) : 
 
     [BindProperty] public string? UtilisationAssumptions { get; set; }
 
+    /// <summary>
+    /// The address of a link followed while this page held unsaved figures — the step bar,
+    /// the breadcrumb, the sidebar. The page saves on the way out and then goes there (US-02:
+    /// every entered value persists on navigation, without an explicit save).
+    /// </summary>
+    [BindProperty] public string? LeavingFor { get; set; }
+
     /// <summary>The method's baselines in this cycle's billable unit; empty for samples.</summary>
     public IReadOnlyList<CapacityBaseline> Baselines => CapacityEngine.BaselinesFor(Method, Cycle.BillableUnit);
 
@@ -37,6 +44,7 @@ public class CapacityModel(CostingDbContext db, MethodConfigProvider methods) : 
             return NotFound();
         }
 
+        await RememberStepAsync(4);
         CycleId = cycleId;
         Inputs = Cycle.Capabilities.Select(CapacityInput.From).ToList();
         UtilisationAssumptions = Cycle.UtilisationAssumptions;
@@ -44,7 +52,20 @@ public class CapacityModel(CostingDbContext db, MethodConfigProvider methods) : 
         return Page();
     }
 
-    public async Task<IActionResult> OnPostAsync()
+    public Task<IActionResult> OnPostAsync() => SaveAsync("/Ric/Rates");
+
+    /// <summary>
+    /// Going back a step saves first, as the rates step does.
+    ///
+    /// US-10 asks that nothing be lost by navigating backwards. The link that used to sit
+    /// here threw away every baseline, deduction, forecast and note typed on this screen,
+    /// so a custodian who went back to check one funding line came back to an empty step.
+    /// It is held to the same checks as continuing: what is saved is always a capacity the
+    /// later steps can price from.
+    /// </summary>
+    public Task<IActionResult> OnPostBackAsync() => SaveAsync("/Ric/Funding");
+
+    private async Task<IActionResult> SaveAsync(string nextPage)
     {
         if (!await LoadCycleAsync(CycleId))
         {
@@ -121,10 +142,10 @@ public class CapacityModel(CostingDbContext db, MethodConfigProvider methods) : 
                 .ToList();
         }
 
-        Cycle.UpdatedAtUtc = DateTime.UtcNow;
+        RecordEdit();
         await Db.SaveChangesAsync();
 
-        return RedirectToPage("/Ric/Rates", new { cycleId = CycleId });
+        return Continue(LeavingFor, nextPage);
     }
 
     /// <summary>

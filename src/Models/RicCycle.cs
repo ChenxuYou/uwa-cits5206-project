@@ -187,6 +187,17 @@ public class RicCycle
     /// </summary>
     public string? UtilisationAssumptions { get; set; }
 
+    /// <summary>
+    /// What the cost figures rest on, for the costs section as a whole: which budget, how
+    /// salaries were estimated, what was treated as in-kind, what was left out and why.
+    ///
+    /// The first item on the guide's Step 5 checklist is "costing assumptions documented"
+    /// [G, Step 5], and US-13 asks for room to explain in every section, not only at the end.
+    /// Each cost line has its own note as well; this is for what no single line says.
+    /// Optional: the review reports it as outstanding rather than refusing submission.
+    /// </summary>
+    public string? CostingAssumptions { get; set; }
+
     public string? BenchmarkNotes { get; set; }
     public string? PricingJustification { get; set; }
     public string? SubmittedBy { get; set; }
@@ -204,6 +215,49 @@ public class RicCycle
     public DateTime? EffectiveDateUtc { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Changes on every save of this row, and every save checks it is still the value that
+    /// was read. Two requests that both read a Submitted cycle — an approver's double click,
+    /// or two approvers deciding at once — can no longer both write: the second is refused
+    /// with a <c>DbUpdateConcurrencyException</c> instead of overwriting a seal that has
+    /// already happened, or returning a record that is already sealed (US-15).
+    ///
+    /// Rotated in <c>CostingDbContext.SaveChanges</c>, so no page has to remember to.
+    /// </summary>
+    public Guid ConcurrencyStamp { get; set; } = Guid.NewGuid();
+
+    /// <summary>
+    /// The sealed cycle this one replaces, when it replaces one (US-01, F22).
+    ///
+    /// <b>The reference is the whole of supersession.</b> The older record is never written
+    /// to: it stays sealed, readable and byte-for-byte what was approved. Whether it is
+    /// superseded is worked out from this column — it is, once a cycle pointing at it has
+    /// itself been sealed — so there is no second copy of the fact to fall out of step.
+    /// </summary>
+    public int? SupersedesCycleId { get; set; }
+
+    public RicCycle? Supersedes { get; set; }
+
+    /// <summary>
+    /// When the custodian last changed a figure or an answer (US-02). Kept apart from
+    /// <see cref="UpdatedAtUtc"/>, which the approver's decisions also move, so "last edited"
+    /// never names an approver who edited nothing.
+    /// </summary>
+    public DateTime LastEditedAtUtc { get; set; } = DateTime.UtcNow;
+
+    /// <summary>Who made that change, as a <b>username</b> — see the note on <see cref="CreatedBy"/>.</summary>
+    public string LastEditedBy { get; set; } = string.Empty;
+
+    /// <summary>Who made that change, as it should appear on screen.</summary>
+    public string LastEditedByDisplay { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The step the custodian last had open, 1 to 6, so reopening a draft returns them to it
+    /// (US-02). See <c>RicSteps</c> for the pages the numbers stand for.
+    /// </summary>
+    public int LastStep { get; set; } = 1;
+
     public List<RicCapability> Capabilities { get; set; } = [];
     public List<RicCostEntry> Costs { get; set; } = [];
 
@@ -223,6 +277,13 @@ public class AppUser
     public DateTime? LastLoginAtUtc { get; set; }
     public DateTime PasswordChangedAtUtc { get; set; } = DateTime.UtcNow;
     public string SecurityStamp { get; set; } = Guid.NewGuid().ToString("N");
+
+    /// <summary>
+    /// The password was set by someone else — an administrator creating the account or
+    /// resetting it, or the bootstrap administrator's value from configuration — so the
+    /// person must choose their own before doing anything else. Cleared when they do.
+    /// </summary>
+    public bool MustChangePassword { get; set; }
 
     public static class Roles
     {

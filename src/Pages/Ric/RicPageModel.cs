@@ -1,5 +1,6 @@
 using CostingTool.Data;
 using CostingTool.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
@@ -43,6 +44,73 @@ public abstract class RicPageModel(CostingDbContext db) : PageModel
         Cycle = cycle;
         return true;
     }
+
+    /// <summary>
+    /// The sealed record the loaded cycle replaces, if it replaces one (US-01), for its key
+    /// figures to be shown beside this cycle's.
+    /// </summary>
+    protected async Task<PreviousRecord?> LoadReplacedRecordAsync()
+    {
+        if (Cycle.SupersedesCycleId is not { } id)
+        {
+            return null;
+        }
+
+        var owner = User.UserName();
+        var replaced = await Db.RicCycles.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id && x.CreatedBy == owner && x.Status == "Sealed");
+
+        return replaced is null ? null : PreviousRecord.From(replaced);
+    }
+
+    /// <summary>
+    /// Stamp the loaded cycle as changed, now, by the signed-in custodian (US-02). Every
+    /// handler that saves a figure or an answer calls this before <c>SaveChangesAsync</c>.
+    /// </summary>
+    protected void RecordEdit()
+    {
+        var now = DateTime.UtcNow;
+        Cycle.UpdatedAtUtc = now;
+        Cycle.LastEditedAtUtc = now;
+        Cycle.LastEditedBy = User.UserName();
+        Cycle.LastEditedByDisplay = User.DisplayName();
+    }
+
+    /// <summary>
+    /// Note which step of a draft is open, so reopening it from the overview comes back here
+    /// (US-02). Opening a step is not an edit: nothing else about the cycle changes.
+    /// </summary>
+    protected async Task RememberStepAsync(int step)
+    {
+        if (!Cycle.IsEditable || Cycle.LastStep == step)
+        {
+            return;
+        }
+
+        Cycle.LastStep = step;
+        await Db.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Where a save that was asked for on the way out of a page should land: the address of
+    /// the link that was followed (see <c>data-save-on-leave</c> in the layout), or
+    /// <paramref name="fallback"/>. Only a path on this site is accepted, so the field cannot
+    /// be used to send anyone elsewhere.
+    /// </summary>
+    protected IActionResult Continue(string? leavingFor, string fallback)
+    {
+        if (IsLocalPath(leavingFor))
+        {
+            return LocalRedirect(leavingFor!);
+        }
+
+        return RedirectToPage(fallback, new { cycleId = Cycle.Id });
+    }
+
+    internal static bool IsLocalPath(string? path) =>
+        !string.IsNullOrEmpty(path)
+        && path[0] == '/'
+        && (path.Length == 1 || (path[1] != '/' && path[1] != '\\'));
 
     /// <summary>
     /// "Inputs[1].UwaUse" → "Cryo-EM: UWA forecast use", for a page that binds one row per

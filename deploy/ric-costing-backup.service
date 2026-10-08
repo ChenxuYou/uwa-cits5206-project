@@ -1,0 +1,9 @@
+# Run deploy/backup.sh once. Started daily by ric-costing-backup.timer.
+[Unit]
+Description=Back up the costing tool database
+
+[Service]
+Type=oneshot
+User=ric-costing
+Group=ric-costing
+ExecStart=/opt/ric-costing/deploy/backup.sh

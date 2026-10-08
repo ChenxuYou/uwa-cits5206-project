@@ -306,6 +306,6 @@ first three boxes below exist because of them.
 
 | Version | Date | Change |
 | --- | --- | --- |
-| 1.2 | 16 Sep 2026 | The five technical layers agreed on 15 September ([minutes](../meetings/2026-09-15-team-meeting.md)) are folded in: Section 1 opens by naming your layer, A2-3's tie-breaker cites `plan.md` §3, and A2-5 is shared with every layer owner rather than the two members who used to write most of the code |
+| 1.2 | 16 Sep 2026 | The five technical layers agreed on 15 September ([minutes](../meetings/team/2026-09-15-team-meeting.md)) are folded in: Section 1 opens by naming your layer, A2-3's tie-breaker cites `plan.md` §3, and A2-5 is shared with every layer owner rather than the two members who used to write most of the code |
 | 1.1 | 13 Sep 2026 | Assignment 1's mark came back at 12/15 with two marks lost to unopenable links. §1 gains the rule that follows from it, §7 gains the cover page, the no-anchor-word and no-wrap checks, and A2-2 is rewritten from a warning into a recurrence. Diagnosis: [`docs/assignments/assignment-1/feedback.md`](../assignments/assignment-1/feedback.md) |
 | 1.0 | 13 Sep 2026 | Written the day the brief was transcribed, sixteen days out, so that the fortnight of S4 and S5 can be used to *create* evidence rather than only to describe it |

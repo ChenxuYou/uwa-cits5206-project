@@ -55,6 +55,26 @@ public static class RecordFormat
             ? $"({Money(Math.Abs(value))}) deficit"
             : $"{Money(value)} surplus";
 
+    /// <summary>
+    /// How far a proposed rate sits from the calculated one (US-11), in words: "matches",
+    /// or "$30.00 below (11.1%)". The direction is a word, not a sign or a colour, so it
+    /// survives a monochrome print. Worked from the two rates the record prints, so a reader
+    /// can check it by subtraction.
+    /// </summary>
+    public static string Variance(decimal calculated, decimal proposed)
+    {
+        var amount = proposed - calculated;
+        if (amount == 0)
+        {
+            return "matches";
+        }
+
+        var text = $"{Money(Math.Abs(amount))} {(amount > 0 ? "above" : "below")}";
+        return calculated == 0
+            ? text
+            : $"{text} ({Math.Abs(amount / calculated * 100m).ToString("0.0", Culture)}%)";
+    }
+
     /// <summary>"Hours" → "hour", so a rate reads "per hour" rather than "per hours".</summary>
     private static string Singular(string unit) =>
         unit.EndsWith("ies", StringComparison.OrdinalIgnoreCase) ? unit[..^3] + "y"

@@ -89,19 +89,31 @@ public class LoginModel(CostingDbContext db, IPasswordHasher<AppUser> hasher) : 
         user.LastLoginAtUtc = now;
         await db.SaveChangesAsync();
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.DisplayName),
-            new Claim(ClaimTypes.Role, user.Role),
-            new Claim(CurrentUser.UserNameClaim, user.UserName),
-            new Claim(CurrentUser.SecurityStampClaim, user.SecurityStamp)
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Name, user.DisplayName),
+            new(ClaimTypes.Role, user.Role),
+            new(CurrentUser.UserNameClaim, user.UserName),
+            new(CurrentUser.SecurityStampClaim, user.SecurityStamp)
         };
+
+        if (user.MustChangePassword)
+        {
+            claims.Add(new Claim(CurrentUser.MustChangePasswordClaim, "true"));
+        }
 
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
             new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)),
             new AuthenticationProperties { IsPersistent = false });
+
+        // A password someone else chose is replaced before anything else is done with it
+        // (M4). MustChangePasswordFilter holds every other page closed until then.
+        if (user.MustChangePassword)
+        {
+            return LocalRedirect("/Account/ChangePassword");
+        }
 
         if (!string.IsNullOrWhiteSpace(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
         {

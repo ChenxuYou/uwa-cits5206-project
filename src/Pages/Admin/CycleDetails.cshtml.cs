@@ -38,10 +38,10 @@ public class CycleDetailsModel(CostingDbContext db, RicCalculationService calcul
 
         Cycle = cycle;
 
-        // A sealed record reproduces its own figures under the method version it was sealed
-        // with, not today's — architecture.md §3 rule R6.
+        // A sealed record shows the figures it was sealed with, read from its snapshot and
+        // never recalculated — US-15, N6. See SealedRates.
         Rates = Cycle.Status == "Sealed"
-            ? calculator.CalculateAsAt(Cycle, Cycle.MethodVersion)
+            ? SealedRates.Of(Cycle)
             : calculator.Calculate(Cycle);
 
         Custodian = await db.AppUsers.AsNoTracking()

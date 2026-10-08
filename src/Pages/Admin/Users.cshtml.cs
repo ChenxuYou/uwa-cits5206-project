@@ -91,14 +91,18 @@ public class UsersModel(CostingDbContext db, IPasswordHasher<AppUser> hasher) : 
         {
             UserName = userName,
             DisplayName = displayName,
-            Role = NewRole!
+            Role = NewRole!,
+
+            // The administrator knows this password, so the person replaces it at their
+            // first sign-in (M4).
+            MustChangePassword = true
         };
         user.PasswordHash = hasher.HashPassword(user, NewPassword!);
 
         db.AppUsers.Add(user);
         await db.SaveChangesAsync();
 
-        TempData["Success"] = $"Account {userName} created. Give the person their password and ask them to change it.";
+        TempData["Success"] = $"Account {userName} created. Give the person their password; they will be asked to choose their own when they first sign in.";
         return RedirectToPage();
     }
 
@@ -154,13 +158,14 @@ public class UsersModel(CostingDbContext db, IPasswordHasher<AppUser> hasher) : 
         }
 
         user.PasswordHash = hasher.HashPassword(user, ResetPassword!);
+        user.MustChangePassword = true;
         user.PasswordChangedAtUtc = DateTime.UtcNow;
         user.SecurityStamp = Guid.NewGuid().ToString("N");
         user.AccessFailedCount = 0;
         user.LockoutEndUtc = null;
         await db.SaveChangesAsync();
 
-        TempData["Success"] = $"Password reset for {user.UserName}. Their other sessions have been signed out.";
+        TempData["Success"] = $"Password reset for {user.UserName}. Their other sessions have been signed out, and they will choose a new password when they next sign in.";
         return RedirectToPage();
     }
 

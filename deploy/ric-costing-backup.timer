@@ -1,0 +1,10 @@
+# Daily database backup at 02:00 Perth time, and on the next boot if the machine was off.
+[Unit]
+Description=Daily backup of the costing tool database
+
+[Timer]
+OnCalendar=*-*-* 02:00:00 Australia/Perth
+Persistent=true
+
+[Install]
+WantedBy=timers.target

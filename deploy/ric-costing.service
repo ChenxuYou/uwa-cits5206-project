@@ -1,0 +1,39 @@
+# systemd unit for the costing tool. Install as /etc/systemd/system/ric-costing.service.
+# See deploy/README.md for the directories and the environment file it expects.
+
+[Unit]
+Description=UWA Research Infrastructure Costing Tool
+After=network.target
+
+[Service]
+Type=simple
+User=ric-costing
+Group=ric-costing
+WorkingDirectory=/opt/ric-costing/current
+ExecStart=/usr/bin/dotnet /opt/ric-costing/current/CostingTool.dll
+
+# Secrets and paths: ConnectionStrings__CostingDb, and Bootstrap__* on the first start only.
+EnvironmentFile=/etc/ric-costing/ric-costing.env
+Environment=ASPNETCORE_ENVIRONMENT=Production
+# Listen on loopback only. Caddy is the only thing that talks to the application; nothing
+# on the network reaches it except through HTTPS (audit C2).
+Environment=ASPNETCORE_URLS=http://127.0.0.1:5000
+Environment=HOME=/var/lib/ric-costing
+Environment=DOTNET_CLI_TELEMETRY_OPTOUT=1
+Environment=DOTNET_NOLOGO=1
+
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGINT
+TimeoutStopSec=20
+
+# The application writes to its data directory and nowhere else.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/ric-costing
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

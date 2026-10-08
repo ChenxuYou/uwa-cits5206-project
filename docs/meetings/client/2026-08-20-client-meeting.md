@@ -9,11 +9,11 @@ written answers
 **Purpose:** walk the client through the scope statement and the five open questions sent on
 17 August, and obtain a written decision on both confirmations.
 
-> **About this record.** Written from [Dai Lam's notes taken in the room](../client/communication-history/2026-08-20-client-meeting/dai-lam-meeting-notes.md)
+> **About this record.** Written from [Dai Lam's notes taken in the room](../../client/communication-history/2026-08-20-client-meeting/dai-lam-meeting-notes.md)
 > and from the client's own written answers, which arrived by email the same day. Where the two
 > differ, **the client's written answers govern** and this record says so. Every artefact
 > referred to here is filed in
-> [`docs/client/communication-history/2026-08-20-client-meeting/`](../client/communication-history/2026-08-20-client-meeting/).
+> [`docs/client/communication-history/2026-08-20-client-meeting/`](../../client/communication-history/2026-08-20-client-meeting/).
 
 ---
 
@@ -36,7 +36,7 @@ the client *has approved* the MVP, and until this meeting it had not.
 | Thu 20 Aug | Signed scope statement and written answers returned by email |
 
 The chase planned for Wednesday 19 August was **not needed** — the client had already replied.
-[`mvp-agreement.md`](../client/mvp-agreement.md) Part C, the "if no answer comes" plan, never
+[`mvp-agreement.md`](../../client/mvp-agreement.md) Part C, the "if no answer comes" plan, never
 became live.
 
 ## 3. The client's answers
@@ -97,7 +97,7 @@ confirmed as a defect.
 
 **The second sentence is an obligation on us, not a preference.** The client wants discrepancies
 between the guide and the calculator reported to them as we find them. We have such a list
-already — it is what §2 of [`requirements.md`](../spec/requirements.md#2-the-problem) is built
+already — it is what §2 of [`requirements.md`](../../spec/requirements.md#2-the-problem) is built
 from — and it now has somewhere to go. Action A15.
 
 ### 3.5 Question 5 — guide or calculator, generally
@@ -112,15 +112,15 @@ request to have discrepancies flagged is the same instinct from their side.
 ## 4. Sign-off
 
 Both confirmations ticked on the returned document
-([`project-scope-summary-signed.pdf`](../client/communication-history/2026-08-20-client-meeting/project-scope-summary-signed.pdf)):
+([`project-scope-summary-signed.pdf`](../../client/communication-history/2026-08-20-client-meeting/project-scope-summary-signed.pdf)):
 
 1. **Scope** — what is in, what is out, what is stretch-only.
 2. **Ownership** — the costing/pricing method is UWA's; the team writes and owns the source code
    and each member may show their contribution in a personal portfolio; overarching IP is held
    **jointly** by UWA and the team, and neither party sells it onward without the other.
 
-**Confirmation 2 is what [Q8](../spec/requirements.md#9-open-questions) has been waiting for.**
-The repository has been all-rights-reserved with permissions granted in [`NOTICE`](../../NOTICE)
+**Confirmation 2 is what [Q8](../../spec/requirements.md#9-open-questions) has been waiting for.**
+The repository has been all-rights-reserved with permissions granted in [`NOTICE`](../../../NOTICE)
 precisely because a licence granted by one joint owner alone may not be effective, and the
 ownership position was not confirmed in writing. It now is. Q8 does not close today — the
 signature confirms the *position*, not the licence that follows from it — but the blocker that
@@ -156,7 +156,7 @@ treat it as raised rather than agreed.
 | D18 | The **administrator is the approver** of a record. In-tool routed approval stays a stretch item (F16, Should) until the client says otherwise |
 | D19 | **HR-system integration for staff roles is not in the MVP.** It is recorded as raised and would need a scope trade |
 
-Decision numbering continues from the [team meeting of 15 August](2026-08-15-team-weekly-meeting.md),
+Decision numbering continues from the [team meeting of 15 August](../team/2026-08-15-team-meeting.md),
 which ended at D13.
 
 ## Actions
@@ -165,15 +165,15 @@ which ended at D13.
 | --- | --- | --- | --- |
 | A14 | Confirm in writing whether in-tool approval routing is required in the core, or whether recording the approver is enough | Yichen Zhao | Sun 24 Aug |
 | A15 | Send the client the list of guide-vs-calculator discrepancies, as they asked | Dai Lam La La | Sun 24 Aug |
-| A16 | Update [`NOTICE`](../../NOTICE) and [`README`](../../README.md) to cite the signed confirmation; state what still has to happen before Q8 closes | Chenxu You | Sun 23 Aug |
-| A17 | Give "the PDF shows the workings" a requirement ID and a story estimate in [`requirements.md`](../spec/requirements.md) and [`user-stories.md`](../spec/user-stories.md) | Wenmin Luo | Sun 23 Aug |
-| A18 | Close Q3, Q4, Q5, Q9 and Q10 in [`requirements.md` §9](../spec/requirements.md#9-open-questions) against the client's written answers | Chenxu You | Sat 22 Aug |
+| A16 | Update [`NOTICE`](../../../NOTICE) and [`README`](../../../README.md) to cite the signed confirmation; state what still has to happen before Q8 closes | Chenxu You | Sun 23 Aug |
+| A17 | Give "the PDF shows the workings" a requirement ID and a story estimate in [`requirements.md`](../../spec/requirements.md) and [`user-stories.md`](../../spec/user-stories.md) | Wenmin Luo | Sun 23 Aug |
+| A18 | Close Q3, Q4, Q5, Q9 and Q10 in [`requirements.md` §9](../../spec/requirements.md#9-open-questions) against the client's written answers | Chenxu You | Sat 22 Aug |
 | A19 | Quote the sign-off in Assignment 1 §2 and link this folder from the submission | Dai Lam La La | Mon 24 Aug |
 
 ## Open questions after this meeting
 
 - **In-tool approval routing** — core or stretch (A14). The signed scope says stretch; the client's answer is about authority, not mechanism.
-- **Deployment.** Untouched by this meeting and still the largest unanswered question — see the [15 August minutes](2026-08-15-team-weekly-meeting.md) §7.
+- **Deployment.** Untouched by this meeting and still the largest unanswered question — see the [15 August minutes](../team/2026-08-15-team-meeting.md) §7.
 - **Q8, the repository licence.** Unblocked by confirmation 2, not yet closed.
 
 ---

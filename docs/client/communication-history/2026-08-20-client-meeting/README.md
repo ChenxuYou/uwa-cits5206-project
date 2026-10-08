@@ -2,7 +2,7 @@
 
 **The meeting at which the client signed off the MVP.** Everything that crossed between us and
 the client on that day is filed here; the written record of the meeting itself is the
-[minutes](../../../meetings/2026-08-20-client-meeting.md).
+[minutes](../../../meetings/client/2026-08-20-client-meeting.md).
 
 ## What is in this folder
 
@@ -26,7 +26,7 @@ Assignment 1 §2 cites this folder. The chain it cites is:
 | --- | --- | --- |
 | Mon 17 Aug 2026 | Scope statement and five questions sent by email | [`../2026-08-17-email-scope-and-questions/`](../2026-08-17-email-scope-and-questions/) |
 | Tue 18 Aug 2026 | Client replied by email confirming a time to meet | Teams / email thread |
-| Thu 20 Aug 2026 | In-person meeting; the client walked through all five questions | [minutes](../../../meetings/2026-08-20-client-meeting.md) |
+| Thu 20 Aug 2026 | In-person meeting; the client walked through all five questions | [minutes](../../../meetings/client/2026-08-20-client-meeting.md) |
 | Thu 20 Aug 2026 | Signed scope statement and written answers returned by email | this folder |
 
 ## A note on committing these files

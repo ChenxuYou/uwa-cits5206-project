@@ -7,6 +7,9 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
 {
     public CycleRates Rates { get; private set; } = null!;
 
+    /// <summary>The sealed record this cycle replaces, whose rates the new ones are set against (US-01).</summary>
+    public PreviousRecord? Previous { get; private set; }
+
     [BindProperty] public int CycleId { get; set; }
 
     [BindProperty] public List<RateInput> Inputs { get; set; } = [];
@@ -14,6 +17,13 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
     [BindProperty] public string? BenchmarkNotes { get; set; }
 
     [BindProperty] public string? PricingJustification { get; set; }
+
+    /// <summary>
+    /// The address of a link followed while this page held unsaved figures — the step bar,
+    /// the breadcrumb, the sidebar. The page saves on the way out and then goes there (US-02:
+    /// every entered value persists on navigation, without an explicit save).
+    /// </summary>
+    [BindProperty] public string? LeavingFor { get; set; }
 
     /// <summary>
     /// True when the page is showing the balance for rates the custodian has typed but not
@@ -28,6 +38,7 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
             return NotFound();
         }
 
+        await RememberStepAsync(5);
         Inputs = Cycle.Capabilities
             .Select(x => new RateInput(x.Id, x.ProposedUwaRate, x.ProposedApfrRate, x.ProposedCommercialRate))
             .ToList();
@@ -84,10 +95,10 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
             return Page();
         }
 
-        Cycle.UpdatedAtUtc = DateTime.UtcNow;
+        RecordEdit();
         await Db.SaveChangesAsync();
 
-        return RedirectToPage(nextPage, new { cycleId = CycleId });
+        return Continue(LeavingFor, nextPage);
     }
 
     /// <summary>
@@ -166,31 +177,14 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
     /// </summary>
     private void RequireJustification()
     {
-        if (!string.IsNullOrWhiteSpace(PricingJustification))
-        {
-            return;
-        }
-
-        var varied = Cycle.Capabilities
-            .Where(x => Rates.For(x.Id)?.VariesFromCalculated == true)
-            .Select(x => x.Name)
-            .ToList();
-
-        if (varied.Count > 0)
+        // The same rule the review page lists and the submission refuses on — SubmissionChecks.
+        if (string.IsNullOrWhiteSpace(PricingJustification)
+            && SubmissionChecks.JustificationRequiredBecause(Cycle, Rates) is { } reason)
         {
             ModelState.AddModelError(
                 nameof(PricingJustification),
-                $"A pricing justification is required because the proposed rates differ from the "
-                + $"calculated ones for {string.Join(", ", varied)}.");
-            return;
-        }
-
-        if (Rates.IsComplete && Rates.ForecastBalance < 0)
-        {
-            ModelState.AddModelError(
-                nameof(PricingJustification),
-                "A pricing justification is required because these rates forecast a deficit. "
-                + "A deficit does not stop the record being submitted; it has to be explained.");
+                $"A pricing justification is required because {reason}. That does not stop the "
+                + "record being submitted; it has to be explained.");
         }
     }
 
@@ -203,6 +197,7 @@ public class RatesModel(CostingDbContext db, RicCalculationService calculator) :
 
         CycleId = cycleId;
         Rates = calculator.Calculate(Cycle);
+        Previous = await LoadReplacedRecordAsync();
         return true;
     }
 

@@ -196,4 +196,39 @@ public class CapacityStepTests
         Assert.Equal(25m, input.Deductions.Single(x => x.Kind == "Setup and pack-down").Amount);
         Assert.Equal(1_700m, page.Preview(input)!.Usable); // 1,725 − 25
     }
+
+    // ---- US-10: nothing is lost by going backwards --------------------------------------
+
+    [Fact]
+    public async Task GoingBackToFundingSavesWhatWasTypedFirst()
+    {
+        await using var db = CreateDb();
+        var page = CapacityPage(db, x =>
+        {
+            x.Baseline = CapacityBaseline.Machine;
+            Deduct(x, "Maintenance", 112.5m, "Quarterly service, 15 days");
+        });
+
+        var result = await page.OnPostBackAsync();
+
+        var redirect = Assert.IsType<RedirectToPageResult>(result);
+        Assert.Equal("/Ric/Funding", redirect.PageName);
+        var saved = Cycle(db).Capabilities.Single();
+        Assert.Equal(1_770m, saved.MaximumCapacity); // 1,882.5 − 112.5
+        Assert.Equal(500m, saved.ForecastUwaUse);
+        Assert.Equal("2025 bookings and one new ARC grant.", Cycle(db).UtilisationAssumptions);
+    }
+
+    [Fact]
+    public async Task GoingBackWithAnUnexplainedDeductionStopsAtTheSameQuestion()
+    {
+        await using var db = CreateDb();
+        var page = CapacityPage(db, x => Deduct(x, "Downtime", 40m, note: null));
+
+        var result = await page.OnPostBackAsync();
+
+        Assert.IsType<PageResult>(result);
+        Assert.Contains("Cryo-EM: explain the downtime deduction.", Errors(page));
+        Assert.Equal(0m, Cycle(db).Capabilities.Single().MaximumCapacity);
+    }
 }

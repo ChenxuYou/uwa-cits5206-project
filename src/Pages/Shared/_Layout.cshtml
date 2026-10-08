@@ -53,6 +53,12 @@
                         }
                     </a>
                 }
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a class="@NavClass("/records")" asp-page="/Records/Index">
+                        <span class="nav-icon" aria-hidden="true">◆</span><span>Sealed records</span>
+                    </a>
+                }
                 @if (isApprover)
                 {
                     <a class="@NavClass("/approvals")" asp-page="/Approvals/Index">
@@ -126,6 +132,69 @@
         menuButton?.addEventListener('click', () => {
             const open = document.getElementById('sidebar')?.classList.toggle('open');
             menuButton.setAttribute('aria-expanded', String(!!open));
+        });
+
+        // US-10: nothing is lost by navigating away without meaning to. A form marked
+        // data-unsaved-warning asks before the page is left by a link — the step bar, the
+        // breadcrumb, the sidebar — while it holds typed changes that no button has saved.
+        // A page rendered in answer to a post holds unsaved figures from the start: a save
+        // that succeeds redirects, so a post that comes back as a page was refused or was
+        // only a preview.
+        // C3: a form marked data-submit-once sends one request. A double click on "Approve &
+        // seal" used to send two; the server now refuses the second, but it is better never
+        // sent. The buttons come back if the browser restores the page from its cache.
+        document.querySelectorAll('form[data-submit-once]').forEach(form => {
+            form.addEventListener('submit', () => {
+                setTimeout(() => form.querySelectorAll('button[type=submit], button:not([type])')
+                    .forEach(button => { button.disabled = true; }), 0);
+            });
+        });
+        window.addEventListener('pageshow', event => {
+            if (event.persisted) {
+                document.querySelectorAll('form[data-submit-once] button').forEach(button => { button.disabled = false; });
+            }
+        });
+
+        const postedBack = @(Microsoft.AspNetCore.Http.HttpMethods.IsPost(Context.Request.Method) ? "true" : "false");
+        document.querySelectorAll('form[data-unsaved-warning]').forEach(form => {
+            let dirty = postedBack;
+            form.addEventListener('input', () => { dirty = true; });
+            form.addEventListener('change', () => { dirty = true; });
+            form.addEventListener('submit', () => { dirty = false; });
+
+            // US-02: on a form marked data-save-on-leave="true", following a link on this site
+            // saves first and then goes there, so nothing typed is lost by moving between
+            // sections. The page model redirects to LeavingFor only after the save succeeds; a
+            // refused save comes back marked "false", and the warning below takes over. (A
+            // value rather than a present-or-absent attribute: on a tag-helper form a null
+            // attribute still renders, as an empty one.)
+            if (form.dataset.saveOnLeave === 'true') {
+                document.addEventListener('click', event => {
+                    const link = event.target.closest('a[href]');
+                    if (!dirty || !link || link.target || link.hasAttribute('download')
+                        || event.defaultPrevented || event.button !== 0
+                        || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) {
+                        return;
+                    }
+
+                    const url = new URL(link.href, location.href);
+                    if (url.origin !== location.origin) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    form.elements.namedItem('LeavingFor').value = url.pathname + url.search + url.hash;
+                    dirty = false;
+                    form.submit();
+                });
+            }
+
+            window.addEventListener('beforeunload', event => {
+                if (dirty) {
+                    event.preventDefault();
+                    event.returnValue = '';
+                }
+            });
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)

@@ -16,6 +16,14 @@
     <div class="breadcrumb"><a asp-page="/Approvals/Index">Approvals</a><span>›</span><span>@Model.Cycle.PlatformName</span></div>
     <div class="review-heading"><div><span class="status-pill @Model.Cycle.Status.ToLowerInvariant()">@Model.Cycle.Status</span><h1>Delegated authority review</h1><p>@Model.Cycle.PlatformName · @Model.Cycle.StartYear–@Model.Cycle.EndYear · prepared by @Model.Cycle.CreatedByDisplay</p></div><a class="outline-action" asp-page="/Approvals/Index">← Approval queue</a></div>
 
+    @if (Model.SuccessMessage is not null)
+    {
+        <div class="submit-success" role="status"><span>✓</span><div><strong>Decision recorded</strong><p>@Model.SuccessMessage</p></div></div>
+    }
+    @if (Model.ErrorMessage is not null)
+    {
+        <div class="return-banner" role="alert"><strong>Your decision was not saved</strong><p>@Model.ErrorMessage</p></div>
+    }
     <div asp-validation-summary="All" class="form-errors approval-errors"></div>
     <div class="review-layout">
         <main>
@@ -119,22 +127,22 @@
                 <tr><td><strong>@(item.Description??item.PersonnelName??item.Category)</strong><small>@capability</small></td><td><span class="category-chip">@item.Category</span><small>@item.Scope · @(item.IsIncome ? "Funding / income" : CostEntry.CostCategories.ClassOf(item.Scope, item.Category))</small></td><td class="source-cell">@(string.IsNullOrWhiteSpace(source)?"Not recorded":source)@if(item.BaseSalary is not null){<small>Base salary @item.BaseSalary.Value.ToString("C") · @item.WorkYears year(s)</small>}</td><td><div class="year-amounts">@foreach(var amount in item.YearAmounts.OrderBy(x=>x.ProjectYear)){<span><b>@(Model.Cycle.StartYear+amount.ProjectYear-1)</b> @amount.Amount.ToString("C")</span>}</div></td><td><strong>@item.Amount.ToString("C")</strong><small>annual average</small></td><td class="notes-cell">@(item.Notes??"—")</td></tr>
             }
             </tbody><tfoot><tr><td colspan="4">Average annual total entered</td><td colspan="2">@Model.Cycle.Costs.Sum(x=>x.Amount).ToString("C")</td></tr></tfoot></table></div></article>
-            <article class="review-card"><div class="review-card-heading"><h2>Evidence</h2></div><div class="review-notes"><div><span>Benchmarking</span><p>@(Model.Cycle.BenchmarkNotes ?? "Not recorded")</p></div><div><span>Pricing justification</span><p>@(Model.Cycle.PricingJustification ?? "Not recorded")</p></div></div></article>
+            <article class="review-card"><div class="review-card-heading"><h2>Evidence</h2></div><div class="review-notes"><div><span>Costing assumptions</span><p>@(Model.Cycle.CostingAssumptions ?? "Not recorded")</p></div><div><span>Utilisation assumptions</span><p>@(Model.Cycle.UtilisationAssumptions ?? "Not recorded")</p></div><div><span>Benchmarking</span><p>@(Model.Cycle.BenchmarkNotes ?? "Not recorded")</p></div><div><span>Pricing justification</span><p>@(Model.Cycle.PricingJustification ?? "Not recorded")</p></div></div></article>
             @if (Model.Cycle.Status == "Returned") { <div class="return-banner"><strong>Returned by @Model.Cycle.ReturnedBy</strong><p>@Model.Cycle.ReturnReason</p></div> }
-            @if (Model.Cycle.Status == "Sealed") { <article class="integrity-card"><span>◆</span><div><strong>Approved and sealed by @Model.Cycle.ApprovedBy</strong><p>Effective @Model.Cycle.EffectiveDateUtc?.ToString("dd MMM yyyy") · @Model.Cycle.ApprovalComment</p><code>@Model.Cycle.SnapshotHash</code></div></article> }
+            @if (Model.Cycle.Status == "Sealed") { <article class="integrity-card"><span>◆</span><div><strong>Approved and sealed by @(Model.Cycle.SealedBy ?? Model.Cycle.ApprovedBy)</strong><p>Sealed @Model.Cycle.SealedAtUtc?.ToLocalTime().ToString("dd MMM yyyy, h:mm tt") under method @Model.Cycle.MethodVersion · effective @Model.Cycle.EffectiveDateUtc?.ToString("dd MMM yyyy") · @Model.Cycle.ApprovalComment</p><code>@Model.Cycle.SnapshotHash</code></div></article> }
         </main>
 
         <aside class="submit-panel approval-actions">
         @if (Model.Cycle.Status == "Submitted")
         {
-            <span class="submit-icon">✓</span><h2>Record a decision</h2><p>Approval creates an immutable snapshot. Return the cycle if any figure or evidence needs correction.</p>
-            <form method="post" asp-page-handler="Approve" asp-route-id="@Model.Cycle.Id">
+            <span class="submit-icon">✓</span><h2>Record a decision</h2><p>Approving seals the record: the figures, workings and reasons are stored as they are now and can no longer be edited or deleted by anyone. Return the cycle if any figure or evidence needs correction.</p>
+            <form method="post" asp-page-handler="Approve" asp-route-id="@Model.Cycle.Id" data-submit-once>
                 <label class="field"><span>Effective date</span><input asp-for="EffectiveDate" type="date"></label>
                 <label class="field"><span>Approval comment</span><textarea asp-for="ApprovalComment" rows="3" placeholder="Optional decision note"></textarea></label>
-                <label class="confirmation"><input type="checkbox" name="confirmApproval" value="true"><span>I have reviewed the costing basis, capacity assumptions, proposed rates and supporting evidence.</span></label>
+                <label class="confirmation"><input type="checkbox" name="confirmApproval" value="true"><span>I have reviewed the costing basis, capacity assumptions, proposed rates and supporting evidence, and I understand that once sealed this record cannot be edited or deleted — a later change needs a new cycle that replaces it.</span></label>
                 <button type="submit" class="submit-button">Approve &amp; seal <span>✓</span></button>
             </form>
-            <details class="return-form"><summary>Return for changes</summary><form method="post" asp-page-handler="Return" asp-route-id="@Model.Cycle.Id"><label class="field"><span>Required changes <b>*</b></span><textarea asp-for="ReturnReason" rows="4" placeholder="Tell the submitter exactly what to update"></textarea></label><button type="submit" class="return-button">Return to submitter</button></form></details>
+            <details class="return-form"><summary>Return for changes</summary><form method="post" asp-page-handler="Return" asp-route-id="@Model.Cycle.Id" data-submit-once><label class="field"><span>Required changes <b>*</b></span><textarea asp-for="ReturnReason" rows="4" placeholder="Tell the submitter exactly what to update"></textarea></label><button type="submit" class="return-button">Return to submitter</button></form></details>
         }
         else { <span class="submit-icon">✓</span><h2>Decision complete</h2><p>This cycle is @Model.Cycle.Status.ToLowerInvariant(). No further approval action is available.</p><a class="secondary-action full-button" asp-page="/Approvals/Index">Back to approvals</a> }
         </aside>

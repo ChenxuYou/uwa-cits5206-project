@@ -4,6 +4,7 @@
     ViewData["Title"] = "Detailed costs";
     var costItems = Model.Cycle.Costs.Where(x => !x.IsIncome).OrderByDescending(x => x.Id).ToList();
     var costs = Model.Costs;
+    var isEditing = Model.EditId is not null;
     var totalCost = costs.Total;
     var ways = costs.Divisor;
     var categoryGroups = new (string Scope, string Heading, IReadOnlyList<string> Categories)[]
@@ -30,9 +31,20 @@
     </div>
 
     <div class="ric-two-column detailed-cost-layout">
-        <form method="post" asp-page-handler="Add" class="ric-card">
+        @* One form for adding and for changing a line (US-10). It names its action, so a
+           refused save posts back to the same handler rather than to whatever the address
+           bar last held. *@
+        <form method="post" asp-page="/Ric/Costs" asp-page-handler="@(isEditing ? "Update" : "Add")" asp-route-cycleId="@Model.Cycle.Id" class="ric-card@(isEditing ? " editing-card" : "")" id="costForm" data-unsaved-warning>
             <input type="hidden" asp-for="CycleId" />
-            <div class="ric-card-title"><h2>Add cost item</h2><p>Amounts are GST exclusive. Detailed values are retained for audit.</p></div>
+            @if (isEditing)
+            {
+                <input type="hidden" asp-for="EditId" />
+                <div class="ric-card-title"><h2>Change cost item</h2><p>Saving replaces this line's figures. Amounts are GST exclusive.</p></div>
+            }
+            else
+            {
+                <div class="ric-card-title"><h2>Add cost item</h2><p>Amounts are GST exclusive. Detailed values are retained for audit.</p></div>
+            }
             <div asp-validation-summary="All" class="form-errors"></div>
 
             <div class="form-grid two-columns">
@@ -142,7 +154,17 @@
             {
                 <label class="confirmation"><input type="checkbox" name="ConfirmLargeAmounts" value="true"><span>I have checked these amounts and they are correct.</span></label>
             }
-            <button class="primary-button full-button add-detail-button" type="submit">＋ Add cost item</button>
+            @if (isEditing)
+            {
+                <div class="edit-actions">
+                    <a class="secondary-action" asp-page="/Ric/Costs" asp-route-cycleId="@Model.Cycle.Id">Cancel</a>
+                    <button class="primary-button add-detail-button" type="submit">Save changes</button>
+                </div>
+            }
+            else
+            {
+                <button class="primary-button full-button add-detail-button" type="submit">＋ Add cost item</button>
+            }
         </form>
 
         <div class="cost-side">
@@ -225,7 +247,7 @@
             }
             @foreach (var item in costItems)
             {
-                <div class="cost-row detailed-row">
+                <div class="cost-row detailed-row editable-row@(item.Id == Model.EditId ? " is-editing" : "")">
                     <div>
                         <strong>@item.Description</strong>
                         <small>@CostEntry.CostCategories.ClassOf(item.Scope, item.Category) · @item.Category@(item.Position is null ? "" : $" ({item.Position})") · @(item.Capability?.Name ?? $"Platform, split {ways} ways")</small>
@@ -239,12 +261,34 @@
                         }
                     </div>
                     <b>@item.Amount.ToString("C")<small>annual avg.</small></b>
+                    <a class="row-edit" asp-page="/Ric/Costs" asp-route-cycleId="@Model.Cycle.Id" asp-route-edit="@item.Id" aria-label="Change @item.Description">Edit</a>
                     <form method="post" asp-page-handler="Delete"><input type="hidden" name="CycleId" value="@Model.Cycle.Id" /><input type="hidden" name="id" value="@item.Id" /><button type="submit" aria-label="Delete @item.Description">×</button></form>
                 </div>
             }
         </section>
         </div>
     </div>
+
+    @* US-13: room to explain the costs section as a whole, not only line by line, and the
+       first item on the guide's Step 5 checklist. A form of its own, so saving it never
+       submits a half-typed cost line. data-save-on-leave: typed assumptions are saved when
+       the custodian leaves by any link, as on the capacity and rates steps (US-02). *@
+    <form method="post" asp-page="/Ric/Costs" asp-page-handler="Assumptions" asp-route-cycleId="@Model.Cycle.Id" class="ric-card costing-assumptions" data-unsaved-warning data-save-on-leave="true">
+        <input type="hidden" name="CycleId" value="@Model.Cycle.Id" />
+        <input type="hidden" name="LeavingFor" value="" />
+        <label class="field">
+            <span>Costing assumptions</span>
+            <small>What these figures rest on as a whole: which budget they come from, how salaries were estimated, what was treated as in-kind, and anything left out and why. The guide's Step 5 checklist asks for costing assumptions to be documented before approval. Each line keeps its own note as well.</small>
+            <textarea asp-for="CostingAssumptions" rows="4" placeholder="e.g. 2026 budget as approved in March; salaries at the current EBA step plus 17% on-costs; the building is provided in kind and costed at the University's floor-area rate."></textarea>
+        </label>
+        <div class="assumptions-actions">
+            <button class="outline-button" type="submit">Save costing assumptions</button>
+            @if (TempData["CostsMessage"] is string saved)
+            {
+                <span class="rollup-check" role="status">✓ @saved</span>
+            }
+        </div>
+    </form>
 
     <div class="wizard-actions"><a href="/" class="secondary-action">Save &amp; exit</a><a class="primary-button" asp-page="/Ric/Funding" asp-route-cycleId="@Model.Cycle.Id">Continue to funding sources →</a></div>
 </div>

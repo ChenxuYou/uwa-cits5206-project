@@ -52,7 +52,7 @@
 > Mathew Hall, Strategic Development Coordinator, dated 20/8/2026 — plus written answers to all
 > five open questions. Filed in
 > [`docs/client/communication-history/2026-08-20-client-meeting/`](../client/communication-history/2026-08-20-client-meeting/)
-> and [minuted](../meetings/2026-08-20-client-meeting.md).
+> and [minuted](../meetings/client/2026-08-20-client-meeting.md).
 >
 > **That was the whole point of the extension**, and it worked. §3 below is rewritten; §6's
 > client items are struck through as done. What remains is criterion 3 — the artefacts — and
@@ -140,12 +140,12 @@ stakeholders, **and** that the client *has approved* the MVP and other deliverab
 
 ### What we already have
 
-- A recorded 34-minute client walkthrough, written up as [minutes](../meetings/2026-07-29-client-kickoff.md) with decisions D1–D6 and actions A1–A4.
+- A recorded 34-minute client walkthrough, written up as [minutes](../meetings/client/2026-07-29-client-meeting.md) with decisions D1–D6 and actions A1–A4.
 - A working relationship with agreed terms: Wednesdays, a shared Teams chat, batched questions, support tapering (kickoff §10).
 - Requirements rewritten **against the client's own documents**, with a stated source-precedence order and every claim marked **[G]**, **[W]** or **[K]**.
 - Open questions each carrying a proposed default so a non-answer does not block us ([`requirements.md` §9](../spec/requirements.md#9-open-questions)). **Five went to the client** in [round 1](../client/questions-round-1.md) and **all five came back answered**; **one remains open** — Q8, the repository licence, which is ours and closes at handover.
 - Two client-facing documents drafted and reconciled against the spec: the [scope statement and question list](../client/2026-08-15-scope-and-questions.md) the client received, and the [reasoning behind it](../client/mvp-agreement.md) traced promise by promise to a numbered requirement.
-- A second client meeting, [minuted](../meetings/2026-08-20-client-meeting.md) with decisions D14–D19 and actions A14–A19.
+- A second client meeting, [minuted](../meetings/client/2026-08-20-client-meeting.md) with decisions D14–D19 and actions A14–A19.
 
 ### The thing that separated 2 from 4 — now closed
 
@@ -159,7 +159,7 @@ The trail, and it is the whole answer to criterion 2:
 | --- | --- | --- |
 | Mon 17 Aug | Scope statement and five questions emailed by Yichen Zhao | [`2026-08-17-email-scope-and-questions/`](../client/communication-history/2026-08-17-email-scope-and-questions/) — the email and both attachments |
 | Tue 18 Aug | Client replied, confirming a time to meet | Email thread. **The reply beat the deadline we asked for**, so the chase planned for the 19th was never sent |
-| Thu 20 Aug | In-person meeting; all five questions walked through | [Minutes](../meetings/2026-08-20-client-meeting.md) · [notes taken in the room](../client/communication-history/2026-08-20-client-meeting/dai-lam-meeting-notes.md) |
+| Thu 20 Aug | In-person meeting; all five questions walked through | [Minutes](../meetings/client/2026-08-20-client-meeting.md) · [notes taken in the room](../client/communication-history/2026-08-20-client-meeting/dai-lam-meeting-notes.md) |
 | Thu 20 Aug | **Signed scope statement returned**, both confirmations ticked, plus written answers to all five questions | [Signed PDF](../client/communication-history/2026-08-20-client-meeting/project-scope-summary-signed.pdf) · [answers](../client/communication-history/2026-08-20-client-meeting/client-answers-to-the-five-questions.md) |
 
 **What to put in the PDF, and in what order.** The signature is the headline, but on its own it
@@ -171,7 +171,7 @@ rather than of one lucky email:
    team that asked and a team that was answered.
 2. **One answer changed what we promised, and we said so.** The client asked that the sealed PDF
    carry the calculator's **workings**, not just its outputs. Our scope statement had not promised
-   that. It is recorded as new work with an owner ([minutes §5](../meetings/2026-08-20-client-meeting.md)),
+   that. It is recorded as new work with an owner ([minutes §5](../meetings/client/2026-08-20-client-meeting.md)),
    not folded in silently — and a team that can point at the thing the client added to its own
    scope is demonstrating exactly what this criterion measures.
 3. **One request was declined, in writing, with a reason.** The client raised linking staff roles
@@ -337,7 +337,7 @@ landing on the same weekday.
 | # | Task | Fixes | Owner | By |
 | --- | --- | --- | --- | --- |
 | ~~1~~ | ~~Send the client [`2026-08-15-scope-and-questions.md`](../client/2026-08-15-scope-and-questions.md) — scope statement, two confirmations, five questions~~ | Crit 2 | Yichen Zhao | ✅ **Sent Mon 17 Aug** — two days later than this row planned |
-| ~~2~~ | ~~Assign every owner in this table~~ | All | Whole team | ✅ Sat 15 Aug — [minutes §8](../meetings/2026-08-15-team-weekly-meeting.md) |
+| ~~2~~ | ~~Assign every owner in this table~~ | All | Whole team | ✅ Sat 15 Aug — [minutes §8](../meetings/team/2026-08-15-team-meeting.md) |
 | 3 | Skills audit — five rows, six skills, gaps and how each is addressed | Crit 4 | Chenxu You | ⚠️ **Not done. Was due Sat 15 Aug and did not happen** — carried into the completion plan |
 | — | *(Date we asked the client to reply by)* | Crit 2 | — | *Tue 18 Aug — **client replied on time*** |
 | ~~4~~ | ~~Chase the client if there is no reply~~ | Crit 2 | Yichen Zhao | ✅ **Not needed.** The reply arrived first; met in person **Thu 20 Aug** and signed |
@@ -402,7 +402,7 @@ it has a name against every line.
 | Version | Date | Change |
 | --- | --- | --- |
 | 2.1 | 1 Sep 2026 | **The board this document called "the one artefact still to be created by hand" now exists** — created 1 September, public, linked to the repository, 25 story issues on it. The body is a rubric assessment of the repository as it stood on 22 August and is not edited; this row is the only correction, so that a reader who reaches §43 or §380 and finds *"we have no board"* can see when that stopped being true. Criterion 3's evidence is now in place. |
-| 2.0 | 22 Aug 2026 | **Criterion 2 is closed. The client signed on 20 August 2026** — both confirmations, plus written answers to all five open questions ([minutes](../meetings/2026-08-20-client-meeting.md), [evidence folder](../client/communication-history/2026-08-20-client-meeting/)). §3 is rewritten from *"the client has not approved the MVP"* to the trail that shows they have, and now says what to put in the report and in what order: the questions were **answered, not defaulted**; one answer **added** to our scope and we recorded it as new work; one request was **declined in writing with a reason**. §1's position column is re-read against all four criteria — **criterion 3 is now the weakest**, not the second weakest. §6's items 1, 2 and 4 are struck through as done, with what actually happened against each rather than what was planned; **item 3, the skills audit, is marked as missed** — it was due 15 August, did not happen, and saying so is the only honest version. §7 is rewritten. The remaining work moves to a new document, [`assignment-1-completion-plan.md`](assignment-1-completion-plan.md), because a readiness assessment and a delivery plan are two different things and this file had been doing both. |
+| 2.0 | 22 Aug 2026 | **Criterion 2 is closed. The client signed on 20 August 2026** — both confirmations, plus written answers to all five open questions ([minutes](../meetings/client/2026-08-20-client-meeting.md), [evidence folder](../client/communication-history/2026-08-20-client-meeting/)). §3 is rewritten from *"the client has not approved the MVP"* to the trail that shows they have, and now says what to put in the report and in what order: the questions were **answered, not defaulted**; one answer **added** to our scope and we recorded it as new work; one request was **declined in writing with a reason**. §1's position column is re-read against all four criteria — **criterion 3 is now the weakest**, not the second weakest. §6's items 1, 2 and 4 are struck through as done, with what actually happened against each rather than what was planned; **item 3, the skills audit, is marked as missed** — it was due 15 August, did not happen, and saying so is the only honest version. §7 is rewritten. The remaining work moves to a new document, [`assignment-1-completion-plan.md`](assignment-1-completion-plan.md), because a readiness assessment and a delivery plan are two different things and this file had been doing both. |
 | 1.0 | 14 Aug 2026 | First version, written against the rubric in [`reference/unit/assignment-1-rubric.md`](../../reference/unit/assignment-1-rubric.md) and the repository as it stands on 14 August. |
 | 1.1 | 14 Aug 2026 | **Deadline extended to Tuesday 25 August 2026**, requested by us and granted by the unit coordinator by email on 14 August. §6 rescheduled: the client request (item 1) and the skills audit (item 3) keep their original dates, a client chase on 19 August is added, and everything else shifts one week onto the same weekday. §3 rewritten — written client sign-off moves from unrealistic to achievable, which is where the extension earns its keep. The unit brief is annotated rather than edited. |
 | 1.3 | 15 Aug 2026 | **Aligned with the reduced question set.** The batch put to the client is **five questions**, not six, and our own open list is **six**, not seven, after the question about our working method was withdrawn — it settled nothing in the product. Q-numbers follow [`requirements.md` §9](../spec/requirements.md#9-open-questions) v2.2, in which old Q7–Q11 became Q6–Q10, so the repository licence question is now **Q8**. The risk table's client-material row now states the risk it always meant: client material committed without the client's agreement, mitigated by [`.gitignore`](../../.gitignore) §1 and [`reference/client/README.md`](../../reference/client/README.md). |

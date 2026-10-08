@@ -74,6 +74,6 @@ we rely on.
 
 | Version | Date | Change |
 | --- | --- | --- |
-| 1.2 | 16 Sep 2026 | **Gap owners follow the technical layers** agreed on 15 September ([minutes](../meetings/2026-09-15-team-meeting.md)): G2 deployment to Dai Lam La La, G3 translating the method to Wenmin Luo, G7 data modelling to Chenxu You. G6 — two of five writing production code — is what the split answers: each member now owns a layer of the build. No rating changed |
+| 1.2 | 16 Sep 2026 | **Gap owners follow the technical layers** agreed on 15 September ([minutes](../meetings/team/2026-09-15-team-meeting.md)): G2 deployment to Dai Lam La La, G3 translating the method to Wenmin Luo, G7 data modelling to Chenxu You. G6 — two of five writing production code — is what the split answers: each member now owns a layer of the build. No rating changed |
 | 1.1 | 1 Sep 2026 | **Ratings confirmed.** Every member has accepted their own row as drafted, so the provisional warning is withdrawn and replaced by what is now true. No number changed — the point of the warning was that nobody had said the numbers were right, and now everybody has. The note about keeping a row current replaces it, because a skills audit that is never revised is a skills audit that stops being one. |
 | 1.0 | 24 Aug 2026 | First version. Overdue: this was scheduled for 15 August and did not happen; it is dated when it was actually run rather than when it was planned. Ratings drafted from contribution evidence and flagged as provisional pending each member's own self-rating |

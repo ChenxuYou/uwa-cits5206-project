@@ -7,6 +7,7 @@
     var totalFunding = fundingItems.Sum(x => x.Amount);
     var uwaFunding = fundingItems.Where(x => x.IsUwaIncome).Sum(x => x.Amount);
     var nonUwaFunding = totalFunding - uwaFunding;
+    var isEditing = Model.EditId is not null;
 }
 
 <div class="page-wrap ric-page">
@@ -22,9 +23,18 @@
     </div>
 
     <div class="ric-two-column detailed-cost-layout">
-        <form method="post" asp-page-handler="Add" class="ric-card">
+        @* One form for adding and for changing a line (US-10). *@
+        <form method="post" asp-page="/Ric/Funding" asp-page-handler="@(isEditing ? "Update" : "Add")" asp-route-cycleId="@Model.Cycle.Id" class="ric-card@(isEditing ? " editing-card" : "")" data-unsaved-warning>
             <input type="hidden" asp-for="CycleId" />
-            <div class="ric-card-title"><h2>Add funding source</h2><p>User fees are not funding sources and must not be entered here.</p></div>
+            @if (isEditing)
+            {
+                <input type="hidden" asp-for="EditId" />
+                <div class="ric-card-title"><h2>Change funding source</h2><p>Saving replaces this line's figures. User fees are not funding sources.</p></div>
+            }
+            else
+            {
+                <div class="ric-card-title"><h2>Add funding source</h2><p>User fees are not funding sources and must not be entered here.</p></div>
+            }
             <div asp-validation-summary="All" class="form-errors"></div>
 
             <section class="detail-panel income-guide">
@@ -73,7 +83,17 @@
             {
                 <label class="confirmation"><input type="checkbox" name="ConfirmLargeAmounts" value="true"><span>I have checked these amounts and they are correct.</span></label>
             }
-            <button class="primary-button full-button add-detail-button" type="submit">＋ Add funding source</button>
+            @if (isEditing)
+            {
+                <div class="edit-actions">
+                    <a class="secondary-action" asp-page="/Ric/Funding" asp-route-cycleId="@Model.Cycle.Id">Cancel</a>
+                    <button class="primary-button add-detail-button" type="submit">Save changes</button>
+                </div>
+            }
+            else
+            {
+                <button class="primary-button full-button add-detail-button" type="submit">＋ Add funding source</button>
+            }
         </form>
 
         <section class="ric-card">
@@ -84,9 +104,10 @@
             }
             @foreach (var item in fundingItems)
             {
-                <div class="cost-row detailed-row">
+                <div class="cost-row detailed-row editable-row@(item.Id == Model.EditId ? " is-editing" : "")">
                     <div><strong>@item.Description</strong><small>@item.Category · @CostEntry.IncomeCategories.RatesReduced(item.Category)</small><em>@string.Join(" · ", item.YearAmounts.OrderBy(x => x.ProjectYear).Select((x, i) => $"{Model.Cycle.StartYear + i}: {x.Amount:C0}"))</em></div>
                     <b>−@item.Amount.ToString("C")<small>annual avg.</small></b>
+                    <a class="row-edit" asp-page="/Ric/Funding" asp-route-cycleId="@Model.Cycle.Id" asp-route-edit="@item.Id" aria-label="Change @item.Description">Edit</a>
                     <form method="post" asp-page-handler="Delete"><input type="hidden" name="CycleId" value="@Model.Cycle.Id" /><input type="hidden" name="id" value="@item.Id" /><button type="submit" aria-label="Delete @item.Description">×</button></form>
                 </div>
             }

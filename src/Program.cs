@@ -7,6 +7,7 @@ using CostingTool.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -70,13 +71,26 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AuthorizeFolder("/Notifications", AppUser.Roles.DataEntry);
     options.Conventions.AuthorizeFolder("/Approvals", AppUser.Roles.Approver);
     options.Conventions.AuthorizeFolder("/Admin", AppUser.Roles.Administrator);
+    // Every role reads sealed records (US-17); which ones is decided per user in RecordAccess.
+    options.Conventions.AuthorizeFolder("/Records");
     options.Conventions.AllowAnonymousToPage("/Account/Login");
     options.Conventions.AllowAnonymousToPage("/Account/AccessDenied");
     options.Conventions.AllowAnonymousToPage("/Error");
     options.Conventions.AuthorizePage("/Account/ChangePassword");
+
+    // M2: sign-in attempts are limited per address as well as per account.
+    options.Conventions.AddPageApplicationModelConvention("/Account/Login",
+        model => model.EndpointMetadata.Add(new EnableRateLimitingAttribute(Hosting.SignInPolicy)));
 })
 .AddMvcOptions(options =>
 {
+    // C3: a save refused because the record changed underneath the request is a 409 page
+    // that says so, not an unhandled exception.
+    options.Filters.Add<SaveConflictFilter>();
+
+    // M4: a session whose password someone else chose reaches only the change-password page.
+    options.Filters.Add<MustChangePasswordFilter>();
+
     // US-18: text in a numeric field is refused with a message a custodian can act on.
     // These are the fallback wordings; the guided-workflow pages replace them with the
     // on-screen name of the field (EntryChecks.ExplainUnreadableNumbers).
@@ -103,6 +117,10 @@ builder.Services.Configure<PasswordHasherOptions>(options =>
 builder.Services.AddScoped<IPasswordHasher<AppUser>, PasswordHasher<AppUser>>();
 
 var app = builder.Build();
+
+// First, so that everything after it sees the client's address and scheme, not the proxy's (M3).
+app.UseForwardedHeaders();
+app.UseSecurityHeaders();
 
 // Every figure on screen is Australian currency, and every date is read by someone in
 // Perth. Without this the application formats money in whatever culture the host happens
@@ -132,6 +150,7 @@ app.UseForwardedHeaders();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapRazorPages();
@@ -139,6 +158,40 @@ app.MapRazorPages();
 await SeedAsync(app);
 
 app.Run();
+
+static async Task RefuseDatabasesMadeBeforeMigrationsAsync(CostingDbContext db)
+{
+    if (!await db.Database.CanConnectAsync())
+    {
+        return;
+    }
+
+    var applied = await db.Database.GetAppliedMigrationsAsync();
+    if (applied.Any())
+    {
+        return;
+    }
+
+    var connection = db.Database.GetDbConnection();
+    await connection.OpenAsync();
+    try
+    {
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'RicCycles'";
+        var tables = Convert.ToInt32(await command.ExecuteScalarAsync(), CultureInfo.InvariantCulture);
+        if (tables > 0)
+        {
+            throw new InvalidOperationException(
+                $"The database at '{connection.DataSource}' was created before this application used migrations, " +
+                "so its schema cannot be brought up to date. It holds development data only (staging has never run " +
+                "on EnsureCreated): delete the file, or point ConnectionStrings:CostingDb at a new one, and start again.");
+        }
+    }
+    finally
+    {
+        await connection.CloseAsync();
+    }
+}
 
 static async Task SeedAsync(WebApplication app)
 {
@@ -208,7 +261,11 @@ static async Task SeedAsync(WebApplication app)
                 {
                     UserName = bootstrapName,
                     DisplayName = app.Configuration["Bootstrap:AdminDisplayName"] ?? "Administrator",
-                    Role = AppUser.Roles.Administrator
+                    Role = AppUser.Roles.Administrator,
+
+                    // The value sat in the server's environment, so it is replaced at the
+                    // first sign-in and the environment variable can then be removed (M4).
+                    MustChangePassword = true
                 };
                 bootstrap.PasswordHash = hasher.HashPassword(bootstrap, bootstrapPassword);
                 db.AppUsers.Add(bootstrap);
