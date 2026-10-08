@@ -116,17 +116,18 @@ the least a *sealed* record can promise.
 
 ## Follow-on actions
 
-| # | Action | Owner | By |
-| --- | --- | --- | --- |
-| 1 | Run `dotnet restore --force-evaluate` and commit the regenerated `src/packages.lock.json` and the new `src/CostingTool.Pdf/packages.lock.json` — CI restores against them | Chenxu You | 15 Sep |
-| 2 | Confirm this ADR at the sprint review; status stays *Accepted (proposed)* until a second member has reviewed the pull request | Wenmin Luo | 19 Sep |
-| 3 | Give the approver the same download link. Today only the custodian can export, because `/Approvals` is a separate folder with its own policy | Chenxu You | S5 |
-| 4 | Decide whether a superseded record's PDF is watermarked as superseded — US-02 and US-15 imply it and no requirement says it | Dai Lam La La | With the next question batch |
-| 5 | Amend ADR-001's stack table row so the two ADRs do not contradict each other in a reader's hands | Chenxu You | 15 Sep |
-| 6 | Check the exported PDF opens in Adobe Reader, Preview and Edge, and prints on A4 without clipping | Jaswanth Vericherla | S5 |
+| # | Action | Owner | By | Status, 8 Oct |
+| --- | --- | --- | --- | --- |
+| 1 | Run `dotnet restore --force-evaluate` and commit the regenerated `src/packages.lock.json` and the new `src/CostingTool.Pdf/packages.lock.json` — CI restores against them | Chenxu You | 15 Sep | ✅ Both lockfiles committed |
+| 2 | Confirm this ADR at the sprint review; status stays *Accepted (proposed)* until a second member has reviewed the pull request | Wenmin Luo | 19 Sep | ⚠️ No record of the review. The renderer was merged with US-16 in #84 on 24 Sep by Jaswanth Vericherla, a second member; no approving review is recorded on the pull request |
+| 3 | Give the approver the same download link. Today only the custodian can export, because `/Approvals` is a separate folder with its own policy | Chenxu You | S5 | ✅ Done another way, 23 Sep: approvers and administrators download the PDF from the record in **Sealed records** (US-17). The approval page itself still has no link |
+| 4 | Decide whether a superseded record's PDF is watermarked as superseded — US-02 and US-15 imply it and no requirement says it | Dai Lam La La | With the next question batch | ⚠️ Open — now [requirements Q15](../spec/requirements.md#9-open-questions) |
+| 5 | Amend ADR-001's stack table row so the two ADRs do not contradict each other in a reader's hands | Chenxu You | 15 Sep | ✅ Done 8 Oct |
+| 6 | Check the exported PDF opens in Adobe Reader, Preview and Edge, and prints on A4 without clipping | Jaswanth Vericherla | S5 | ⚠️ No record of the check |
 
 ## Change log
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.1 | 8 Oct 2026 | Follow-on actions given a status column. Two are done, one done another way — the approver downloads the PDF from Sealed records — and three have no record: the sprint-review confirmation, the superseded watermark (now requirements Q15) and the A4 print check. ADR-001's *PDF export* row now points here |
 | 1.0 | 13 Sep 2026 | First version, written alongside the spike rather than before it — the font-resolver finding is the reason the decision has the shape it has, and it was found by building |
