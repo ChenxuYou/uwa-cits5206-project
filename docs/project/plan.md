@@ -1,6 +1,6 @@
 # Project Plan — 24 August to 13 October 2026
 
-**Version:** 1.11 — 25 September 2026
+**Version:** 1.12 — 8 October 2026
 **Owner:** Chenxu You
 **Reviewed:** every Saturday team meeting
 **Companions:** [`risks.md`](risks.md) · [`skills-audit.md`](skills-audit.md) ·
@@ -18,11 +18,11 @@
 | --- | --- | --- | --- |
 | M0 | ✅ Assignment 1 submitted | **25 Aug 2026** | **Met.** `Group13-Project Spec and Plans.pdf` uploaded by one member on 25 Aug, every linked resource open to the facilitator |
 | M1 | ✅ **Engine provably correct** | **4 Sep 2026** | **Met 2 Sep, two days early.** The client's worked example reproduces to the cent in `tests/CostingTool.Engine.Tests`, and `dotnet test` is a merge gate rather than a warning. The engine now sits in its own project with no package references, so the tests reach the arithmetic without EF or ASP.NET behind it |
-| M2 | ✅ **Guided flow, validated server-side** | **11 Sep 2026** | **Met.** Costs, income, capacity and forecast utilisation are captured and validated server-side across `Start → Costs → Capacity → Rates → Review`, and every step loads through `RicPageModel`, so no step can forget an `Include` or an ownership filter. **Criteria completed 21 Sep:** an audit against [`user-stories.md`](../spec/user-stories.md) found US-03, US-04, US-07 and US-08 (#20, #22, #24, #25) still short of their criteria — the client's cost categories, platform floor area, a capacity built from a baseline, and a forecast above capacity warned about rather than blocked. See change log 1.6 |
+| M2 | ✅ **Guided flow, validated server-side** | **11 Sep 2026** | **Met.** Costs, funding, capacity and forecast utilisation are captured and validated server-side across `Platform → Costs → Funding → Capacity → Rates → Review`, and every step loads through `RicPageModel`, so no step can forget an `Include` or an ownership filter. **Criteria completed 21 Sep:** an audit against [`user-stories.md`](../spec/user-stories.md) found US-03, US-04, US-07 and US-08 (#20, #22, #24, #25) still short of their criteria — the client's cost categories, platform floor area, a capacity built from a baseline, and a forecast above capacity warned about rather than blocked. See change log 1.6 |
 | M3 | ✅ Rates, proposed rates and balance | **18 Sep 2026** | **Met 23 Sep, five days late.** Three rates per capability with the figures behind each; proposed rates and the resulting surplus or deficit. US-09 to US-13 (#26–#30) verified and closed, and the milestone closed on GitHub |
 | M4 | ✅ **Vertical slice complete** | **25 Sep 2026** | **Met 24 Sep, a day early.** Sign in → create cycle → enter inputs → see rates → propose → justify → seal → export PDF → reopen, driven end to end in a browser. US-01, US-02 and US-14 to US-17 (#18, #19, #31–#34) built in #83 and #84, reviewed, verified and closed. One criterion is met differently from its wording: US-15 has the custodian confirm and the record sealed, while the tool has the custodian submit and the approver's approval seal it, as in US-20. This is recorded on #32 for the client to confirm |
-| M5 | Staging live, client using it | **2 Oct 2026** | Deployed over HTTPS, seeded credentials replaced, the client reaches it unaccompanied |
-| M6 | Release candidate, feature freeze | **9 Oct 2026** | Critical fixes only; full regression pass; evidence pack assembled |
+| M5 | Staging live, client using it | **2 Oct 2026** | Deployment rehearsal completed 25 Sep: first release, HTTPS by IP, forced password change, backup, restore and automatic rollback of a deliberately broken release. The 2 Oct target has passed; this repository does not record client-use acceptance. **Status: confirmation required.** |
+| M6 | Release candidate, feature freeze | **9 Oct 2026** | Critical fixes only; full regression pass; evidence pack assembled. **Due tomorrow; completion not yet recorded here.** |
 | M7 | **Final release and handover** | **13 Oct 2026** | Tagged release deployed, handover notes written so UWA can rehost, final report submitted |
 
 **Fallback trigger.** If M4 has not been met by the end of week 8, we cut stretch scope — we do
@@ -51,11 +51,16 @@ review rule: the person who writes a story is never the person who verifies it.
 | S3 ✅ | 7 Sep | Costs, income, capacity, forecast utilisation | US-03, US-04, US-06, US-07, US-08 | 26 | Wenmin Luo, Chenxu You (US-03, US-07) · Dai Lam La La (US-04) · Jaswanth Vericherla (US-06) · Yichen Zhao (US-08) | Jaswanth Vericherla — except US-06, verified by Chenxu You |
 | S4 ◀ | 14 Sep | Rates, proposed rates, balance, justification | US-09, US-10, US-11, US-12, US-13 | 24 | Wenmin Luo (calculation) · Chenxu You (page models, persistence) · Yichen Zhao (screens) · Dai Lam La La (US-13, carried from before the split) | Jaswanth Vericherla — except US-13's screens, verified by Chenxu You |
 | S5 ✅ | 21 Sep | Seal, PDF with workings, retrieval, supersession | US-14, US-15, US-16, US-17, US-01, US-02 | 26 | Chenxu You (seal, retrieval, supersession, US-01, US-02) · Wenmin Luo (PDF workings, US-17) · Yichen Zhao (review and approver screens) · Jaswanth Vericherla (who-sealed identity on the record) | Jaswanth Vericherla — except his own piece, verified by Chenxu You |
-| S6 | 28 Sep | Identity hardening and deploy to staging | US-19, deployment | 10 | Jaswanth Vericherla (US-19, staging accounts) · Dai Lam La La (server, CD, TLS) | Chenxu You (US-19) · Jaswanth Vericherla (deployment) |
-| S7 | 5 Oct | Stabilise — critical fixes only | — | — | Whoever owns the fix | Dai Lam La La |
+| S6 ⚠ | 28 Sep | Identity hardening and deploy to staging | US-19, deployment | 10 | Jaswanth Vericherla (US-19, staging accounts) · Dai Lam La La (server, CD, TLS) | Chenxu You (US-19) · Jaswanth Vericherla (deployment) |
+| S7 ◀ | 5 Oct | Stabilise — critical fixes only | — | — | Whoever owns the fix | Dai Lam La La |
 | S8 | 12 Oct | Final release and handover | — | — | Dai Lam La La (release), Chenxu You (handover notes) | Whole team |
 
-**S5's stories are done and M4 was met on 24 September**, a day early; M3 was met on the 23rd. **S6 is next**: US-19 and the deploy to staging (#15, #60), which gate M5 on 2 October. US-16's renderer was brought forward out of S5 into a spike in S4, because it was the only link in the M4 chain that nobody had built or costed — see [ADR-002](../decisions/adr-002-pdf-generation.md).
+**S5's stories are done and M4 was met on 24 September**, a day early; M3 was met on the 23rd.
+The S6 deployment procedure was rehearsed on 25 September: first release, HTTPS by IP, forced
+password change, backup, restore and automatic rollback. The M5 target date has passed;
+client-use acceptance is not recorded here and must be confirmed. S7 is the current stabilisation
+sprint, with M6 due 9 October, followed by S8 and handover. US-16's renderer was brought forward
+out of S5 into a spike in S4 — see [ADR-002](../decisions/adr-002-pdf-generation.md).
 
 **Story points are re-estimated at each Saturday meeting.** The table above is the plan of
 record; the [board](https://github.com/users/ChenxuYou/projects/2) is the live state, and the
@@ -98,29 +103,34 @@ not sign off its arithmetic.
 
 ## 5. Deployment
 
-The largest question still open after the 15 August meeting, so it carries dates rather than
-intentions. Detail in Assignment 1 §3.5.
+The hosting decision remained unanswered in the repository after the 15 August meeting. The
+team has rehearsed a single Ubuntu 24.04 server deployment using systemd, Caddy and SQLite; the
+hosting owner and client acceptance still need explicit confirmation. The operational procedure
+is in [`deploy/README.md`](../../deploy/README.md).
 
 | Stage | Owner | By |
 | --- | --- | --- |
-| Hosting decision with the client — UWA VM, the UWA domain already shared with us, or team-provisioned; who administers it; whether sign-in must use UWA accounts | Yichen Zhao, with Dai Lam La La on the technical options | ⚠️ **9 Sep — no answer recorded in this repository.** Every row below it depends on it, and M5 is 2 Oct. If it is not settled at the 19 Sep meeting it stops being a date and becomes a risk with a fallback: provision a team-held server ourselves and hand the client the migration path at handover |
-| Provision and access | Dai Lam La La | 18 Sep |
-| CI extended to CD, with a documented rollback | Dai Lam La La | ⚠️ **25 Sep — half done.** [`deploy/release.sh`](../../deploy/release.sh) releases a published build, backs the database up first and rolls back by itself when the new build does not answer; rehearsed on 25 Sep. Running it from CI is still to do |
-| DNS, reverse proxy, TLS | Dai Lam La La | 30 Sep. Caddy configuration for both cases is in [`deploy/`](../../deploy/README.md): by IP address with Caddy's own certificate now, Let's Encrypt once a name resolves. **Plain `http://` cannot work** — the sign-in cookie is Secure outside Development |
-| Staging accounts provisioned; no demo account reachable | Jaswanth Vericherla | 30 Sep |
+| Hosting decision and service owner — client-managed UWA host or agreed interim server; DNS and client identity requirements | Yichen Zhao, with Dai Lam La La on technical options | ⚠️ Target 9 Sep passed; no final decision recorded here. Confirm owner, hostname and supported access before client acceptance |
+| Provisioning, release procedure, backup/restore and rollback rehearsal | Dai Lam La La | ✅ Rehearsed 25 Sep on Ubuntu 24.04 with a stand-in for `systemctl`; see [`deploy/README.md`](../../deploy/README.md) |
+| HTTPS and reverse proxy | Dai Lam La La | ✅ Caddy configurations support HTTPS by IP for testing and domain/Let's Encrypt when DNS resolves. Client-facing hostname and certificate trust still require confirmation |
+| Production/staging accounts; no demo account reachable | Jaswanth Vericherla | 30 Sep target passed; verify and record current deployment state |
 | EF Core migrations in place — the schema can change without losing entered data | Chenxu You | ✅ **Done 25 Sep.** A baseline migration replaces `EnsureCreated`; CI fails when the model changes without one ([`src/README.md`](../../src/README.md#changing-the-data-model)) |
-| Deployment testing — build, release, rollback, reachability | Jaswanth Vericherla, with Dai Lam La La | 2 Oct |
-| Staging sign-off | Whole team | 5 Oct |
+| M5 client-use acceptance | Whole team | ⚠️ Target 2 Oct passed; no acceptance record found in the latest committed plan. Confirm with the client and record the outcome |
+| M6 regression pass and release-candidate evidence | Whole team; Dai Lam La La coordinates deployment checks | 9 Oct 2026 |
 | Final release and handover pack | Dai Lam La La, Chenxu You | 13 Oct |
 
 ---
 
 ## 6. Open items carried into this plan
 
+This list has not been re-audited against live issue status since the dates shown. As of 8 October,
+items with earlier due dates need their owners to confirm whether they are complete, still open or
+superseded; a passed date alone is not evidence of completion.
+
 | # | Item | Owner | By |
 | --- | --- | --- | --- |
 | A14 | Confirm in writing whether in-tool approval routing is required in the core, or whether recording the approver is enough | Yichen Zhao | ⚠️ **Missed 26 Aug — re-dated to 5 Sep.** No issue was ever opened for it, which is why it passed unnoticed; open one first |
-| A15 | Report guide-vs-calculator divergences to the client as they surface. The commercial-rate divergence is already answered; a **line-by-line reconciliation of the calculator is deferred to the next cycle**, once the engine exists to compare against | Wenmin Luo (from 15 Sep; was Dai Lam La La) | Rolling; first pass after **M1**, 4 Sep |
+| A15 | Report guide-vs-calculator divergences to the client as they surface. The commercial-rate divergence is already answered; a **line-by-line reconciliation of the calculator is deferred to the next cycle** | Wenmin Luo (from 15 Sep; was Dai Lam La La) | Next cycle; confirm status and timing with the owner |
 | A17 | Give "the sealed PDF shows the calculator's workings" a requirement ID and a story estimate | Wenmin Luo | ⚠️ **Missed 26 Aug — re-dated to 5 Sep.** Tracked as issue #10, still open. It gates a Must story's estimate, so it cannot slip past the S4 planning on 14 Sep |
 | — | ~~**Create the GitHub Projects board** — populated from the eighteen Must stories. Carried out of Assignment 1 as the one artefact that has to be made by hand~~ | Wenmin Luo, Chenxu You | ✅ Done 1 Sep. Board #2, public and linked to the repository; 25 story issues carried their points, priority and sprint across. Built by [`scripts/seed-project-board.py`](../../scripts/seed-project-board.py), so it can be rebuilt from `user-stories.md` rather than by hand |
 | — | **Finish the board by hand** — rename Status `Todo` to `Backlog` and add `Review`; add a board view grouped by Status; add issues #10, #21 and #60, which are not stories and so are not in `user-stories.md`; enable the three Workflows that move cards without anyone dragging them | Chenxu You | ⚠️ **Missed 5 Sep — re-dated to 19 Sep.** Half of it is now automated: [`scripts/finish-project-board.py`](../../scripts/finish-project-board.py) adds the three issues and then audits the board against this row, printing what is still outstanding. The Status rename stays by hand **deliberately** — the GraphQL mutation that edits single-select options replaces the whole option list and clears every card's Status, so the two-minute job in the web UI is the safe one |
@@ -156,6 +166,7 @@ Recorded so that neither is quietly forgotten and neither quietly becomes this s
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.12 | 8 Oct 2026 | **Status review after the M5 target date.** M5's 2 Oct target passed; the repository contains a deployment rehearsal from 25 Sep but no client-use acceptance record, so confirmation is explicitly required rather than assumed. The plan now reflects S7 as the current stabilisation sprint, identifies M6 as due 9 Oct, updates the deployment method to the rehearsed systemd/Caddy/SQLite setup, corrects M2 to the six shipped workflow steps, and flags overdue §6 items for owner verification. |
 | 1.11 | 25 Sep 2026 | **Audit of 25 September acted on, for M5.** Three critical findings fixed: the schema moves to **EF Core migrations** (C1), so a deployment can no longer lose the client's data or break on a new column; a **concurrency stamp** on each cycle stops two approval requests both sealing or returning it (C3); and a [`deploy/`](../../deploy/README.md) kit puts the application behind Caddy over HTTPS (C2) with a daily backup, a tested restore and a release script that rolls back. Also: data-protection keys kept beside the database, an absolute database path required outside Development, only a local proxy trusted, anti-framing headers, a sign-in rate limit per address, and a password an administrator set replaced at first sign-in. §5 rows re-dated accordingly; the access-control test row closed as already covered |
 | 1.10 | 24 Sep 2026 | **M4 met, a day early**, and **M3 marked met** (23 Sep), which this plan still showed as on track. The vertical slice was driven end to end in a browser, and #18, #19 and #31–#34 were closed against their criteria. The one criterion met differently from its wording, who seals under US-15, is recorded on #32 for the client to confirm, along with the other decisions listed in #83 and #84. S5 marked done; S6, US-19 and the deploy to staging, is next |
 | 1.9 | 23 Sep 2026 | **US-14, US-15 and US-16 completed, for M4.** **US-14:** the review page lists everything still missing when it opens — capacity, forecast, utilisation assumptions, proposed rates, a justification where rates differ or forecast a deficit — each linked to the step that supplies it, and submission is refused on that same list (`SubmissionChecks`, shared with the rates step). The page now shows every input by step, each with a link back, and both rate sets with the variance. **US-15:** the approver's confirmation names the consequence; a sealed record is refused any change or deletion at the database, not only by each page; and a sealed record's figures are read from its snapshot on every page, never recalculated — recalculation had fallen back to today's method when the sealed version was not a stored row. **US-16:** snapshot schema 1.4 adds who sealed the record and the capacity inputs; the PDF prints who sealed it, the variance beside each rate, the capacity build-up, every cost and income line, and the guide's retention requirement. Older snapshots still render |

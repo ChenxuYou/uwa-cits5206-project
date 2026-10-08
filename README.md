@@ -2,7 +2,7 @@
 
 **CITS5206 Professional Computing — Capstone Project, The University of Western Australia**
 **Client:** UWA Research Infrastructure
-**Status:** **Assignment 1 submitted on 25 August 2026** — one PDF, [`Group13-Project Spec and Plans.pdf`](docs/assignments/assignment-1/). Scope signed off by the client on 20 August 2026 — both confirmations, scope and ownership. Requirements written against the client's own documents. The technology decision is settled and recorded: **ASP.NET Core Razor Pages with EF Core** — see [ADR-001](docs/decisions/adr-001-technology-stack.md) and [Technology](#technology). **M1 met on 2 September 2026:** the client's worked example reproduces to the cent as a CI merge gate. Next: **M2, the guided flow validated server-side, 11 September 2026** — [`docs/project/plan.md`](docs/project/plan.md).
+**Status as of 8 October 2026:** Assignment 1 was submitted on 25 August and the project scope was signed by the client on 20 August. The technology decision is ASP.NET Core Razor Pages with EF Core — see [ADR-001](docs/decisions/adr-001-technology-stack.md). The latest committed plan records M1–M4 complete: the calculation engine, guided costing workflow, rate proposal and balance, and an end-to-end sealed PDF workflow. M5, staging live for client use, had a target date of 2 October. The deployment procedure was rehearsed on 25 September, but M5 client-use acceptance is not recorded in the latest plan; the risk register tracks this as an active delivery risk. Confirm the staging status with the team before describing it as live for the client. See [`docs/project/plan.md`](docs/project/plan.md), [`docs/project/risks.md`](docs/project/risks.md) and [`deploy/README.md`](deploy/README.md).
 
 ---
 
@@ -24,9 +24,9 @@ its formulas: logic and data arrive in one object, with one set of permissions, 
 a cell the user should fill apart from a cell that computes. So mistakes are silent — a cleared
 formula, a range dragged one column too far, or an amount typed with one extra zero all return a
 plausible number — and nothing records how the number was reached. Where the client's guide and
-their calculator disagree, **the guide governs**, confirmed in writing on 20 August 2026; a full
-reconciliation of the calculator is work for a later cycle, once the engine exists to compare
-against. See [`docs/spec/requirements.md` §2](docs/spec/requirements.md#2-the-problem).
+their calculator disagree, **the guide governs**, confirmed in writing on 20 August 2026. The
+engine now exists and is tested; a line-by-line reconciliation against the calculator remains
+next-cycle work. See [`docs/spec/requirements.md` §2](docs/spec/requirements.md#2-the-problem).
 
 The sentence the client used to describe what success looks like:
 
@@ -69,7 +69,7 @@ R_commercial = (C / U)               × k
 | `U` | **Forecast** annual utilisation — not capacity |
 | `k` | `1.35`, UWA's standard indirect cost recovery applied to any external party |
 
-The client's own worked example, which is also the first test we will write:
+The client's own worked example, reproduced to the cent by the calculation engine's golden-file test:
 
 | | |
 | --- | --- |
@@ -88,23 +88,25 @@ figures are asserted to the cent and the build fails if they drift.
 
 ## What the MVP delivers
 
-A guided web form in **three sequential sections**, mirroring the three sheets of the workbook:
-
-1. **Costs** — staffing, consumables, maintenance contracts, utilities, other operating costs, plus the four lines of non-variable income that offset them.
-2. **Capacity and utilisation** — billable unit (hours, days or samples), full capacity, forecast use, and the reasoning behind the forecast.
-3. **Rates** — three calculated charge-out rates per capability, with room to adjust inputs and see the effect before committing.
+A guided, six-step workflow: **Platform → Costs → Funding → Capacity → Rates → Review**.
+Custodians define a platform and its capabilities, record capability and platform operating
+costs, enter non-variable funding, establish usable capacity and forecast demand, propose rates,
+and review the complete record before submitting it.
 
 Running through it:
 
-- Users sign in; no record is created anonymously, and every record carries who made and sealed it.
+- Users sign in; no record is created anonymously, and records retain who created, submitted and approved them.
 - Calculation logic stays server-side, out of the user's reach.
 - Mandatory fields and type validation, so `$20,000` cannot be entered as `$200,000` unnoticed.
 - Every total is summed over the same set of capabilities as the figures it is compared against — the workbook's own failure mode, made structurally impossible.
-- Free-text justification boxes throughout — the rate has to be defensible, not merely correct.
-- On submit, the inputs and results are sealed into a record that can be exported and filed, and read back in three years' time.
+- Free-text costing, utilisation, benchmarking and pricing explanations support defensible rates.
+- Submission locks the cycle for delegated-authority review. Approval seals an immutable snapshot with its inputs, calculation workings and decision; custodians can export the sealed record as a PDF.
 
 Deployment is a standalone web application. Integration into existing UWA systems was
 discussed and deferred; a working website comes first.
+
+Role-based instructions for custodians, delegated approvers and administrators are in the
+[user manual](docs/user-manual.md).
 
 ## Client sign-off
 
@@ -151,6 +153,7 @@ hard to tell apart in a single flat folder.
 
 ```
 ├── docs/
+│   ├── user-manual.md       Role-based guide for custodians, approvers and administrators
 │   ├── spec/               What we are building
 │   │   ├── requirements.md     What the client needs, and what is still open
 │   │   ├── user-stories.md     Personas, epics, stories and acceptance criteria
@@ -181,6 +184,8 @@ hard to tell apart in a single flat folder.
 │   ├── decisions/          Architecture and process decision records
 │   │   └── adr-001-technology-stack.md   Why ASP.NET Core Razor Pages
 │   └── internal/           Our own review notes — not committed
+├── deploy/                 Ubuntu deployment: systemd, Caddy, release, backup and restore
+│   └── README.md           Rehearsed on-prem deployment and rollback procedure
 ├── .github/workflows/      CI — build, test and dependency scan on every push and PR
 ├── presentations/          Self-contained HTML decks, one file per deck
 │   ├── README.md           How to build, present and export a deck
@@ -202,9 +207,10 @@ hard to tell apart in a single flat folder.
 │   │                           "the engine never sees a database row" checkable
 │   ├── CostingTool.csproj      The web application
 │   └── README.md               How to run it in VS Code, and what is not built yet
-├── tests/                  Automated tests
-│   └── CostingTool.Engine.Tests/   The golden file — the client's worked example,
-│                                   asserted to the cent. The CI merge gate
+├── tests/                  Automated engine, PDF and web tests
+│   ├── CostingTool.Engine.Tests/   Calculation and client worked-example tests
+│   ├── CostingTool.Pdf.Tests/      Sealed-record PDF tests
+│   └── CostingTool.Web.Tests/      Workflow, validation and identity tests
 ├── .vscode/                Shared editor setup — F5 runs the app, tasks run the tests
 ├── CostingTool.sln         The three projects, so one command builds and tests them all
 ├── .gitattributes          Line endings — LF everywhere, so diffs stay readable
@@ -216,9 +222,10 @@ hard to tell apart in a single flat folder.
 Some working files live alongside these and are deliberately local — see
 [Confidential material](#confidential-material).
 
-Everything under `docs/` and `presentations/` is **markdown or HTML**, deliberately. Plain-text
-artefacts diff in GitHub and review like code; Word documents and `.pptx` files do not.
-Presentations are built as single self-contained HTML files for the same reason — see
+Authored documentation is primarily Markdown, and presentations are HTML, so these sources diff
+in GitHub and can be reviewed like code. PDFs are retained where needed for submitted work or
+client-signed material; Word documents and `.pptx` are not used as editable project sources.
+Presentations are built as single self-contained HTML files — see
 [`presentations/STYLE-GUIDE.md`](presentations/STYLE-GUIDE.md) §8.
 
 ### Naming
@@ -307,8 +314,8 @@ the commit, not after it.
 - **Fortnightly** in person on campus, including the facilitator checkpoint.
 - **Client on Wednesdays as needed**, plus a shared Teams chat for asynchronous questions. The client asked us to digest and come back with batched questions rather than hold a fixed weekly slot; support is heavier up front and eases off later (agreed 29 July 2026).
 - Every MVP task is a GitHub issue with a named owner and a milestone date, tracked on the [Projects board](https://github.com/users/ChenxuYou/projects/2) and planned in [`docs/project/plan.md`](docs/project/plan.md). Stretch stories sit on the board unassigned, because assigning work nobody has agreed to do is how a plan starts lying.
-- Minutes are committed within 24 hours, so members who missed a meeting can be briefed from the repository. Two meetings from before this rule settled — 24 July and 5 August — are still to be written up.
-- CI runs on every push and pull request: [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+- Minutes are committed within 24 hours, so members who missed a meeting can be briefed from the repository. The 5 August meeting has been written up; the 24 July meeting remains outstanding in the latest project plan.
+- CI builds and tests relevant pushes and pull requests; documentation-only changes are filtered out. See [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
 Team roster: [`docs/project/team.md`](docs/project/team.md).
 
@@ -337,12 +344,13 @@ requirement that money arithmetic be exact and defensible.
 documents what we learned, reconciles it with the five options already assessed, and lists the
 follow-on work the choice creates.
 
-Settled regardless of stack: the calculation engine is a pure, versioned, unit-tested module with
-no database or UI dependency — decimal arithmetic, a divide-by-zero guard, aggregates that
-iterate rather than index, and method configuration versioned so that a record created in 2026
-still reproduces its figures in 2030. SQLite is the development store; the production store is
-decided together with hosting on 9 September 2026, and EF Core makes the provider a one-line
-change.
+The calculation engine is a pure, versioned, unit-tested module with no database or UI dependency:
+decimal arithmetic, a divide-by-zero guard, aggregates that iterate rather than index, and method
+configuration versioned so a record created in 2026 can reproduce its figures later. The current
+application and rehearsed single-server deployment use SQLite through EF Core migrations. The
+database lives outside the application release under `/var/lib/ric-costing`; daily backups,
+restore and release rollback are documented in [`deploy/README.md`](deploy/README.md). PostgreSQL
+was explored during deployment work but is not the current checked-in deployment configuration.
 
 ## Deliverables
 
@@ -357,11 +365,15 @@ repository, which the facilitator can open.
 
 Brief and rubric: [`reference/unit/`](reference/unit/).
 
-**M1 — the engine provably correct: met on 2 September 2026**, two days early. The client's
-worked example reproduces to the cent in `tests/CostingTool.Engine.Tests`, and `dotnet test` is
-a merge gate rather than a warning. **Next: M2, the guided flow validated server-side,
-11 September.** Milestones M0–M7 and the sprint plan to 13 October are in
-[`docs/project/plan.md`](docs/project/plan.md).
+**M1–M4 are recorded complete in the latest plan.** M1's worked example reproduces to the cent;
+M2's guided workflow validates inputs server-side; M3 adds calculated and proposed rates with a
+forecast balance; and M4 completes the browser workflow through approval, sealing, PDF export and
+reopening the record. M4 was recorded as met on 24 September. The deployment package includes a
+first-release and rollback script, systemd service, Caddy HTTPS configuration, and scheduled
+SQLite backups. The rehearsal was completed on 25 September. The latest committed plan set 2
+October for M5 client use, but does not record whether that milestone was accepted. Confirm its
+current status before describing the tool as live for the client. The project plan tracks
+milestones through final handover on 13 October: [`docs/project/plan.md`](docs/project/plan.md).
 
 ## Ownership
 
