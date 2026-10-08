@@ -2,7 +2,7 @@
 
 **CITS5206 Professional Computing — Capstone Project, The University of Western Australia**
 **Client:** UWA Research Infrastructure
-**Status as of 8 October 2026:** Assignment 1 was submitted on 25 August and the project scope was signed by the client on 20 August. The technology decision is ASP.NET Core Razor Pages with EF Core — see [ADR-001](docs/decisions/adr-001-technology-stack.md). The latest committed plan records M1–M4 complete: the calculation engine, guided costing workflow, rate proposal and balance, and an end-to-end sealed PDF workflow. M5, staging live for client use, had a target date of 2 October. The deployment procedure was rehearsed on 25 September, but M5 client-use acceptance is not recorded in the latest plan; the risk register tracks this as an active delivery risk. Confirm the staging status with the team before describing it as live for the client. See [`docs/project/plan.md`](docs/project/plan.md), [`docs/project/risks.md`](docs/project/risks.md) and [`deploy/README.md`](deploy/README.md).
+**Status as of 8 October 2026:** Assignment 1 was submitted on 25 August and the project scope was signed by the client on 20 August. The technology decision is ASP.NET Core Razor Pages with EF Core — see [ADR-001](docs/decisions/adr-001-technology-stack.md). The latest committed plan records M1–M4 complete: the calculation engine, guided costing workflow, rate proposal and balance, and an end-to-end sealed PDF workflow. **Staging has been live since 30 September**, two days before M5's 2 October date, and the link went to the client the same day ([#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60)). The other half of M5, the client using it, is not recorded yet; the risk register tracks this as an active delivery risk. See [`docs/project/plan.md`](docs/project/plan.md), [`docs/project/risks.md`](docs/project/risks.md) and [`deploy/README.md`](deploy/README.md).
 
 ---
 
@@ -370,9 +370,9 @@ M2's guided workflow validates inputs server-side; M3 adds calculated and propos
 forecast balance; and M4 completes the browser workflow through approval, sealing, PDF export and
 reopening the record. M4 was recorded as met on 24 September. The deployment package includes a
 first-release and rollback script, systemd service, Caddy HTTPS configuration, and scheduled
-SQLite backups. The rehearsal was completed on 25 September. The latest committed plan set 2
-October for M5 client use, but does not record whether that milestone was accepted. Confirm its
-current status before describing the tool as live for the client. The project plan tracks
+SQLite backups. The rehearsal was completed on 25 September. Staging has been live since
+30 September, two days before M5's 2 October date, and the client has the link; whether the
+client has used it is not recorded yet. The project plan tracks
 milestones through final handover on 13 October: [`docs/project/plan.md`](docs/project/plan.md).
 
 ## Ownership

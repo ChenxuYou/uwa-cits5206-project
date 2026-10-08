@@ -129,6 +129,9 @@ request reviews, any training or joint work, milestone management)*
 
 ## 5. Open items on the brief itself
 
+> **8 October 2026:** the deadline of 29 September has passed. The items below are left as they
+> stood, as the record; none of them can change a submission now.
+
 Recorded here rather than assumed, because each one changes what goes in the PDF.
 
 | # | Item | Owner | By |

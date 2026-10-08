@@ -1,10 +1,11 @@
 # User Stories
 
 **Project:** Research Infrastructure Costing & Pricing Tool
-**Status:** Draft v2.1 — 15 August 2026. **The scope these stories implement was signed off by
+**Status:** Draft v2.2 — 8 October 2026. **The scope these stories implement was signed off by
 the client on 20 August 2026** ([minutes](../meetings/client/2026-08-20-client-meeting.md)); the stories
-themselves have not been reviewed by them, and one addition from that meeting — the sealed PDF
-showing the calculator's workings — is not yet written as a story (action A17)
+themselves have not been reviewed by them. The one addition from that meeting — the sealed PDF
+showing the calculator's workings — is now a criterion of US-16 (action A17). **All eighteen Must
+stories and US-20 are built and closed**; the other stretch stories are open issues
 **Companion documents:** [requirements](requirements.md) · [architecture](architecture.md)
 
 > Stories trace to the requirement IDs in [requirements §6](requirements.md#6-requirements).
@@ -433,6 +434,10 @@ the other in the same commit. Estimates are relative points, for sprint planning
 - Sealed figures are stored as computed — never recalculated on read **[N6]**.
 - The client's phrasing: while live the user edits freely; once they confirm they are happy, it is sealed and does not need to be revisited **[K §5]**.
 
+> **Built differently, for the client to confirm — [Q11](requirements.md#9-open-questions).** The custodian
+> submits, and the record is sealed by the delegated authority's approval (US-20); the confirmation that
+> names the consequence is shown to the approver. If the client accepts this, the story is reworded to match.
+
 ---
 
 **US-16 · Export the record** — Must · 5 pts · F12
@@ -445,6 +450,7 @@ the other in the same commit. Estimates are relative points, for sprint planning
 
 - A sealed record exports to a self-contained document containing every input, both rate sets, the variance, the balance, all justifications, the benchmarking where recorded, and the method version.
 - The export identifies the platform, the period, **who sealed it** (**[F15]**) and when.
+- The export shows **the calculator's workings** behind every rate — the figures and arithmetic that produced each one, not only the inputs and the results **[C, [Q5](requirements.md#9-open-questions)]**.
 - It satisfies the guide's retention requirement: "Supporting documentation should be retained for audit and review purposes" **[G, Step 5]**.
 - Format is PDF for the MVP; the client suggested a printout or a generated email and left the format open **[K §6, [Q5](requirements.md#9-open-questions)]**.
 - The export renders and prints legibly on A4.
@@ -611,3 +617,4 @@ where they are enforced, so that "no story" is never mistaken for "no coverage".
 | 1.1 | 14 Aug 2026 | MVP realigned to [requirements §7](requirements.md#7-scope): US-05 and US-19 left the MVP, which became seventeen Must stories at 95 points. US-20 raised to Should. Story priority formally inherits from the requirement. |
 | 2.1 | 15 Aug 2026 | **Follows requirements v2.3, which gave cycle supersession a requirement ID.** Supersession was asserted in A5 and built in [architecture §4](architecture.md#4-data-model) but owned by no requirement and therefore by no story, so §6 below could not have shown the gap — nothing was missing from the table because nothing had an ID to be missing. **US-01 now carries F22** alongside F10 and F13 and gains one acceptance criterion: a cycle that replaces a sealed one records a reference to it, and the superseded record stays readable and unchanged. The criterion names what the whole arrangement is for — it is the only route by which changed costs reach the rates, because a sealed record is never edited to match them. §6 gains the F22 row; §5 gains a line explaining why F22 adds no nineteenth story. **US-01 keeps its 3 points and the MVP stays at eighteen stories and 110 points**, since a reference recorded at creation is not new work of any size. US-01's existing "key figures shown alongside" criterion is now attributed to F13, which §6 already claimed it for. |
 | 2.0 | 14 Aug 2026 | **Realigned to requirements v2.0, which was rewritten against the client's own documents.** US-19 (sign-in) returns to the MVP as a **Must**, resolving the contradiction where US-02, US-15 and US-16 required an identity the MVP did not provide; E7 renamed and US-19 moved to the front of the story list, because nothing else works without it. Rates are now **per capability** — US-09 and US-12 re-estimated 8 → 13 points to reflect it. Terminology follows the client's guide: capability, billable unit, APFR, custodian. US-06 rewritten for **four** income lines. US-07 carries the client's two capacity baselines and the staff-FTE cap. Three new stories from guide steps 1, 4 and 6: **US-23** replacement reserve, **US-24** benchmarking record, **US-25** price-change communication. Dr Chen is no longer *(inferred)* — the guide names the delegated authority. US-18 and US-12 gained criteria for **N14**. §6 traceability rebuilt so every requirement appears exactly once, with structural enforcement named where no story owns it. **MVP: eighteen stories, 110 points.** |
+| 2.2 | 8 Oct 2026 | **Follows what was built and what the client asked.** US-16 gains the criterion the client added on 20 August — the export shows the calculator's workings (A17, #10) — which the PDF has met since 24 September. US-15 gains a note that it was built with the approver's approval doing the sealing, open as requirements Q11. The status line records that all eighteen Must stories and US-20 are closed |
