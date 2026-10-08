@@ -1,6 +1,6 @@
 # Project Plan — 24 August to 13 October 2026
 
-**Version:** 1.12 — 8 October 2026
+**Version:** 1.13 — 8 October 2026
 **Owner:** Chenxu You
 **Reviewed:** every Saturday team meeting
 **Companions:** [`risks.md`](risks.md) · [`skills-audit.md`](skills-audit.md) ·
@@ -21,7 +21,7 @@
 | M2 | ✅ **Guided flow, validated server-side** | **11 Sep 2026** | **Met.** Costs, funding, capacity and forecast utilisation are captured and validated server-side across `Platform → Costs → Funding → Capacity → Rates → Review`, and every step loads through `RicPageModel`, so no step can forget an `Include` or an ownership filter. **Criteria completed 21 Sep:** an audit against [`user-stories.md`](../spec/user-stories.md) found US-03, US-04, US-07 and US-08 (#20, #22, #24, #25) still short of their criteria — the client's cost categories, platform floor area, a capacity built from a baseline, and a forecast above capacity warned about rather than blocked. See change log 1.6 |
 | M3 | ✅ Rates, proposed rates and balance | **18 Sep 2026** | **Met 23 Sep, five days late.** Three rates per capability with the figures behind each; proposed rates and the resulting surplus or deficit. US-09 to US-13 (#26–#30) verified and closed, and the milestone closed on GitHub |
 | M4 | ✅ **Vertical slice complete** | **25 Sep 2026** | **Met 24 Sep, a day early.** Sign in → create cycle → enter inputs → see rates → propose → justify → seal → export PDF → reopen, driven end to end in a browser. US-01, US-02 and US-14 to US-17 (#18, #19, #31–#34) built in #83 and #84, reviewed, verified and closed. One criterion is met differently from its wording: US-15 has the custodian confirm and the record sealed, while the tool has the custodian submit and the approver's approval seal it, as in US-20. This is recorded on #32 for the client to confirm |
-| M5 | Staging live, client using it | **2 Oct 2026** | Deployment rehearsal completed 25 Sep: first release, HTTPS by IP, forced password change, backup, restore and automatic rollback of a deliberately broken release. The 2 Oct target has passed; this repository does not record client-use acceptance. **Status: confirmation required.** |
+| M5 | Staging live, client using it | **2 Oct 2026** | Deployment rehearsal completed 25 Sep: first release, HTTPS by IP, forced password change, backup, restore and automatic rollback of a deliberately broken release. **Staging live since 30 Sep**, two days early: deployed by Dai Lam La La from `feat/deployment_docker`, reached by IP address over HTTPS, and the link sent to the client with one account per role the same day ([#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60)). Client-use acceptance is not recorded yet. **Status: staging live; client use outstanding.** |
 | M6 | Release candidate, feature freeze | **9 Oct 2026** | Critical fixes only; full regression pass; evidence pack assembled. **Due tomorrow; completion not yet recorded here.** |
 | M7 | **Final release and handover** | **13 Oct 2026** | Tagged release deployed, handover notes written so UWA can rehost, final report submitted |
 
@@ -51,14 +51,14 @@ review rule: the person who writes a story is never the person who verifies it.
 | S3 ✅ | 7 Sep | Costs, income, capacity, forecast utilisation | US-03, US-04, US-06, US-07, US-08 | 26 | Wenmin Luo, Chenxu You (US-03, US-07) · Dai Lam La La (US-04) · Jaswanth Vericherla (US-06) · Yichen Zhao (US-08) | Jaswanth Vericherla — except US-06, verified by Chenxu You |
 | S4 ◀ | 14 Sep | Rates, proposed rates, balance, justification | US-09, US-10, US-11, US-12, US-13 | 24 | Wenmin Luo (calculation) · Chenxu You (page models, persistence) · Yichen Zhao (screens) · Dai Lam La La (US-13, carried from before the split) | Jaswanth Vericherla — except US-13's screens, verified by Chenxu You |
 | S5 ✅ | 21 Sep | Seal, PDF with workings, retrieval, supersession | US-14, US-15, US-16, US-17, US-01, US-02 | 26 | Chenxu You (seal, retrieval, supersession, US-01, US-02) · Wenmin Luo (PDF workings, US-17) · Yichen Zhao (review and approver screens) · Jaswanth Vericherla (who-sealed identity on the record) | Jaswanth Vericherla — except his own piece, verified by Chenxu You |
-| S6 ⚠ | 28 Sep | Identity hardening and deploy to staging | US-19, deployment | 10 | Jaswanth Vericherla (US-19, staging accounts) · Dai Lam La La (server, CD, TLS) | Chenxu You (US-19) · Jaswanth Vericherla (deployment) |
+| S6 ✅ | 28 Sep | Identity hardening and deploy to staging | US-19, deployment | 10 | Jaswanth Vericherla (US-19, staging accounts) · Dai Lam La La (server, CD, TLS) | Chenxu You (US-19) · Jaswanth Vericherla (deployment) |
 | S7 ◀ | 5 Oct | Stabilise — critical fixes only | — | — | Whoever owns the fix | Dai Lam La La |
 | S8 | 12 Oct | Final release and handover | — | — | Dai Lam La La (release), Chenxu You (handover notes) | Whole team |
 
 **S5's stories are done and M4 was met on 24 September**, a day early; M3 was met on the 23rd.
 The S6 deployment procedure was rehearsed on 25 September: first release, HTTPS by IP, forced
-password change, backup, restore and automatic rollback. The M5 target date has passed;
-client-use acceptance is not recorded here and must be confirmed. S7 is the current stabilisation
+password change, backup, restore and automatic rollback. Staging went live on 30 September, two
+days before M5; client-use acceptance is not recorded here and must be confirmed. S7 is the current stabilisation
 sprint, with M6 due 9 October, followed by S8 and handover. US-16's renderer was brought forward
 out of S5 into a spike in S4 — see [ADR-002](../decisions/adr-002-pdf-generation.md).
 
@@ -106,14 +106,15 @@ not sign off its arithmetic.
 The hosting decision remained unanswered in the repository after the 15 August meeting. The
 team has rehearsed a single Ubuntu 24.04 server deployment using systemd, Caddy and SQLite; the
 hosting owner and client acceptance still need explicit confirmation. The operational procedure
-is in [`deploy/README.md`](../../deploy/README.md).
+is in [`deploy/README.md`](../../deploy/README.md). Staging has been live since 30 September,
+deployed from `feat/deployment_docker` ([#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60)).
 
 | Stage | Owner | By |
 | --- | --- | --- |
 | Hosting decision and service owner — client-managed UWA host or agreed interim server; DNS and client identity requirements | Yichen Zhao, with Dai Lam La La on technical options | ⚠️ Target 9 Sep passed; no final decision recorded here. Confirm owner, hostname and supported access before client acceptance |
 | Provisioning, release procedure, backup/restore and rollback rehearsal | Dai Lam La La | ✅ Rehearsed 25 Sep on Ubuntu 24.04 with a stand-in for `systemctl`; see [`deploy/README.md`](../../deploy/README.md) |
 | HTTPS and reverse proxy | Dai Lam La La | ✅ Caddy configurations support HTTPS by IP for testing and domain/Let's Encrypt when DNS resolves. Client-facing hostname and certificate trust still require confirmation |
-| Production/staging accounts; no demo account reachable | Jaswanth Vericherla | 30 Sep target passed; verify and record current deployment state |
+| Production/staging accounts; no demo account reachable | Jaswanth Vericherla | ✅ Staging live since 30 Sep with one account per role, sent to the client by email ([#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60)). That no demo account is reachable there is still to be verified |
 | EF Core migrations in place — the schema can change without losing entered data | Chenxu You | ✅ **Done 25 Sep.** A baseline migration replaces `EnsureCreated`; CI fails when the model changes without one ([`src/README.md`](../../src/README.md#changing-the-data-model)) |
 | M5 client-use acceptance | Whole team | ⚠️ Target 2 Oct passed; no acceptance record found in the latest committed plan. Confirm with the client and record the outcome |
 | M6 regression pass and release-candidate evidence | Whole team; Dai Lam La La coordinates deployment checks | 9 Oct 2026 |
@@ -166,6 +167,7 @@ Recorded so that neither is quietly forgotten and neither quietly becomes this s
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.13 | 8 Oct 2026 | **Staging recorded as live.** It has run since 30 September, deployed from `feat/deployment_docker`, and the client has had the link and one account per role since that day (#60). M5's row, S6, the S6 note and §5 now say so instead of asking for confirmation. Client-use acceptance is still outstanding |
 | 1.12 | 8 Oct 2026 | **Status review after the M5 target date.** M5's 2 Oct target passed; the repository contains a deployment rehearsal from 25 Sep but no client-use acceptance record, so confirmation is explicitly required rather than assumed. The plan now reflects S7 as the current stabilisation sprint, identifies M6 as due 9 Oct, updates the deployment method to the rehearsed systemd/Caddy/SQLite setup, corrects M2 to the six shipped workflow steps, and flags overdue §6 items for owner verification. |
 | 1.11 | 25 Sep 2026 | **Audit of 25 September acted on, for M5.** Three critical findings fixed: the schema moves to **EF Core migrations** (C1), so a deployment can no longer lose the client's data or break on a new column; a **concurrency stamp** on each cycle stops two approval requests both sealing or returning it (C3); and a [`deploy/`](../../deploy/README.md) kit puts the application behind Caddy over HTTPS (C2) with a daily backup, a tested restore and a release script that rolls back. Also: data-protection keys kept beside the database, an absolute database path required outside Development, only a local proxy trusted, anti-framing headers, a sign-in rate limit per address, and a password an administrator set replaced at first sign-in. §5 rows re-dated accordingly; the access-control test row closed as already covered |
 | 1.10 | 24 Sep 2026 | **M4 met, a day early**, and **M3 marked met** (23 Sep), which this plan still showed as on track. The vertical slice was driven end to end in a browser, and #18, #19 and #31–#34 were closed against their criteria. The one criterion met differently from its wording, who seals under US-15, is recorded on #32 for the client to confirm, along with the other decisions listed in #83 and #84. S5 marked done; S6, US-19 and the deploy to staging, is next |
