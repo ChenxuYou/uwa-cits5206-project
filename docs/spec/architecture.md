@@ -384,10 +384,11 @@ stops it being an option we reach for under pressure.
 - Golden-file verification against the client's worked example before any UI is written.
 - Server-side validation is authoritative.
 
-**The relational store is the one open sub-decision.** SQLite is the development store today.
-Whether production runs on SQLite or PostgreSQL is decided together with hosting on
-**9 September 2026** ([AQ2](#11-open-architectural-questions)); EF Core makes the provider a
-one-line change and no raw SQL is written anywhere, so deferring it costs nothing.
+**The relational store is SQLite, in development and in the rehearsed deployment.** The
+single-server deployment runs on Ubuntu with systemd and Caddy, with the database kept outside the
+release and backed up daily (see [`deploy/README.md`](../../deploy/README.md)). PostgreSQL was
+explored during deployment work but is not the checked-in configuration. EF Core makes the provider
+a one-line change and no raw SQL is written anywhere, so moving later remains cheap.
 
 ## 10. Delivery approach
 
