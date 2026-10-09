@@ -65,7 +65,8 @@ The stories and their acceptance criteria are in
 
 ## 3. Client testing and what changed after it
 
-The client tested staging in all three roles and sent written notes on 9 October 2026. They
+The client tested staging in all three roles and sent written notes on 9 October 2026,
+[summarised here](client/communication-history/2026-10-09-client-testing-notes/README.md). They
 found the capacity, rates, review and approval screens clear, and the explanatory text useful.
 They asked for six changes:
 
