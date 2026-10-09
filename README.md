@@ -1,34 +1,127 @@
 # Research Infrastructure Costing & Pricing Tool
 
-**CITS5206 Professional Computing — Capstone Project, The University of Western Australia**
+**CITS5206 Professional Computing — capstone project, The University of Western Australia · Group 13**
 **Client:** UWA Research Infrastructure
-**Status as of 8 October 2026:** Assignment 1 was submitted on 25 August and the project scope was signed by the client on 20 August. The technology decision is ASP.NET Core Razor Pages with EF Core — see [ADR-001](docs/decisions/adr-001-technology-stack.md). The latest committed plan records M1–M4 complete: the calculation engine, guided costing workflow, rate proposal and balance, and an end-to-end sealed PDF workflow. **Staging has been live since 30 September**, two days before M5's 2 October date, and the link went to the client the same day ([#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60)). The other half of M5, the client using it, is recorded: the client tested staging in all three roles and sent notes on 9 October ([summary](docs/client/communication-history/2026-10-09-client-testing-notes/README.md)). The final report is due 13 October 2026, 11:59 pm (UTC+8). See [`docs/project/plan.md`](docs/project/plan.md), [`docs/project/risks.md`](docs/project/risks.md) and [`deploy/README.md`](deploy/README.md).
+
+A guided web application that takes a research-infrastructure platform custodian through
+UWA's costing method, computes the platform's hourly (or per-unit) rates, has them approved by
+the delegated authority, and seals the result as a record that can be filed and defended
+years later. It replaces an Excel calculator that, in the client's words, is hard to use
+because it is easy to break.
+
+---
+
+## Contents
+
+1. [Status](#status)
+2. [Start here](#start-here)
+3. [Run it on your machine](#run-it-on-your-machine)
+4. [The problem](#the-problem)
+5. [Who uses it](#who-uses-it)
+6. [The calculation](#the-calculation)
+7. [What was delivered](#what-was-delivered)
+8. [How we know it works](#how-we-know-it-works)
+9. [Deployment](#deployment)
+10. [Known gaps and open questions](#known-gaps-and-open-questions)
+11. [Client](#client)
+12. [Team and ways of working](#team-and-ways-of-working)
+13. [Use of generative AI](#use-of-generative-ai)
+14. [Technology](#technology)
+15. [Repository layout](#repository-layout)
+16. [Conventions and confidential material](#conventions-and-confidential-material)
+17. [Ownership](#ownership)
+18. [Deliverables](#deliverables)
+
+---
+
+## Status
+
+**As of 9 October 2026.** The plan of record is [`docs/project/plan.md`](docs/project/plan.md).
+
+| | |
+| --- | --- |
+| **Scope** | All 18 Must stories (110 points) and US-20, approval by the delegated authority, are built and closed. Signed by the client on 20 August 2026 |
+| **Tests** | 240 automated tests across the engine, the sealed-record PDF and the web workflow, run by [CI](.github/workflows/ci.yml) on every push. The client's worked example is asserted to the cent |
+| **Client testing** | 9 October 2026: the client used staging in all three roles and sent written notes ([record](docs/client/communication-history/2026-10-09-client-testing-notes/README.md)). Five of their six requests are done; the sixth is salary pre-fill (US-05, [#42](https://github.com/ChenxuYou/uwa-cits5206-project/issues/42)) |
+| **Staging** | Live since 30 September 2026, reached by IP address; the address and one account per role were sent to the client by email. It still runs an earlier branch; redeploying it from `main` is [#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101) |
+| **Release** | `v1.0.0`, to be tagged on `main` once staging runs it |
+| **Handover** | Expected Monday 12 October 2026 — [handover document](docs/handover.md) |
+| **Final report** | Due Tuesday 13 October 2026, 11:59 pm (UTC+8) |
+
+## Start here
+
+| You want to… | Read |
+| --- | --- |
+| Run the tool on your own machine | [Run it on your machine](#run-it-on-your-machine), then [`src/README.md`](src/README.md) |
+| Use the tool — as a custodian, an approver or an administrator | [User manual](docs/user-manual.md) |
+| Deploy it to a server | [`deploy/README.md`](deploy/README.md) |
+| Take it over | [Handover document](docs/handover.md) |
+| Know what is not done | [Known gaps](src/README.md#known-gaps) and the [open issues](https://github.com/ChenxuYou/uwa-cits5206-project/issues) |
+| Check the method and the scope | [Requirements](docs/spec/requirements.md), [user stories](docs/spec/user-stories.md), [architecture](docs/spec/architecture.md) |
+| See how AI was used | [AI statement](docs/project/ai-use.md) |
+| See how the project was run | [Plan](docs/project/plan.md), [risks](docs/project/risks.md), [meeting minutes](docs/meetings/README.md) |
+
+## Run it on your machine
+
+**You need** the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (`dotnet --info`
+must list a `10.0.x` SDK) and Git. Nothing else: the database is a local SQLite file that the
+application creates on first run.
+
+```bash
+git clone https://github.com/ChenxuYou/uwa-cits5206-project.git
+cd uwa-cits5206-project
+dotnet run --project src/CostingTool.csproj
+```
+
+Open **<https://localhost:7267>**. The first run shows a certificate warning for the local
+development certificate; `dotnet dev-certs https --trust` clears it for good.
+
+Sign in with a demo account:
+
+| Role | Username | Password |
+| --- | --- | --- |
+| Platform custodian | `entry` | `Entry123!` |
+| Delegated approver | `approver` | `Approve123!` |
+| Administrator | `admin` | `Admin123!` |
+
+These accounts are created **in the Development environment only**, which `dotnet run` uses.
+A deployed server starts with one administrator and no demo accounts
+([`deploy/README.md`](deploy/README.md)).
+
+**A five-minute tour.** As `entry`, select **Start new costing cycle** and work through the six
+steps — Platform, Costs, Funding, Capacity, Rates, Review — then submit. Sign out, sign in as
+`approver`, open the submission and **Approve & seal** it. Back as `entry`, open the sealed
+record and select **Export PDF**. The [user manual](docs/user-manual.md) explains each screen.
+
+**Run the tests:**
+
+```bash
+dotnet test CostingTool.sln
+```
+
+In VS Code, open the repository folder (the one containing `CostingTool.sln`), install the
+recommended **C# Dev Kit** extension and press <kbd>F5</kbd>. Editor tasks, troubleshooting and
+how to change the data model are in [`src/README.md`](src/README.md).
 
 ---
 
 ## The problem
 
 UWA runs research infrastructure — electron microscopes, a human MRI, radio telescopes,
-phenotyping drones — that is expensive to buy and expensive to operate. Some of that cost is
-passed on to the researchers who buy time on it, and because UWA is a publicly funded
-institution, the way those prices are set has to be **transparent, consistent across every
-platform, and defensible years after the fact**. The aim is sustainability, not profit.
+phenotyping drones — that is expensive to buy and to operate. Part of that cost is passed on to
+the researchers who buy time on it, and because UWA is publicly funded, the way those prices are
+set has to be **transparent, consistent across every platform, and defensible years after the
+fact**. The aim is sustainability, not profit.
 
-The client already has the logic. It lives in a guide and an Excel workbook that is, in their
-words, hard for anyone to actually use because it is easy to break. What they want is a guided
-web application that asks a platform custodian for the inputs, keeps the calculation out of
-reach behind the form, and produces a record that can be filed and retrieved.
+The client already had the method, in a guide and an Excel calculator. **The calculator's
+fragility belongs to the medium, not to that file.** Sharing a workbook shares its formulas, and
+nothing marks a cell to fill apart from a cell that computes, so mistakes are silent: a cleared
+formula, a range dragged one column too far or an amount typed with an extra zero all still
+return a plausible number, and nothing records how the number was reached. Where the guide and
+the calculator disagree, **the guide governs**, as the client confirmed in writing on 20 August
+2026. See [`requirements.md` §2](docs/spec/requirements.md#2-the-problem).
 
-**The fragility belongs to the medium, not to that particular file.** Sharing a workbook shares
-its formulas: logic and data arrive in one object, with one set of permissions, and nothing marks
-a cell the user should fill apart from a cell that computes. So mistakes are silent — a cleared
-formula, a range dragged one column too far, or an amount typed with one extra zero all return a
-plausible number — and nothing records how the number was reached. Where the client's guide and
-their calculator disagree, **the guide governs**, confirmed in writing on 20 August 2026. The
-engine now exists and is tested; a line-by-line reconciliation against the calculator remains
-next-cycle work. See [`docs/spec/requirements.md` §2](docs/spec/requirements.md#2-the-problem).
-
-The sentence the client used to describe what success looks like:
+What success looks like, in the client's words:
 
 > If someone comes to us and says "why does it cost $50 an hour for me to use?", we want to
 > be able to say: well, it costs $100,000 a year to run, this is how many hours a year it's
@@ -39,21 +132,16 @@ The sentence the client used to describe what success looks like:
 
 ## Who uses it
 
-**Platform custodians** — the academic or professional staff who run a platform, not the
-researchers who buy time on it. (*Custodian* is the client's own word, used throughout their
-guide.) They are technical people for whom this is administrative work, and they run the
-exercise roughly **once every three to five years** to set rates for the period ahead. Low
-frequency, high stakes: the tool has to be self-explanatory, because nobody will remember it
-from last time.
-
-Rates are then approved by a **delegated authority** — typically the head of the business unit
-that carries the platform's operating costs.
+| Role | Who they are | What they do in the tool |
+| --- | --- | --- |
+| **Platform custodian** | Academic or professional staff who run a platform — the client's own word for them | Enter the platform's costs, funding and forecast use; propose rates and explain them; submit. They do this roughly **once every three to five years**, so the tool has to explain itself |
+| **Delegated approver** | Typically the head of the business unit that carries the platform's costs | Review a submission, then return it with comments or approve and seal it |
+| **Administrator** | Whoever UWA names to manage access | Create and manage accounts; view every cycle, read-only |
 
 ## The calculation
 
-Total operating cost, less non-variable income, divided by forecast utilisation. Three rates
-come out, one per user category, and they are computed **per capability** — a platform holding
-seven capabilities produces seven sets of three.
+Total operating cost, less non-variable income, divided by **forecast** use. Three rates come
+out, one per user category, for **each capability** of a platform:
 
 ```
 R_uwa        = (C − I_total)   / U
@@ -67,351 +155,230 @@ R_commercial = (C / U)               × k
 | `I_total` | All non-variable income: UWA GP/in-kind + State + Federal (incl. NCRIS) + Other |
 | `I_nonuwa` | The same, less the UWA portion |
 | `U` | **Forecast** annual utilisation — not capacity |
-| `k` | `1.35`, UWA's standard indirect cost recovery applied to any external party |
+| `k` | `1.35`, UWA's standard indirect-cost recovery for any external party |
 
-The client's own worked example, reproduced to the cent by the calculation engine's golden-file test:
+The client's worked example, reproduced to the cent by a golden-file test in
+[`tests/CostingTool.Engine.Tests`](tests/CostingTool.Engine.Tests/):
 
 | | |
 | --- | --- |
-| Operating costs, UWA in-kind, WA Gov support | $150,000 · $20,000 · $30,000 |
+| Operating costs · UWA in-kind · WA Government support | $150,000 · $20,000 · $30,000 |
 | Forecast utilisation | 1,000 hours |
-| → UWA Researcher · APFR · Commercial | **$100.00** · **$162.00** · **$202.50** per hour |
+| → UWA researcher · APFR · Commercial | **$100.00** · **$162.00** · **$202.50** per hour |
 
-Two things are easy to get wrong. The divisor is *forecast* use, not capacity — a capability
-with 1,882.5 hours of machine availability may see far less real use, and weekends,
-maintenance windows, staff FTE and even weather all cut into it. And costs are captured both
-per capability and per platform, with platform costs split evenly across capabilities.
+Two things are easy to get wrong, and the tool guards both. The divisor is forecast use, not
+capacity: a capability with 1,882.5 hours of machine availability may see far less real use.
+And costs are entered both per capability and per platform, with platform costs split evenly
+across capabilities and the split shown on screen.
 
-The engine is validated against the client's worked example as a golden-file test — and it is,
-in [`tests/CostingTool.Engine.Tests`](tests/CostingTool.Engine.Tests/), where those three
-figures are asserted to the cent and the build fails if they drift.
+## What was delivered
 
-## What the MVP delivers
+A guided six-step workflow — **Platform → Costs → Funding → Capacity → Rates → Review** — followed
+by approval and a sealed record.
 
-A guided, six-step workflow: **Platform → Costs → Funding → Capacity → Rates → Review**.
-Custodians define a platform and its capabilities, record capability and platform operating
-costs, enter non-variable funding, establish usable capacity and forecast demand, propose rates,
-and review the complete record before submitting it.
+- **Nothing is anonymous.** Every user signs in, and each record keeps who created, submitted, returned and approved it.
+- **The calculation stays on the server**, out of the user's reach, and every input is validated there, so `$20,000` cannot become `$200,000` unnoticed.
+- **Totals cannot drift.** Every total is summed over the same set of capabilities as the figures it is compared with — the calculator's own failure mode, made structurally impossible.
+- **Every number is explained.** Each rate is shown beside the figures that produce it, and the custodian records the reasoning behind costs, utilisation, benchmarking and proposed rates.
+- **Approval seals the record.** Its inputs, workings and decision are frozen as a snapshot that cannot be edited or deleted, and it exports as a PDF for UWA's Content Manager (TRIM). A sealed record can be superseded by a new cycle, never changed.
 
-Running through it:
-
-- Users sign in; no record is created anonymously, and records retain who created, submitted and approved them.
-- Calculation logic stays server-side, out of the user's reach.
-- Mandatory fields and type validation, so `$20,000` cannot be entered as `$200,000` unnoticed.
-- Every total is summed over the same set of capabilities as the figures it is compared against — the workbook's own failure mode, made structurally impossible.
-- Free-text costing, utilisation, benchmarking and pricing explanations support defensible rates.
-- Submission locks the cycle for delegated-authority review. Approval seals an immutable snapshot with its inputs, calculation workings and decision; custodians can export the sealed record as a PDF.
-
-Deployment is a standalone web application. Integration into existing UWA systems was
-discussed and deferred; a working website comes first.
-
-Role-based instructions for custodians, delegated approvers and administrators are in the
-[user manual](docs/user-manual.md). What is handed over to UWA on 13 October, and the decisions left to it, are in the
-[handover document](docs/handover.md).
-
-## Client sign-off
-
-Our client is **UWA Research Infrastructure**: **Erika Slavin**, Manager (Research Infrastructure
-& Partnerships) / Business Development Coordinator, and **Mathew Hall**, Strategic Development
-Coordinator. Names, roles and how we contact them live in
-[`docs/client/contacts.md`](docs/client/contacts.md).
-
-**The client signed the scope statement on 20 August 2026.** Mathew Hall — both confirmations
-ticked: the scope is right, and the ownership position is right.
-
-The paper trail, in one place: the scope statement and five questions went by email on **17
-August**; the client replied on **18 August** confirming a time; we met in person on **20
-August**; the signed document and written answers to all five questions came back the same day.
-Everything is filed in
-[`docs/client/communication-history/`](docs/client/communication-history/) and the meeting is
-[minuted](docs/meetings/client/2026-08-20-client-meeting.md).
-
-The client's answers also changed one thing we had promised. The exported PDF must show **the
-calculator's workings**, not only the inputs and the three rates, and records are filed into
-UWA's Content Manager (TRIM). That is real additional work and it is tracked as such rather than
-absorbed quietly — [minutes §5](docs/meetings/client/2026-08-20-client-meeting.md).
-
-## Open questions
-
-**One is open.** Five went to the client and all five came back answered — multi-year cycles,
-access control, the record format, and both questions about whether the guide or the calculator
-governs. Three earlier questions were **closed by reading the client's own documents** rather
-than by asking. The full list is in
-[`docs/spec/requirements.md`](docs/spec/requirements.md#9-open-questions).
-
-The one that remains is ours and cannot be closed by us alone: **what licence this repository
-carries** (Q8), because the IP is jointly held. The 20 August signature **unblocks** it — the
-joint position is now confirmed in writing, which is what it was waiting for — but does not close
-it, because confirming the position is not the same as choosing the licence that follows from it.
-Until then the repository is all rights reserved and [`NOTICE`](NOTICE) carries the permissions.
-See [Ownership](#ownership).
-
-## Repository layout
-
-`docs/` is grouped by who a document is for — the specification, how the team runs, and what
-crosses to the client — because those three readerships want different things and were becoming
-hard to tell apart in a single flat folder.
-
-```
-├── docs/
-│   ├── user-manual.md       Role-based guide for custodians, approvers and administrators
-│   ├── handover.md          The handover to UWA: what is handed over, and what UWA decides
-│   ├── spec/               What we are building
-│   │   ├── requirements.md     What the client needs, and what is still open
-│   │   ├── user-stories.md     Personas, epics, stories and acceptance criteria
-│   │   └── architecture.md     System shape, options assessed, and the decision gate
-│   ├── project/            How the team runs
-│   │   ├── team.md             The roster — the only place it lives
-│   │   ├── plan.md             Milestones, sprints and story assignment to 13 Oct
-│   │   ├── risks.md            The risk register — likelihood, impact, mitigation, trigger, owner
-│   │   ├── skills-audit.md     Where our gaps are, and what is done about each
-│   │   ├── assignment-1-readiness.md   The 22 Aug rubric assessment — closed, kept as the record
-│   │   └── assignment-1-completion-plan.md   Who did what, by when — closed, submitted 25 Aug
-│   ├── assignments/        What was submitted, and the material it was built from
-│   │   └── assignment-1/       Group13-Project Spec and Plans.pdf — submitted 25 Aug 2026,
-│   │                           alongside submission-draft.md, the markdown it came from
-│   ├── client/             Everything that crosses to the client
-│   │   ├── contacts.md         Client names and roles — the only place they live
-│   │   ├── 2026-08-15-scope-and-questions.md   The document they receive
-│   │   ├── mvp-agreement.md    Why that scope, traced to requirement IDs — and the sign-off trail
-│   │   ├── questions-round-1.md   Why those questions, and our defaults
-│   │   └── communication-history/  What actually crossed, one folder per exchange
-│   │       ├── 2026-08-17-email-scope-and-questions/       The outbound email and its two attachments
-│   │       └── 2026-08-20-client-meeting/     The signed scope statement, the client's written
-│   │                               answers, and our notes from the room
-│   ├── meetings/           Minutes, one file per meeting — index in its README
-│   │   ├── client/         With UWA Research Infrastructure
-│   │   ├── facilitator/    Lab facilitator checkpoints
-│   │   └── team/           Team meetings
-│   ├── decisions/          Architecture and process decision records
-│   │   └── adr-001-technology-stack.md   Why ASP.NET Core Razor Pages
-│   └── internal/           Our own review notes — not committed
-├── deploy/                 Ubuntu deployment: systemd, Caddy, release, backup and restore
-│   └── README.md           Rehearsed on-prem deployment and rollback procedure
-├── .github/workflows/      CI — build, test and dependency scan on every push and PR
-├── presentations/          Self-contained HTML decks, one file per deck
-│   ├── README.md           How to build, present and export a deck
-│   ├── STYLE-GUIDE.md      Binding style policy — read before building a deck
-│   ├── template.html       Empty skeleton; copy it, never present from it
-│   └── assets/
-├── reference/
-│   ├── client/             Client material — local only, not committed
-│   └── unit/               Assignment briefs, rubric and unit resources
-├── scripts/                One-off repository tooling, not application code
-│   ├── seed-project-board.py   Milestones, labels, issues and the Projects board, built
-│   │                           from docs/spec/user-stories.md and docs/project/plan.md
-│   ├── dedupe-story-issues.py  One issue per story — keeps the first, deletes the rest
-│   ├── backfill-issues.py      Assigns unowned Must stories; opens the deploy issue
-│   └── export-issues.py        Dumps live issue state to issues.json (not committed)
-├── src/                    Application code — ASP.NET Core Razor Pages (see the note below)
-│   ├── CostingTool.Engine/     The calculation, on its own — no EF, no ASP.NET, no
-│   │                           package references at all, which is what makes
-│   │                           "the engine never sees a database row" checkable
-│   ├── CostingTool.csproj      The web application
-│   └── README.md               How to run it in VS Code, and what is not built yet
-├── tests/                  Automated engine, PDF and web tests
-│   ├── CostingTool.Engine.Tests/   Calculation and client worked-example tests
-│   ├── CostingTool.Pdf.Tests/      Sealed-record PDF tests
-│   └── CostingTool.Web.Tests/      Workflow, validation and identity tests
-├── .vscode/                Shared editor setup — F5 runs the app, tasks run the tests
-├── CostingTool.sln         The three projects, so one command builds and tests them all
-├── .gitattributes          Line endings — LF everywhere, so diffs stay readable
-├── .gitignore              What never gets committed, and why
-├── NOTICE                  Ownership, the grant to UWA, and portfolio use
-└── README.md
-```
-
-Some working files live alongside these and are deliberately local — see
-[Confidential material](#confidential-material).
-
-Authored documentation is primarily Markdown, and presentations are HTML, so these sources diff
-in GitHub and can be reviewed like code. PDFs are retained where needed for submitted work or
-client-signed material; Word documents and `.pptx` are not used as editable project sources.
-Presentations are built as single self-contained HTML files — see
-[`presentations/STYLE-GUIDE.md`](presentations/STYLE-GUIDE.md) §8.
-
-### Naming
-
-One convention, so that a path can be guessed rather than looked up:
-
-| Rule | Example |
-| --- | --- |
-| Folders and files are **lowercase-kebab-case** | `docs/client/communication-history/` |
-| Anything tied to a date is prefixed **`YYYY-MM-DD-`** | `2026-08-20-client-meeting.md` |
-| No spaces, no capitals, no camelCase in a path | `submission-draft.md`, not `submissionDrafts.md` |
-| Repository meta-documents keep their conventional capitals | `README.md`, `NOTICE`, `STYLE-GUIDE.md` |
-| The same thing is spelled the same way everywhere | `assignment-1-*`, never `assignment1-*` |
-
-**`src/` is the deliberate exception.** C# and ASP.NET Core expect PascalCase files and folders
-(`Pages/Ric/Rates.cshtml`, `Services/RicCalculationService.cs`), and fighting a framework's own
-convention costs more than it buys. The rule inside `src/` is the .NET rule.
-
-Client-supplied filenames in `reference/client/` are **left exactly as the client sent them**
-— [`requirements.md`](docs/spec/requirements.md) cites them by name as sources, and a renamed
-source is a broken citation.
-
-**Submitted files keep the name they were submitted under.** `docs/assignments/assignment-1/Group13-Project Spec and Plans.pdf`
-has capitals and spaces and stays that way: it is the file the unit received, and a submission
-renamed after the fact no longer matches what was marked. The convention applies to everything
-we author for ourselves; the moment a file crosses to the client or the unit, the name it
-crossed under is the name it keeps.
-
-A rename pass on 22 August 2026 brought the tree to this convention: a misspelled `assginment/`
-folder, spaces in `Communication history/` and `Email content.md`, non-ISO dates in
-`Email-17-Aug/`, and a camelCase `submissionDrafts.md` all went. Every cross-reference was
-rewritten with them and all 274 internal links were checked afterwards.
-
-## Where our facts come from
-
-The client gave us a costing & pricing guide, a working calculator, and a recorded walkthrough.
-They do not always agree, so [`docs/spec/requirements.md`](docs/spec/requirements.md) sets a precedence
-order and every statement is marked with its source:
-
-| Rank | Source | Marker |
+| Priority | Stories | State |
 | --- | --- | --- |
-| 1 | The client's costing & pricing guide — their normative policy document | **[G]** |
-| 2 | The client's calculator workbook — a reference implementation, and demonstrably buggy | **[W]** |
-| 3 | Our minutes of the spoken walkthrough — good for intent, unreliable for figures | **[K]** |
+| Must | All 18: US-01 to US-04, US-06 to US-19 | **Delivered** |
+| Should | US-20 approval by the delegated authority | **Delivered** |
+| Should | US-24 record the benchmarking | Partly: a free-text field on the rates step, carried into the sealed record and its PDF; the guide's structured prompts are not built |
+| Could | US-22 compare with the last cycle | Partly: a new cycle shows the previous sealed record's key figures beside it |
+| Should / Could | US-05 salary pre-fill, US-21 method configuration screen, US-23 replacement reserve, US-25 price-change communication | Not built — open issues |
 
-This is not bureaucracy. An earlier draft quoted a set of demonstration figures transcribed
-from the walkthrough that appear in no client document, and one of them was heading for a test
-fixture. The precedence rule is what caught it.
+Stories and acceptance criteria: [`docs/spec/user-stories.md`](docs/spec/user-stories.md).
 
-## Confidential material
+## How we know it works
 
-Some files referenced in this repository are **deliberately absent** from it:
+| Evidence | What it shows | Where |
+| --- | --- | --- |
+| **Engine tests** — 36 | The client's worked example to the cent; decimal arithmetic, with rounding once at presentation; zero or negative inputs refused; the capacity baselines and staff caps | [`tests/CostingTool.Engine.Tests`](tests/CostingTool.Engine.Tests/) |
+| **PDF tests** — 31 | The worked example reaches the PDF to the cent; every rate is printed beside its arithmetic, with the method version and integrity hash; unsealed or damaged records are refused; older records still render as sealed | [`tests/CostingTool.Pdf.Tests`](tests/CostingTool.Pdf.Tests/) |
+| **Web tests** — 173 | Validation on every step, editing lines, rates and variances, sign-in, lockout and record ownership, approval and sealing under concurrent requests, supersession, migrations, and the staff fields added after client testing | [`tests/CostingTool.Web.Tests`](tests/CostingTool.Web.Tests/) |
+| **Continuous integration** | Every push and pull request is built and tested, formatting is checked, dependencies are scanned for known vulnerabilities, and a model change without a database migration fails the build | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
+| **Code review** | Nothing merges on its author's approval, and nobody approves a pull request in their own layer | [`plan.md` §3](docs/project/plan.md#3-responsibilities) |
+| **Deployment rehearsal** — 25 Sep | First release, HTTPS, forced password change, backup, restore and automatic rollback of a deliberately broken release | [`deploy/README.md`](deploy/README.md) |
+| **Client acceptance testing** — 9 Oct | The client used the deployed tool in all three roles and sent written notes | [Testing record](docs/client/communication-history/2026-10-09-client-testing-notes/README.md) |
 
-| Not committed | Why |
-| --- | --- |
-| Client spreadsheets and documents (`reference/client/`) | The client's material, sensitive while in progress, and not ours to publish |
-| Meeting audio and video (`.m4a`, `.mp4`, …) | Identifiable voices |
-| Transcripts of any kind — subtitle formats (`.srt`, `.vtt`, …) and `*-transcript.md` | Verbatim, unreviewed speech, whatever the file extension. Written minutes are the record, and they go in `docs/meetings/` |
-| Internal review notes (`docs/internal/`) | Our own working critique of our own documents. Useful to us; not a deliverable, and not something to hand anyone half-finished |
-| API state dumps (`issues.json`, `projects.json`) | What `scripts/` reads to work out what already exists before it changes anything. A snapshot of live state, stale the moment anyone touches an issue, and committing it invites someone to trust it. Re-export it; never read it out of a commit |
-| Credentials, `.env` files, keys, local databases | The obvious reasons |
+## Deployment
 
-**There is no exception for internal meetings.** An earlier version of these rules let a
-raw transcript be committed when no external party was present. It has been withdrawn: a
-transcript is unreviewed speech about identifiable people either way, and the minutes are the
-artefact anyone actually needs. Everything the team is asked to read is written up in
-`docs/meetings/`.
+The tool is a standalone web application: ASP.NET Core behind Caddy, which provides HTTPS, on
+one Ubuntu 24.04 server, with the SQLite database, daily backups and the cookie keys kept outside
+the application release. Releasing, restoring and rolling back are one script each.
+**Runbook: [`deploy/README.md`](deploy/README.md).**
 
-The rules and the reasoning are in [`.gitignore`](.gitignore). Check any single path with
-`git check-ignore -v <path>`. Committing something excluded needs team agreement and
-`git add -f`.
+- **Staging** has been live since 30 September 2026. It is reached by IP address, so browsers
+  show a certificate warning; its address and accounts were sent to the client by email and are
+  not recorded in this public repository. It was deployed from the branch
+  `feat/deployment_docker` (Docker Compose and PostgreSQL) and is being redeployed from `main`
+  with the runbook ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)).
+- **Production** does not exist yet. Who runs it, where, and on which database are UWA's
+  decisions, set out in [handover §6](docs/handover.md#6-decisions-uwa-needs-to-make).
 
-**Ignoring a file does not remove it from history.** Two files were committed before these
-rules settled — the 24 July team transcript, and an earlier `LICENSE` — and adding them to
-`.gitignore` did nothing to the commits that already held them. Both have since been rewritten
-out and the result force-pushed. The current history begins at `84ab707` and neither file
-appears anywhere in it.
+## Known gaps and open questions
 
-That pass cost one rewrite and a re-clone for everyone, which is what it costs while the
-history is short. The lesson is the rule at the top of this section: the check happens before
-the commit, not after it.
+**Every known gap is a GitHub issue**, listed with its reason in
+[`src/README.md` — Known gaps](src/README.md#known-gaps). The
+[open issues](https://github.com/ChenxuYou/uwa-cits5206-project/issues) also hold the stretch
+stories not built, and [handover §8](docs/handover.md#8-known-limitations-and-recommended-next-work)
+puts them in the order we would do them.
 
-## How the team works
+**Seven questions are open**, each with a working answer already in the tool, so a different
+answer from UWA is a contained change. Full list, with reasons and sources:
+[`requirements.md` §9](docs/spec/requirements.md#9-open-questions).
 
-- **Weekly** online stand-up — progress, blockers, next week's allocation.
-- **Fortnightly** in person on campus, including the facilitator checkpoint.
-- **Client on Wednesdays as needed**, plus a shared Teams chat for asynchronous questions. The client asked us to digest and come back with batched questions rather than hold a fixed weekly slot; support is heavier up front and eases off later (agreed 29 July 2026).
-- Every MVP task is a GitHub issue with a named owner and a milestone date, tracked on the [Projects board](https://github.com/users/ChenxuYou/projects/2) and planned in [`docs/project/plan.md`](docs/project/plan.md). Stretch stories sit on the board unassigned, because assigning work nobody has agreed to do is how a plan starts lying.
-- Minutes are committed within 24 hours, so members who missed a meeting can be briefed from the repository. The 5 August meeting has been written up; the 24 July meeting remains outstanding in the latest project plan.
-- CI builds and tests relevant pushes and pull requests; documentation-only changes are filtered out. See [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+| # | Question | Issue |
+| --- | --- | --- |
+| Q8 | What licence does this repository carry, given jointly owned IP? | — see [Ownership](#ownership) |
+| Q11 | Does the approver's approval seal the record, or the custodian's confirmation? | [#105](https://github.com/ChenxuYou/uwa-cits5206-project/issues/105) |
+| Q12 | Is a multi-year cost profile averaged into one annual figure? | [#103](https://github.com/ChenxuYou/uwa-cits5206-project/issues/103) |
+| Q13 | Does the platform keep the indirect-cost uplift in its revenue projection? | [#104](https://github.com/ChenxuYou/uwa-cits5206-project/issues/104) |
+| Q14 | Who runs the tool after handover, where, and on which database? | [Handover §6](docs/handover.md#6-decisions-uwa-needs-to-make) |
+| Q15 | Should a superseded record's PDF say that it is superseded? | [#106](https://github.com/ChenxuYou/uwa-cits5206-project/issues/106) |
+| Q16 | What do "LG funded" and "GP funded" stand for, and should either change the costing? | [Handover §7](docs/handover.md#7-open-questions-on-the-method) |
 
-Team roster: [`docs/project/team.md`](docs/project/team.md).
+## Client
+
+**UWA Research Infrastructure** — Erika Slavin, Manager (Research Infrastructure & Partnerships)
+/ Business Development Coordinator, and Mathew Hall, Strategic Development Coordinator
+([contacts](docs/client/contacts.md)).
+
+| Date | What happened | Record |
+| --- | --- | --- |
+| 29 Jul 2026 | Kick-off walkthrough of the method, the guide and the calculator | [Minutes](docs/meetings/client/2026-07-29-client-meeting.md) |
+| 20 Aug 2026 | **Scope and ownership signed** by Mathew Hall; five written answers to our questions. The PDF must show the calculator's workings, which became tracked work | [Minutes](docs/meetings/client/2026-08-20-client-meeting.md), [signed scope](docs/client/communication-history/2026-08-20-client-meeting/project-scope-summary-signed.pdf), [MVP agreement](docs/client/mvp-agreement.md) |
+| 22 Sep 2026 | First look at the working tool; agreement that the team may host staging until UWA IT provides resources | [Minutes](docs/meetings/client/2026-09-22-client-meeting.md) |
+| 30 Sep 2026 | Staging address and one account per role sent to the client | [#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60) |
+| 9 Oct 2026 | Client testing in all three roles; six change requests, five done the same day | [Testing record](docs/client/communication-history/2026-10-09-client-testing-notes/README.md) |
+
+Everything that crossed to the client is filed in
+[`docs/client/communication-history/`](docs/client/communication-history/).
+
+## Team and ways of working
+
+| Member | Technical layer | GitHub |
+| --- | --- | --- |
+| Chenxu You | General backend, repository and documentation | [ChenxuYou](https://github.com/ChenxuYou) |
+| Yichen Zhao | Front end; client liaison | [itsEvanZHAO](https://github.com/itsEvanZHAO) |
+| Wenmin Luo | Calculation engine | [onikirinana](https://github.com/onikirinana) |
+| Dai Lam La La | Deployment | [ladailam382](https://github.com/ladailam382) |
+| Jaswanth Vericherla | Authentication and accounts | [jaswanth-kumar24](https://github.com/jaswanth-kumar24) |
+
+The roster's home is [`docs/project/team.md`](docs/project/team.md); the layers were agreed on
+15 September 2026 ([minutes](docs/meetings/team/2026-09-15-team-meeting.md)).
+
+- **Planning.** One-week sprints against seven milestones, M1 to M7, in [`plan.md`](docs/project/plan.md); risks in [`risks.md`](docs/project/risks.md).
+- **Tracking.** Every task is a GitHub issue with an owner and a milestone, on the [Projects board](https://github.com/users/ChenxuYou/projects/2).
+- **Meetings.** A weekly online stand-up, fortnightly on campus with the facilitator, and the client on Wednesdays as needed plus a shared Teams chat. Minutes are in [`docs/meetings/`](docs/meetings/README.md).
+- **Review.** Every change arrives by pull request and is reviewed by a second member; CI must pass before merge.
+
+## Use of generative AI
+
+AI was used as **a tool that drafts, never as an author that decides**. It drafted code, tests
+and documents, reviewed pull requests and helped the team learn ASP.NET Core and EF Core. Every
+output was checked by a person against something other than the AI — the client's worked
+example, the test suite, the code, or the record on GitHub — and the person who committed it
+owns it. No client data, personal data or third-party IP went into a public AI tool.
+
+The [AI statement](docs/project/ai-use.md) sets out the team's rules, the tools and what each was
+used for, how output was checked, how this maps to UWA and ACS requirements, each member's own
+account with examples of output that was corrected or rejected, and what we learned.
 
 ## Technology
 
-**Decided: ASP.NET Core Razor Pages with Entity Framework Core, targeting .NET 10.** Recorded in
-[ADR-001](docs/decisions/adr-001-technology-stack.md), 24 August 2026.
+**ASP.NET Core Razor Pages with Entity Framework Core on .NET 10, and SQLite** — recorded in
+[ADR-001](docs/decisions/adr-001-technology-stack.md). Six options were assessed
+([`architecture.md` §8](docs/spec/architecture.md#8-options-assessed)); a server-rendered
+monolith came out ahead because it keeps the calculation on the server and gives one codebase
+with framework-provided sign-in and validation. A timeboxed spike then showed the team could
+build it fastest in C#, whose native `decimal` type also suits money arithmetic that has to be
+exact. The PDF is drawn with MigraDoc from the sealed snapshot
+([ADR-002](docs/decisions/adr-002-pdf-generation.md)).
 
-Six options were considered. Five went to the facilitator on 5 August 2026 — a client-side SPA
-with no backend (prototype only); an SPA with a REST API and PostgreSQL; a Django + HTMX
-monolith; Microsoft Power Platform (rejected); and building inside existing UWA systems
-(deferred at the client's request). The weighted comparison in
-[`docs/spec/architecture.md` §8](docs/spec/architecture.md#8-options-assessed) put the
-**server-rendered monolith** ahead, on criteria that deliberately weight delivery risk: one
-codebase, framework-provided auth and validation, and nowhere for calculation logic to leak to.
+The calculation engine is its own project with no database, UI or package dependency, and its
+method configuration is versioned, so a record sealed in 2026 reproduces its figures under the
+method it was sealed with. Schema changes go through EF Core migrations.
 
-The sixth is what we build: **the same architecture in the language the team can actually move
-fastest in.** That was settled by evidence rather than argument — a timeboxed spike produced a
-working end-to-end application in .NET, running in time for the client meeting of 20 August, and
-the skills audit confirmed the team's depth is in C# and server-side web work rather than in
-JavaScript frameworks. `decimal` being a native base-10 type in C# also maps directly onto the
-requirement that money arithmetic be exact and defensible.
+## Repository layout
 
-**The decision record was written after the spike, not before it**, and
-[ADR-001](docs/decisions/adr-001-technology-stack.md) says so. We built to learn; the ADR
-documents what we learned, reconciles it with the five options already assessed, and lists the
-follow-on work the choice creates.
+```
+├── src/                         The application — how to run and change it: src/README.md
+│   ├── CostingTool.Engine/        The calculation, with no dependencies at all
+│   ├── CostingTool.Pdf/           The sealed-record PDF
+│   └── CostingTool.csproj         The web application (Razor Pages, EF Core, SQLite)
+├── tests/                       Engine, PDF and web test projects
+├── deploy/                      Production runbook: systemd, Caddy, release, backup, restore
+├── docs/
+│   ├── user-manual.md             For custodians, approvers and administrators
+│   ├── handover.md                What UWA receives, and what it has to decide
+│   ├── spec/                      Requirements, user stories, architecture
+│   ├── decisions/                 ADR-001 technology stack, ADR-002 PDF generation
+│   ├── project/                   Plan, risks, team, skills audit, AI statement
+│   ├── client/                    Contacts, MVP agreement, and everything that crossed to the client
+│   ├── meetings/                  Minutes — client, facilitator and team
+│   ├── assignments/               What was submitted to the unit
+│   └── internal/                  Our own review notes — not committed
+├── reference/unit/              Assignment briefs, rubrics and unit material
+├── presentations/               Self-contained HTML decks and their style guide
+├── scripts/                     One-off repository tooling, not application code
+├── .github/workflows/ci.yml     Build, test, format check and dependency scan
+├── .vscode/                     Shared editor setup — F5 runs the app
+├── CostingTool.sln              All projects, so one command builds and tests them
+└── NOTICE                       Ownership, and UWA's permission to use the tool
+```
 
-The calculation engine is a pure, versioned, unit-tested module with no database or UI dependency:
-decimal arithmetic, a divide-by-zero guard, aggregates that iterate rather than index, and method
-configuration versioned so a record created in 2026 can reproduce its figures later. The current
-application and rehearsed single-server deployment use SQLite through EF Core migrations. The
-database lives outside the application release under `/var/lib/ric-costing`; daily backups,
-restore and release rollback are documented in [`deploy/README.md`](deploy/README.md). PostgreSQL
-was explored during deployment work but is not the current checked-in deployment configuration.
+## Conventions and confidential material
 
-## Deliverables
+**Sources.** The client's guide, calculator and walkthrough do not always agree, so
+[`requirements.md`](docs/spec/requirements.md) ranks them — guide **[G]**, then calculator
+**[W]**, then our minutes of the walkthrough **[K]** — and marks every statement with its
+source.
 
-**Assignment 1 — project specification and plan: submitted.** One PDF,
-`Group13-Project Spec and Plans.pdf`, uploaded by one member on **Tuesday 25 August 2026**,
-against a deadline extended by one week from 18 August at our request and granted by the unit
-coordinator by email on 14 August 2026. Four sections: problem statement, client communication
-and MVP agreement, project management and plans, risk and technology assessment. The submitted
-PDF and the markdown it was assembled from are in
-[`docs/assignments/assignment-1/`](docs/assignments/assignment-1/); both link to this
-repository, which the facilitator can open.
+**Naming.** Paths are lowercase-kebab-case, and anything tied to a date starts `YYYY-MM-DD-`.
+Two exceptions: `src/` follows .NET's PascalCase, and files received from the client or
+submitted to the unit keep the name they arrived or left under.
 
-Brief and rubric: [`reference/unit/`](reference/unit/).
+**Formats.** Documentation is Markdown and presentations are single HTML files, so both can be
+reviewed like code. PDFs are kept only for submitted or signed material.
 
-**M1–M4 are recorded complete in the latest plan.** M1's worked example reproduces to the cent;
-M2's guided workflow validates inputs server-side; M3 adds calculated and proposed rates with a
-forecast balance; and M4 completes the browser workflow through approval, sealing, PDF export and
-reopening the record. M4 was recorded as met on 24 September. The deployment package includes a
-first-release and rollback script, systemd service, Caddy HTTPS configuration, and scheduled
-SQLite backups. The rehearsal was completed on 25 September. Staging has been live since
-30 September, two days before M5's 2 October date, and the client tested it in all three roles
-on 9 October ([summary](docs/client/communication-history/2026-10-09-client-testing-notes/README.md)). The project plan tracks
-milestones through final handover on 13 October: [`docs/project/plan.md`](docs/project/plan.md).
+**Not committed, on purpose** ([`.gitignore`](.gitignore) gives the reasons):
+
+| Not committed | Why |
+| --- | --- |
+| The client's guide, calculator and documents (`reference/client/`) | The client's material, not ours to publish. Our own summaries are committed with their source named |
+| Meeting recordings and transcripts | Identifiable voices and unreviewed speech; written minutes are the record |
+| Internal review notes (`docs/internal/`) | Working critique of our own documents, not a deliverable |
+| Credentials, keys, `.env` files, local databases, API state dumps | The obvious reasons, and stale snapshots invite misplaced trust |
+
+Two files committed before these rules settled — an early meeting transcript and an MIT
+`LICENSE` — were rewritten out of the history; neither appears anywhere in it.
 
 ## Ownership
 
-The client owns the costing logic. The team owns the code and may use the project in
-portfolios; the client raised no objection to us sharing what we build. Selling the tool
-onward would not be appropriate, as the overarching IP is joint. Agreed with the client on
-29 July 2026 — see the [kickoff minutes](docs/meetings/client/2026-07-29-client-meeting.md) §9 — and
-**confirmed in writing on 20 August 2026**, signed, as confirmation 2 of the
-[scope statement](docs/client/communication-history/2026-08-20-client-meeting/project-scope-summary-signed.pdf).
+UWA owns the costing method; the team owns the code and may show it in portfolios; the
+overarching IP is held jointly, and the tool is not to be sold onward. Agreed on 29 July 2026
+and **signed by the client on 20 August 2026**.
 
-**No licence: all rights reserved, with permissions set out in [`NOTICE`](NOTICE).** That file
-records who owns what, grants UWA a perpetual permission to use, modify and host the tool for
-its own purposes, and reserves portfolio use for the authors.
+The repository carries **no licence: all rights reserved**, and [`NOTICE`](NOTICE) grants UWA a
+perpetual, royalty-free permission to use, run, copy, modify, host and internally distribute the
+tool. A licence granted by one joint owner alone may not be effective, so the choice of licence
+is left to be agreed with UWA at handover ([Q8](docs/spec/requirements.md#9-open-questions)). A
+noncommercial licence such as PolyForm is the likely answer; an open-source licence would not
+fit, because MIT, Apache-2.0, GPL and AGPL all permit sale.
 
-This is an interim position, held deliberately. The IP is **jointly** held, and a licence
-granted by one joint owner alone may not be effective — so the team does not purport to grant
-one. That is [Q8](docs/spec/requirements.md#9-open-questions), and it closes at handover, not
-before.
+## Deliverables
 
-**The condition on it has now been met.** The position held until the ownership was confirmed in
-writing; the client signed that confirmation on 20 August 2026. What remains is choosing the
-licence, which is a decision for handover and not one to take in the week before an assignment
-is due.
+| Assessment | Type | State |
+| --- | --- | --- |
+| Assignment 1 — project specification and plan | Group | **Submitted** 25 Aug 2026 — [PDF and source](docs/assignments/assignment-1/) |
+| Assignment 2 — software feature report | Individual | Each member's own; due 29 Sep 2026 |
+| Assignment 3 — professional reflection | Individual | Each member's own; due 29 Sep 2026 |
+| Assignment 4 — pitch video | Individual | Each member's own |
+| Assignment 5 — final group report | Group | Due Tue 13 Oct 2026, 11:59 pm (UTC+8) |
+| Group Member Evaluation | Individual, on Feedback Fruits | Due Mon 19 Oct 2026, 11:59 pm |
 
-Why an open-source licence would not do the job in the meantime: MIT and Apache-2.0 permit
-sale; **GPL and AGPL also permit sale** — copyleft requires source disclosure, it does not
-restrict commerce; Creative Commons advises against CC licences for software. A noncommercial
-licence such as PolyForm would fit the client's position, and remains the likely answer at
-handover — but any licence binds only the people who receive it, not the copyright holders,
-so it is not what stops the tool being sold. The joint-IP position is.
-
-Reserving all rights costs us nothing here: `NOTICE` already gives UWA everything it needs,
-and GitHub's terms already let any user view and fork a public repository.
-
-An early commit carried a `LICENSE` file — MIT, copyright "RTMart" — which would have granted
-the public exactly the right to sell that the joint-IP position rules out. Deleting the file
-would not have retracted a grant already published, so the history was rewritten to remove it,
-force-pushed, and checked for forks and clones predating the rewrite. Nothing in the current
-history grants a licence to anyone.
+Briefs and rubrics: [`reference/unit/`](reference/unit/).
