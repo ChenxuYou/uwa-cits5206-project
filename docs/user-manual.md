@@ -4,7 +4,7 @@
 
 **Audience:** Platform custodians, delegated approvers and administrators  
 **Status:** Current application guide  
-**Last updated:** 8 October 2026
+**Last updated:** 9 October 2026
 
 ## 1. Purpose
 
@@ -78,6 +78,16 @@ Add operating costs by category. For each line:
 3. Select the cost category and complete the fields shown for it. Personnel, general items and floor-area costs request different details.
 4. Enter the amount for each year in the pricing period. Amounts are GST exclusive.
 5. Add notes or assumptions where useful, then select **Add cost item**.
+
+For a staff line, choose the position funding type (ARC Fellow, ARC Funded Position, Chief
+Investigator – UWA funded, LG funded or GP funded) and the staff type. Academic staff take a
+salary level from A to E and professional staff a level from 1 to 10; the level list changes
+with the staff type. The base salary is not yet filled in from the pay scales, so enter the
+yearly amounts yourself.
+
+To correct a saved line, select **Edit** beside it, change any field and save; the line is
+updated in place rather than added again. A capability named wrongly on step 1 can be renamed
+there: select **Platform** in the step bar at any time.
 
 Review the running totals. Capability costs are directly incurred; platform-level costs are
 allocated evenly across the capabilities. The screen shows the allocation and checks that the
