@@ -938,3 +938,15 @@ a.ric-step-link:focus-visible {
 .step5-checklist li.done > span:first-child { color: var(--green); font-weight: 700; }
 .step5-checklist li.outstanding > span:first-child { color: var(--amber); }
 .step5-checklist small { display: block; font-size: 12px; color: var(--muted); }
+
+/* Space between stacked cards.
+   A card, panel, callout or list of cards that follows another one directly in a page,
+   or in a form that is the page's body, keeps 18px from it — the gap the grids use.
+   Without it, cards with no margin of their own sat flush against each other: the
+   rates step's guide and capability cards, the administrator's account list and new
+   account form, and the callout above a cycle's details. Limited to direct children
+   so that grid and flex layouts, which space their items with gap, are not affected. */
+.page-wrap > :is(.ric-card, .panel, .review-card, .callout, .rate-list) + :is(.ric-card, .panel, .review-card, .callout, .rate-list, .integrity-card),
+.page-wrap > form > :is(.ric-card, .panel, .review-card, .callout, .rate-list) + :is(.ric-card, .panel, .review-card, .callout, .rate-list, .integrity-card) {
+    margin-top: 18px;
+}
