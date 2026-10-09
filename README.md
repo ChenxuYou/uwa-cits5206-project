@@ -186,7 +186,7 @@ by approval and a sealed record.
 | --- | --- | --- |
 | Must | All 18: US-01 to US-04, US-06 to US-19 | **Delivered** |
 | Should | US-20 approval by the delegated authority | **Delivered** |
-| Should | US-24 record the benchmarking | Delivered as a free-text field on the review step |
+| Should | US-24 record the benchmarking | Partly: a free-text field on the rates step, carried into the sealed record and its PDF; the guide's structured prompts are not built |
 | Could | US-22 compare with the last cycle | Partly: a new cycle shows the previous sealed record's key figures beside it |
 | Should / Could | US-05 salary pre-fill, US-21 method configuration screen, US-23 replacement reserve, US-25 price-change communication | Not built — open issues |
 
