@@ -53,7 +53,7 @@ All six concern the custodian's platform and cost steps.
 | 5 | Add "LG funded" and "GP funded" as position funding types | **Done 9 Oct**, with the client's wording. Their meaning is put to the client as [Q16](../../../spec/requirements.md#9-open-questions) |
 | 6 | Fill each year's salary in automatically for the years selected, still editable | **Not built.** This is US-05 ([#42](https://github.com/ChenxuYou/uwa-cits5206-project/issues/42)) and needs UWA's pay scales. Recorded for after handover |
 
-Items 3–5 are on the branch `feat/client-feedback-staff-fields`, with tests, and are described
+Items 3–5 were merged to `main` on 9 October in [#110](https://github.com/ChenxuYou/uwa-cits5206-project/pull/110), with tests, and are described
 for the client in the [handover document](../../../handover.md) §3.
 
 ## Limits of this evidence
@@ -73,7 +73,7 @@ for the client in the [handover document](../../../handover.md) §3.
 
 | Action | Owner | By |
 | --- | --- | --- |
-| Merge items 3–5 to `main` after `dotnet test` passes | Chenxu You | Sat 10 Oct |
+| Merge items 3–5 to `main` after `dotnet test` passes | Chenxu You | ✅ Done 9 Oct, [#110](https://github.com/ChenxuYou/uwa-cits5206-project/pull/110) |
 | Redeploy staging from `main` and tell the client items 1 and 2 are visible there | Dai Lam La La | Sun 11 Oct |
 | Reply to the client: what changed, why salary pre-fill waits, Q11–Q16, and the handover document | Yichen Zhao | ✅ Done 9 Oct |
-| Close [#99](https://github.com/ChenxuYou/uwa-cits5206-project/issues/99) with a link to this record | Yichen Zhao | Mon 12 Oct |
+| Close [#99](https://github.com/ChenxuYou/uwa-cits5206-project/issues/99) with a link to this record | Yichen Zhao | ✅ Done 9 Oct |
