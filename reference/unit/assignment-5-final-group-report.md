@@ -16,13 +16,13 @@ LMS course: https://lms.uwa.edu.au/ultra/courses/_113158_1/outline
 | **Deliverable round** | **D3**, alongside the individual pitch video (15%) and the individual reflection (15%) — per the assessment slide in Workshop 1 |
 | **Weight** | **15%** of the total mark for CITS5206 |
 | **Marks** | **15 points**, across four criteria (3 / 4 / 3 / 5) — see §3 |
-| **Length** | **No more than 5 pages.** "Over-length" is named in the *Competent* band of *Delivered Project* |
+| **Length** | **No more than 5 pages for the whole report**, confirmed on the LMS on 9 October 2026 — see O4 in §5. "Over-length" is named in the *Competent* band of *Delivered Project* |
 | **Suggested structure** | Table of contents · summary of project requirements and proposed solution(s) · verification and test activities · links to user guides and deployment · discussion and future work · references |
 | **Links** | To relevant documents in the project repositories, "as with earlier deliverables" |
 | **Marked outside the PDF** | The marker **runs the project from the README** (§3.2), and the unit coordinator **may contact the client** after submission (§3.4) |
 | **Peer weighting** | The group mark is weighted by the **Group Member Evaluation** on Feedback Fruits, due **before Monday of week 13, 23:59** — every member, individually |
 | **Format** | Not stated — see O4 in §5 |
-| **Due** | Not stated in the brief — see O1 in §5 |
+| **Due** | **Tuesday 13 October 2026, 11:59 pm (UTC+8)**, confirmed on the LMS on 9 October 2026 — the same day as M7, the handover |
 
 ---
 
@@ -126,7 +126,7 @@ Our reading, not the unit's words.
 | **R4** | **Open issues must be recorded in the repository.** *Proficient* for 3.1 asks that "remaining open issues (bugs/features) are documented in the project repository"; for 3.2, "Ongoing issues have not been recorded" is enough on its own to cap the criterion at *Competent* | Every known bug, gap and unbuilt feature is a GitHub issue, labelled, and the report links the filtered list. The *Known gaps* section of [`src/README.md`](../../src/README.md#known-gaps) should agree with those issues, not stand in for them |
 | **R5** | **Client acceptance testing needs evidence.** "Little evidence of client acceptance testing" is likewise enough to cap 3.2 at *Competent* | A dated session in which the client works through the MVP stories on the deployed build, minuted in [`docs/meetings/client/`](../../docs/meetings/client/) and linked from the report. A demo the team drives is weaker evidence than the client using the tool themselves |
 | **R6** | **Responsible use of AI is new, and wants more than a disclaimer.** No earlier rubric in this unit had it. Acknowledgement alone is *Competent*; *Proficient* needs "clear evidence that AI-generated outputs were critically evaluated, adapted, and integrated" | A section saying which tools were used and for what, with concrete examples of output that was checked, corrected or rejected, and how — code review, tests, the client's worked example. The commit history does not show this by itself, so the report has to |
-| **R7** | **Five pages, concise, summary-level.** "Over-length" alone is named in *Competent* for 3.1 | Each section summarises and links; the detail stays in the repository. Treat the 5 pages as including everything until O4 says otherwise |
+| **R7** | **Five pages, concise, summary-level.** "Over-length" alone is named in *Competent* for 3.1 | Each section summarises and links; the detail stays in the repository. The 5 pages are the whole report, cover and contents included (O4) |
 | **R8** | **The suggested structure maps onto the rubric, except for AI.** Requirements and solution, verification and tests, and discussion and future work cover 3.1; user guides and deployment cover 3.2 | Use the suggested headings and add one for AI use (3.3). Assignment 1 lost a point for having no cover page or table of contents ([feedback F4](../../docs/assignments/assignment-1/feedback.md#5-what-changes-and-where-it-is-written-down)), and the brief now lists the table of contents first |
 | **R9** | **"As with earlier deliverables, include links"** | The Assignment 1 lessons apply in full: full visible `https://…` URLs, none wrapping mid-path, each opened signed out from the built PDF (F1–F3 in the same file). Pin file links to the tagged final release, as the D2 report pinned them to a commit, so the marker sees what was submitted |
 | **R10** | **The peer evaluation weights the group mark** | Every member completes the Group Member Evaluation on Feedback Fruits before Monday of week 13, 23:59. It is individual and separate from the report, and the one submitter cannot do it for the others |
@@ -139,10 +139,10 @@ Recorded here rather than assumed.
 
 | # | Item | Why it matters |
 | --- | --- | --- |
-| **O1** | **Confirm the due date** from the LMS Unit Timetable. The team's own plan targets **13 October 2026** (M7 in [`plan.md`](../../docs/project/plan.md)) | The brief as transcribed gives none |
+| **O1** | ~~Confirm the due date~~ **Closed 9 Oct 2026:** due **Tuesday 13 October 2026, 11:59 pm (UTC+8)**, from the LMS. It falls on M7 in [`plan.md`](../../docs/project/plan.md), so the handover and the submission share a day | The brief as transcribed gave none |
 | **O2** | **Confirm how the peer evaluation weights the mark.** The Assignment 1 brief gave peer review 50%, client feedback 25% and facilitator feedback 25%, with the evaluation in week 12; this brief gives no split and sets the deadline before Monday of week 13 | Whether the 50 / 25 / 25 split still applies, and which deadline is right |
 | **O3** | **Confirm the calendar date of "Week 13's Monday"** from the LMS Unit Timetable | The brief gives a week, not a date, and the peer evaluation is missed if it is read wrongly |
-| **O4** | **Confirm the format and what the page limit counts.** The brief does not say PDF, though Assignment 1 was a single PDF through *Upload Files*; nor does it say whether the cover page, table of contents and references count towards the 5 pages | Over-length costs marks on 3.1 (R7) |
+| **O4** | **Confirm the format.** The brief does not say PDF, though Assignment 1 was a single PDF through *Upload Files*. **Page limit closed 9 Oct 2026:** the whole report is no more than 5 pages, so the cover page, table of contents and references count towards them | Over-length costs marks on 3.1 (R7) |
 | **O5** | **Check whether the unit sets an AI-use policy or an acknowledgement format**, and add it to this folder if so | 3.3 is new, and its card does not say what it is marked from |
 
 ---

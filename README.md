@@ -2,7 +2,7 @@
 
 **CITS5206 Professional Computing — Capstone Project, The University of Western Australia**
 **Client:** UWA Research Infrastructure
-**Status as of 8 October 2026:** Assignment 1 was submitted on 25 August and the project scope was signed by the client on 20 August. The technology decision is ASP.NET Core Razor Pages with EF Core — see [ADR-001](docs/decisions/adr-001-technology-stack.md). The latest committed plan records M1–M4 complete: the calculation engine, guided costing workflow, rate proposal and balance, and an end-to-end sealed PDF workflow. **Staging has been live since 30 September**, two days before M5's 2 October date, and the link went to the client the same day ([#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60)). The other half of M5, the client using it, is not recorded yet; the risk register tracks this as an active delivery risk. See [`docs/project/plan.md`](docs/project/plan.md), [`docs/project/risks.md`](docs/project/risks.md) and [`deploy/README.md`](deploy/README.md).
+**Status as of 8 October 2026:** Assignment 1 was submitted on 25 August and the project scope was signed by the client on 20 August. The technology decision is ASP.NET Core Razor Pages with EF Core — see [ADR-001](docs/decisions/adr-001-technology-stack.md). The latest committed plan records M1–M4 complete: the calculation engine, guided costing workflow, rate proposal and balance, and an end-to-end sealed PDF workflow. **Staging has been live since 30 September**, two days before M5's 2 October date, and the link went to the client the same day ([#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60)). The other half of M5, the client using it, is recorded: the client tested staging in all three roles and sent notes on 9 October ([summary](docs/client/communication-history/2026-10-09-client-testing-notes/README.md)). The final report is due 13 October 2026, 11:59 pm (UTC+8). See [`docs/project/plan.md`](docs/project/plan.md), [`docs/project/risks.md`](docs/project/risks.md) and [`deploy/README.md`](deploy/README.md).
 
 ---
 
@@ -106,7 +106,8 @@ Deployment is a standalone web application. Integration into existing UWA system
 discussed and deferred; a working website comes first.
 
 Role-based instructions for custodians, delegated approvers and administrators are in the
-[user manual](docs/user-manual.md).
+[user manual](docs/user-manual.md). What is handed over to UWA on 13 October, and the decisions left to it, are in the
+[handover document](docs/handover.md).
 
 ## Client sign-off
 
@@ -154,6 +155,7 @@ hard to tell apart in a single flat folder.
 ```
 ├── docs/
 │   ├── user-manual.md       Role-based guide for custodians, approvers and administrators
+│   ├── handover.md          The handover to UWA: what is handed over, and what UWA decides
 │   ├── spec/               What we are building
 │   │   ├── requirements.md     What the client needs, and what is still open
 │   │   ├── user-stories.md     Personas, epics, stories and acceptance criteria
@@ -371,8 +373,8 @@ forecast balance; and M4 completes the browser workflow through approval, sealin
 reopening the record. M4 was recorded as met on 24 September. The deployment package includes a
 first-release and rollback script, systemd service, Caddy HTTPS configuration, and scheduled
 SQLite backups. The rehearsal was completed on 25 September. Staging has been live since
-30 September, two days before M5's 2 October date, and the client has the link; whether the
-client has used it is not recorded yet. The project plan tracks
+30 September, two days before M5's 2 October date, and the client tested it in all three roles
+on 9 October ([summary](docs/client/communication-history/2026-10-09-client-testing-notes/README.md)). The project plan tracks
 milestones through final handover on 13 October: [`docs/project/plan.md`](docs/project/plan.md).
 
 ## Ownership

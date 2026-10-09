@@ -60,8 +60,6 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
     [BindProperty] public string? SalaryStep { get; set; }
 
-    [BindProperty] public string? SchoolType { get; set; }
-
     [BindProperty] public decimal BaseSalary { get; set; } = PlaceholderBaseSalary;
 
     [BindProperty] public string? Description { get; set; }
@@ -242,7 +240,7 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
         entry.PersonnelName = isPersonnel ? PersonnelName : null;
         entry.FundingType = isPersonnel ? FundingType : null;
-        entry.FellowshipType = isPersonnel && FundingType == "ARC Fellow" ? FellowshipType : null;
+        entry.FellowshipType = isPersonnel && FundingType == CostEntry.FundingTypes.ArcFellow ? FellowshipType : null;
         entry.StepOption = isPersonnel ? StepOption : null;
         entry.WorkYears = isPersonnel ? WorkYears : null;
         entry.EmploymentType = isPersonnel ? EmploymentType : null;
@@ -251,7 +249,8 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
         entry.StaffType = isPersonnel ? StaffType : null;
         entry.SalaryScale = isPersonnel ? SalaryScale : null;
         entry.SalaryStep = isPersonnel ? SalaryStep : null;
-        entry.SchoolType = isPersonnel ? SchoolType : null;
+        // No longer collected (client feedback, 9 October 2026); cleared when a line is saved.
+        entry.SchoolType = null;
         entry.BaseSalary = isPersonnel ? BaseSalary : null;
 
         entry.YearAmounts = amounts
@@ -284,7 +283,6 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
         StaffType = item.StaffType;
         SalaryScale = item.SalaryScale;
         SalaryStep = item.SalaryStep;
-        SchoolType = item.SchoolType;
         BaseSalary = item.BaseSalary ?? BaseSalary;
 
         var saved = item.YearAmounts.OrderBy(x => x.ProjectYear).Select(x => x.Amount).ToList();
@@ -356,8 +354,31 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
             {
                 ModelState.AddModelError(nameof(FundingType), "Funding type is required.");
             }
+            else if (!CostEntry.FundingTypes.All.Contains(FundingType))
+            {
+                ModelState.AddModelError(nameof(FundingType), "Select one of the listed funding types.");
+            }
 
-            if (FundingType == "ARC Fellow" && string.IsNullOrWhiteSpace(FellowshipType))
+            if (StaffType is not null && !CostEntry.SalaryScales.StaffTypes.Contains(StaffType))
+            {
+                ModelState.AddModelError(nameof(StaffType), "Select academic or professional staff.");
+            }
+
+            // Academic staff take Levels A–E and professional staff Levels 1–10; a posted
+            // level from the other set would be stored against the wrong scale.
+            if (!string.IsNullOrWhiteSpace(SalaryScale)
+                && !CostEntry.SalaryScales.For(StaffType).Contains(SalaryScale))
+            {
+                ModelState.AddModelError(nameof(SalaryScale),
+                    StaffType switch
+                    {
+                        CostEntry.SalaryScales.Professional => "Professional staff take a salary level from 1 to 10.",
+                        CostEntry.SalaryScales.Academic => "Academic staff take a salary level from A to E.",
+                        _ => "Select one of the listed salary levels."
+                    });
+            }
+
+            if (FundingType == CostEntry.FundingTypes.ArcFellow && string.IsNullOrWhiteSpace(FellowshipType))
             {
                 ModelState.AddModelError(nameof(FellowshipType), "Fellowship type is required for ARC Fellows.");
             }

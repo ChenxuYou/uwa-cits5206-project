@@ -111,6 +111,52 @@ public static class CostEntry
     }
 
     /// <summary>
+    /// The position funding types offered for a staff line. "LG funded" and "GP funded" were
+    /// added at the client's request after they tested staging (feedback of 9 October 2026).
+    /// </summary>
+    public static class FundingTypes
+    {
+        public const string ArcFellow = "ARC Fellow";
+
+        public static readonly string[] All =
+        [
+            ArcFellow,
+            "ARC Funded Position",
+            "Chief Investigator – UWA funded",
+            "LG funded",
+            "GP funded"
+        ];
+    }
+
+    /// <summary>
+    /// Salary scale levels by staff type: academic Levels A–E and professional Levels 1–10.
+    /// The stored codes keep the workbook's LVLA form; the label is what the form shows.
+    /// Steps within a level are not yet tied to a level, because the pay scale tables are
+    /// part of US-05 (salary pre-fill), which is not built.
+    /// </summary>
+    public static class SalaryScales
+    {
+        public const string Academic = "Academic";
+        public const string Professional = "Professional";
+
+        public static readonly string[] StaffTypes = [Academic, Professional];
+
+        public static readonly (string Code, string Label)[] AcademicLevels =
+            [.. "ABCDE".Select(x => ($"LVL{x}", $"Level {x}"))];
+
+        public static readonly (string Code, string Label)[] ProfessionalLevels =
+            [.. Enumerable.Range(1, 10).Select(x => ($"LVL{x}", $"Level {x}"))];
+
+        /// <summary>The levels a staff type may take; both sets when the type is not given.</summary>
+        public static IEnumerable<string> For(string? staffType) => staffType switch
+        {
+            Academic => AcademicLevels.Select(x => x.Code),
+            Professional => ProfessionalLevels.Select(x => x.Code),
+            _ => AcademicLevels.Concat(ProfessionalLevels).Select(x => x.Code)
+        };
+    }
+
+    /// <summary>
     /// The four non-variable income lines. The UWA / non-UWA split is <b>derived</b> from
     /// this list rather than stored, because the three formulas deduct different subsets
     /// and deriving them from one source means they cannot drift apart
@@ -447,6 +493,10 @@ public class RicCostEntry
     public string? StaffType { get; set; }
     public string? SalaryScale { get; set; }
     public string? SalaryStep { get; set; }
+    /// <summary>
+    /// Low or high cost school. No longer collected: the client confirmed on 9 October 2026
+    /// that it is not needed. Kept so lines entered before then still read as they were saved.
+    /// </summary>
     public string? SchoolType { get; set; }
     public decimal? BaseSalary { get; set; }
     public string? Description { get; set; }
