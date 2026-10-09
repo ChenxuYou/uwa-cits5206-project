@@ -8,7 +8,7 @@ the acceptance-testing evidence the final report needs
 | | |
 | --- | --- |
 | **Received** | Friday 9 October 2026, as a Word document of notes addressed to Group 13 |
-| **From** | UWA Research Infrastructure ([contacts](../../contacts.md)). Which of the two contacts wrote it is _to confirm_ |
+| **From** | Mathew Hall, Strategic Development Coordinator, UWA Research Infrastructure ([contacts](../../contacts.md)) |
 | **What was tested** | The staging server sent on 30 September ([#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60)), signed in as platform custodian, delegated approver and administrator, with the client entering their own test data |
 | **Build tested** | `feat/deployment_docker`, not `main` ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)) — see *Limits* below |
 | **Issue** | [#99](https://github.com/ChenxuYou/uwa-cits5206-project/issues/99) |
@@ -75,5 +75,5 @@ for the client in the [handover document](../../../handover.md) §3.
 | --- | --- | --- |
 | Merge items 3–5 to `main` after `dotnet test` passes | Chenxu You | Sat 10 Oct |
 | Redeploy staging from `main` and tell the client items 1 and 2 are visible there | Dai Lam La La | Sun 11 Oct |
-| Reply to the client: what changed, why salary pre-fill waits, Q11–Q16, and the handover document | Yichen Zhao | Mon 12 Oct |
+| Reply to the client: what changed, why salary pre-fill waits, Q11–Q16, and the handover document | Yichen Zhao | ✅ Done 9 Oct |
 | Close [#99](https://github.com/ChenxuYou/uwa-cits5206-project/issues/99) with a link to this record | Yichen Zhao | Mon 12 Oct |
