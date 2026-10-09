@@ -106,7 +106,8 @@ Deployment is a standalone web application. Integration into existing UWA system
 discussed and deferred; a working website comes first.
 
 Role-based instructions for custodians, delegated approvers and administrators are in the
-[user manual](docs/user-manual.md).
+[user manual](docs/user-manual.md). What is handed over to UWA on 13 October, and the decisions left to it, are in the
+[handover document](docs/handover.md).
 
 ## Client sign-off
 
@@ -154,6 +155,7 @@ hard to tell apart in a single flat folder.
 ```
 ├── docs/
 │   ├── user-manual.md       Role-based guide for custodians, approvers and administrators
+│   ├── handover.md          The handover to UWA: what is handed over, and what UWA decides
 │   ├── spec/               What we are building
 │   │   ├── requirements.md     What the client needs, and what is still open
 │   │   ├── user-stories.md     Personas, epics, stories and acceptance criteria
