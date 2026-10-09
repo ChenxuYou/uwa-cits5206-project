@@ -31,9 +31,11 @@
 #      deployed service as well as to development. It is accepted on 1 to 3,
 #      not on the hope of a different database.
 #
-# Review: at each risk review and at handover on 13 October 2026 — or sooner if
-# a patched SQLitePCLRaw is released. The first review date, 9 September 2026,
-# passed with hosting undecided.
-# Owner: Dai Lam La La (docs/project/risks.md R17a).
+# Reviewed 9 October 2026: the advisory still lists no patched version, 2.1.11
+# is still the version in use, and 2 to 4 still hold, so the exception stands.
+# (The first review date, 9 September 2026, had passed with hosting undecided.)
+# Next review: at handover, or sooner if a patched SQLitePCLRaw is released.
+# Owner: Dai Lam La La until handover; then UWA's service owner
+# (docs/project/risks.md R17a).
 # ---------------------------------------------------------------------------
 GHSA-2m69-gcr7-jv3q

@@ -7,7 +7,7 @@ CITS5206 Professional Computing capstone, The University of Western Australia â€
 | --- | --- |
 | **To** | UWA Research Infrastructure â€” Erika Slavin and Mathew Hall |
 | **From** | Chenxu You, Yichen Zhao, Wenmin Luo, Dai Lam La La, Jaswanth Vericherla |
-| **Handover date** | Tuesday 13 October 2026 (milestone M7) |
+| **Handover date** | Monday 12 October 2026 (milestone M7) |
 | **Prepared** | 9 October 2026 |
 | **Release** | `v1.0.0` on the `main` branch of [ChenxuYou/uwa-cits5206-project](https://github.com/ChenxuYou/uwa-cits5206-project) |
 
@@ -55,7 +55,7 @@ for Content Manager (TRIM). A sealed record can be superseded by a new cycle but
 | --- | --- | --- |
 | Must | All 18, US-01 to US-04, US-06 to US-19 | Delivered |
 | Should | US-20 approval by the delegated authority | Delivered |
-| Should | US-24 record the benchmarking | Delivered as a free-text field on the review |
+| Should | US-24 record the benchmarking | Partly: a free-text field on the rates step, shown to the approver and carried into the sealed record and its PDF. The guide's structured sources and prompts are not built |
 | Should | US-05 salary pre-fill, US-21 method configuration screen, US-23 replacement reserve | Not built |
 | Could | US-22 compare with the last cycle | Partly: a new cycle shows the previous sealed record's key figures beside it |
 | Could | US-25 price-change communication | Not built |
@@ -142,7 +142,7 @@ to be read cold.
 
 ## 6. Decisions UWA needs to make
 
-These cannot be settled by the team. Each one changes what happens after 13 October.
+These cannot be settled by the team. Each one changes what happens after handover.
 
 | # | Decision | Why it matters | The team's suggestion |
 | --- | --- | --- | --- |
