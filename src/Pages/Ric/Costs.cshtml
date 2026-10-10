@@ -145,7 +145,11 @@
                         </select>
                     </label>
                     <label class="field"><span>Salary Step</span><select asp-for="SalaryStep"><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option></select></label>
-                    <label class="field readonly-field"><span>Base Salary</span><input asp-for="BaseSalary" readonly /></label>
+                    @* The custodian enters the salary: the pay scales that would fill it in from the
+                       level and step are US-05, not built. The yearly increase only feeds the fill
+                       below and is not saved; the year amounts it produces are. *@
+                    <label class="field money-field"><span>Base salary (full-time, per year)</span><div><b>$</b><input asp-for="BaseSalary" id="baseSalary" type="number" min="0" step="0.01" /></div><small>Optional. Enter it to fill each year's amount below.</small></label>
+                    <label class="field"><span>Yearly salary increase (%)</span><input id="salaryIncrease" type="number" min="0" max="20" step="0.1" value="0" /><small>Applied from the second year. Not saved.</small></label>
                 </div>
             </section>
 
@@ -170,6 +174,10 @@
 
             <section class="detail-panel" id="yearPanel">
                 <h3>Cost by year</h3>
+                <div id="salaryFill" hidden>
+                    <p class="panel-note" id="salaryFillNote" aria-live="polite"></p>
+                    <button type="button" class="secondary-action" id="salaryFillButton">Fill years from salary</button>
+                </div>
                 <div class="year-grid">
                     @for (var i = 0; i < Model.YearCount; i++)
                     {
@@ -367,6 +375,7 @@
             positionField.hidden = !needsPosition; positionField.querySelector('select').disabled = !isPersonnel || !needsPosition;
             updateFellowship();
             updateFloorArea();
+            updateSalaryFill();
         }
         // Only the current scope's categories can be chosen: a capability takes directly
         // incurred costs, the platform directly allocated and indirect ones.
@@ -410,6 +419,55 @@
                 if (first) salaryScale.value = first.value;
             }
         }
+        // Each year the person works is base salary × percent worked × (1 + superannuation),
+        // raised by the yearly increase from the second year; later years are nil. The form
+        // fills the years while they hold nothing typed by hand, and the button refills them.
+        const baseSalary = document.getElementById('baseSalary');
+        const salaryIncrease = document.getElementById('salaryIncrease');
+        const percentWorked = document.getElementById('PercentWorked');
+        const superannuation = document.getElementById('SuperannuationPercent');
+        const workYears = document.getElementById('WorkYears');
+        const salaryFill = document.getElementById('salaryFill');
+        const salaryFillNote = document.getElementById('salaryFillNote');
+        const yearInputs = [...yearPanel.querySelectorAll('input[name^="YearAmounts"]')];
+        let typedByHand = yearInputs.some(input => Number(input.value) > 0);
+
+        function salaryByYear() {
+            const base = Number(baseSalary.value);
+            if (!(base > 0)) return null;
+            const share = (Number(percentWorked.value) || 0) / 100;
+            const onCost = 1 + (Number(superannuation.value) || 0) / 100;
+            const rise = 1 + (Number(salaryIncrease.value) || 0) / 100;
+            const years = Number(workYears.value) || 1;
+            return yearInputs.map((_, i) => i < years ? Math.round(base * share * onCost * Math.pow(rise, i) * 100) / 100 : 0);
+        }
+        function fillYears() {
+            const amounts = salaryByYear();
+            if (!amounts) return;
+            yearInputs.forEach((input, i) => input.value = amounts[i].toFixed(2));
+            typedByHand = false;
+            updateSalaryFill();
+        }
+        function updateSalaryFill() {
+            const isPersonnel = personnelCategories.includes(category.value);
+            salaryFill.hidden = !isPersonnel;
+            if (!isPersonnel) return;
+            const amounts = salaryByYear();
+            if (!amounts) {
+                salaryFillNote.textContent = 'Enter a base salary above to fill these from it, or type each year.';
+            } else if (typedByHand) {
+                salaryFillNote.textContent = 'These amounts were typed in or saved earlier. Fill years from salary to work them out again from the salary above.';
+            } else {
+                salaryFillNote.textContent = `Filled from the salary: ${money.format(Number(baseSalary.value))} × ${Number(percentWorked.value) || 0}% worked, plus ${Number(superannuation.value) || 0}% superannuation, for ${Number(workYears.value) || 1} year(s)${Number(salaryIncrease.value) > 0 ? `, rising ${Number(salaryIncrease.value)}% a year` : ''}. Change any year if needed; add other on-costs by hand.`;
+            }
+            document.getElementById('salaryFillButton').disabled = !amounts;
+        }
+        function salaryChanged() { if (!typedByHand) fillYears(); updateSalaryFill(); }
+        [baseSalary, salaryIncrease].forEach(input => input.addEventListener('input', salaryChanged));
+        [percentWorked, superannuation, workYears].forEach(input => input.addEventListener('change', salaryChanged));
+        yearInputs.forEach(input => input.addEventListener('input', () => { typedByHand = true; updateSalaryFill(); }));
+        document.getElementById('salaryFillButton').addEventListener('click', fillYears);
+
         function updateFellowship() { const visible = funding.value === arcFellow; fellowship.hidden = !visible; fellowshipSelect.disabled = !visible; if (!visible) fellowshipSelect.value = ''; }
 
         category.addEventListener('change', updateCategory);
