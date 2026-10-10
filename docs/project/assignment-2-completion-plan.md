@@ -2,12 +2,18 @@
 
 **Deliverable:** an individual report on your own contributions. **One PDF per member**, five in
 total — this is not a group submission.
-**Due:** Tuesday 29 September 2026, 11:59 pm (UTC+8) — **target upload 8:00 pm**
+**Due:** Tuesday 29 September 2026, 11:59 pm (UTC+8) — **target upload 8:00 pm** — **closed, the deadline has passed**
 **Written:** Sunday 13 September 2026 — **sixteen days**
 **Brief and rubric:** [`reference/unit/assignment-2-software-feature-report.md`](../../reference/unit/assignment-2-software-feature-report.md)
 **Companions:** [`plan.md`](plan.md) · [`team.md`](team.md) ·
 [`assignment-1-completion-plan.md`](assignment-1-completion-plan.md), whose shape this follows ·
 [`assignment-1/feedback.md`](../assignments/assignment-1/feedback.md), which is why §7 is as long as it is
+
+> ### 🔒 Closed — the deadline was 29 September 2026
+>
+> Each member was to upload their own PDF. Whether and when each did is not recorded in this
+> repository; the reports are individual and are kept by their authors.
+> **The plan below is a record, not a task list.**
 
 > **Who this is for.** Every member writes their own report, so the drafting in §5 is yours alone.
 > The three things that are *not* yours alone — facilitator access, the file-naming convention,
@@ -306,6 +312,7 @@ first three boxes below exist because of them.
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.3 | 8 Oct 2026 | Marked closed: the deadline of 29 September has passed. Kept as the record |
 | 1.2 | 16 Sep 2026 | The five technical layers agreed on 15 September ([minutes](../meetings/team/2026-09-15-team-meeting.md)) are folded in: Section 1 opens by naming your layer, A2-3's tie-breaker cites `plan.md` §3, and A2-5 is shared with every layer owner rather than the two members who used to write most of the code |
 | 1.1 | 13 Sep 2026 | Assignment 1's mark came back at 12/15 with two marks lost to unopenable links. §1 gains the rule that follows from it, §7 gains the cover page, the no-anchor-word and no-wrap checks, and A2-2 is rewritten from a warning into a recurrence. Diagnosis: [`docs/assignments/assignment-1/feedback.md`](../assignments/assignment-1/feedback.md) |
 | 1.0 | 13 Sep 2026 | Written the day the brief was transcribed, sixteen days out, so that the fortnight of S4 and S5 can be used to *create* evidence rather than only to describe it |

@@ -2,6 +2,7 @@
 
 **Status:** Accepted
 **Date:** 24 August 2026
+**Amended:** 8 October 2026 — the *Store* and *PDF export* rows, and the follow-on statuses, brought up to date
 **Deciders:** Chenxu You, Yichen Zhao, Wenmin Luo, Dai Lam La La, Jaswanth Vericherla
 **Supersedes:** the open decision gate in [`architecture.md` §9](../spec/architecture.md#9-how-the-decision-was-taken)
 **Related:** [`architecture.md` §8](../spec/architecture.md#8-options-assessed) (options A–E),
@@ -48,10 +49,10 @@ is recorded as **Option F** and added to the comparison in `architecture.md` §8
 | Runtime | .NET 10 (SDK version pinned in CI) |
 | Web | ASP.NET Core Razor Pages |
 | Data access | Entity Framework Core 10 |
-| Store | SQLite in development; the production store is decided with the hosting decision (9 Sep 2026) |
+| Store | SQLite, in development and in production: the single-server deployment on Ubuntu with systemd and Caddy in [`deploy/`](../../deploy/README.md), [`architecture.md` §9](../spec/architecture.md). Until 8 Oct this row said the production store would be decided with hosting on 9 Sep 2026 |
 | Authentication | Cookie authentication with ASP.NET Core Identity password hashing; role-based page policies |
 | Calculation engine | A plain C# class library with **no ASP.NET or EF dependency** |
-| PDF export | Server-side HTML → PDF, sharing one template with the on-screen record |
+| PDF export | MigraDoc, drawing the document from the sealed snapshot — [ADR-002](adr-002-pdf-generation.md), 13 Sep 2026. Until 8 Oct this row read "server-side HTML → PDF, sharing one template with the on-screen record" |
 | CI | GitHub Actions — restore, build, test; engine tests are the merge gate |
 
 ## Rationale
@@ -119,7 +120,7 @@ false one. Two things follow, and we do both rather than either:
 | --- | --- |
 | .NET 10 is very new; fewer worked examples, some libraries lag | Pin the SDK in CI; keep the dependency surface minimal (one NuGet package today); commit the lockfile; avoid preview-only features |
 | Less interactive polish than a SPA | Acceptable — the client asked for prompts and boxes. Richer interaction is added as progressive enhancement over working pages |
-| Production store still undecided | EF Core makes the provider a one-line change and no raw SQL is written. Decided with hosting on 9 Sep 2026 |
+| The production store was left open until 8 Oct | Settled as SQLite in [`architecture.md` §9](../spec/architecture.md). No raw SQL is written, so a later move to another provider changes configuration and migrations, not queries. Whether UWA IT's hosting requirements change it is part of [requirements Q14](../spec/requirements.md#9-open-questions) |
 | Framework knowledge concentrated in two members | Engine kept framework-independent; both developers pair on it; every PR reviewed by a second member |
 
 **Follow-on work created by this decision**
@@ -132,9 +133,9 @@ false one. Two things follow, and we do both rather than either:
 | 4 | Golden-file test against the client's worked example, wired as a CI merge gate | Jaswanth Vericherla | 4 Sep 2026 (**M1**) | ✅ **Done 2 Sep** — `tests/CostingTool.Engine.Tests` asserts $100.00 / $162.00 / $202.50 to the cent, plus the boundaries. The engine moved into `src/CostingTool.Engine`, a project with no package references at all, so the test suite reaches the arithmetic without touching EF or ASP.NET — R7 enforced by the compiler. `ci.yml` no longer warns that the gate is empty; `dotnet test` runs the solution and the formatting check is no longer `continue-on-error` |
 | 5 | Stop tracking `src/bin/` and `src/obj/` (`git rm -r --cached`) | Wenmin Luo | Before the next code commit | ✅ **Done 25 Aug** — 76 files untracked, files kept on disk, no history rewrite |
 | 6 | Replace the seeded demo credentials before anything is deployed to staging | Jaswanth Vericherla (from 15 Sep; was Chenxu You) | 2 Oct 2026 (**M5**) | ✅ **Done in code.** Demo accounts are seeded in Development only; a staging database starts empty apart from one bootstrap administrator from the server's environment, who must choose a new password at first sign-in (25 Sep), as must every account an administrator creates or resets. Checking the deployed instance is `plan.md` §5's accounts row |
-| 7 | Move pay scales, capacity baselines and the cost/income categories into `MethodConfig` alongside `k` | Wenmin Luo | 11 Sep 2026 (**M2**) | ⚠️ Outstanding, part-done and re-dated. `k`, the decimal places and the half-cent rule are configuration, and the categories are now named constants in one place (`Models/RicCostEntry`) rather than string literals repeated across the engine, the page models, the validation and the dropdown's JavaScript — which closes the drift risk even though it is not yet a database row. Pay scales and capacity baselines remain hard-coded |
+| 7 | Move pay scales, capacity baselines and the cost/income categories into `MethodConfig` alongside `k` | Wenmin Luo | 11 Sep 2026 (**M2**) | ⚠️ Outstanding, part-done and re-dated. `k`, the decimal places and the half-cent rule are configuration, and the categories are now named constants in one place (`Models/RicCostEntry`) rather than string literals repeated across the engine, the page models, the validation and the dropdown's JavaScript — which closes the drift risk even though it is not yet a database row. **Capacity baselines moved into `MethodConfig` on 21 Sep** — machine 251 days, staff 230, 7.5 hours a day. **Pay scales remain outside it:** the salary field shows a placeholder until US-05 is built |
 | 8 | Replace `EnsureCreated()` with EF Core migrations | Chenxu You (from 15 Sep; was Wenmin Luo) | 2 Oct 2026 (**M5**) | ✅ **Done 25 Sep.** Baseline migration in `src/Data/Migrations/`, applied at start-up; `MigrationTests` fails CI when the model changes without a migration |
-| 9 | **New.** Confirm two modelling decisions with the client that carry no source marker: whether a multi-year cost profile should be averaged into one annual figure, and whether the indirect-cost uplift is retained by the platform in the revenue projection | Wenmin Luo (from 15 Sep; was Dai Lam La La) | With the next question batch | ⚠️ Outstanding. Both surfaced while extracting the engine; both are commented in the code as ours rather than theirs |
+| 9 | **New.** Confirm two modelling decisions with the client that carry no source marker: whether a multi-year cost profile should be averaged into one annual figure, and whether the indirect-cost uplift is retained by the platform in the revenue projection | Wenmin Luo (from 15 Sep; was Dai Lam La La) | With the next question batch | ⚠️ Outstanding. Both surfaced while extracting the engine; both are commented in the code as ours rather than theirs. Recorded as [Q12 and Q13](../spec/requirements.md#9-open-questions) on 8 Oct; no answer recorded |
 
 ## Fallback trigger
 

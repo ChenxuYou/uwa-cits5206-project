@@ -97,7 +97,13 @@
                         </select>
                         <small>The workbook costs a capability's staff under these two roles. The platform leader's share of platform work goes under the platform-level "Platform leader salary and on-costs".</small>
                     </label>
-                    <label class="field"><span>Position funding type *</span><select asp-for="FundingType" id="fundingType"><option value="">Select</option><option>ARC Fellow</option><option>ARC Funded Position</option><option>Chief Investigator – UWA funded</option></select></label>
+                    <label class="field"><span>Position funding type *</span><select asp-for="FundingType" id="fundingType">
+                        <option value="">Select</option>
+                        @foreach (var fundingType in CostEntry.FundingTypes.All)
+                        {
+                            <option value="@fundingType">@fundingType</option>
+                        }
+                    </select></label>
                     <label class="field" id="fellowshipField" hidden><span>Fellowship Type *</span><select asp-for="FellowshipType" id="fellowshipType"><option value="">Select</option><option>DECRA</option><option>DIA</option><option>FT</option></select></label>
                     <label class="field"><span>Step/Option</span><select asp-for="StepOption"><option>100% option</option><option>75% option</option><option>50% option</option></select></label>
                     <label class="field">
@@ -112,10 +118,33 @@
                     <label class="field"><span>Employment Type</span><select asp-for="EmploymentType"><option>Ongoing</option><option>Fixed Term</option><option>Casual</option></select></label>
                     <label class="field"><span>Percent Worked</span><select asp-for="PercentWorked"><option value="100">100%</option><option value="80">80%</option><option value="60">60%</option><option value="50">50%</option><option value="20">20%</option></select></label>
                     <label class="field"><span>Superannuation</span><select asp-for="SuperannuationPercent"><option value="17">17%</option><option value="12">12%</option><option value="0">0%</option></select></label>
-                    <label class="field"><span>Staff Type</span><select asp-for="StaffType"><option>Academic</option><option>Professional</option></select></label>
-                    <label class="field"><span>Salary Scale</span><select asp-for="SalaryScale"><option>LVLA</option><option>LVLB</option><option>LVLC</option><option>LVLD</option><option>LVLE</option></select></label>
+                    <label class="field"><span>Staff Type</span>
+                        <select asp-for="StaffType" id="staffType">
+                            @foreach (var staffType in CostEntry.SalaryScales.StaffTypes)
+                            {
+                                <option value="@staffType">@staffType</option>
+                            }
+                        </select>
+                    </label>
+                    @* Academic Levels A–E and professional Levels 1–10; the script shows only the
+                       group for the chosen staff type, and the server checks the pair. *@
+                    <label class="field"><span>Salary Level</span>
+                        <select asp-for="SalaryScale" id="salaryScale">
+                            <optgroup label="Academic" data-staff="@CostEntry.SalaryScales.Academic">
+                                @foreach (var level in CostEntry.SalaryScales.AcademicLevels)
+                                {
+                                    <option value="@level.Code">@level.Label</option>
+                                }
+                            </optgroup>
+                            <optgroup label="Professional" data-staff="@CostEntry.SalaryScales.Professional">
+                                @foreach (var level in CostEntry.SalaryScales.ProfessionalLevels)
+                                {
+                                    <option value="@level.Code">@level.Label</option>
+                                }
+                            </optgroup>
+                        </select>
+                    </label>
                     <label class="field"><span>Salary Step</span><select asp-for="SalaryStep"><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option></select></label>
-                    <label class="field"><span>School Type</span><select asp-for="SchoolType"><option>Low cost school</option><option>High cost school</option></select></label>
                     <label class="field readonly-field"><span>Base Salary</span><input asp-for="BaseSalary" readonly /></label>
                 </div>
             </section>
@@ -316,6 +345,9 @@
         const funding = document.getElementById('fundingType');
         const fellowship = document.getElementById('fellowshipField');
         const fellowshipSelect = document.getElementById('fellowshipType');
+        const arcFellow = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(CostEntry.FundingTypes.ArcFellow));
+        const staffType = document.getElementById('staffType');
+        const salaryScale = document.getElementById('salaryScale');
 
         const floorArea = document.getElementById('floorAreaPanel');
         const yearPanel = document.getElementById('yearPanel');
@@ -364,11 +396,27 @@
         }
         document.getElementById('floorArea').addEventListener('input', updateFloorArea);
         document.getElementById('floorAreaRate').addEventListener('input', updateFloorArea);
-        function updateFellowship() { const visible = funding.value === 'ARC Fellow'; fellowship.hidden = !visible; fellowshipSelect.disabled = !visible; if (!visible) fellowshipSelect.value = ''; }
+        function updateSalaryLevels() {
+            // Show only the levels for the chosen staff type; keep the saved level if it fits.
+            let keep = false;
+            salaryScale.querySelectorAll('optgroup').forEach(group => {
+                const allowed = group.dataset.staff === staffType.value;
+                group.hidden = !allowed;
+                group.querySelectorAll('option').forEach(option => option.disabled = !allowed);
+                if (allowed && group.contains(salaryScale.selectedOptions[0])) keep = true;
+            });
+            if (!keep) {
+                const first = salaryScale.querySelector(`optgroup[data-staff="${staffType.value}"] option`);
+                if (first) salaryScale.value = first.value;
+            }
+        }
+        function updateFellowship() { const visible = funding.value === arcFellow; fellowship.hidden = !visible; fellowshipSelect.disabled = !visible; if (!visible) fellowshipSelect.value = ''; }
 
         category.addEventListener('change', updateCategory);
         scope.addEventListener('change', updateScope);
         funding.addEventListener('change', updateFellowship);
+        staffType.addEventListener('change', updateSalaryLevels);
+        updateSalaryLevels();
         updateScope();
     </script>
 }

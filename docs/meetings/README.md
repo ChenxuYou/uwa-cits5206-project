@@ -23,6 +23,7 @@ was with.
 | Wed 16 Sep 2026 | Facilitator: Assignment 1 result, links, managing the project | [facilitator/2026-09-16-facilitator-meeting.md](facilitator/2026-09-16-facilitator-meeting.md) | [deck](../../presentations/2026-09-16-facilitator-checkpoint.html) |
 | Tue 22 Sep 2026 | Client: deployment, and the working tool demonstrated | [client/2026-09-22-client-meeting.md](client/2026-09-22-client-meeting.md) | [deck](../../presentations/2026-09-22-client-meeting.html) |
 | Wed 23 Sep 2026 | Facilitator: progress check and the video demo | [facilitator/2026-09-23-facilitator-meeting.md](facilitator/2026-09-23-facilitator-meeting.md) | — |
+| Wed 30 Sep 2026 | Facilitator: discussion _to confirm_; the staging link sent to the client | [facilitator/2026-09-30-facilitator-meeting.md](facilitator/2026-09-30-facilitator-meeting.md) | — |
 
 **Not yet written up:**
 

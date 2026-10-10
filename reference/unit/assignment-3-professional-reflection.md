@@ -134,6 +134,9 @@ register — see
 
 ## 5. Open items on the brief
 
+> **8 October 2026:** the deadline of 29 September has passed. B2 and B3 are left as they stood,
+> as the record.
+
 Recorded here rather than assumed, because each one changes what goes in the PDF.
 
 | # | Item | Why it matters |

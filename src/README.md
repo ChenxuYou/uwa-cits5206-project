@@ -1,7 +1,9 @@
 # Research Infrastructure Costing Tool — application
 
 ASP.NET Core Razor Pages, targeting .NET 10, with EF Core over SQLite in development.
-Chosen and recorded in [ADR-001](../docs/decisions/adr-001-technology-stack.md).
+Chosen and recorded in [ADR-001](../docs/decisions/adr-001-technology-stack.md). Production uses
+SQLite too, deployed as in [`deploy/README.md`](../deploy/README.md). To *use* the tool rather
+than develop it, read the [user manual](../docs/user-manual.md).
 
 ---
 
@@ -44,7 +46,7 @@ warning; `dotnet dev-certs https --trust` clears it for good.
 | --- | --- |
 | **build** | Builds the solution. Also <kbd>Ctrl/Cmd</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd> |
 | **watch** | Runs the app and reloads it as you save — the fastest loop for UI work |
-| **test** | Runs the engine tests. Also `dotnet test` |
+| **test** | Runs every test project in the solution — the same as `dotnet test` |
 | **format** | Applies the formatting CI checks, so a pull request does not fail on whitespace |
 | **reset local database** | Deletes the local SQLite file; the migrations rebuild it on the next run |
 
@@ -89,8 +91,8 @@ redirects there (`Services/MustChangePasswordFilter.cs`).
 **What an administrator can and cannot do.** They see every cycle in the application and
 administer accounts — create, deactivate, reset a password. They cannot edit, submit or seal
 another person's cycle: those actions write a name into the record, and US-02, US-15 and
-US-16 depend on that name being the person who did the work. The role set beyond these three
-is [Q4](../docs/spec/requirements.md#9-open-questions), still open with the client. Accounts
+US-16 depend on that name being the person who did the work. These three roles are the ones
+the client confirmed on 20 August ([Q4](../docs/spec/requirements.md#9-open-questions)). Accounts
 are deactivated rather than deleted, because their names appear on the records they created.
 
 Passwords are never stored in plain text. ASP.NET Core's `PasswordHasher<AppUser>` creates a
@@ -216,8 +218,9 @@ rule R4.
 ### The method is versioned; never edit a version
 
 `k` (1.35 today), the rounding rule and the decimal places live in the `MethodConfigs`
-table, seeded as version `2026.1`. A cycle stamps its `MethodVersion` when it is sealed, and
-reopening a sealed record recalculates under **that** version. So:
+table, seeded as version `2026.1`. A cycle stamps its `MethodVersion` when it is sealed, and a
+sealed record's figures are read back from its snapshot, never recalculated — the version it
+names is the one they were worked out under. So:
 
 > **To change the factor, add a new row and move `IsCurrent`. Never edit an existing
 > version — sealed records point at it.**
@@ -298,12 +301,19 @@ come from `dotnet ef` as usual.
 
 ## Known gaps
 
-Recorded here rather than discovered later.
+Recorded here rather than discovered later. Open issues, including the stretch stories not
+built, are on [GitHub](https://github.com/ChenxuYou/uwa-cits5206-project/issues).
 
 | Gap | Where it is tracked |
 | --- | --- |
-| **The PDF export is a spike, not finished work.** `src/CostingTool.Pdf` renders a sealed record and the custodian can download it from the review page; it has not been reviewed by a second member, the approver has no link to it yet, and nobody has printed one on A4. US-16 closes in S5 | [ADR-002](../docs/decisions/adr-002-pdf-generation.md), follow-on actions |
-| **Pay scales, capacity baselines and category lists are not in `MethodConfig` yet.** `k` and the rounding rule are; the rest of rule R5 is not, so the salary field carries a placeholder rather than a looked-up figure | [ADR-001 action 7](../docs/decisions/adr-001-technology-stack.md) |
-| **`Amount` is the mean of the per-year figures.** Averaging a multi-year profile into one annual number is our decision, not the client's; it is commented where it happens and needs confirming | `Models/RicCycle.cs` |
-| **The revenue projection divides the uplift back out** of the APFR and commercial proposed rates. Preserved from the spike and documented in `RateEngine`, but it carries no source marker in any client document | `Services/RicCalculationService.cs` |
+| **The 30 September staging server does not run this code.** It was deployed from `feat/deployment_docker` (Docker Compose, PostgreSQL), which left `main` on 22 September and has not been merged back, so everything merged since — the Sealed records register, supersession, the forced password change — is missing there. A server deployed with [`deploy/`](../deploy/README.md) runs `main` | [#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101), following [#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60) |
+| **The folder rules in `Program.cs` have no automated test.** The identity tests build page models directly, which bypasses routing, so deleting `AuthorizeFolder("/Admin", …)` would leave every test green | [#86](https://github.com/ChenxuYou/uwa-cits5206-project/issues/86) |
+| **The approval page has no PDF link.** The custodian downloads the sealed PDF from the cycle's review page; approvers and administrators download it from the record in **Sealed records**. The A4 print check is not recorded | [#102](https://github.com/ChenxuYou/uwa-cits5206-project/issues/102); [ADR-002](../docs/decisions/adr-002-pdf-generation.md), follow-on actions 3 and 6 |
+| **Pay scales are not in `MethodConfig`.** `k`, the rounding rule and the capacity baselines are; the cost and income categories are named constants in `Models/RicCycle.cs` rather than configuration; and the salary field shows a placeholder base salary until US-05 | [ADR-001 action 7](../docs/decisions/adr-001-technology-stack.md), [#42](https://github.com/ChenxuYou/uwa-cits5206-project/issues/42), [#57](https://github.com/ChenxuYou/uwa-cits5206-project/issues/57) |
+| **`Amount` is the mean of the per-year figures.** Averaging a multi-year profile into one annual number is our decision, not the client's; it is commented where it happens and needs confirming | [#103](https://github.com/ChenxuYou/uwa-cits5206-project/issues/103); `Models/RicCycle.cs`, [requirements Q12](../docs/spec/requirements.md#9-open-questions) |
+| **The revenue projection divides the uplift back out** of the APFR and commercial proposed rates. Preserved from the spike and documented in `RateEngine`, but it carries no source marker in any client document | [#104](https://github.com/ChenxuYou/uwa-cits5206-project/issues/104); `Services/RicCalculationService.cs`, [requirements Q13](../docs/spec/requirements.md#9-open-questions) |
+| **Sealing happens on approval, not on the custodian's confirmation** as US-15 is worded | [#105](https://github.com/ChenxuYou/uwa-cits5206-project/issues/105), following [#32](https://github.com/ChenxuYou/uwa-cits5206-project/issues/32); [requirements Q11](../docs/spec/requirements.md#9-open-questions) |
+| **Nothing is deleted or withdrawn.** There is no way to delete a cycle or to withdraw a submission; an approver has to return it | [#107](https://github.com/ChenxuYou/uwa-cits5206-project/issues/107) |
+| **Notifications are in the application only.** No email is sent on submission, return or approval | [#108](https://github.com/ChenxuYou/uwa-cits5206-project/issues/108) |
+| **A superseded record's PDF is not marked as superseded.** Whether it should carry a watermark is for the client to decide | [#106](https://github.com/ChenxuYou/uwa-cits5206-project/issues/106); [requirements Q15](../docs/spec/requirements.md#9-open-questions) |
 | **`site.css` is minified** except the block at the end. Sections are expanded as they are next touched rather than in one unreviewable pass | — |

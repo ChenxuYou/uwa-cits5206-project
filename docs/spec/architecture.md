@@ -1,7 +1,7 @@
 # Architecture Vision
 
 **Project:** Research Infrastructure Costing & Pricing Tool
-**Status:** v2.2 — 25 August 2026. **Technology committed: ASP.NET Core Razor Pages with EF Core** — see §8 Option F, §9 and [ADR-001](../decisions/adr-001-technology-stack.md).
+**Status:** v2.3 — 8 October 2026. **Technology committed: ASP.NET Core Razor Pages with EF Core** — see §8 Option F, §9 and [ADR-001](../decisions/adr-001-technology-stack.md).
 **Companion documents:** [requirements](requirements.md) · [user stories](user-stories.md)
 
 > This document sets out the architecture we build, the options assessed for realising it, and
@@ -384,10 +384,11 @@ stops it being an option we reach for under pressure.
 - Golden-file verification against the client's worked example before any UI is written.
 - Server-side validation is authoritative.
 
-**The relational store is the one open sub-decision.** SQLite is the development store today.
-Whether production runs on SQLite or PostgreSQL is decided together with hosting on
-**9 September 2026** ([AQ2](#11-open-architectural-questions)); EF Core makes the provider a
-one-line change and no raw SQL is written anywhere, so deferring it costs nothing.
+**The relational store is SQLite, in development and in the rehearsed deployment.** The
+single-server deployment runs on Ubuntu with systemd and Caddy, with the database kept outside the
+release and backed up daily (see [`deploy/README.md`](../../deploy/README.md)). PostgreSQL was
+explored during deployment work but is not the checked-in configuration. EF Core makes the provider
+a one-line change and no raw SQL is written anywhere, so moving later remains cheap.
 
 ## 10. Delivery approach
 
@@ -416,9 +417,9 @@ unit tests for logic · reviewed by a second member · merged to main · deploye
 | # | Question | Blocks | Current position |
 | --- | --- | --- | --- |
 | ~~AQ1~~ | Per-capability rates, or one rate set per platform? | Data model shape | **Closed.** Per capability — the client's workbook computes an independent rate set for every capability column **[W, sheet 3]**. §4 and [A1](requirements.md#8-assumptions) updated |
-| AQ2 | Where will this be deployed after handover — UWA infrastructure, or team-provisioned? | Deployment, auth strategy | Team-provisioned for the MVP; documented so UWA can rehost |
-| AQ3 | Is UWA SSO available to us within the semester? | US-19 | Assume not; local auth with an SSO-shaped seam. F15 is in the MVP either way |
-| AQ4 | PDF generation approach | US-16 | Server-side HTML → PDF, so the export and the on-screen record share one template |
+| AQ2 | Where will this be deployed after handover — UWA infrastructure, or team-provisioned? | Deployment, auth strategy | **Answered in part, 22 Sep** ([minutes](../meetings/client/2026-09-22-client-meeting.md)): the team hosts staging on its own server until UWA IT provides a domain and resources, which the client is requesting. The single-server deployment in §9 is what UWA would rehost. Who runs it after handover is open — [requirements Q14](requirements.md#9-open-questions) |
+| ~~AQ3~~ | Is UWA SSO available to us within the semester? | US-19 | **Closed in practice.** Built as assumed: local sign-in behind an SSO-shaped seam (US-19, closed 27 Sep). SSO is next cycle's work ([`plan.md` §7](../project/plan.md)) |
+| ~~AQ4~~ | PDF generation approach | US-16 | **Closed 13 Sep** by [ADR-002](../decisions/adr-002-pdf-generation.md): MigraDoc, drawing the document from the sealed snapshot rather than from the live rows |
 | AQ5 | Does the client need cost data imported from an existing system? | Scope | No — manual entry, per [requirements §7](requirements.md#7-scope) |
 | AQ6 | How many capabilities must one screen handle before the per-capability rate table stops being readable? | UI shape of US-09, US-12 | The demonstration platform has seven **[W]**; design for a dozen, paginate beyond |
 
@@ -433,3 +434,4 @@ unit tests for logic · reviewed by a second member · merged to main · deploye
 | 2.0 | 14 Aug 2026 | **Realigned to requirements v2.0.** §3 golden-file fixtures replaced: the withdrawn walkthrough figures ($380,000 / $230,000 / $3,291 / $15,000, none of which appears in any client document) give way to the guide's worked example, $150,000 / $20,000 / $30,000 / 1,000 h → $100.00 / $162.00 / $202.50, plus a second fixture transcribed from a workbook capability. §4 data model reshaped: `RateSet` moves to `Capability`, income becomes a four-value enum with UWA/non-UWA derived, capacity references a configured baseline, and `ReplacementReserve`, `BenchmarkEntry` and `User` are added. New driver and engine rule **R8** against **N14**, the workbook's mismatched-column-range defect. §6 authentication contradiction resolved — F15 is a Must and the MVP authenticates. §10 build order moves identity into step 2 rather than step 6. **AQ1 closed** (per capability); AQ6 opened. §8 now says why Option E is unscored, and the v1.1 change-log entry is rewritten to say what it meant. |
 | 2.2 | 25 Aug 2026 | **The stack is decided: Option F, ASP.NET Core Razor Pages + EF Core** ([ADR-001](../decisions/adr-001-technology-stack.md)). §8 gains Option F and re-runs the weighted comparison including it — F leads at 151, separating from C on fit-to-skills alone, the one criterion for which there is now direct evidence rather than an estimate. B and C move from *live candidate* to *considered, not chosen*; C is rejected on language fit only, since F is the same architecture in C#. §9 is rewritten from a gate that had not closed into a record of how it closed, including the plain statement that **the spike preceded the decision record**. The line "PostgreSQL as the relational store" is withdrawn from the settled list: SQLite is the development store and the production store is decided with hosting on 9 September (AQ2). §1 and §3 no longer characterise the client's workbook as defective — the client has confirmed that **the guide governs** where the two disagree, and a line-by-line reconciliation of the calculator is deferred to a later cycle. No structural decision in §2–§7 changes. |
 | 2.1 | 15 Aug 2026 | **Synchronised with requirements v2.2.** §6's client-material control now states the rule directly — nothing the client gave us is committed without their agreement, enforced by [`.gitignore`](../../.gitignore) §1 — rather than deferring to an open question. Q-number references follow the renumbering in [requirements §9](requirements.md#9-open-questions), where old Q7–Q11 became Q6–Q10: the workbook-defect question is now **Q10**. No architectural decision changes. |
+| 2.3 | 8 Oct 2026 | **Brought up to date with what was built.** §9 states SQLite as the production store, in the single-server deployment of [`deploy/README.md`](../../deploy/README.md). AQ3 and AQ4 are closed — local sign-in as assumed, and the PDF by ADR-002 — and AQ2 records the hosting answer of 22 September and what it left open |
