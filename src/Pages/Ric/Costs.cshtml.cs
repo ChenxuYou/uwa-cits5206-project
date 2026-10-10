@@ -6,15 +6,6 @@ namespace CostingTool.Pages.Ric;
 
 public class CostsModel(CostingDbContext db) : RicPageModel(db)
 {
-    /// <summary>
-    /// Placeholder salary shown while the field is read-only.
-    ///
-    /// Salary pre-fill from the pay scales is US-05, a Should, and is not built — so this
-    /// is a stand-in, not a rate anyone should rely on. When US-05 lands, the figure comes
-    /// from the pay scale table in <c>MethodConfig</c> and this constant goes.
-    /// </summary>
-    private const decimal PlaceholderBaseSalary = 122_876m;
-
     [BindProperty] public int CycleId { get; set; }
 
     [BindProperty] public int? CapabilityId { get; set; }
@@ -60,7 +51,13 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
     [BindProperty] public string? SalaryStep { get; set; }
 
-    [BindProperty] public decimal BaseSalary { get; set; } = PlaceholderBaseSalary;
+    /// <summary>
+    /// The person's full-time salary for a year, as the custodian enters it. Optional: when
+    /// given, the form fills each year's amount from it (client feedback of 9 October 2026),
+    /// and the amounts stay editable. The pay scales that would fill this in from the level
+    /// and step are US-05, which is not built, so nothing is filled in for the custodian.
+    /// </summary>
+    [BindProperty] public decimal? BaseSalary { get; set; }
 
     [BindProperty] public string? Description { get; set; }
 
@@ -283,7 +280,7 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
         StaffType = item.StaffType;
         SalaryScale = item.SalaryScale;
         SalaryStep = item.SalaryStep;
-        BaseSalary = item.BaseSalary ?? BaseSalary;
+        BaseSalary = item.BaseSalary;
 
         var saved = item.YearAmounts.OrderBy(x => x.ProjectYear).Select(x => x.Amount).ToList();
         YearAmounts = Enumerable.Range(0, YearCount).Select(i => i < saved.Count ? saved[i] : 0m).ToList();
@@ -378,6 +375,11 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
                     });
             }
 
+            if (BaseSalary is <= 0)
+            {
+                ModelState.AddModelError(nameof(BaseSalary), "Enter the base salary in dollars, greater than zero, or leave it blank.");
+            }
+
             if (FundingType == CostEntry.FundingTypes.ArcFellow && string.IsNullOrWhiteSpace(FellowshipType))
             {
                 ModelState.AddModelError(nameof(FellowshipType), "Fellowship type is required for ARC Fellows.");
@@ -462,6 +464,7 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
             {
                 nameof(FloorArea) => "Floor area",
                 nameof(FloorAreaRate) => "Rate per m²",
+                nameof(BaseSalary) => "Base salary",
                 _ => null
             },
             "a number, such as 120 or 450.00");

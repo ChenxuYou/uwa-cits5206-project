@@ -13,7 +13,8 @@ namespace CostingTool.Web.Tests;
 /// <summary>
 /// The staff fields of a cost line, as changed after the client tested staging (feedback of
 /// 9 October 2026): professional Levels 1–10 alongside academic Levels A–E, "LG funded" and
-/// "GP funded" as funding types, and no low or high cost school.
+/// "GP funded" as funding types, no low or high cost school, and a base salary the custodian
+/// enters, from which the form fills each year.
 /// </summary>
 public class StaffFieldsTests
 {
@@ -156,5 +157,72 @@ public class StaffFieldsTests
 
         Assert.IsType<RedirectToPageResult>(result);
         Assert.Null(db.RicCostEntries.Single().SchoolType);
+    }
+
+    [Fact]
+    public async Task ANewStaffLineStartsWithNoBaseSalary()
+    {
+        await using var db = CreateDb();
+        var page = new CostsModel(db) { PageContext = SignedInAsEntry() };
+
+        await page.OnGetAsync(db.RicCycles.Single().Id);
+
+        Assert.Null(page.BaseSalary);
+    }
+
+    [Fact]
+    public async Task AStaffLineWithoutABaseSalaryIsSavedWithoutOne()
+    {
+        await using var db = CreateDb();
+
+        await StaffLine(db, CostEntry.SalaryScales.Academic, "LVLB").OnPostAddAsync();
+
+        Assert.Null(db.RicCostEntries.Single().BaseSalary);
+    }
+
+    [Fact]
+    public async Task AnEnteredBaseSalaryIsSavedAndComesBackWhenTheLineIsChanged()
+    {
+        await using var db = CreateDb();
+        var add = StaffLine(db, CostEntry.SalaryScales.Professional, "LVL6");
+        add.BaseSalary = 92_500m;
+        await add.OnPostAddAsync();
+        var line = db.RicCostEntries.Single();
+
+        var page = new CostsModel(db) { PageContext = SignedInAsEntry() };
+        await page.OnGetAsync(line.RicCycleId, line.Id);
+
+        Assert.Equal(92_500m, line.BaseSalary);
+        Assert.Equal(92_500m, page.BaseSalary);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public async Task ABaseSalaryOfZeroOrLessIsRefused(decimal baseSalary)
+    {
+        await using var db = CreateDb();
+        var page = StaffLine(db, CostEntry.SalaryScales.Academic, "LVLB");
+        page.BaseSalary = baseSalary;
+
+        var result = await page.OnPostAddAsync();
+
+        Assert.IsType<PageResult>(result);
+        Assert.Contains("Enter the base salary in dollars, greater than zero, or leave it blank.", Errors(page));
+        Assert.Empty(db.RicCostEntries);
+    }
+
+    [Fact]
+    public async Task ABaseSalaryIsNotKeptOnALineThatIsNotStaff()
+    {
+        await using var db = CreateDb();
+        var page = StaffLine(db, CostEntry.SalaryScales.Academic, "LVLB");
+        page.Category = "Materials and supplies";
+        page.Description = "Reagents";
+        page.BaseSalary = 92_500m;
+
+        await page.OnPostAddAsync();
+
+        Assert.Null(db.RicCostEntries.Single().BaseSalary);
     }
 }
