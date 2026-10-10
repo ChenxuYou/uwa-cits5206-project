@@ -82,8 +82,11 @@ Add operating costs by category. For each line:
 For a staff line, choose the position funding type (ARC Fellow, ARC Funded Position, Chief
 Investigator – UWA funded, LG funded or GP funded) and the staff type. Academic staff take a
 salary level from A to E and professional staff a level from 1 to 10; the level list changes
-with the staff type. The base salary is not yet filled in from the pay scales, so enter the
-yearly amounts yourself.
+with the staff type. The base salary is not yet filled in from the pay scales: enter the
+person's full-time salary for a year, and each year they work is filled in as that salary ×
+percent worked, plus superannuation, rising by the yearly increase if you give one. Change any
+year as needed; once a year has been typed in, select **Fill years from salary** to work them
+out again. Leave the base salary blank to type every year yourself.
 
 To correct a saved line, select **Edit** beside it, change any field and save; the line is
 updated in place rather than added again. A capability named wrongly on step 1 can be renamed

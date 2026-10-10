@@ -51,7 +51,7 @@ All six concern the custodian's platform and cost steps.
 | 3 | Professional staff salary Levels 1–10, alongside academic Levels A–E | **Done 9 Oct** |
 | 4 | Drop the low or high cost school field — it came from the example calculator and is not needed | **Done 9 Oct** |
 | 5 | Add "LG funded" and "GP funded" as position funding types | **Done 9 Oct**, with the client's wording. Their meaning is put to the client as [Q16](../../../spec/requirements.md#9-open-questions) |
-| 6 | Fill each year's salary in automatically for the years selected, still editable | **Not built.** This is US-05 ([#42](https://github.com/ChenxuYou/uwa-cits5206-project/issues/42)) and needs UWA's pay scales. Recorded for after handover |
+| 6 | Fill each year's salary in automatically for the years selected, still editable | **Partly done 10 Oct.** Each year is filled from a base salary the custodian enters, and stays editable. Filling the salary from the level and step is US-05 ([#42](https://github.com/ChenxuYou/uwa-cits5206-project/issues/42)) and needs UWA's pay scales. Recorded for after handover |
 
 Items 3–5 were merged to `main` on 9 October in [#110](https://github.com/ChenxuYou/uwa-cits5206-project/pull/110), with tests, and are described
 for the client in the [handover document](../../../handover.md) §3.

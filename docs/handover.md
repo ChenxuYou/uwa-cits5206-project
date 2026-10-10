@@ -77,7 +77,7 @@ They asked for six changes:
 | Professional staff Levels 1–10 alongside academic Levels A–E | **Done.** The level list follows the staff type, and the server refuses a level from the other scale |
 | Remove the low or high cost school field | **Done.** No longer asked. Lines saved before the change keep the value they were saved with until next edited |
 | Add "LG funded" and "GP funded" as position funding types | **Done**, using the client's wording. See Q16 below |
-| Fill each year's salary in from the pay scales, still editable | **Not built.** This is US-05. It needs UWA's current academic and professional pay scales, which are not in the material we hold; see §7 |
+| Fill each year's salary in from the pay scales, still editable | **Partly done.** The custodian enters a base salary, and each year the person works is filled from it, with percent worked, superannuation and an optional yearly increase; every year stays editable. Filling the salary itself from the level and step is US-05, which needs UWA's current academic and professional pay scales; see §7 |
 
 The first two were already on `main` when the client tested, but not on the staging server,
 which was deployed from an earlier branch (§4).
@@ -173,7 +173,7 @@ The full list, with the reasoning and sources, is in
 In order of what we would do next:
 
 1. **Redeploy staging from this release** (§4), so that what the client sees is what is handed over.
-2. **Salary pre-fill (US-05).** Load UWA's academic and professional pay scales into the method configuration, tie the salary steps to each level (the step list is currently 01–05 for every level), and fill each year's amount from the level, step, FTE and superannuation, left editable. Needs the current pay scales from UWA.
+2. **Salary pre-fill (US-05).** Load UWA's academic and professional pay scales into the method configuration, tie the salary steps to each level (the step list is currently 01–05 for every level), so the base salary is filled from the level and step instead of typed. The years already fill from the base salary, FTE and superannuation, left editable. Needs the current pay scales from UWA.
 3. **Reconcile the client's calculator line by line** against the engine. The guide governs where they disagree; the commercial-rate divergence is already answered.
 4. **Test the folder access rules through routing** ([#86](https://github.com/ChenxuYou/uwa-cits5206-project/issues/86)). The rules work, but removing one would not fail a test.
 5. **A PDF link on the approval page** and a recorded A4 print check ([#102](https://github.com/ChenxuYou/uwa-cits5206-project/issues/102)).
