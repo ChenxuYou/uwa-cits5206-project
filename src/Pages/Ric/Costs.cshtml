@@ -327,7 +327,13 @@
         </div>
     </form>
 
-    <div class="wizard-actions"><a href="/" class="secondary-action">Save &amp; exit</a><a class="primary-button" asp-page="/Ric/Funding" asp-route-cycleId="@Model.Cycle.Id">Continue to funding sources →</a></div>
+    @* The way back to step 1 is in the step bar as well, but the client reported no way back
+       from this step to correct a capability name (feedback of 9 October 2026). Funding has
+       the same "back" link at its foot. *@
+    <div class="wizard-actions">
+        <a class="secondary-action" asp-page="/Ric/Start" asp-route-cycleId="@Model.Cycle.Id">← Back to platform</a>
+        <div class="wizard-actions-end"><a href="/" class="secondary-action">Save &amp; exit</a><a class="primary-button" asp-page="/Ric/Funding" asp-route-cycleId="@Model.Cycle.Id">Continue to funding sources →</a></div>
+    </div>
 </div>
 
 @functions {

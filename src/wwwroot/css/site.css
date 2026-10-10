@@ -833,6 +833,16 @@ a.ric-step-link:focus-visible {
 }
 .edit-actions .add-detail-button { margin-top: 0; }
 
+/* Two actions kept together at the right of a step's foot, with "back" on its own at the left. */
+.wizard-actions-end {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+@media (max-width: 600px) {
+    .wizard-actions, .wizard-actions-end { flex-wrap: wrap; gap: 10px; }
+}
+
 /* A cycle set against the sealed record it replaces (US-01), and where a draft was left (US-02). */
 .replace-note {
     margin: 14px 28px 0;

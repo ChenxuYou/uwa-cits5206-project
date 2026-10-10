@@ -154,6 +154,25 @@ public static class CostEntry
             Professional => ProfessionalLevels.Select(x => x.Code),
             _ => AcademicLevels.Concat(ProfessionalLevels).Select(x => x.Code)
         };
+
+        /// <summary>
+        /// A saved level and step in words for a screen, such as "Level 7, step 02", rather
+        /// than the stored "LVL7-02". A code from neither list is shown as it was stored.
+        /// </summary>
+        public static string? Describe(string? code, string? step)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                return null;
+            }
+
+            var label = AcademicLevels.Concat(ProfessionalLevels)
+                .Where(x => x.Code == code)
+                .Select(x => x.Label)
+                .FirstOrDefault() ?? code;
+
+            return string.IsNullOrWhiteSpace(step) ? label : $"{label}, step {step}";
+        }
     }
 
     /// <summary>

@@ -14,7 +14,7 @@ namespace CostingTool.Web.Tests;
 /// The staff fields of a cost line, as changed after the client tested staging (feedback of
 /// 9 October 2026): professional Levels 1–10 alongside academic Levels A–E, "LG funded" and
 /// "GP funded" as funding types, no low or high cost school, and a base salary the custodian
-/// enters, from which the form fills each year.
+/// enters, from which the form fills each year — every year of the cycle unless fewer are chosen.
 /// </summary>
 public class StaffFieldsTests
 {
@@ -168,6 +168,54 @@ public class StaffFieldsTests
         await page.OnGetAsync(db.RicCycles.Single().Id);
 
         Assert.Null(page.BaseSalary);
+    }
+
+    [Fact]
+    public async Task ANewStaffLineStartsAtEveryYearOfTheCycle()
+    {
+        await using var db = CreateDb();
+        var page = new CostsModel(db) { PageContext = SignedInAsEntry() };
+
+        await page.OnGetAsync(db.RicCycles.Single().Id);
+
+        Assert.Equal(2, page.WorkYears);
+    }
+
+    [Fact]
+    public async Task AStaffLineKeepsTheWorkYearsItWasSavedWith()
+    {
+        await using var db = CreateDb();
+        var add = StaffLine(db, CostEntry.SalaryScales.Academic, "LVLB");
+        add.WorkYears = 1;
+        await add.OnPostAddAsync();
+        var line = db.RicCostEntries.Single();
+
+        var page = new CostsModel(db) { PageContext = SignedInAsEntry() };
+        await page.OnGetAsync(line.RicCycleId, line.Id);
+
+        Assert.Equal(1, line.WorkYears);
+        Assert.Equal(1, page.WorkYears);
+    }
+
+    [Fact]
+    public async Task AStaffLineSentWithoutWorkYearsIsSavedForTheWholeCycle()
+    {
+        await using var db = CreateDb();
+
+        await StaffLine(db, CostEntry.SalaryScales.Academic, "LVLB").OnPostAddAsync();
+
+        Assert.Equal(2, db.RicCostEntries.Single().WorkYears);
+    }
+
+    [Theory]
+    [InlineData("LVL7", "02", "Level 7, step 02")]
+    [InlineData("LVLB", "01", "Level B, step 01")]
+    [InlineData("LVL10", null, "Level 10")]
+    [InlineData("HEW5", "03", "HEW5, step 03")]
+    [InlineData(null, "01", null)]
+    public void ASavedLevelAndStepAreShownInWords(string? code, string? step, string? expected)
+    {
+        Assert.Equal(expected, CostEntry.SalaryScales.Describe(code, step));
     }
 
     [Fact]

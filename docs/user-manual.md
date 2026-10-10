@@ -84,13 +84,16 @@ Investigator – UWA funded, LG funded or GP funded) and the staff type. Academi
 salary level from A to E and professional staff a level from 1 to 10; the level list changes
 with the staff type. The base salary is not yet filled in from the pay scales: enter the
 person's full-time salary for a year, and each year they work is filled in as that salary ×
-percent worked, plus superannuation, rising by the yearly increase if you give one. Change any
-year as needed; once a year has been typed in, select **Fill years from salary** to work them
-out again. Leave the base salary blank to type every year yourself.
+percent worked, plus superannuation, rising by the yearly increase if you give one. **Work
+Years** starts at the whole pricing period; lower it for someone who works only the first year
+or two, and the later years are left at nil. Change any year as needed; once a year has been
+typed in, select **Fill years from salary** to work them out again. Leave the base salary blank
+to type every year yourself.
 
 To correct a saved line, select **Edit** beside it, change any field and save; the line is
 updated in place rather than added again. A capability named wrongly on step 1 can be renamed
-there: select **Platform** in the step bar at any time.
+there: select **← Back to platform** at the foot of the costs step, or **Platform** in the step
+bar at any time.
 
 Review the running totals. Capability costs are directly incurred; platform-level costs are
 allocated evenly across the capabilities. The screen shows the allocation and checks that the
