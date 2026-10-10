@@ -120,7 +120,7 @@
             {
                 var capability = Model.Cycle.Capabilities.FirstOrDefault(x=>x.Id==item.RicCapabilityId)?.Name ?? "Whole platform";
                 var source = CostEntry.CostCategories.IsPersonnel(item.Category)
-                    ? string.Join(" · ", new[]{item.PersonnelName,item.Position,item.FundingType,item.FellowshipType,item.EmploymentType,item.StaffType,item.SalaryScale is null?null:$"{item.SalaryScale}-{item.SalaryStep}",item.StepOption,item.SchoolType,item.PercentWorked is null?null:$"{item.PercentWorked:N0}% FTE",item.SuperannuationPercent is null?null:$"{item.SuperannuationPercent:N0}% super"}.Where(x=>!string.IsNullOrWhiteSpace(x)))
+                    ? string.Join(" · ", new[]{item.PersonnelName,item.Position,item.FundingType,item.FellowshipType,item.EmploymentType,item.StaffType,CostEntry.SalaryScales.Describe(item.SalaryScale,item.SalaryStep),item.StepOption,item.SchoolType,item.PercentWorked is null?null:$"{item.PercentWorked:N0}% FTE",item.SuperannuationPercent is null?null:$"{item.SuperannuationPercent:N0}% super"}.Where(x=>!string.IsNullOrWhiteSpace(x)))
                     : CostEntry.CostCategories.IsFloorArea(item.Category) && item.FloorArea is not null
                     ? $"{item.FloorArea:N1} m² × {item.FloorAreaRate:C} per m² per year"
                     : string.Join(" · ", new[]{item.Supplier,item.Description}.Where(x=>!string.IsNullOrWhiteSpace(x)));

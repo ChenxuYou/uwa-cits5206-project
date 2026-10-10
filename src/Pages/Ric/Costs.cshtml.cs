@@ -37,7 +37,13 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
 
     [BindProperty] public string? StepOption { get; set; }
 
-    [BindProperty] public int WorkYears { get; set; } = 1;
+    /// <summary>
+    /// How many years of the cycle the person works, from the first. A new staff line starts
+    /// at the whole cycle, so a base salary fills every year without another choice (client
+    /// feedback of 9 October 2026 asked for each year of the cycle to be filled). Set in
+    /// <see cref="Load"/> when the form did not send it.
+    /// </summary>
+    [BindProperty] public int? WorkYears { get; set; }
 
     [BindProperty] public string? EmploymentType { get; set; }
 
@@ -478,6 +484,7 @@ public class CostsModel(CostingDbContext db) : RicPageModel(db)
         }
 
         CycleId = cycleId;
+        WorkYears ??= YearCount;
 
         // Every handler that shows the page again — a refused cost line, say — keeps what the
         // record holds in the costing assumptions box rather than showing it empty.
