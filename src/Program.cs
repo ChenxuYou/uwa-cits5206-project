@@ -116,6 +116,8 @@ builder.Services.Configure<PasswordHasherOptions>(options =>
 });
 builder.Services.AddScoped<IPasswordHasher<AppUser>, PasswordHasher<AppUser>>();
 
+builder.Services.AddSignInRateLimit();
+
 var app = builder.Build();
 
 // First, so that everything after it sees the client's address and scheme, not the proxy's (M3).

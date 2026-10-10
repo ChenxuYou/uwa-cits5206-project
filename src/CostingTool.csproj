@@ -44,6 +44,9 @@
     ItemGroup entirely. Tracked in plan.md §6, owned and dated, not left as a comment.
   -->
   <ItemGroup>
+    <Compile Remove="Data\Migrations\20260925120000_Baseline.cs" />
+    <Compile Remove="Data\Migrations\20260925120000_Baseline.Designer.cs" />
+
     <Compile Remove="CostingTool.Engine\**" />
     <Content Remove="CostingTool.Engine\**" />
     <EmbeddedResource Remove="CostingTool.Engine\**" />

@@ -1,9 +1,9 @@
+using System.Data.Common;
 using System.Net;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.Data.Sqlite;
 
 namespace CostingTool.Data;
 
@@ -35,7 +35,16 @@ public static class Hosting
     /// </summary>
     public static string DatabasePath(string connectionString, IHostEnvironment environment)
     {
-        var dataSource = new SqliteConnectionStringBuilder(connectionString).DataSource;
+        var connection = new DbConnectionStringBuilder { ConnectionString = connectionString };
+        var dataSource = string.Empty;
+        foreach (var keyword in new[] { "Data Source", "DataSource", "Filename" })
+        {
+            if (connection.TryGetValue(keyword, out var value))
+            {
+                dataSource = Convert.ToString(value) ?? string.Empty;
+                break;
+            }
+        }
 
         if (!environment.IsDevelopment()
             && (string.IsNullOrWhiteSpace(dataSource) || dataSource == ":memory:" || !Path.IsPathRooted(dataSource)))
