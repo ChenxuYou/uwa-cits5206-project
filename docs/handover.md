@@ -72,12 +72,12 @@ They asked for six changes:
 
 | Requested | Outcome |
 | --- | --- |
-| Return to step 1 from the costs step, to correct a capability name | **Done.** Every completed step in the step bar is a link, and step 1 renames or removes capabilities |
+| Return to step 1 from the costs step, to correct a capability name | **Done.** The costs step has **← Back to platform** at its foot, every completed step in the step bar is a link, and step 1 renames or removes capabilities |
 | Edit a saved cost line instead of deleting it and adding it again | **Done.** Each line has an **Edit** link; the line is changed in place and held to the same checks as a new one |
 | Professional staff Levels 1–10 alongside academic Levels A–E | **Done.** The level list follows the staff type, and the server refuses a level from the other scale |
 | Remove the low or high cost school field | **Done.** No longer asked. Lines saved before the change keep the value they were saved with until next edited |
 | Add "LG funded" and "GP funded" as position funding types | **Done**, using the client's wording. See Q16 below |
-| Fill each year's salary in from the pay scales, still editable | **Partly done.** The custodian enters a base salary, and each year the person works is filled from it, with percent worked, superannuation and an optional yearly increase; every year stays editable. Filling the salary itself from the level and step is US-05, which needs UWA's current academic and professional pay scales; see §7 |
+| Fill each year's salary in from the pay scales, still editable | **Partly done.** The custodian enters a base salary, and each year the person works is filled from it, with percent worked, superannuation and an optional yearly increase. Work years starts at the whole pricing period, so a three-year cycle fills all three years; every year stays editable. Filling the salary itself from the level and step is US-05, which needs UWA's current academic and professional pay scales; see §7 |
 
 The first two were already on `main` when the client tested, but not on the staging server,
 which was deployed from an earlier branch (§4).
