@@ -8,12 +8,13 @@ CITS5206 Professional Computing capstone, The University of Western Australia �
 | **To** | UWA Research Infrastructure — Erika Slavin and Mathew Hall |
 | **From** | Chenxu You, Yichen Zhao, Wenmin Luo, Dai Lam La La, Jaswanth Vericherla |
 | **Handover date** | Monday 12 October 2026 (milestone M7) |
-| **Prepared** | 9 October 2026 |
+| **Prepared** | 11 October 2026 |
 | **Release** | `v1.0.0` on the `main` branch of [ChenxuYou/uwa-cits5206-project](https://github.com/ChenxuYou/uwa-cits5206-project) |
 
 This document is the formal handover of the tool to UWA Research Infrastructure. It says what
 is being handed over, what state it is in, what UWA needs to decide to run it, and what is
 still open. Every statement links to the document in the repository that holds the detail.
+A one-page version for sign-off is in [`handover-summary.md`](handover-summary.md).
 
 ---
 
@@ -24,12 +25,12 @@ still open. Every statement links to the document in the repository that holds t
 | The application — ASP.NET Core Razor Pages on .NET 10, with EF Core and SQLite | [`src/`](../src/), how to run it in [`src/README.md`](../src/README.md) |
 | The calculation engine, separate from the web application and with no database or UI dependency | [`src/CostingTool.Engine/`](../src/CostingTool.Engine/) |
 | Automated tests — engine, sealed-record PDF and web workflow; the client's worked example is asserted to the cent | [`tests/`](../tests/), run on every push by [CI](../.github/workflows/ci.yml) |
-| User manual for platform custodians, delegated approvers and administrators | [`docs/user-manual.md`](user-manual.md) |
+| User manual for platform custodians, delegated approvers and administrators, with screenshots | [`docs/user-manual.md`](user-manual.md) |
 | Deployment runbook: one Ubuntu server, HTTPS, daily backups, restore and rollback | [`deploy/README.md`](../deploy/README.md) |
 | Requirements, user stories and architecture, with the source of every rule marked | [`docs/spec/`](spec/) |
 | Decision records — technology stack and PDF generation | [`docs/decisions/`](decisions/) |
 | Ownership and the permission granted to UWA | [`NOTICE`](../NOTICE) |
-| The staging server, live since 30 September 2026 | Address and accounts sent to the client by email on 30 September; not recorded in this public repository |
+| The staging server, running this release since 11 October 2026 | Address and accounts sent to the client by email; not recorded in this public repository |
 
 ## 2. What the tool does
 
@@ -94,17 +95,15 @@ The staging server was set up by the team on 30 September 2026, with the client'
 22 September that the team may host it until UWA IT provides a domain and resources. It is
 reached by IP address, so browsers show a certificate warning.
 
-**It does not run this release.** It was deployed from the branch `feat/deployment_docker`
-(Docker Compose and PostgreSQL), which left `main` on 22 September. Everything since — editing
-a line, renaming a capability, the staff-field changes in §3, the sealed records register,
-supersession and the forced password change — is missing there
-([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)).
+**It runs this release.** On 11 October 2026 it was redeployed from `main` with
+[`deploy/README.md`](../deploy/README.md), and the regression pass was run on it in all three
+roles ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)). Until then it ran
+the branch `feat/deployment_docker` (Docker Compose and PostgreSQL), which is what the client
+tested on 9 October.
 
-To bring it up to this release, the server is redeployed from `main` with
-[`deploy/README.md`](../deploy/README.md). That runbook uses SQLite, so **figures entered on the
-current staging server do not carry over**. They are test figures only — real platform figures
-have not been cleared for a team-held server (Q14) — so they are recorded for reference before
-the switch and the client re-enters what they need.
+The runbook uses SQLite, so **figures entered on the earlier staging server did not carry
+over**. They were test figures only — real platform figures have not been cleared for a
+team-held server (Q14) — and the client re-enters what they need.
 
 ### Production
 
@@ -151,6 +150,8 @@ These cannot be settled by the team. Each one changes what happens after handove
 | Q14c | **Whether UWA IT requires a managed database** | Decides between this release's SQLite and the PostgreSQL branch | SQLite is sufficient for a handful of custodians and is simpler to back up; change only if UWA IT requires it |
 | Q14d | **Whether real platform figures may go on the team-held server** | Until answered, staging holds test figures only | Test figures only until the tool is on UWA infrastructure |
 | Q8 | **The repository licence** | The IP is jointly held, so the team cannot grant a licence alone. [`NOTICE`](../NOTICE) already gives UWA a perpetual permission to use, modify and host the tool | A noncommercial licence, agreed with UWA, or leave `NOTICE` as the arrangement |
+| — | **Where the repository lives** | It is held in a team member's personal GitHub account | Transfer it to a UWA GitHub organisation, or UWA keeps a fork |
+| — | **When the team's staging server closes** | It is a team resource, and the team's access ends with the unit | A fixed date, after UWA has its own server |
 
 ## 7. Open questions on the method
 
@@ -172,13 +173,12 @@ The full list, with the reasoning and sources, is in
 
 In order of what we would do next:
 
-1. **Redeploy staging from this release** (§4), so that what the client sees is what is handed over.
-2. **Salary pre-fill (US-05).** Load UWA's academic and professional pay scales into the method configuration, tie the salary steps to each level (the step list is currently 01–05 for every level), so the base salary is filled from the level and step instead of typed. The years already fill from the base salary, FTE and superannuation, left editable. Needs the current pay scales from UWA.
-3. **Reconcile the client's calculator line by line** against the engine. The guide governs where they disagree; the commercial-rate divergence is already answered.
-4. **Test the folder access rules through routing** ([#86](https://github.com/ChenxuYou/uwa-cits5206-project/issues/86)). The rules work, but removing one would not fail a test.
-5. **A PDF link on the approval page** and a recorded A4 print check ([#102](https://github.com/ChenxuYou/uwa-cits5206-project/issues/102)).
-6. **Deleting a draft cycle, withdrawing a submission** ([#107](https://github.com/ChenxuYou/uwa-cits5206-project/issues/107)) and **email notifications** ([#108](https://github.com/ChenxuYou/uwa-cits5206-project/issues/108)). Notifications are currently in the tool only.
-7. The remaining Should and Could stories in §2.
+1. **Salary pre-fill (US-05).** Load UWA's academic and professional pay scales into the method configuration, tie the salary steps to each level (the step list is currently 01–05 for every level), so the base salary is filled from the level and step instead of typed. The years already fill from the base salary, FTE and superannuation, left editable. Needs the current pay scales from UWA.
+2. **Reconcile the client's calculator line by line** against the engine. The guide governs where they disagree; the commercial-rate divergence is already answered.
+3. **Test the folder access rules through routing** ([#86](https://github.com/ChenxuYou/uwa-cits5206-project/issues/86)). The rules work, but removing one would not fail a test.
+4. **A PDF link on the approval page** and a recorded A4 print check ([#102](https://github.com/ChenxuYou/uwa-cits5206-project/issues/102)).
+5. **Deleting a draft cycle, withdrawing a submission** ([#107](https://github.com/ChenxuYou/uwa-cits5206-project/issues/107)) and **email notifications** ([#108](https://github.com/ChenxuYou/uwa-cits5206-project/issues/108)). Notifications are currently in the tool only.
+6. The remaining Should and Could stories in §2.
 
 The current list of gaps is kept in [`src/README.md` — Known gaps](../src/README.md#known-gaps),
 and every one has an open issue.

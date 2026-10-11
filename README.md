@@ -43,9 +43,9 @@ because it is easy to break.
 | **Scope** | All 18 Must stories (110 points) and US-20, approval by the delegated authority, are built and closed. Signed by the client on 20 August 2026 |
 | **Tests** | 240 automated tests across the engine, the sealed-record PDF and the web workflow, run by [CI](.github/workflows/ci.yml) on every push. The client's worked example is asserted to the cent |
 | **Client testing** | 9 October 2026: the client used staging in all three roles and sent written notes ([record](docs/client/communication-history/2026-10-09-client-testing-notes/README.md)). Five of their six requests are done; the sixth is salary pre-fill (US-05, [#42](https://github.com/ChenxuYou/uwa-cits5206-project/issues/42)) |
-| **Staging** | Live since 30 September 2026, reached by IP address; the address and one account per role were sent to the client by email. It still runs an earlier branch; redeploying it from `main` is [#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101) |
-| **Release** | `v1.0.0`, to be tagged on `main` once staging runs it |
-| **Handover** | Expected Monday 12 October 2026 — [handover document](docs/handover.md) |
+| **Staging** | Live since 30 September 2026, reached by IP address; the address and one account per role were sent to the client by email. Redeployed from `main` on 11 October 2026 and regression-tested ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)) |
+| **Release** | `v1.0.0`, tagged on `main` on 11 October 2026 |
+| **Handover** | Expected Monday 12 October 2026 — [handover document](docs/handover.md), with a [one-page summary](docs/handover-summary.md) for sign-off |
 | **Final report** | Due Tuesday 13 October 2026, 11:59 pm (UTC+8) |
 
 ## Start here
@@ -213,9 +213,10 @@ the application release. Releasing, restoring and rolling back are one script ea
 
 - **Staging** has been live since 30 September 2026. It is reached by IP address, so browsers
   show a certificate warning; its address and accounts were sent to the client by email and are
-  not recorded in this public repository. It was deployed from the branch
-  `feat/deployment_docker` (Docker Compose and PostgreSQL) and is being redeployed from `main`
-  with the runbook ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)).
+  not recorded in this public repository. It was first deployed from the branch
+  `feat/deployment_docker` (Docker Compose and PostgreSQL), and on 11 October 2026 was
+  redeployed from `main` with the runbook
+  ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)).
 - **Production** does not exist yet. Who runs it, where, and on which database are UWA's
   decisions, set out in [handover §6](docs/handover.md#6-decisions-uwa-needs-to-make).
 
@@ -315,6 +316,7 @@ method it was sealed with. Schema changes go through EF Core migrations.
 ├── docs/
 │   ├── user-manual.md             For custodians, approvers and administrators
 │   ├── handover.md                What UWA receives, and what it has to decide
+│   ├── handover-summary.md        One-page version of the handover, for sign-off
 │   ├── spec/                      Requirements, user stories, architecture
 │   ├── decisions/                 ADR-001 technology stack, ADR-002 PDF generation
 │   ├── project/                   Plan, risks, team, skills audit, AI statement
