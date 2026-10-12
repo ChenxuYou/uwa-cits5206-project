@@ -26,14 +26,14 @@ that the team could deploy on its own server until UWA IT provides hosting.
 
 The email gave:
 
-- **the address:** https://64.23.166.196/
+- **the address** of the server;
 - **a note on the browser warning:** DNS is not set up yet, so the site is reached by IP address
   and the browser shows a security warning. The client was asked to click past it with
   *More options → Proceed*;
 - **one test account for each role:** platform custodian, delegated approver and administrator.
 
-**The credentials are not recorded here**, because this repository is public. They are in the
-email only.
+**Neither the address nor the credentials are recorded here**, because this repository is public.
+They are in the email only.
 
 **The client's reply** (date _to confirm_): they are busy at the moment and will respond in a few
 days, possibly next week.
