@@ -204,6 +204,7 @@ Stories and acceptance criteria: [`docs/spec/user-stories.md`](docs/spec/user-st
 | **Deployment rehearsal** — 25 Sep | First release, HTTPS, forced password change, backup, restore and automatic rollback of a deliberately broken release | [`deploy/README.md`](deploy/README.md) |
 | **Client acceptance testing** — 9 Oct | The client used the deployed tool in all three roles and sent written notes | [Testing record](docs/client/communication-history/2026-10-09-client-testing-notes/README.md) |
 | **Regression pass on staging** — 12 Oct | Every Must story and US-20 in all three roles, the client's requests of 9 October, sign-in over HTTPS and no demo account, on the release handed over | [#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101) |
+| **Fresh-clone run** — 12 Oct | Jaswanth Vericherla, who did not write the setup steps, cloned the repository on a clean machine and followed [Run it on your machine](#run-it-on-your-machine) as written; the tool ran without problems | This README |
 
 ## Deployment
 
