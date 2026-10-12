@@ -1,6 +1,6 @@
 # Project Plan — 24 August to 13 October 2026
 
-**Version:** 1.16 — 12 October 2026
+**Version:** 1.17 — 12 October 2026
 **Owner:** Chenxu You
 **Reviewed:** every Saturday team meeting
 **Companions:** [`risks.md`](risks.md) · [`skills-audit.md`](skills-audit.md) ·
@@ -13,8 +13,9 @@
 **Where we are, 12 October 2026.** M1–M6 are met. All 18 Must stories and US-20 are built,
 verified and closed, the client has tested staging in all three roles, and five of their six
 requests are on `main`, the sixth partly. Staging runs `main`, the regression pass on it is
-recorded on #101, and `v1.0.0` is tagged and released. What is left of M7 is the handover on
-Monday 12 October and the final report on Tuesday 13 October. The steps, owners and dates are in
+recorded on #101, and `v1.0.0` is tagged and released. The handover document and its one-page
+summary were sent to the client on 12 October and are not yet signed. What is left of M7 is that
+signature and the final report on Tuesday 13 October. The steps, owners and dates are in
 [§5](#5-deployment-and-release).
 
 ---
@@ -30,7 +31,7 @@ Monday 12 October and the final report on Tuesday 13 October. The steps, owners 
 | M4 | ✅ **Vertical slice complete** | **25 Sep 2026** | **Met 24 Sep, a day early.** Sign in → create cycle → enter inputs → see rates → propose → justify → seal → export PDF → reopen, driven end to end in a browser. US-01, US-02 and US-14 to US-17 (#18, #19, #31–#34) built in #83 and #84, reviewed, verified and closed. One criterion is met differently from its wording: US-15 has the custodian confirm and the record sealed, while the tool has the custodian submit and the approver's approval seal it, as in US-20. This is recorded on #32 for the client to confirm |
 | M5 | ✅ Staging live, client using it | **2 Oct 2026** | Deployment rehearsal completed 25 Sep: first release, HTTPS by IP, forced password change, backup, restore and automatic rollback of a deliberately broken release. **Staging live since 30 Sep**, two days early: deployed by Dai Lam La La from `feat/deployment_docker`, reached by IP address over HTTPS, and the link sent to the client with one account per role the same day ([#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60)). **Client use recorded 9 Oct:** the client tested staging in all three roles and sent written notes, summarised in [the testing record](../client/communication-history/2026-10-09-client-testing-notes/README.md) ([#99](https://github.com/ChenxuYou/uwa-cits5206-project/issues/99)). **Status: met late, 9 Oct.** |
 | M6 | ✅ Release candidate, feature freeze | **9 Oct 2026** | Critical fixes only; full regression pass; evidence pack assembled. **Met 9 Oct, on the day**, and closed on GitHub: the freeze holds, and the release candidate is `main` at #110, with CI green. The client's testing notes of 9 Oct were taken in as the one exception to the freeze — three small staff-field changes, with tests. **The regression pass is carried into S8**, because it means something only on the server the client will use: it is run on staging once staging runs `main` (§5) |
-| M7 | **Final release and handover** | **13 Oct 2026** | Tagged release deployed, [handover document](../handover.md) signed, final report submitted. **Handover expected Monday 12 Oct; the report is due Tuesday 13 Oct, 11:59 pm (UTC+8), and is no more than 5 pages in all** ([brief](../../reference/unit/assignment-5-final-group-report.md)). Closed on GitHub by mistake with M6 on 9 Oct and reopened the same day |
+| M7 | **Final release and handover** | **13 Oct 2026** | Tagged release deployed, [handover document](../handover.md) signed, final report submitted. **Handover sent to the client on Monday 12 Oct and not yet signed; the report is due Tuesday 13 Oct, 11:59 pm (UTC+8), and is no more than 5 pages in all** ([brief](../../reference/unit/assignment-5-final-group-report.md)). Closed on GitHub by mistake with M6 on 9 Oct and reopened the same day |
 
 **Fallback trigger.** If M4 has not been met by the end of week 8, we cut stretch scope — we do
 not change stack. The cut order is fixed in advance: dashboard → price-change communication →
@@ -138,7 +139,7 @@ put to the client as Q14 in [handover §6](../handover.md#6-decisions-uwa-needs-
 | **Regression pass on the redeployed staging**: every Must story and US-20 in all three roles, the client's six requests, sign-in over HTTPS, no demo account reachable. Record the result when closing #101 | Dai Lam La La, Jaswanth Vericherla | ✅ **12 Oct**, a day late: all passed, recorded on [#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101), which is closed |
 | **Screenshots in the [user manual](../user-manual.md)**, taken from the redeployed staging | Yichen Zhao | ✅ **11 Oct**, fifteen screenshots (#116) |
 | **Tag `v1.0.0`** on the commit staging runs, and publish it as a GitHub release | Dai Lam La La | ✅ **12 Oct**, a day late: [`v1.0.0`](https://github.com/ChenxuYou/uwa-cits5206-project/releases/tag/v1.0.0) on `e357f19` |
-| **Handover meeting** with the client: walk through the [handover document](../handover.md), its decisions (§6) and open questions (§7), and get §11 signed | Yichen Zhao, Chenxu You | Mon 12 Oct |
+| **Handover meeting** with the client: walk through the [handover document](../handover.md), its decisions (§6) and open questions (§7), and get §11 signed | Yichen Zhao, Chenxu You | **Sent 12 Oct; not yet signed.** The handover document and its [one-page summary](../handover-summary.md) went to the client on the day; the signature on summary §5 (or handover §11) is awaited |
 | **Final report** submitted by one member; links pinned to `v1.0.0` | Chenxu You, with the whole team | Tue 13 Oct, 11:59 pm |
 | **Group Member Evaluation** on Feedback Fruits — each member, individually | Everyone | Mon 19 Oct, 11:59 pm |
 
@@ -190,6 +191,7 @@ Recorded so that neither is quietly forgotten and neither quietly becomes this s
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.17 | 12 Oct 2026 | **Handover sent, not yet signed.** The status paragraph, M7 and the handover row in §5 now say that the handover document and its one-page summary were sent to the client on 12 October and that the client has not yet signed. M7 stays open until they do |
 | 1.16 | 12 Oct 2026 | **Staging, regression pass and release recorded.** The status paragraph and §5 now say that staging runs `main` at commit `e357f19`, confirmed on 12 October; the regression pass passed and is recorded on #101, which is closed; and `v1.0.0` is tagged and released on that commit, a day later than planned. The user-manual screenshots are ticked as done on 11 October (#116). Left: the handover and the final report |
 | 1.15 | 9 Oct 2026 | **Brought up to date for the final week.** A status paragraph opens the plan. M5 ticked; M6's row says what was met — the freeze and the release candidate — and moves the regression pass into S8, where it is run on the redeployed staging; M7 records the handover expected on Monday 12 October and that its GitHub milestone was reopened. S1, S2, S4 and S7 ticked; S8 starts on 10 October. §5 becomes *Deployment and release*, with the hosting row handed to UWA as Q14 and a dated run-in to handover, including the Group Member Evaluation on 19 October. Every §6 row closed out as done, superseded, handed to UWA or dropped; two that could not be checked say so. Salary pre-fill added to §7 |
 | 1.14 | 9 Oct 2026 | **Client use recorded; report deadline confirmed.** The client tested staging in all three roles and sent notes on 9 October, so M5 is marked met late and its §5 row closed. Three of their six requests are taken into M6 as the one exception to the freeze. The final report is due 13 October, 11:59 pm (UTC+8), and is no more than 5 pages in all, both confirmed on the LMS; M7's row now says so. **M6 met on the day** and closed on GitHub |

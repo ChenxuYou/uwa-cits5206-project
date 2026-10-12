@@ -45,7 +45,7 @@ because it is easy to break.
 | **Client testing** | 9 October 2026: the client used staging in all three roles and sent written notes ([record](docs/client/communication-history/2026-10-09-client-testing-notes/README.md)). Five of their six requests are done. The sixth, salary fill, is partly done: each year is filled from a base salary the custodian enters, and filling it from the level and step waits on UWA's pay scales (US-05, [#42](https://github.com/ChenxuYou/uwa-cits5206-project/issues/42)) |
 | **Staging** | Live since 30 September 2026, reached by IP address; the address and one account per role were sent to the client by email. It runs `main` at `v1.0.0`, and the regression pass on it in all three roles passed on 12 October 2026 ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)) |
 | **Release** | [`v1.0.0`](https://github.com/ChenxuYou/uwa-cits5206-project/releases/tag/v1.0.0), tagged on `main` on 12 October 2026 |
-| **Handover** | Monday 12 October 2026 — [handover document](docs/handover.md), with a [one-page summary](docs/handover-summary.md) for sign-off |
+| **Handover** | Sent to the client on 12 October 2026: the [handover document](docs/handover.md) and its [one-page summary](docs/handover-summary.md) for sign-off. **Not yet signed** |
 | **Final report** | Due Tuesday 13 October 2026, 11:59 pm (UTC+8) |
 
 ## Start here
