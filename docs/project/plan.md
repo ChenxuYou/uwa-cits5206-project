@@ -1,6 +1,6 @@
 # Project Plan — 24 August to 13 October 2026
 
-**Version:** 1.18 — 12 October 2026
+**Version:** 1.19 — 12 October 2026
 **Owner:** Chenxu You
 **Reviewed:** every Saturday team meeting
 **Companions:** [`risks.md`](risks.md) · [`skills-audit.md`](skills-audit.md) ·
@@ -91,9 +91,11 @@ overlap, which is also what lets five Assignment 2 reports each lead with their 
 | **Dai Lam La La** | **Backend — deployment** | Server provisioning; CI extended to CD with a documented rollback; DNS, reverse proxy and TLS; staging; the tagged release; dependency scanning | [`risks.md`](risks.md); final read-through of anything submitted |
 | **Jaswanth Vericherla** | **Authentication** | Sign-in, roles and authorisation policies; ownership checks and the tests that prove them; account provisioning for staging in place of the demo accounts; US-19 and the SSO-ready seam | Verification of increments outside his layer; meeting minutes; link and access checking |
 
-**Nothing merges on its author's approval.** Every pull request is reviewed by a second member,
+**The rule: nothing merges on its author's approval.** Every pull request is reviewed by a second member,
 nobody approves a pull request in their own layer, and the person who writes a calculation does
-not sign off its arithmetic.
+not sign off its arithmetic. **In practice it was not kept:** 29 of the 37 pull requests merged by
+3 October have no approving review on GitHub, 22 of them merged by their own author
+([AI statement §6.1](ai-use.md#61-chenxu-you--general-backend-repository-and-documents)).
 
 ---
 
@@ -191,6 +193,7 @@ Recorded so that neither is quietly forgotten and neither quietly becomes this s
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.19 | 12 Oct 2026 | **The review rule marked as not kept.** §3 now says that 29 of the 37 pull requests merged by 3 October have no approving review on GitHub, 22 of them merged by their own author, instead of stating the rule as practice |
 | 1.18 | 12 Oct 2026 | **Report links pinned to a commit, not the tag.** §5 said the final report's links would be pinned to `v1.0.0`. The tag stays where it is, on `e357f19`, the commit staging runs and the client was sent; the documentation merged after it is only on `main`, so the report pins its links to the last commit on `main` before submission instead |
 | 1.17 | 12 Oct 2026 | **Handover sent, not yet signed.** The status paragraph, M7 and the handover row in §5 now say that the handover document and its one-page summary were sent to the client on 12 October and that the client has not yet signed. M7 stays open until they do |
 | 1.16 | 12 Oct 2026 | **Staging, regression pass and release recorded.** The status paragraph and §5 now say that staging runs `main` at commit `e357f19`, confirmed on 12 October; the regression pass passed and is recorded on #101, which is closed; and `v1.0.0` is tagged and released on that commit, a day later than planned. The user-manual screenshots are ticked as done on 11 October (#116). Left: the handover and the final report |
