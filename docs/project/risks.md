@@ -2,7 +2,7 @@
 
 **Owner of this document:** Dai Lam La La
 **Reviewed:** every Saturday team meeting, alongside the sprint review
-**Version:** 1.7 — 9 October 2026
+**Version:** 1.8 — 12 October 2026
 **Feeds:** Assignment 1 §4.3 · [`skills-audit.md`](skills-audit.md) · [`plan.md`](plan.md)
 
 > **Every row carries a trigger.** A mitigation without a trigger is a hope: it says what we
@@ -46,7 +46,7 @@ the immutable snapshot, the integrity hash, and the golden-file test as a merge 
 | # | Risk | L | I | Mitigation | Trigger | Owner |
 | --- | --- | --- | --- | --- | --- | --- |
 | R5 | Scope grows past the semester | Medium | High | The vertical slice is the commitment; the stretch list is written to the client as "intentions, not commitments"; the cut order is stated in advance — dashboard, price-change communication, benchmarking, replacement reserve, salary pre-fill, in-tool approval | Any stretch item started before the slice is complete end to end | Whole team |
-| R6 | Client use is recorded, but staging runs an older build and the handover is not yet accepted | Medium | High | A single-server Ubuntu 24.04 deployment using systemd, Caddy and SQLite is documented and was rehearsed on 25 Sep. Staging has been live since 30 Sep, deployed from `feat/deployment_docker` ([#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60)). **The client tested it in all three roles on 9 Oct** ([summary](../client/communication-history/2026-10-09-client-testing-notes/README.md)); two of their six requests were already fixed on `main` but not on staging. Redeploy staging from `main` ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)), and have the client sign the [handover document](../handover.md) | Staging still not on `main` by 12 Oct, or no signature by 13 Oct | Dai Lam La La |
+| R6 | Client use is recorded and staging runs `main`, but the handover is not yet signed | Medium | High | A single-server Ubuntu 24.04 deployment using systemd, Caddy and SQLite is documented and was rehearsed on 25 Sep. Staging has been live since 30 Sep, deployed from `feat/deployment_docker` ([#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60)). **The client tested it in all three roles on 9 Oct** ([summary](../client/communication-history/2026-10-09-client-testing-notes/README.md)); two of their six requests were already fixed on `main` but not on staging. Staging was redeployed from `main` and the regression pass on it passed on 12 Oct ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)). **The [handover document](../handover.md) and its [one-page summary](../handover-summary.md) were sent to the client on 12 Oct and are not yet signed.** Ask the client once more to sign summary §5 | No signature by 13 Oct | Dai Lam La La |
 | R7 | Schedule slips because a task has no owner | Medium | Medium | Every issue carries one owner and one date; the board is reviewed at the Saturday meeting; unassigned issues are not allowed into a sprint | Any issue in a sprint column with no assignee | Whole team |
 | R8 | A key member becomes unavailable — five people, one already withdrawn | Medium | High | Two owners for every critical area; engine kept framework-independent so any member can read it; PR review by a second member; the redistribution after DongSheng Li's withdrawal is documented in [`team.md`](team.md) | Any area with a single owner for more than one sprint | Whole team |
 | R9 | Client latency blocks a decision | Low | Medium | One named liaison so the client is never chased twice; questions batched; **every open question carries a default we will use if no answer comes**. All five sent 17 Aug came back answered — none defaulted | Any question open for more than seven days | Yichen Zhao |
@@ -98,6 +98,7 @@ stronger evidence of risk management than any hypothetical.
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.8 | 12 Oct 2026 | **R6 brought up to date.** Staging now runs `main` and the regression pass on it passed (#101), so what remains is the signature: the handover was sent to the client on 12 October and is not yet signed. The trigger keeps only the signature; likelihood and impact unchanged |
 | 1.7 | 9 Oct 2026 | **R17a reviewed**, a month after its first review date: still no patched `SQLitePCLRaw`, and the conditions it was accepted on still hold, so the exception stands. Its next review is at handover, where ownership passes to UWA. The version line, which still read 1.5, corrected |
 | 1.6 | 9 Oct 2026 | **R6 re-scoped: client use is recorded.** The client tested staging in all three roles on 9 October. What remains is the older build on staging and the handover signature, so likelihood falls to Medium; impact stays High |
 | 1.5 | 8 Oct 2026 | **R6 corrected: staging is live.** It has run since 30 September and the client has the link (#60), so R6 is now about client use and acceptance, which are still not recorded, rather than about whether staging exists. Likelihood and impact unchanged |
