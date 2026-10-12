@@ -74,6 +74,6 @@ for the client in the [handover document](../../../handover.md) §3.
 | Action | Owner | By |
 | --- | --- | --- |
 | Merge items 3–5 to `main` after `dotnet test` passes | Chenxu You | ✅ Done 9 Oct, [#110](https://github.com/ChenxuYou/uwa-cits5206-project/pull/110) |
-| Redeploy staging from `main` and tell the client items 1 and 2 are visible there | Dai Lam La La | Sun 11 Oct |
+| Redeploy staging from `main` and tell the client items 1 and 2 are visible there | Dai Lam La La | ✅ Redeployed 11 Oct ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)); the client told on 12 Oct, in the [handover email](../2026-10-12-handover-for-sign-off/covering-email.md) |
 | Reply to the client: what changed, why salary pre-fill waits, Q11–Q16, and the handover document | Yichen Zhao | ✅ Done 9 Oct |
 | Close [#99](https://github.com/ChenxuYou/uwa-cits5206-project/issues/99) with a link to this record | Yichen Zhao | ✅ Done 9 Oct |

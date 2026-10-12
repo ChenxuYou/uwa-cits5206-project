@@ -45,7 +45,7 @@ because it is easy to break.
 | **Client testing** | 9 October 2026: the client used staging in all three roles and sent written notes ([record](docs/client/communication-history/2026-10-09-client-testing-notes/README.md)). Five of their six requests are done. The sixth, salary fill, is partly done: each year is filled from a base salary the custodian enters, and filling it from the level and step waits on UWA's pay scales (US-05, [#42](https://github.com/ChenxuYou/uwa-cits5206-project/issues/42)) |
 | **Staging** | Live since 30 September 2026, reached by IP address; the address and one account per role were sent to the client by email. It runs `main` at `v1.0.0`, and the regression pass on it in all three roles passed on 12 October 2026 ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)) |
 | **Release** | [`v1.0.0`](https://github.com/ChenxuYou/uwa-cits5206-project/releases/tag/v1.0.0), tagged on `main` on 12 October 2026 |
-| **Handover** | Sent to the client on 12 October 2026: the [handover document](docs/handover.md) and its [one-page summary](docs/handover-summary.md) for sign-off. **Not yet signed** |
+| **Handover** | Sent to the client on 12 October 2026: the [handover document](docs/handover.md) and its [one-page summary](docs/handover-summary.md) for sign-off ([email](docs/client/communication-history/2026-10-12-handover-for-sign-off/covering-email.md)). **Not yet signed** |
 | **Final report** | Due Tuesday 13 October 2026, 11:59 pm (UTC+8) |
 
 ## Start here
@@ -257,6 +257,7 @@ answer from UWA is a contained change. Full list, with reasons and sources:
 | 22 Sep 2026 | First look at the working tool; agreement that the team may host staging until UWA IT provides resources | [Minutes](docs/meetings/client/2026-09-22-client-meeting.md) |
 | 30 Sep 2026 | Staging address and one account per role sent to the client | [#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60) |
 | 9 Oct 2026 | Client testing in all three roles; six change requests, five done the same day | [Testing record](docs/client/communication-history/2026-10-09-client-testing-notes/README.md) |
+| 12 Oct 2026 | Handover document and one-page summary sent for sign-off, with what changed after testing. **Not yet signed** | [Email](docs/client/communication-history/2026-10-12-handover-for-sign-off/covering-email.md) |
 
 Everything that crossed to the client is filed in
 [`docs/client/communication-history/`](docs/client/communication-history/).
