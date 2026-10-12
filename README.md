@@ -41,7 +41,7 @@ because it is easy to break.
 | | |
 | --- | --- |
 | **Scope** | All 18 Must stories (110 points) and US-20, approval by the delegated authority, are built and closed. Signed by the client on 20 August 2026 |
-| **Tests** | 249 automated tests across the engine, the sealed-record PDF and the web workflow, run by [CI](.github/workflows/ci.yml) on every push. The client's worked example is asserted to the cent |
+| **Tests** | 249 automated test methods across the engine, the sealed-record PDF and the web workflow, run by [CI](.github/workflows/ci.yml) on every push. The client's worked example is asserted to the cent |
 | **Client testing** | 9 October 2026: the client used staging in all three roles and sent written notes ([record](docs/client/communication-history/2026-10-09-client-testing-notes/README.md)). Five of their six requests are done. The sixth, salary fill, is partly done: each year is filled from a base salary the custodian enters, and filling it from the level and step waits on UWA's pay scales (US-05, [#42](https://github.com/ChenxuYou/uwa-cits5206-project/issues/42)) |
 | **Staging** | Live since 30 September 2026, reached by IP address; the address and one account per role were sent to the client by email. It runs `main` at `v1.0.0`, and the regression pass on it in all three roles passed on 12 October 2026 ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)) |
 | **Release** | [`v1.0.0`](https://github.com/ChenxuYou/uwa-cits5206-project/releases/tag/v1.0.0), tagged on `main` on 12 October 2026 |
@@ -200,7 +200,7 @@ Stories and acceptance criteria: [`docs/spec/user-stories.md`](docs/spec/user-st
 | **PDF tests** — 31 | The worked example reaches the PDF to the cent; every rate is printed beside its arithmetic, with the method version and integrity hash; unsealed or damaged records are refused; older records still render as sealed | [`tests/CostingTool.Pdf.Tests`](tests/CostingTool.Pdf.Tests/) |
 | **Web tests** — 182 | Validation on every step, editing lines, rates and variances, sign-in, lockout and record ownership, approval and sealing under concurrent requests, supersession, migrations, and the staff fields added after client testing | [`tests/CostingTool.Web.Tests`](tests/CostingTool.Web.Tests/) |
 | **Continuous integration** | Every push and pull request is built and tested, formatting is checked, dependencies are scanned for known vulnerabilities, and a model change without a database migration fails the build | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
-| **Code review** | Nothing merges on its author's approval, and nobody approves a pull request in their own layer | [`plan.md` §3](docs/project/plan.md#3-responsibilities) |
+| **Code review** | The plan asks for a second member's review on every pull request. It was not kept: 29 of the 37 merged by 3 October 2026 have no approving review on GitHub, 22 of them merged by their own author | [`plan.md` §3](docs/project/plan.md#3-responsibilities), [AI statement §6.1](docs/project/ai-use.md#61-chenxu-you--general-backend-repository-and-documents) |
 | **Deployment rehearsal** — 25 Sep | First release, HTTPS, forced password change, backup, restore and automatic rollback of a deliberately broken release | [`deploy/README.md`](deploy/README.md) |
 | **Client acceptance testing** — 9 Oct | The client used the deployed tool in all three roles and sent written notes | [Testing record](docs/client/communication-history/2026-10-09-client-testing-notes/README.md) |
 | **Regression pass on staging** — 12 Oct | Every Must story and US-20 in all three roles, the client's requests of 9 October, sign-in over HTTPS and no demo account, on the release handed over | [#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101) |
@@ -278,7 +278,7 @@ The roster's home is [`docs/project/team.md`](docs/project/team.md); the layers 
 - **Planning.** One-week sprints against seven milestones, M1 to M7, in [`plan.md`](docs/project/plan.md); risks in [`risks.md`](docs/project/risks.md).
 - **Tracking.** Every task is a GitHub issue with an owner and a milestone, on the [Projects board](https://github.com/users/ChenxuYou/projects/2).
 - **Meetings.** A weekly online stand-up, fortnightly on campus with the facilitator, and the client on Wednesdays as needed plus a shared Teams chat. Minutes are in [`docs/meetings/`](docs/meetings/README.md).
-- **Review.** Every change arrives by pull request and is reviewed by a second member; CI must pass before merge.
+- **Review.** Every change arrives by pull request, and CI must pass before merge. The plan also asks for a second member's review, which most pull requests merged by 3 October did not get ([AI statement §6.1](docs/project/ai-use.md#61-chenxu-you--general-backend-repository-and-documents)).
 
 ## Use of generative AI
 
