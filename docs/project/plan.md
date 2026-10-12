@@ -1,6 +1,6 @@
 # Project Plan — 24 August to 13 October 2026
 
-**Version:** 1.15 — 9 October 2026
+**Version:** 1.16 — 12 October 2026
 **Owner:** Chenxu You
 **Reviewed:** every Saturday team meeting
 **Companions:** [`risks.md`](risks.md) · [`skills-audit.md`](skills-audit.md) ·
@@ -10,11 +10,11 @@
 > **The scope this plan delivers was signed by the client on 20 August 2026.** Nothing below is
 > a proposal to the client; it is the sequence in which we build what they approved.
 
-**Where we are, 9 October 2026.** M1–M6 are met. All 18 Must stories and US-20 are built,
+**Where we are, 12 October 2026.** M1–M6 are met. All 18 Must stories and US-20 are built,
 verified and closed, the client has tested staging in all three roles, and five of their six
-requests are on `main`, three of them merged in #110. What is left is M7: redeploy staging from
-`main`, run and record the regression pass, tag `v1.0.0`, hand over on Monday 12 October and
-submit the final report on Tuesday 13 October. The steps, owners and dates are in
+requests are on `main`, the sixth partly. Staging runs `main`, the regression pass on it is
+recorded on #101, and `v1.0.0` is tagged and released. What is left of M7 is the handover on
+Monday 12 October and the final report on Tuesday 13 October. The steps, owners and dates are in
 [§5](#5-deployment-and-release).
 
 ---
@@ -112,9 +112,10 @@ not sign off its arithmetic.
 
 The production procedure is a single Ubuntu 24.04 server with systemd, Caddy and SQLite,
 rehearsed end to end on 25 September ([`deploy/README.md`](../../deploy/README.md)). Staging has
-been live since 30 September but was deployed from `feat/deployment_docker`, with Docker Compose
-and PostgreSQL ([#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60)), so it does
-not run `main`. Who runs the tool after handover, where, and on which database is UWA's decision,
+been live since 30 September. It was first deployed from `feat/deployment_docker`, with Docker
+Compose and PostgreSQL ([#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60)), and
+now runs `main` at release `v1.0.0`
+([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)). Who runs the tool after handover, where, and on which database is UWA's decision,
 put to the client as Q14 in [handover §6](../handover.md#6-decisions-uwa-needs-to-make).
 
 ### Deployment gates
@@ -133,10 +134,10 @@ put to the client as Q14 in [handover §6](../handover.md#6-decisions-uwa-needs-
 
 | Step | Owner | By |
 | --- | --- | --- |
-| Note the figures on the current staging server, then **redeploy it from `main`** with [`deploy/README.md`](../../deploy/README.md). Its PostgreSQL data does not carry over to SQLite; the figures are test data, and the client re-enters what they need ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)) | Dai Lam La La | Sun 11 Oct |
-| **Regression pass on the redeployed staging**: every Must story and US-20 in all three roles, the client's six requests, sign-in over HTTPS, no demo account reachable. Record the result when closing #101 | Dai Lam La La, Jaswanth Vericherla | Sun 11 Oct |
-| **Screenshots in the [user manual](../user-manual.md)**, taken from the redeployed staging | Yichen Zhao | Sun 11 Oct |
-| **Tag `v1.0.0`** on the commit staging runs, and publish it as a GitHub release | Dai Lam La La | Sun 11 Oct |
+| Note the figures on the current staging server, then **redeploy it from `main`** with [`deploy/README.md`](../../deploy/README.md). Its PostgreSQL data does not carry over to SQLite; the figures are test data, and the client re-enters what they need ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)) | Dai Lam La La | ✅ **Done.** Staging serves commit `e357f19`, confirmed 12 Oct |
+| **Regression pass on the redeployed staging**: every Must story and US-20 in all three roles, the client's six requests, sign-in over HTTPS, no demo account reachable. Record the result when closing #101 | Dai Lam La La, Jaswanth Vericherla | ✅ **12 Oct**, a day late: all passed, recorded on [#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101), which is closed |
+| **Screenshots in the [user manual](../user-manual.md)**, taken from the redeployed staging | Yichen Zhao | ✅ **11 Oct**, fifteen screenshots (#116) |
+| **Tag `v1.0.0`** on the commit staging runs, and publish it as a GitHub release | Dai Lam La La | ✅ **12 Oct**, a day late: [`v1.0.0`](https://github.com/ChenxuYou/uwa-cits5206-project/releases/tag/v1.0.0) on `e357f19` |
 | **Handover meeting** with the client: walk through the [handover document](../handover.md), its decisions (§6) and open questions (§7), and get §11 signed | Yichen Zhao, Chenxu You | Mon 12 Oct |
 | **Final report** submitted by one member; links pinned to `v1.0.0` | Chenxu You, with the whole team | Tue 13 Oct, 11:59 pm |
 | **Group Member Evaluation** on Feedback Fruits — each member, individually | Everyone | Mon 19 Oct, 11:59 pm |
@@ -189,6 +190,7 @@ Recorded so that neither is quietly forgotten and neither quietly becomes this s
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.16 | 12 Oct 2026 | **Staging, regression pass and release recorded.** The status paragraph and §5 now say that staging runs `main` at commit `e357f19`, confirmed on 12 October; the regression pass passed and is recorded on #101, which is closed; and `v1.0.0` is tagged and released on that commit, a day later than planned. The user-manual screenshots are ticked as done on 11 October (#116). Left: the handover and the final report |
 | 1.15 | 9 Oct 2026 | **Brought up to date for the final week.** A status paragraph opens the plan. M5 ticked; M6's row says what was met — the freeze and the release candidate — and moves the regression pass into S8, where it is run on the redeployed staging; M7 records the handover expected on Monday 12 October and that its GitHub milestone was reopened. S1, S2, S4 and S7 ticked; S8 starts on 10 October. §5 becomes *Deployment and release*, with the hosting row handed to UWA as Q14 and a dated run-in to handover, including the Group Member Evaluation on 19 October. Every §6 row closed out as done, superseded, handed to UWA or dropped; two that could not be checked say so. Salary pre-fill added to §7 |
 | 1.14 | 9 Oct 2026 | **Client use recorded; report deadline confirmed.** The client tested staging in all three roles and sent notes on 9 October, so M5 is marked met late and its §5 row closed. Three of their six requests are taken into M6 as the one exception to the freeze. The final report is due 13 October, 11:59 pm (UTC+8), and is no more than 5 pages in all, both confirmed on the LMS; M7's row now says so. **M6 met on the day** and closed on GitHub |
 | 1.13 | 8 Oct 2026 | **Staging recorded as live.** It has run since 30 September, deployed from `feat/deployment_docker`, and the client has had the link and one account per role since that day (#60). M5's row, S6, the S6 note and §5 now say so instead of asking for confirmation. Client-use acceptance is still outstanding |

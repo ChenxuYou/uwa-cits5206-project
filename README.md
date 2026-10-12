@@ -41,10 +41,10 @@ because it is easy to break.
 | | |
 | --- | --- |
 | **Scope** | All 18 Must stories (110 points) and US-20, approval by the delegated authority, are built and closed. Signed by the client on 20 August 2026 |
-| **Tests** | 240 automated tests across the engine, the sealed-record PDF and the web workflow, run by [CI](.github/workflows/ci.yml) on every push. The client's worked example is asserted to the cent |
+| **Tests** | 249 automated tests across the engine, the sealed-record PDF and the web workflow, run by [CI](.github/workflows/ci.yml) on every push. The client's worked example is asserted to the cent |
 | **Client testing** | 9 October 2026: the client used staging in all three roles and sent written notes ([record](docs/client/communication-history/2026-10-09-client-testing-notes/README.md)). Five of their six requests are done; the sixth is salary pre-fill (US-05, [#42](https://github.com/ChenxuYou/uwa-cits5206-project/issues/42)) |
 | **Staging** | Live since 30 September 2026, reached by IP address; the address and one account per role were sent to the client by email. Redeployed from `main` on 11 October 2026 and regression-tested ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)) |
-| **Release** | `v1.0.0`, tagged on `main` on 11 October 2026 |
+| **Release** | [`v1.0.0`](https://github.com/ChenxuYou/uwa-cits5206-project/releases/tag/v1.0.0), tagged on `main` on 12 October 2026 |
 | **Handover** | Expected Monday 12 October 2026 — [handover document](docs/handover.md), with a [one-page summary](docs/handover-summary.md) for sign-off |
 | **Final report** | Due Tuesday 13 October 2026, 11:59 pm (UTC+8) |
 
