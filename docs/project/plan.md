@@ -1,6 +1,6 @@
 # Project Plan — 24 August to 13 October 2026
 
-**Version:** 1.17 — 12 October 2026
+**Version:** 1.18 — 12 October 2026
 **Owner:** Chenxu You
 **Reviewed:** every Saturday team meeting
 **Companions:** [`risks.md`](risks.md) · [`skills-audit.md`](skills-audit.md) ·
@@ -140,7 +140,7 @@ put to the client as Q14 in [handover §6](../handover.md#6-decisions-uwa-needs-
 | **Screenshots in the [user manual](../user-manual.md)**, taken from the redeployed staging | Yichen Zhao | ✅ **11 Oct**, fifteen screenshots (#116) |
 | **Tag `v1.0.0`** on the commit staging runs, and publish it as a GitHub release | Dai Lam La La | ✅ **12 Oct**, a day late: [`v1.0.0`](https://github.com/ChenxuYou/uwa-cits5206-project/releases/tag/v1.0.0) on `e357f19` |
 | **Handover meeting** with the client: walk through the [handover document](../handover.md), its decisions (§6) and open questions (§7), and get §11 signed | Yichen Zhao, Chenxu You | **Sent 12 Oct; not yet signed.** The handover document and its [one-page summary](../handover-summary.md) went to the client on the day ([email](../client/communication-history/2026-10-12-handover-for-sign-off/covering-email.md)); the signature on summary §5 (or handover §11) is awaited |
-| **Final report** submitted by one member; links pinned to `v1.0.0` | Chenxu You, with the whole team | Tue 13 Oct, 11:59 pm |
+| **Final report** submitted by one member; its links to files pinned to the last commit on `main` before submission, so they show the documents as handed in. `v1.0.0` stays on the commit staging runs, which the client was sent | Chenxu You, with the whole team | Tue 13 Oct, 11:59 pm |
 | **Group Member Evaluation** on Feedback Fruits — each member, individually | Everyone | Mon 19 Oct, 11:59 pm |
 
 ---
@@ -191,6 +191,7 @@ Recorded so that neither is quietly forgotten and neither quietly becomes this s
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.18 | 12 Oct 2026 | **Report links pinned to a commit, not the tag.** §5 said the final report's links would be pinned to `v1.0.0`. The tag stays where it is, on `e357f19`, the commit staging runs and the client was sent; the documentation merged after it is only on `main`, so the report pins its links to the last commit on `main` before submission instead |
 | 1.17 | 12 Oct 2026 | **Handover sent, not yet signed.** The status paragraph, M7 and the handover row in §5 now say that the handover document and its one-page summary were sent to the client on 12 October and that the client has not yet signed. M7 stays open until they do |
 | 1.16 | 12 Oct 2026 | **Staging, regression pass and release recorded.** The status paragraph and §5 now say that staging runs `main` at commit `e357f19`, confirmed on 12 October; the regression pass passed and is recorded on #101, which is closed; and `v1.0.0` is tagged and released on that commit, a day later than planned. The user-manual screenshots are ticked as done on 11 October (#116). Left: the handover and the final report |
 | 1.15 | 9 Oct 2026 | **Brought up to date for the final week.** A status paragraph opens the plan. M5 ticked; M6's row says what was met — the freeze and the release candidate — and moves the regression pass into S8, where it is run on the redeployed staging; M7 records the handover expected on Monday 12 October and that its GitHub milestone was reopened. S1, S2, S4 and S7 ticked; S8 starts on 10 October. §5 becomes *Deployment and release*, with the hosting row handed to UWA as Q14 and a dated run-in to handover, including the Group Member Evaluation on 19 October. Every §6 row closed out as done, superseded, handed to UWA or dropped; two that could not be checked say so. Salary pre-fill added to §7 |
