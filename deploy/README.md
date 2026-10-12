@@ -6,11 +6,14 @@ M5 asks for — staging over HTTPS, no demo credentials, a tested backup and rol
 answers C2, H1 and H2 in the 25 September audit.
 
 > **This is the production deployment** ([`architecture.md` §9](../docs/spec/architecture.md)).
-> The staging server that went live on 30 September 2026 was set up differently: from the branch
-> `feat/deployment_docker`, with Docker Compose and PostgreSQL — the configuration explored during
-> deployment work, recorded on [#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60).
-> That branch is not merged into `main`, so a server deployed with this runbook runs the code on
-> `main` and staging does not.
+> The staging server runs `main` at release
+> [`v1.0.0`](https://github.com/ChenxuYou/uwa-cits5206-project/releases/tag/v1.0.0) (commit
+> `e357f19`), and the regression pass on it is recorded on
+> [#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101). When it went live on
+> 30 September 2026 it was deployed from the branch `feat/deployment_docker`, with Docker Compose
+> and PostgreSQL — the configuration explored during deployment work, recorded on
+> [#60](https://github.com/ChenxuYou/uwa-cits5206-project/issues/60). That branch is not merged
+> into `main`; this runbook is the supported way to deploy.
 
 Every step below was rehearsed end to end on 25 September 2026 with a stand-in for
 `systemctl`: first release, sign-in over HTTPS by IP address with Caddy's internal
