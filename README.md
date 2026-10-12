@@ -36,16 +36,16 @@ because it is easy to break.
 
 ## Status
 
-**As of 9 October 2026.** The plan of record is [`docs/project/plan.md`](docs/project/plan.md).
+**As of 12 October 2026.** The plan of record is [`docs/project/plan.md`](docs/project/plan.md).
 
 | | |
 | --- | --- |
 | **Scope** | All 18 Must stories (110 points) and US-20, approval by the delegated authority, are built and closed. Signed by the client on 20 August 2026 |
 | **Tests** | 249 automated tests across the engine, the sealed-record PDF and the web workflow, run by [CI](.github/workflows/ci.yml) on every push. The client's worked example is asserted to the cent |
-| **Client testing** | 9 October 2026: the client used staging in all three roles and sent written notes ([record](docs/client/communication-history/2026-10-09-client-testing-notes/README.md)). Five of their six requests are done; the sixth is salary pre-fill (US-05, [#42](https://github.com/ChenxuYou/uwa-cits5206-project/issues/42)) |
-| **Staging** | Live since 30 September 2026, reached by IP address; the address and one account per role were sent to the client by email. Redeployed from `main` on 11 October 2026 and regression-tested ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)) |
+| **Client testing** | 9 October 2026: the client used staging in all three roles and sent written notes ([record](docs/client/communication-history/2026-10-09-client-testing-notes/README.md)). Five of their six requests are done. The sixth, salary fill, is partly done: each year is filled from a base salary the custodian enters, and filling it from the level and step waits on UWA's pay scales (US-05, [#42](https://github.com/ChenxuYou/uwa-cits5206-project/issues/42)) |
+| **Staging** | Live since 30 September 2026, reached by IP address; the address and one account per role were sent to the client by email. It runs `main` at `v1.0.0`, and the regression pass on it in all three roles passed on 12 October 2026 ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)) |
 | **Release** | [`v1.0.0`](https://github.com/ChenxuYou/uwa-cits5206-project/releases/tag/v1.0.0), tagged on `main` on 12 October 2026 |
-| **Handover** | Expected Monday 12 October 2026 — [handover document](docs/handover.md), with a [one-page summary](docs/handover-summary.md) for sign-off |
+| **Handover** | Monday 12 October 2026 — [handover document](docs/handover.md), with a [one-page summary](docs/handover-summary.md) for sign-off |
 | **Final report** | Due Tuesday 13 October 2026, 11:59 pm (UTC+8) |
 
 ## Start here
@@ -198,11 +198,12 @@ Stories and acceptance criteria: [`docs/spec/user-stories.md`](docs/spec/user-st
 | --- | --- | --- |
 | **Engine tests** — 36 | The client's worked example to the cent; decimal arithmetic, with rounding once at presentation; zero or negative inputs refused; the capacity baselines and staff caps | [`tests/CostingTool.Engine.Tests`](tests/CostingTool.Engine.Tests/) |
 | **PDF tests** — 31 | The worked example reaches the PDF to the cent; every rate is printed beside its arithmetic, with the method version and integrity hash; unsealed or damaged records are refused; older records still render as sealed | [`tests/CostingTool.Pdf.Tests`](tests/CostingTool.Pdf.Tests/) |
-| **Web tests** — 173 | Validation on every step, editing lines, rates and variances, sign-in, lockout and record ownership, approval and sealing under concurrent requests, supersession, migrations, and the staff fields added after client testing | [`tests/CostingTool.Web.Tests`](tests/CostingTool.Web.Tests/) |
+| **Web tests** — 182 | Validation on every step, editing lines, rates and variances, sign-in, lockout and record ownership, approval and sealing under concurrent requests, supersession, migrations, and the staff fields added after client testing | [`tests/CostingTool.Web.Tests`](tests/CostingTool.Web.Tests/) |
 | **Continuous integration** | Every push and pull request is built and tested, formatting is checked, dependencies are scanned for known vulnerabilities, and a model change without a database migration fails the build | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
 | **Code review** | Nothing merges on its author's approval, and nobody approves a pull request in their own layer | [`plan.md` §3](docs/project/plan.md#3-responsibilities) |
 | **Deployment rehearsal** — 25 Sep | First release, HTTPS, forced password change, backup, restore and automatic rollback of a deliberately broken release | [`deploy/README.md`](deploy/README.md) |
 | **Client acceptance testing** — 9 Oct | The client used the deployed tool in all three roles and sent written notes | [Testing record](docs/client/communication-history/2026-10-09-client-testing-notes/README.md) |
+| **Regression pass on staging** — 12 Oct | Every Must story and US-20 in all three roles, the client's requests of 9 October, sign-in over HTTPS and no demo account, on the release handed over | [#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101) |
 
 ## Deployment
 
@@ -214,9 +215,9 @@ the application release. Releasing, restoring and rolling back are one script ea
 - **Staging** has been live since 30 September 2026. It is reached by IP address, so browsers
   show a certificate warning; its address and accounts were sent to the client by email and are
   not recorded in this public repository. It was first deployed from the branch
-  `feat/deployment_docker` (Docker Compose and PostgreSQL), and on 11 October 2026 was
-  redeployed from `main` with the runbook
-  ([#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101)).
+  `feat/deployment_docker` (Docker Compose and PostgreSQL), and now runs `main` at release
+  [`v1.0.0`](https://github.com/ChenxuYou/uwa-cits5206-project/releases/tag/v1.0.0), with the
+  regression pass recorded on [#101](https://github.com/ChenxuYou/uwa-cits5206-project/issues/101).
 - **Production** does not exist yet. Who runs it, where, and on which database are UWA's
   decisions, set out in [handover §6](docs/handover.md#6-decisions-uwa-needs-to-make).
 
