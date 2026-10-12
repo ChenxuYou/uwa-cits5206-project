@@ -13,7 +13,7 @@ pin_links.py, which also fills in the SHA on the cover; then build with build.py
 open every link signed out (F3). Issue, pull request, milestone and release links stay live.
 
 Facts in this report are as of Monday 12 October 2026. If the client signs the handover before
-the links are pinned, file the signed copy, merge, and change §4 and the AI note on page 1.
+the links are pinned, file the signed copy, merge, and change the cover's Release row and §4.
 
 These comments do not appear in the PDF.
 -->
@@ -27,7 +27,7 @@ These comments do not appear in the PDF.
 <tr><th>Project</th><td>Research Infrastructure Costing &amp; Pricing Tool</td></tr>
 <tr><th>Client</th><td>UWA Research Infrastructure: Erika Slavin and Mathew Hall</td></tr>
 <tr><th>Group</th><td>13: Chenxu You, Yichen Zhao, Wenmin Luo, Dai Lam La La, Jaswanth Vericherla</td></tr>
-<tr><th>Release</th><td><code>v1.0.0</code>, handed over on 12 October 2026</td></tr>
+<tr><th>Release</th><td><code>v1.0.0</code>; handover sent for sign-off on 12 October 2026, not yet signed</td></tr>
 </table>
 
 <div class="linkbox">
@@ -55,7 +55,7 @@ These comments do not appear in the PDF.
 <h2 class="toc-title">Contents</h2>
 <!--TOC-->
 
-<p class="ack"><strong>Acknowledgement of generative AI use.</strong> Between August and October 2026 the team used Claude (Anthropic, 2026; Claude Code and the Claude app) and ChatGPT (OpenAI, 2026), every member using both, and GitHub Copilot (GitHub, 2026), used by one member. They drafted and reviewed code and tests, explained unfamiliar framework behaviour, reviewed pull requests, and drafted and edited documentation, including this report. No client data, personal data or third-party intellectual property was entered into a public AI tool. Every output was checked by a team member against the client's worked example, the test suite, the source code or the project record, and the member who committed each change is responsible for it. Section 6 gives the detail.</p>
+<p class="ack"><strong>Acknowledgement of generative AI use.</strong> Between August and October 2026 the team used Claude (Anthropic, 2026), through Claude Code and the Claude app, and ChatGPT (OpenAI, 2026), every member using both, and GitHub Copilot (GitHub, 2026), used by one member. They drafted and reviewed code and tests, explained unfamiliar framework behaviour, reviewed pull requests, and drafted and edited documentation, including this report. No client data, personal data or third-party intellectual property was entered into a public AI tool. Every output was checked by a team member against the client's worked example, the test suite, the source code or the project record, and the member who committed each change is responsible for it. Section 6 gives the detail.</p>
 </div>
 
 ## 1. Requirements and solution
@@ -64,9 +64,9 @@ These comments do not appear in the PDF.
 
 **The agreed MVP** is eighteen Must user stories (110 points): a platform and its capabilities, one costing cycle, and the whole path from signing in to retrieving a sealed record. Mathew Hall signed the scope and the ownership terms on 20 August 2026, and confirmed in writing that where the guide and the calculator disagree, the guide governs.
 
-**The solution** is a guided web application. A platform custodian, who may do this only once every three to five years, works through six explained steps: Platform, Costs, Funding, Capacity, Rates and Review. The server computes three rates per capability: for UWA researchers (*C* − *I*<sub>total</sub>) / *U*; for other publicly funded researchers ((*C* − *I*<sub>non-UWA</sub>) / *U*) × 1.35; and for commercial users (*C* / *U*) × 1.35, where *C* is operating cost, *I* is non-variable income and *U* is forecast use. The custodian proposes rates, sees their effect on the platform's balance, justifies any variance and submits. The delegated approver returns the cycle with comments or approves it, and **approval seals the record**: its inputs, workings and decision are frozen in a snapshot with a SHA-256 hash that can be superseded by a new cycle but never edited, and it exports as a PDF for UWA's records system (Content Manager).
+**The solution** is a guided web application. A platform custodian, who may do this only once every three to five years, works through six explained steps: Platform, Costs, Funding, Capacity, Rates and Review. The server computes three rates per capability: for UWA researchers (*C* − *I*<sub>total</sub>) / *U*; for other publicly funded researchers ((*C* − *I*<sub>non-UWA</sub>) / *U*) × 1.35; and for commercial users (*C* / *U*) × 1.35, where *C* is operating cost, *I* is non-variable income and *U* is forecast use. The custodian proposes rates, sees their effect on the platform's balance, justifies any variance and submits. The delegated approver returns the cycle with comments or approves it, and **approval seals the record**: its inputs, workings and decision are frozen in a snapshot with a SHA-256 hash. A sealed record can be superseded by a new cycle but never edited, and it exports as a PDF for UWA's records system (Content Manager).
 
-The stack, ASP.NET Core Razor Pages with EF Core and SQLite on .NET 10 (Microsoft, 2025), was chosen from six assessed options (ADR-001) because it keeps the calculation on the server and C#'s `decimal` type suits money. The engine is a separate project with no dependencies and a versioned method configuration, so a record sealed in 2026 reproduces its figures under the method it was sealed with.
+The stack, ASP.NET Core Razor Pages with EF Core and SQLite on .NET 10 (Microsoft, n.d.), was chosen from six assessed options (ADR-001) because it keeps the calculation on the server and C#'s `decimal` type suits money. The code is three projects, each with its own test project: the web application, the sealed-record PDF, and an engine with no dependencies and a versioned method configuration, so a record sealed in 2026 reproduces its figures under the method it was sealed with.
 
 | Scope | Stories | State on 12 October 2026 |
 | --- | --- | --- |
@@ -91,11 +91,11 @@ Quality assurance was built around one fixed point, the client's worked example:
 
 | Activity | What it showed |
 | --- | --- |
-| **249 automated tests**: engine 36, PDF 31, web 182 | The worked example to the cent in the engine and again in the printed PDF; rounding once, at presentation; validation on every step; sign-in, lockout and record ownership; approval and sealing under concurrent requests; supersession; schema migrations |
+| **249 test methods**: engine 36, PDF 31, web 182 | The worked example to the cent in the engine and again in the printed PDF; rounding once, at presentation; validation on every step; sign-in, lockout and record ownership; approval and sealing under concurrent requests; supersession; schema migrations |
 | **Continuous integration** on every push and pull request | Build, tests, format check and dependency scan; a model change without a database migration fails the build. Green on the last code change to `main` (`fb0321b`); later merges changed documentation only |
 | **Deployment rehearsal**, 25 September | First release, HTTPS, forced password change, backup, restore, and automatic rollback of a deliberately broken release |
-| **Client acceptance testing**, 9 October | The client used staging unaccompanied, in all three roles and with their own test data, and sent written notes (§4) |
-| **Regression pass on staging**, 12 October | Every Must story and US-20 in all three roles, the client's requests, sign-in over HTTPS and no demo account, on the release handed over: all passed |
+| **Client acceptance testing**, 9 October | The client used staging on their own, in all three roles and with their own test data, and sent written notes (§4) |
+| **Regression pass on staging**, 12 October | Every Must story and US-20 in all three roles, the client's requests, sign-in over HTTPS and no demo account, on `v1.0.0`: all passed |
 | **Fresh-clone run**, 12 October | A member who did not write the setup steps cloned the repository on a clean machine and ran the tool from the README as written |
 
 **Limits.** The client tested an older build, so two of their six requests were already fixed, and their notes did not reach funding, proposed rates, sealing or the PDF; the regression pass covered those. The folder access rules work, but no test would fail if one were removed (#86). Not every pull request had a second member's review (§5).
@@ -111,11 +111,11 @@ Quality assurance was built around one fixed point, the client's worked example:
 
 ## 3. User guides and deployment
 
-**Running it.** The README's *Run it on your machine* needs only the .NET 10 SDK and Git. Three commands clone and start the tool, which creates its own database and, in development only, one demo account per role; a five-minute tour takes a cycle from draft to sealed PDF. The fresh-clone run followed exactly this path.
+**Running it.** The README's *Run it on your machine* needs only the .NET 10 SDK and Git. Three commands clone and start the tool, which creates its own database and, in development only, one demo account per role; a five-minute tour takes a cycle from draft to sealed PDF.
 
 **Using it.** The user manual is written for people meeting the tool cold: task-based chapters for the custodian, the approver and the administrator, fifteen screenshots from staging, a troubleshooting table and a summary of the workflow. The screens also carry the guide's explanations, which the client singled out as helpful.
 
-**Deploying it.** The runbook puts the tool on one Ubuntu 24.04 server: the application under systemd behind Caddy for HTTPS, the database outside the release, daily checked backups, and one script each to release, restore and roll back. A new server has no demo accounts, only an administrator who must change the password at first sign-in. **Staging** has run since 30 September and now serves `v1.0.0`; its address and one account per role went to the client by email, not into this public repository. Production hosting is UWA's decision (§4).
+**Deploying it.** The runbook puts the tool on one Ubuntu 24.04 server: the application under systemd behind Caddy for HTTPS, the database outside the release, daily checked backups, and one script each to release, restore and roll back. A new server has no demo accounts, only an administrator who must change the password at first sign-in. **Staging** has run since 30 September and now serves `v1.0.0`; its address and one account per role went to the client by email, and no credentials are in this public repository. Production hosting is UWA's decision (§4).
 
 <div class="ev" markdown="1">
 - Run it on your machine
@@ -129,18 +129,16 @@ Quality assurance was built around one fixed point, the client's worked example:
 
 ## 4. Client acceptance and handover
 
-**What the client has said.** At her first look at the working tool on 22 September, Erika Slavin found the business process clear, the content comprehensive and the interface good. On 9 October Mathew Hall tested staging himself in all three roles and sent written notes. He found the capacity step clear and intuitive, the rates clear with the figures behind each, the review and approval pages clear, the return-with-comments protocol working, and the explanatory text useful because it is visible rather than hidden. He asked for six changes to the custodian's platform and cost steps. Two were already on `main`; three were made and merged, with tests, the same day (#110). The sixth, filling in each year's salary, is partly done: every year fills from a base salary the custodian enters, but filling it from the staff level and step needs UWA's pay scales (US-05, #42).
+**What the client has said.** At her first look at the working tool on 22 September, Erika Slavin found the business process clear and the content comprehensive, and said the interface looked good. On 9 October Mathew Hall tested staging himself in all three roles and sent written notes. He found the capacity step clear and intuitive, the rates clear with the figures behind each, the review and approval pages clear, the return-with-comments protocol working, and the explanatory text useful because it is visible rather than hidden. He asked for six changes to the custodian's platform and cost steps. Two were already on `main`; three were made and merged, with tests, the same day (#110). The sixth, filling in each year's salary, is partly done: every year fills from a base salary the custodian enters, but filling it from the staff level and step needs UWA's pay scales (US-05, #42).
 
-**The handover** went to the client on 12 October: a handover document and a one-page summary for signature. They set out what is handed over, how to run it, seven decisions that need a UWA owner (from who runs and hosts the tool to the licence and when the team's staging server closes), and five questions on how the tool reads the method, each with its current answer. **When this report was submitted, the client had not yet signed.** The testing notes are a positive assessment with change requests, not a formal acceptance, so the team will keep following up the signature.
+**The handover** went to the client on 12 October: a handover document and a short summary for signature. They set out what is handed over, how to run it, seven decisions that need a UWA owner (from who runs and hosts the tool to the licence and when the team's staging server closes), and five questions on how the tool reads the method, each with its current answer. **When this report was submitted, the client had not yet signed.** The testing notes are a positive assessment with change requests, not a formal acceptance, so the team is following up on the signature.
 
 <div class="ev" markdown="1">
-- Client testing record, 9 October
-  <https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/client/communication-history/2026-10-09-client-testing-notes/README.md>
-- Handover document and one-page summary for sign-off
+- Client timeline, linking the testing record of 9 October and the handover email of 12 October
+  <https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/README.md#client>
+- Handover document and summary for sign-off, and the client meeting minutes
   <https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/handover.md>
   <https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/handover-summary.md>
-- Handover email of 12 October, and the client meeting minutes
-  <https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/client/communication-history/2026-10-12-handover-for-sign-off/covering-email.md>
   <https://github.com/ChenxuYou/uwa-cits5206-project/tree/main/docs/meetings/client>
 </div>
 
@@ -148,19 +146,19 @@ Quality assurance was built around one fixed point, the client's worked example:
 
 **What worked.** Writing the client's worked example as a test first: the engine milestone was met two days early, and the arithmetic never regressed. Asking the client early and in writing: five questions sent on 17 August were all answered on 20 August, and a written order of sources (the client's answers, then the guide, the calculator and our minutes) settled disagreements without guesswork; assumptions no source supported went to the client as questions, not silently into code. One owner per technical layer, and one client contact, kept work and messages from overlapping.
 
-**What did not.** Two milestones slipped: rates and balance by five days, and client use of staging by a week. Staging was first deployed from a branch, not `main`, so the client tested a build two weeks old and reported two problems already fixed; next time we would deploy from `main` from day one. And our process claims ran ahead of practice: the plan required a second review on every pull request, yet 22 of the 37 merged by 3 October have no approving review on GitHub, and team minutes stopped after 15 September. The repository records both rather than glossing over them.
+**What did not.** Two milestones slipped: rates and balance by five days, and client use of staging by a week. Staging was first deployed from a branch, not `main`, so the client tested a build more than two weeks behind `main` and reported two problems already fixed; next time we would deploy from `main` from day one. And our process claims ran ahead of practice: the plan required a second review on every pull request, yet 29 of the 37 merged by 3 October have no approving review on GitHub, 22 of them merged by their own author, and team minutes stopped after 15 September.
 
-**Future work.** The 14 open issues hold every known gap. In the order the handover recommends:
+**Future work.** The 14 open issues and handover §8 hold every known gap. In the order the handover recommends:
 
 1. **Salary pre-fill from UWA's pay scales** (US-05, #42), the client's one outstanding request.
 2. **Reconcile the client's calculator line by line** against the engine; where they differ, the guide governs.
 3. **A routing-level test for the folder access rules** (#86), and **a PDF link on the approval page** with a recorded A4 print check (#102).
 4. **Deleting draft cycles and withdrawing submissions** (#107), and **email notifications** (#108).
-5. The remaining stretch stories, and UWA single sign-on, which the signed scope deferred.
+5. The remaining Should and Could stories.
 
 <div class="ev" markdown="1">
-- Known limitations and recommended next work, and the known gaps, each linked to its issue
-  <https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/handover.md#8-known-limitations-and-recommended-next-work>
+- Known limitations and recommended next work (handover §8), and the known gaps, each linked to its issue
+  <https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/handover.md>
   <https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/src/README.md#known-gaps>
 - Project plan and risk register
   <https://github.com/ChenxuYou/uwa-cits5206-project/blob/main/docs/project/plan.md>
@@ -169,7 +167,7 @@ Quality assurance was built around one fixed point, the client's worked example:
 
 ## 6. Responsible use of AI
 
-**How we used it.** On 5 August the team set its rules from UWA's guide for students (The University of Western Australia, n.d.) and the ACS Code of Professional Ethics (Australian Computer Society, 2023), and presented them to the facilitator: AI drafts and people decide; whoever commits an output checks it and answers for it; and no client data, personal data or third-party IP goes into a public AI tool. AI drafted code, tests and documents, gave pull requests a first review, explained unfamiliar parts of ASP.NET Core and EF Core, and polished emails. It made no decisions (the stack, scope, layers and cuts were settled in minuted meetings), and it never wrote a test's expected values, so it could not pass its own exam.
+**How we used it.** On 5 August the team set its rules from UWA's guide for students (University of Western Australia, 2026), alongside the ACS Code of Professional Ethics (Australian Computer Society, 2023), and presented them to the facilitator: AI drafts and people decide; whoever commits an output checks it and answers for it; and no client data, personal data or third-party IP goes into a public AI tool. AI drafted code, tests and documents, gave pull requests a first review, explained unfamiliar parts of ASP.NET Core and EF Core, and polished emails. It made no decisions (the stack, scope, layers and cuts were settled in minuted meetings), and the team's rule was that it never writes a test's expected values, so it cannot pass its own exam.
 
 **How its output was checked.** The checks scale with consequence. Wording is read; the calculation, the seal and sign-in must pass tests that fail if the work is wrong. Five of the cases those checks caught:
 
@@ -196,15 +194,15 @@ Quality assurance was built around one fixed point, the client's worked example:
 
 Anthropic. (2026). *Claude* [Large language model]. <https://claude.ai>
 
-Australian Computer Society. (2023). *ACS code of professional ethics*.
+Australian Computer Society. (2023). *ACS code of professional ethics*. <https://www.acs.org.au/content/dam/acs/rules-and-regulations/CodeOfProfessionalEthics_Mar_2023.pdf>
 
 GitHub. (2026). *GitHub Copilot* [AI coding assistant]. <https://github.com/features/copilot>
 
-Microsoft. (2025). *ASP.NET Core documentation*. <https://learn.microsoft.com/aspnet/core>
+Microsoft. (n.d.). *ASP.NET Core documentation*. Retrieved October 12, 2026, from <https://learn.microsoft.com/aspnet/core>
 
 OpenAI. (2026). *ChatGPT* [Large language model]. <https://chatgpt.com>
 
-The University of Western Australia. (n.d.). *Using artificial intelligence tools at UWA: A guide for students*. <https://teaching.csse.uwa.edu.au/units/CITS2003/Using_AI_Tools_at_UWA.pdf>
+University of Western Australia. (2026). *Using artificial intelligence tools at UWA: A guide for students*. <https://teaching.csse.uwa.edu.au/units/CITS2003/Using_AI_Tools_at_UWA.pdf>
 
 UWA Library. (n.d.). *Acknowledging and referencing AI*. <https://guides.library.uwa.edu.au/artificial_intelligence/acknowledging_and_referencing_AI>
 
